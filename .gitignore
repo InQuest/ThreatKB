@@ -1,3 +1,4 @@
+flask/
 .DS_Store
 *.db
 *.pyc
