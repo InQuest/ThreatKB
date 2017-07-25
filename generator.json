@@ -1,0 +1,336 @@
+{
+    "baseName": "InquestKB",
+    "entities": [
+        {
+            "name": "c2ip",
+            "attrs": [
+                {
+                    "attrName": "date_created",
+                    "attrType": "Date",
+                    "dateConstraint": "",
+                    "enumValues": [],
+                    "required": true
+                },
+                {
+                    "attrName": "date_modified",
+                    "attrType": "Date",
+                    "dateConstraint": "",
+                    "enumValues": [],
+                    "required": true
+                },
+                {
+                    "attrName": "ip",
+                    "attrType": "String",
+                    "minLength": "",
+                    "maxLength": "15",
+                    "enumValues": [],
+                    "required": true
+                },
+                {
+                    "attrName": "asn",
+                    "attrType": "String",
+                    "minLength": "",
+                    "maxLength": "128",
+                    "enumValues": [],
+                    "required": true
+                },
+                {
+                    "attrName": "country",
+                    "attrType": "String",
+                    "minLength": "",
+                    "maxLength": "64",
+                    "enumValues": [],
+                    "required": false
+                },
+                {
+                    "attrName": "city",
+                    "attrType": "String",
+                    "minLength": "",
+                    "maxLength": "64",
+                    "enumValues": [],
+                    "required": false
+                },
+                {
+                    "attrName": "state",
+                    "attrType": "String",
+                    "minLength": "",
+                    "maxLength": "64",
+                    "enumValues": [],
+                    "required": false
+                },
+                {
+                    "attrName": "reference_link",
+                    "attrType": "String",
+                    "minLength": "",
+                    "maxLength": "2048",
+                    "enumValues": [],
+                    "required": true
+                },
+                {
+                    "attrName": "reference_text",
+                    "attrType": "String",
+                    "minLength": "",
+                    "maxLength": "4096",
+                    "enumValues": [],
+                    "required": false
+                },
+                {
+                    "attrName": "expiration_type",
+                    "attrType": "String",
+                    "minLength": "",
+                    "maxLength": "32",
+                    "enumValues": [],
+                    "required": true
+                },
+                {
+                    "attrName": "expiration_timestamp",
+                    "attrType": "Date",
+                    "dateConstraint": "Future",
+                    "enumValues": [],
+                    "required": false
+                }
+            ]
+        },
+        {
+            "name": "c2dns",
+            "attrs": [
+                {
+                    "attrName": "date_created",
+                    "attrType": "Date",
+                    "dateConstraint": "",
+                    "enumValues": [],
+                    "required": true
+                },
+                {
+                    "attrName": "date_modified",
+                    "attrType": "Date",
+                    "dateConstraint": "",
+                    "enumValues": [],
+                    "required": true
+                },
+                {
+                    "attrName": "state",
+                    "attrType": "String",
+                    "minLength": "",
+                    "maxLength": "32",
+                    "enumValues": [],
+                    "required": true
+                },
+                {
+                    "attrName": "domain_name",
+                    "attrType": "String",
+                    "minLength": "",
+                    "maxLength": "2048",
+                    "enumValues": [],
+                    "required": true
+                },
+                {
+                    "attrName": "match_type",
+                    "attrType": "Enum",
+                    "enumValues": [
+                        "exact",
+                        "wildcard"
+                    ],
+                    "required": true
+                },
+                {
+                    "attrName": "reference_link",
+                    "attrType": "String",
+                    "minLength": "",
+                    "maxLength": "2048",
+                    "enumValues": [],
+                    "required": true
+                },
+                {
+                    "attrName": "reference_text",
+                    "attrType": "String",
+                    "minLength": "",
+                    "maxLength": "2048",
+                    "enumValues": [],
+                    "required": false
+                },
+                {
+                    "attrName": "expiration_type",
+                    "attrType": "String",
+                    "minLength": "",
+                    "maxLength": "32",
+                    "enumValues": [],
+                    "required": true
+                },
+                {
+                    "attrName": "expiration_timestamp",
+                    "attrType": "Date",
+                    "dateConstraint": "Future",
+                    "enumValues": [],
+                    "required": false
+                }
+            ]
+        },
+        {
+            "name": "yara_rule",
+            "attrs": [
+                {
+                    "attrName": "date_created",
+                    "attrType": "Date",
+                    "dateConstraint": "",
+                    "enumValues": [],
+                    "required": true
+                },
+                {
+                    "attrName": "date_modified",
+                    "attrType": "Date",
+                    "dateConstraint": "",
+                    "enumValues": [],
+                    "required": true
+                },
+                {
+                    "attrName": "state",
+                    "attrType": "String",
+                    "minLength": "",
+                    "maxLength": "32",
+                    "enumValues": [],
+                    "required": true
+                },
+                {
+                    "attrName": "name",
+                    "attrType": "String",
+                    "minLength": "",
+                    "maxLength": "128",
+                    "enumValues": [],
+                    "required": true
+                },
+                {
+                    "attrName": "test_status",
+                    "attrType": "String",
+                    "minLength": "",
+                    "maxLength": "16",
+                    "enumValues": [],
+                    "required": true
+                },
+                {
+                    "attrName": "confidence",
+                    "attrType": "Integer",
+                    "min": "0",
+                    "max": "10",
+                    "enumValues": [],
+                    "required": true
+                },
+                {
+                    "attrName": "severity",
+                    "attrType": "Integer",
+                    "min": "0",
+                    "max": "10",
+                    "enumValues": [],
+                    "required": true
+                },
+                {
+                    "attrName": "description",
+                    "attrType": "String",
+                    "minLength": "",
+                    "maxLength": "4096",
+                    "enumValues": [],
+                    "required": true
+                },
+                {
+                    "attrName": "category",
+                    "attrType": "String",
+                    "minLength": "",
+                    "maxLength": "32",
+                    "enumValues": [],
+                    "required": true
+                },
+                {
+                    "attrName": "file_type",
+                    "attrType": "String",
+                    "minLength": "",
+                    "maxLength": "32",
+                    "enumValues": [],
+                    "required": true
+                },
+                {
+                    "attrName": "subcategory1",
+                    "attrType": "String",
+                    "minLength": "",
+                    "maxLength": "32",
+                    "enumValues": [],
+                    "required": false
+                },
+                {
+                    "attrName": "subcategory2",
+                    "attrType": "String",
+                    "minLength": "",
+                    "maxLength": "32",
+                    "enumValues": [],
+                    "required": false
+                },
+                {
+                    "attrName": "subcategory3",
+                    "attrType": "String",
+                    "minLength": "",
+                    "maxLength": "32",
+                    "enumValues": [],
+                    "required": false
+                },
+                {
+                    "attrName": "reference_link",
+                    "attrType": "String",
+                    "minLength": "",
+                    "maxLength": "2048",
+                    "enumValues": [],
+                    "required": true
+                },
+                {
+                    "attrName": "reference_text",
+                    "attrType": "String",
+                    "minLength": "",
+                    "maxLength": "2048",
+                    "enumValues": [],
+                    "required": false
+                },
+                {
+                    "attrName": "condition",
+                    "attrType": "String",
+                    "minLength": "",
+                    "maxLength": "2048",
+                    "enumValues": [],
+                    "required": true
+                },
+                {
+                    "attrName": "strings",
+                    "attrType": "String",
+                    "minLength": "",
+                    "maxLength": "30000",
+                    "enumValues": [],
+                    "required": true
+                }
+            ]
+        },
+        {
+            "name": "cfg_reference_text_templates",
+            "attrs": [
+                {
+                    "attrName": "template_text",
+                    "attrType": "String",
+                    "minLength": "",
+                    "maxLength": "2048",
+                    "enumValues": [],
+                    "required": true
+                }
+            ]
+        },
+        {
+            "name": "cfg_states",
+            "attrs": [
+                {
+                    "attrName": "state",
+                    "attrType": "String",
+                    "minLength": "",
+                    "maxLength": "32",
+                    "enumValues": [],
+                    "required": true
+                }
+            ]
+        }
+    ],
+    "resources": []
+}

@@ -1,0 +1,32 @@
+<form autocomplete="off" ng-submit="login()" class="center" ng-controller="AuthController">
+
+    <div class="panel panel-body login-form container">
+        <div class="text-center">
+
+            <h5 class="content-group">Login to your account <br>
+                <small class="display-block">Enter credentials</small>
+            </h5>
+        </div>
+
+        <div class="form-group has-feekdback has-feedback-left">
+            <input type="text" id="input_email" class="form-control" placeholder="Email"
+                   ng-model="login_form.email">
+            <div class="form-control-feedback">
+                <i class="icon-user text-muted"></i>
+            </div>
+        </div>
+
+        <div class="form-group has-feedback has-feedback-left">
+            <input type="password" id="input_password" class="form-control"
+                   placeholder="Password" ng-model="login_form.password">
+            <div class="form-control-feedback">
+                <i class="icon-lock2 text-muted"></i>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <button type="submit" name="form.submitted" class="btn btn-primary btn-block">Sign in <i
+                    class="icon-circle-right2 position-right"></i></button>
+        </div>
+    </div>
+</form>

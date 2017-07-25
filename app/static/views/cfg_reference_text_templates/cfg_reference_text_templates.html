@@ -1,0 +1,90 @@
+<div>
+
+    <script type="text/ng-template" id="cfg_reference_text_templates-save.html">
+        <form name="form" role="form" novalidate
+              class="ng-scope ng-invalid ng-invalid-required ng-dirty"
+              ng-submit="ok()">
+
+            <div class="modal-header">
+                <button type="button" class="close"
+                        ng-click="cancel()">&times;
+                </button>
+                <h4 class="modal-title" id="myCfg_reference_text_templatesLabel">Create or edit a
+                    Cfg_reference_text_templates</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>ID</label>
+                    <input type="text" class="form-control" name="id"
+                           ng-model="cfg_reference_text_templates.id" readonly>
+                </div>
+
+
+                <div class="form-group">
+                    <label>template_text:</label>
+
+                    <input type="text" class="form-control" name="template_text"
+                           ng-model="cfg_reference_text_templates.template_text" ng-required="true"
+                           ng-maxlength=2048/>
+                    <span class="error"
+                          ng-show="form.template_text.$error.minlength">Must be at least  characters.</span>
+                    <span class="error"
+                          ng-show="form.template_text.$error.maxlength">Must be at most 2048 characters.</span>
+                </div>
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" ng-click="cancel()">Cancel
+                </button>
+                <button type="submit" ng-disabled="form.$invalid" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </script>
+
+    <br>
+    <div class="container-fluid">
+
+        <div class="inner-addon left-addon col-md-4" style="padding-left:0px;">
+            <i class="glyphicon glyphicon-search"></i>
+            <input type="text" class="form-control" placeholder="Search" ng-model="search"/>
+        </div>
+        <a class="btn-link pull-right" style="color:inherit;" ng-click="create()">
+            <span class="glyphicon glyphicon-plus-sign"></span>
+        </a>
+    </div>
+
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>ID</th>
+
+                <th>template_text</th>
+
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="cfg_reference_text_templates in cfg_reference_text_templates">
+                <td ng-if="cfg_reference_text_templates.id">{{ cfg_reference_text_templates.id }}</td>
+
+                <td ng-if="cfg_reference_text_templates.template_text">{{ cfg_reference_text_templates.template_text }}</td>
+
+                <td ng-if="cfg_reference_text_templates.template_text">
+                    <button type="submit"
+                            ng-click="update(cfg_reference_text_templates.id)"
+                            class="btn">
+                        <span class="glyphicon glyphicon-pencil"></span> Edit
+                    </button>
+                    <button type="submit"
+                            ng-click="delete(cfg_reference_text_templates.id)"
+                            class="btn btn-danger">
+                        <span class="glyphicon glyphicon-remove-circle"></span> Delete
+                    </button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

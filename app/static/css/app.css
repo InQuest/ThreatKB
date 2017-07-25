@@ -1,0 +1,51 @@
+body {
+    margin-top: 60px;
+    padding: 10px;
+    background-color: #ECF0F1;
+}
+
+.center {
+    margin: auto;
+    width: 35%;
+    padding: 10px;
+}
+
+table td:last-child {
+    width: 100%;
+    align: right;
+    text-align: right;
+}
+
+/* enable absolute positioning */
+.inner-addon {
+    position: relative;
+}
+
+/* style glyph */
+.inner-addon .glyphicon {
+    position: absolute;
+    padding: 10px;
+    pointer-events: none;
+}
+
+/* align glyph */
+.left-addon .glyphicon {
+    left: 0px;
+}
+
+.right-addon .glyphicon {
+    right: 0px;
+}
+
+/* add padding  */
+.left-addon input {
+    padding-left: 30px;
+}
+
+.right-addon input {
+    padding-right: 30px;
+}
+
+span.glyphicon {
+    font-size: 1.4em;
+}
