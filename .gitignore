@@ -1,3 +1,5 @@
+.editorconfig
+.jshintrc
 flask/
 .DS_Store
 *.db
