@@ -22,9 +22,9 @@ def get_yara_rule(id):
 @app.route('/InquestKB/yara_rules', methods=['POST'])
 def create_yara_rule():
     entity = yara_rule.Yara_rule(
-        date_created=datetime.datetime.strptime(request.json['date_created'], "%Y-%m-%d").date()
-        , date_modified=datetime.datetime.strptime(request.json['date_modified'], "%Y-%m-%d").date()
-        , state=request.json['state']
+        date_created=datetime.datetime.now()
+        , date_modified=datetime.datetime.now()
+        , state=request.json['state']['state']
         , name=request.json['name']
         , test_status=request.json['test_status']
         , confidence=request.json['confidence']
@@ -53,7 +53,7 @@ def update_yara_rule(id):
     entity = yara_rule.Yara_rule(
         date_created=datetime.datetime.strptime(request.json['date_created'], "%Y-%m-%d").date(),
         date_modified=datetime.datetime.strptime(request.json['date_modified'], "%Y-%m-%d").date(),
-        state=request.json['state'],
+        state=request.json['state']['state'],
         name=request.json['name'],
         test_status=request.json['test_status'],
         confidence=request.json['confidence'],

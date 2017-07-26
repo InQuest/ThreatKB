@@ -14,35 +14,36 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label>ID</label>
-                    <input type="text" class="form-control" name="id"
-                           ng-model="yara_rule.id" readonly>
+                    <input type="text" class="form-control" name="id" ng-model="yara_rule.id" readonly>
                 </div>
 
 
-                <div class="form-group">
+                <div class="form-group" ng-if="yara_rule.date_created">
                     <label>date_created:</label>
 
-                    <input type="text" class="form-control" name="date_created" ui-date="date_createdDateOptions"
-                           ui-date-format="yy-mm-dd"
-                           ng-model="yara_rule.date_created" ng-required="true"/>
+                    <input type="text" class="form-control" name="date_created" ng-model="yara_rule.date_created"
+                           readonly/>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" ng-if="yara_rule.date_modified">
                     <label>date_modified:</label>
 
-                    <input type="text" class="form-control" name="date_modified" ui-date="date_modifiedDateOptions"
-                           ui-date-format="yy-mm-dd"
-                           ng-model="yara_rule.date_modified" ng-required="true"/>
+                    <input type="text" class="form-control" name="date_modified" ng-model="yara_rule.date_modified"
+                           readonly>
                 </div>
 
                 <div class="form-group">
                     <label>state:</label>
 
-                    <input type="text" class="form-control" name="state"
-                           ng-model="yara_rule.state" ng-required="true"
-                           ng-maxlength=32/>
-                    <span class="error" ng-show="form.state.$error.minlength">Must be at least  characters.</span>
-                    <span class="error" ng-show="form.state.$error.maxlength">Must be at most 32 characters.</span>
+                    <ui-select ng-model="yara_rule.state">
+                        <ui-select-match placeholder="Select a state..">
+                            <span ng-bind="$select.selected.state || yara_rule.state"></span>
+                        </ui-select-match>
+                        <ui-select-choices repeat="state in (cfg_states | filter: $select.search) track by state.id">
+                            <span ng-bind="state.state"></span>
+                        </ui-select-choices>
+                    </ui-select>
+
                 </div>
 
                 <div class="form-group">
@@ -281,7 +282,7 @@
 
                 <td ng-if="yara_rule.severity">{{ yara_rule.severity }}</td>
 
-                <td ng-if="yara_rule.description)">{{ yara_rule.description }}</td>
+                <td ng-if="yara_rule.description">{{ yara_rule.description }}</td>
 
                 <td ng-if="yara_rule.category">{{ yara_rule.category }}</td>
 
@@ -297,7 +298,7 @@
 
                 <td ng-if="yara_rule.reference_text">{{ yara_rule.reference_text }}</td>
 
-                <td ng-if="yara_rule.condition)">{{ yara_rule.condition }}</td>
+                <td ng-if="yara_rule.condition">{{ yara_rule.condition }}</td>
 
                 <td ng-if="yara_rule.strings">{{ yara_rule.strings }}</td>
 

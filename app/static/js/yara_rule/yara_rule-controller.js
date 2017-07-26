@@ -1,11 +1,10 @@
 'use strict';
 
 angular.module('InquestKB')
-    .controller('Yara_ruleController', ['$scope', '$modal', 'resolvedYara_rule', 'Yara_rule',
-        function ($scope, $modal, resolvedYara_rule, Yara_rule) {
+    .controller('Yara_ruleController', ['$scope', '$modal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states',
+        function ($scope, $modal, resolvedYara_rule, Yara_rule, Cfg_states) {
 
             $scope.yara_rules = resolvedYara_rule;
-
             $scope.create = function () {
                 $scope.clear();
                 $scope.open();
@@ -13,6 +12,7 @@ angular.module('InquestKB')
 
             $scope.update = function (id) {
                 $scope.yara_rule = Yara_rule.get({id: id});
+                $scope.cfg_states = Cfg_states.query();
                 $scope.open(id);
             };
 
@@ -97,21 +97,11 @@ angular.module('InquestKB')
                 });
             };
         }])
-    .controller('Yara_ruleSaveController', ['$scope', '$modalInstance', 'yara_rule',
-        function ($scope, $modalInstance, yara_rule) {
+    .controller('Yara_ruleSaveController', ['$scope', '$modalInstance', 'yara_rule', 'Cfg_states',
+        function ($scope, $modalInstance, yara_rule, Cfg_states) {
             $scope.yara_rule = yara_rule;
 
-
-            $scope.date_createdDateOptions = {
-                dateFormat: 'yy-mm-dd',
-
-
-            };
-            $scope.date_modifiedDateOptions = {
-                dateFormat: 'yy-mm-dd',
-
-
-            };
+            $scope.cfg_states = Cfg_states.query();
 
             $scope.ok = function () {
                 $modalInstance.close($scope.yara_rule);
