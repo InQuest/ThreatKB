@@ -81,8 +81,8 @@ angular.module('InquestKB')
                 });
             };
         }])
-    .controller('C2dnsSaveController', ['$scope', '$modalInstance', 'c2dns',
-        function ($scope, $modalInstance, c2dns) {
+    .controller('C2dnsSaveController', ['$scope', '$http', '$modalInstance', 'c2dns',
+        function ($scope, $http, $modalInstance, c2dns) {
             $scope.c2dns = c2dns;
 
 
@@ -109,4 +109,16 @@ angular.module('InquestKB')
             $scope.cancel = function () {
                 $modalInstance.dismiss('cancel');
             };
+
+            $scope.tags = [];
+
+            $scope.loadTags = function($query) {
+                return $http.get('/InquestKB/tags', {cache: true}).then(function(response) {
+                    var tags = response.data;
+                    return tags.filter(function(tag) {
+                        return tag.text.toLowerCase().indexOf($query.toLowerCase()) != -1;
+                    });
+                });
+            }
+
         }]);

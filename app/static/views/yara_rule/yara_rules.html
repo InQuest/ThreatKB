@@ -51,7 +51,7 @@
 
                     <input type="text" class="form-control" name="name"
                            ng-model="yara_rule.name" ng-required="true"
-                           ng-maxlength=128/>
+                           ng-maxlength="128"/>
                     <span class="error" ng-show="form.name.$error.minlength">Must be at least  characters.</span>
                     <span class="error" ng-show="form.name.$error.maxlength">Must be at most 128 characters.</span>
                 </div>
@@ -61,7 +61,7 @@
 
                     <input type="text" class="form-control" name="test_status"
                            ng-model="yara_rule.test_status" ng-required="true"
-                           ng-maxlength=16/>
+                           ng-maxlength="16"/>
                     <span class="error" ng-show="form.test_status.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
                           ng-show="form.test_status.$error.maxlength">Must be at most 16 characters.</span>
@@ -92,7 +92,7 @@
 
                     <input type="text" class="form-control" name="description"
                            ng-model="yara_rule.description" ng-required="true"
-                           ng-maxlength=4096/>
+                           ng-maxlength="4096"/>
                     <span class="error" ng-show="form.description.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
                           ng-show="form.description.$error.maxlength">Must be at most 4096 characters.</span>
@@ -103,7 +103,7 @@
 
                     <input type="text" class="form-control" name="category"
                            ng-model="yara_rule.category" ng-required="true"
-                           ng-maxlength=32/>
+                           ng-maxlength="32"/>
                     <span class="error" ng-show="form.category.$error.minlength">Must be at least  characters.</span>
                     <span class="error" ng-show="form.category.$error.maxlength">Must be at most 32 characters.</span>
                 </div>
@@ -113,7 +113,7 @@
 
                     <input type="text" class="form-control" name="file_type"
                            ng-model="yara_rule.file_type" ng-required="true"
-                           ng-maxlength=32/>
+                           ng-maxlength="32"/>
                     <span class="error" ng-show="form.file_type.$error.minlength">Must be at least  characters.</span>
                     <span class="error" ng-show="form.file_type.$error.maxlength">Must be at most 32 characters.</span>
                 </div>
@@ -123,7 +123,7 @@
 
                     <input type="text" class="form-control" name="subcategory1"
                            ng-model="yara_rule.subcategory1" ng-required="false"
-                           ng-maxlength=32/>
+                           ng-maxlength="32"/>
                     <span class="error"
                           ng-show="form.subcategory1.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
@@ -135,7 +135,7 @@
 
                     <input type="text" class="form-control" name="subcategory2"
                            ng-model="yara_rule.subcategory2" ng-required="false"
-                           ng-maxlength=32/>
+                           ng-maxlength="32"/>
                     <span class="error"
                           ng-show="form.subcategory2.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
@@ -147,7 +147,7 @@
 
                     <input type="text" class="form-control" name="subcategory3"
                            ng-model="yara_rule.subcategory3" ng-required="false"
-                           ng-maxlength=32/>
+                           ng-maxlength="32"/>
                     <span class="error"
                           ng-show="form.subcategory3.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
@@ -159,7 +159,7 @@
 
                     <input type="text" class="form-control" name="reference_link"
                            ng-model="yara_rule.reference_link" ng-required="true"
-                           ng-maxlength=2048/>
+                           ng-maxlength="2048"/>
                     <span class="error"
                           ng-show="form.reference_link.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
@@ -171,7 +171,7 @@
 
                     <input type="text" class="form-control" name="reference_text"
                            ng-model="yara_rule.reference_text" ng-required="false"
-                           ng-maxlength=2048/>
+                           ng-maxlength="2048"/>
                     <span class="error"
                           ng-show="form.reference_text.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
@@ -183,7 +183,7 @@
 
                     <input type="text" class="form-control" name="condition"
                            ng-model="yara_rule.condition" ng-required="true"
-                           ng-maxlength=2048/>
+                           ng-maxlength="2048"/>
                     <span class="error" ng-show="form.condition.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
                           ng-show="form.condition.$error.maxlength">Must be at most 2048 characters.</span>
@@ -194,7 +194,7 @@
 
                     <input type="text" class="form-control" name="strings"
                            ng-model="yara_rule.strings" ng-required="true"
-                           ng-maxlength=30000/>
+                           ng-maxlength="30000"/>
                     <span class="error" ng-show="form.strings.$error.minlength">Must be at least  characters.</span>
                     <span class="error" ng-show="form.strings.$error.maxlength">Must be at most 30000 characters.</span>
                 </div>
@@ -265,7 +265,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="yara_rule in yara_rules">
+            <tr ng-repeat="yara_rule in yara_rules track by $index">
                 <td ng-if="yara_rule.id">{{ yara_rule.id }}</td>
 
                 <td ng-if="yara_rule.date_created">{{ yara_rule.date_created  | date:'yyyy-MM-dd'}}</td>

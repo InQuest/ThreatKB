@@ -40,7 +40,7 @@
 
                     <input type="text" class="form-control" name="state"
                            ng-model="c2dns.state" ng-required="true"
-                           ng-maxlength=32/>
+                           ng-maxlength="32"/>
                     <span class="error" ng-show="form.state.$error.minlength">Must be at least  characters.</span>
                     <span class="error" ng-show="form.state.$error.maxlength">Must be at most 32 characters.</span>
                 </div>
@@ -50,7 +50,7 @@
 
                     <input type="text" class="form-control" name="domain_name"
                            ng-model="c2dns.domain_name" ng-required="true"
-                           ng-maxlength=2048/>
+                           ng-maxlength="2048"/>
                     <span class="error" ng-show="form.domain_name.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
                           ng-show="form.domain_name.$error.maxlength">Must be at most 2048 characters.</span>
@@ -70,7 +70,7 @@
 
                     <input type="text" class="form-control" name="reference_link"
                            ng-model="c2dns.reference_link" ng-required="true"
-                           ng-maxlength=2048/>
+                           ng-maxlength="2048"/>
                     <span class="error"
                           ng-show="form.reference_link.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
@@ -82,7 +82,7 @@
 
                     <input type="text" class="form-control" name="reference_text"
                            ng-model="c2dns.reference_text" ng-required="false"
-                           ng-maxlength=2048/>
+                           ng-maxlength="2048"/>
                     <span class="error"
                           ng-show="form.reference_text.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
@@ -94,7 +94,7 @@
 
                     <input type="text" class="form-control" name="expiration_type"
                            ng-model="c2dns.expiration_type" ng-required="true"
-                           ng-maxlength=32/>
+                           ng-maxlength="32"/>
                     <span class="error"
                           ng-show="form.expiration_type.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
@@ -107,6 +107,14 @@
                     <input type="text" class="form-control" name="expiration_timestamp"
                            ui-date="expiration_timestampDateOptions" ui-date-format="yy-mm-dd"
                            ng-model="c2dns.expiration_timestamp" ng-required="false"/>
+                </div>
+
+                <div class="form-group">
+                    <label>tags:</label>
+
+                    <tags-input ng-model="tags">
+                        <auto-complete source="loadTags($query)"></auto-complete>
+                    </tags-input>
                 </div>
 
 
@@ -157,10 +165,12 @@
 
                 <th>expiration_timestamp</th>
 
+                <th>tags</th>
+
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="c2dns in c2dns">
+            <tr ng-repeat="c2dns in c2dns track by $index">
                 <td ng-if="c2dns.id">{{ c2dns.id }}</td>
 
                 <td ng-if="c2dns.date_created">{{ c2dns.date_created  | date:'yyyy-MM-dd'}}</td>
@@ -180,6 +190,8 @@
                 <td ng-if="c2dns.expiration_type">{{ c2dns.expiration_type }}</td>
 
                 <td ng-if="c2dns.expiration_timestamp">{{ c2dns.expiration_timestamp  | date:'yyyy-MM-dd'}}</td>
+
+                <td ng-if="c2dns.expiration_type">{{ c2dns.expiration_type }}</td>
 
                 <td ng-if="c2dns.id">
                     <button type="submit"

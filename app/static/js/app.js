@@ -1,5 +1,5 @@
 // Declare app level module which depends on filters, and services
-angular.module('InquestKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize', 'ui.select'])
+angular.module('InquestKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize', 'ui.select', 'ngTagsInput', 'angular-toArrayFilter'])
     .config(['$routeProvider', function ($routeProvider) {
         $routeProvider
             .when('/', {
@@ -54,6 +54,26 @@ angular.module('InquestKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitiz
                 resolve: {
                     resolvedCfg_states: ['Cfg_states', function (Cfg_states) {
                         return Cfg_states.query();
+                    }]
+                }
+            })
+            .when('/tags', {
+                templateUrl: 'views/tags/tags.html',
+                controller: 'TagsController',
+                access: {restricted: true},
+                resolve:{
+                    resolvedTags: ['Tags', function (Tags) {
+                        return Tags.query();
+                    }]
+                }
+            })
+            .when('/tags_mapping', {
+                templateUrl: 'views/tags_mapping/tags_mapping.html',
+                controller: 'Tags_mappingController',
+                access: {restricted: true},
+                resolve:{
+                    resolvedTags_mapping: ['Tags_mapping', function (Tags_mapping) {
+                        return Tags_mapping.query();
                     }]
                 }
             })

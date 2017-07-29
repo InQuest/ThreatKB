@@ -1,34 +1,32 @@
 <div>
-
-    <script type="text/ng-template" id="cfg_states-save.html">
+    <script type = "text/ng-template" id="tags-save.html">
         <form name="form" role="form" novalidate
               class="ng-scope ng-invalid ng-invalid-required ng-dirty"
               ng-submit="ok()">
 
             <div class="modal-header">
                 <button type="button" class="close"
-                        ng-click="cancel()">&times;
-                </button>
-                <h4 class="modal-title" id="myCfg_statesLabel">Create or edit a Cfg_states</h4>
+                        ng-click="cancel()">&times;</button>
+                <h4 class="modal-title" id="myTagsLabel">Create or edit a Tags</h4>
             </div>
             <div class="modal-body">
                 <div class="form-group">
                     <label>ID</label>
                     <input type="text" class="form-control" name="id"
-                           ng-model="cfg_states.id" readonly>
+                           ng-model="tags.id" readonly>
                 </div>
 
-
+                
                 <div class="form-group">
-                    <label>state:</label>
-
-                    <input type="text" class="form-control" name="state"
-                           ng-model="cfg_states.state" ng-required="true"
-                           ng-maxlength="32"/>
-                    <span class="error" ng-show="form.state.$error.minlength">Must be at least  characters.</span>
-                    <span class="error" ng-show="form.state.$error.maxlength">Must be at most 32 characters.</span>
+                    <label>text:</label>
+                    
+                    <input type="text" class="form-control" name="text"
+                           ng-model="tags.text" ng-required="true"
+                           ng-maxlength="256"/>
+                    <span class="error" ng-show="form.text.$error.minlength">Must be at least  characters.</span>
+                    <span class="error" ng-show="form.text.$error.maxlength">Must be at most 256 characters.</span>
                 </div>
-
+                
 
             </div>
             <div class="modal-footer">
@@ -51,35 +49,33 @@
         </a>
     </div>
 
-
     <div class="table-responsive">
         <table class="table table-striped">
             <thead>
             <tr>
                 <th>ID</th>
-
-                <th>State</th>
-
+                
+                <th>text</th>
+                
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="cfg_state in cfg_states | toArray:false | filter:search track by $index">
-                <td ng-if="cfg_state.id">{{ cfg_state.id }}</td>
-
-                <td ng-if="cfg_state.state">{{ cfg_state.state }}</td>
-
-                <td ng-if="cfg_state.id" style="float:right">
+            <tr ng-repeat="tag in tags | toArray:false | filter:search track by $index">
+                <td ng-if="tag.id">{{tag.id}}</td>
+                
+                <td ng-if="tag.text">{{tag.text }}</td>
+                
+                <td ng-if="tag.id" style="float:right">
                     <button type="submit"
-                            ng-click="update(cfg_state.id)"
+                            ng-click="update(tag.id)"
                             class="btn">
                         <span class="glyphicon glyphicon-pencil"></span> Edit
                     </button>
                     <button type="submit"
-                            ng-click="delete(cfg_state.id)"
+                            ng-click="delete(tag.id)"
                             class="btn btn-danger">
                         <span class="glyphicon glyphicon-remove-circle"></span> Delete
                     </button>
-
                 </td>
             </tr>
             </tbody>

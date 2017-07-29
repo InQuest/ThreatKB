@@ -23,24 +23,20 @@ angular.module('InquestKB').factory('AuthService',
             }
 
             function login(email, password) {
-
                 // create a new instance of deferred
                 var deferred = $q.defer();
 
                 // send a post request to the server
                 $http.post('/InquestKB/login', {email: email, password: password})
-                // handle success
-                    .success(function (data, status) {
-                        if (status === 200 && data.result) {
+                    .then(function(success) {
+                        if (success.status === 200 && success.data.result) {
                             user = true;
                             deferred.resolve();
                         } else {
                             user = false;
                             deferred.reject();
                         }
-                    })
-                    // handle error
-                    .error(function (data) {
+                    },function(error) {
                         user = false;
                         deferred.reject();
                     });
@@ -57,13 +53,13 @@ angular.module('InquestKB').factory('AuthService',
 
                 // send a get request to the server
                 $http.get('/InquestKB/logout')
-                // handle success
-                    .success(function (data) {
+                    // handle success
+                    .then(function(success) {
                         user = false;
                         deferred.resolve();
-                    })
+                    },
                     // handle error
-                    .error(function (data) {
+                    function(error) {
                         user = false;
                         deferred.reject();
                     });
@@ -74,42 +70,40 @@ angular.module('InquestKB').factory('AuthService',
             }
 
             function register(email, password) {
-
                 // create a new instance of deferred
                 var deferred = $q.defer();
 
                 // send a post request to the server
                 $http.post('/InquestKB/register', {email: email, password: password})
-                // handle success
-                    .success(function (data, status) {
-                        if (status === 200 && data.result) {
+                    // handle success
+                    .then(function(success) {
+                        if (success.status === 200 && success.data.result) {
                             deferred.resolve();
                         } else {
                             deferred.reject();
                         }
-                    })
+                    },
                     // handle error
-                    .error(function (data) {
+                    function(error) {
                         deferred.reject();
                     });
 
                 // return promise object
                 return deferred.promise;
-
             }
 
             function getUserStatus() {
                 return $http.get('/InquestKB/status')
-                // handle success
-                    .success(function (data) {
-                        if (data.status) {
+                    // handle success
+                    .then(function(success) {
+                        if (success.status == 200) {
                             user = true;
                         } else {
                             user = false;
                         }
-                    })
+                    },
                     // handle error
-                    .error(function (data) {
+                    function(error) {
                         user = false;
                     });
             }
