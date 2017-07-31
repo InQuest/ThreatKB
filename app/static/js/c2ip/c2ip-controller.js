@@ -17,25 +17,22 @@ angular.module('InquestKB')
             };
 
             $scope.delete = function (id) {
-                C2ip.delete({id: id},
-                    function () {
-                        $scope.c2ips = C2ip.query();
-                    });
+                C2ip.delete({id: id}, function () {
+                    $scope.c2ips = C2ip.query();
+                });
             };
 
             $scope.save = function (id) {
                 if (id) {
-                    C2ip.update({id: id}, $scope.c2ip,
-                        function () {
-                            $scope.c2ips = C2ip.query();
-                            //$scope.clear();
-                        });
+                    C2ip.update({id: id}, $scope.c2ip, function () {
+                        $scope.c2ips = C2ip.query();
+                        //$scope.clear();
+                    });
                 } else {
-                    C2ip.save($scope.c2ip,
-                        function () {
-                            $scope.c2ips = C2ip.query();
-                            //$scope.clear();
-                        });
+                    C2ip.save($scope.c2ip, function () {
+                        $scope.c2ips = C2ip.query();
+                        //$scope.clear();
+                    });
                 }
             };
 
@@ -64,7 +61,13 @@ angular.module('InquestKB')
 
                     "expiration_timestamp": "",
 
-                    "id": ""
+                    "id": "",
+
+                    "tags": [],
+
+                    "addedTags": [],
+
+                    "removedTags": []
                 };
             };
 
@@ -85,24 +88,19 @@ angular.module('InquestKB')
                 });
             };
         }])
-    .controller('C2ipSaveController', ['$scope', '$modalInstance', 'c2ip',
-        function ($scope, $modalInstance, c2ip) {
+    .controller('C2ipSaveController', ['$scope', '$http', '$modalInstance', 'c2ip',
+        function ($scope, $http, $modalInstance, c2ip) {
             $scope.c2ip = c2ip;
 
 
             $scope.date_createdDateOptions = {
-                dateFormat: 'yy-mm-dd',
-
-
+                dateFormat: 'yy-mm-dd'
             };
             $scope.date_modifiedDateOptions = {
-                dateFormat: 'yy-mm-dd',
-
-
+                dateFormat: 'yy-mm-dd'
             };
             $scope.expiration_timestampDateOptions = {
                 dateFormat: 'yy-mm-dd',
-
                 minDate: 1
             };
 
@@ -113,4 +111,21 @@ angular.module('InquestKB')
             $scope.cancel = function () {
                 $modalInstance.dismiss('cancel');
             };
+
+            $scope.addedTag = function ($tag) {
+                $scope.c2ip.addedTags.push($tag)
+            };
+
+            $scope.removedTag = function ($tag) {
+                $scope.c2ip.removedTags.push($tag)
+            };
+
+            $scope.loadTags = function (query) {
+                return $http.get('/InquestKB/tags', {cache: false}).then(function (response) {
+                    var tags = response.data;
+                    return tags.filter(function (tag) {
+                        return tag.text.toLowerCase().indexOf(query.toLowerCase()) !== -1;
+                    });
+                });
+            }
         }]);

@@ -1,4 +1,5 @@
 from app import db
+from app.routes import tags_mapping
 
 
 class Yara_rule(db.Model):
@@ -40,6 +41,12 @@ class Yara_rule(db.Model):
 
     strings = db.Column(db.String(30000))
 
+    tags = []
+
+    addedTags = []
+
+    removedTags = []
+
     def to_dict(self):
         return dict(
             date_created=self.date_created.isoformat(),
@@ -59,7 +66,10 @@ class Yara_rule(db.Model):
             reference_text=self.reference_text,
             condition=self.condition,
             strings=self.strings,
-            id=self.id
+            id=self.id,
+            tags=tags_mapping.get_tags_for_source(self.__tablename__, self.id),
+            addedTags=[],
+            removedTags=[]
         )
 
     def __repr__(self):

@@ -4,6 +4,8 @@ from flask import abort, jsonify, request
 import datetime
 import json
 
+from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
+
 
 @app.route('/InquestKB/c2dns', methods=['GET'])
 def get_all_c2dns():
@@ -34,6 +36,9 @@ def create_c2dns():
     )
     db.session.add(entity)
     db.session.commit()
+
+    entity.tags = create_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
+
     return jsonify(entity.to_dict()), 201
 
 
@@ -56,14 +61,23 @@ def update_c2dns(id):
     )
     db.session.merge(entity)
     db.session.commit()
+
+    create_tags_mapping(entity.__tablename__, entity.id, request.json['addedTags'])
+    delete_tags_mapping(entity.__tablename__, entity.id, request.json['removedTags'])
+
     return jsonify(entity.to_dict()), 200
 
 
 @app.route('/InquestKB/c2dns/<int:id>', methods=['DELETE'])
 def delete_c2dns(id):
     entity = c2dns.C2dns.query.get(id)
+    tag_mapping_to_delete = entity.to_dict()['tags']
+
     if not entity:
         abort(404)
     db.session.delete(entity)
     db.session.commit()
+
+    delete_tags_mapping(entity.__tablename__, entity.id, tag_mapping_to_delete)
+
     return '', 204

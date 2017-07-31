@@ -130,6 +130,14 @@
                            ng-model="c2ip.expiration_timestamp" ng-required="false"/>
                 </div>
 
+                <div class="form-group">
+                    <label>tags:</label>
+
+                    <tags-input ng-model="c2ip.tags" on-tag-added="addedTag($tag)" on-tag-removed="removedTag($tag)">
+                        <auto-complete minlength="2" source="loadTags($query)"></auto-complete>
+                    </tags-input>
+                </div>
+
 
             </div>
             <div class="modal-footer">

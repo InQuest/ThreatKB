@@ -1,4 +1,5 @@
 from app import db
+from app.routes import tags_mapping
 
 
 class C2ip(db.Model):
@@ -28,6 +29,12 @@ class C2ip(db.Model):
 
     expiration_timestamp = db.Column(db.Date)
 
+    tags = []
+
+    addedTags = []
+
+    removedTags = []
+
     def to_dict(self):
         return dict(
             date_created=self.date_created.isoformat(),
@@ -41,7 +48,10 @@ class C2ip(db.Model):
             reference_text=self.reference_text,
             expiration_type=self.expiration_type,
             expiration_timestamp=self.expiration_timestamp.isoformat(),
-            id=self.id
+            id=self.id,
+            tags=tags_mapping.get_tags_for_source(self.__tablename__, self.id),
+            addedTags=[],
+            removedTags=[]
         )
 
     def __repr__(self):

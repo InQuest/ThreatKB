@@ -112,8 +112,8 @@
                 <div class="form-group">
                     <label>tags:</label>
 
-                    <tags-input ng-model="tags">
-                        <auto-complete source="loadTags($query)"></auto-complete>
+                    <tags-input ng-model="c2dns.tags" on-tag-added="addedTag($tag)" on-tag-removed="removedTag($tag)">
+                        <auto-complete minlength="2" source="loadTags($query)"></auto-complete>
                     </tags-input>
                 </div>
 
@@ -165,8 +165,6 @@
 
                 <th>expiration_timestamp</th>
 
-                <th>tags</th>
-
             </tr>
             </thead>
             <tbody>
@@ -190,8 +188,6 @@
                 <td ng-if="c2dns.expiration_type">{{ c2dns.expiration_type }}</td>
 
                 <td ng-if="c2dns.expiration_timestamp">{{ c2dns.expiration_timestamp  | date:'yyyy-MM-dd'}}</td>
-
-                <td ng-if="c2dns.expiration_type">{{ c2dns.expiration_type }}</td>
 
                 <td ng-if="c2dns.id">
                     <button type="submit"

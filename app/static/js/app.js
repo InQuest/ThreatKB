@@ -67,16 +67,16 @@ angular.module('InquestKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitiz
                     }]
                 }
             })
-            .when('/tags_mapping', {
-                templateUrl: 'views/tags_mapping/tags_mapping.html',
-                controller: 'Tags_mappingController',
-                access: {restricted: true},
-                resolve:{
-                    resolvedTags_mapping: ['Tags_mapping', function (Tags_mapping) {
-                        return Tags_mapping.query();
-                    }]
-                }
-            })
+            // .when('/tags_mapping', {
+            //     templateUrl: 'views/tags_mapping/tags_mapping.html',
+            //     controller: 'Tags_mappingController',
+            //     access: {restricted: true},
+            //     resolve:{
+            //         resolvedTags_mapping: ['Tags_mapping', function (Tags_mapping) {
+            //             return Tags_mapping.query();
+            //         }]
+            //     }
+            // })
             .when('/yara_rules', {
                 templateUrl: 'views/yara_rule/yara_rules.html',
                 controller: 'Yara_ruleController',

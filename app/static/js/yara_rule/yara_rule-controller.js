@@ -5,6 +5,7 @@ angular.module('InquestKB')
         function ($scope, $modal, resolvedYara_rule, Yara_rule, Cfg_states) {
 
             $scope.yara_rules = resolvedYara_rule;
+
             $scope.create = function () {
                 $scope.clear();
                 $scope.open();
@@ -17,25 +18,22 @@ angular.module('InquestKB')
             };
 
             $scope.delete = function (id) {
-                Yara_rule.delete({id: id},
-                    function () {
-                        $scope.yara_rules = Yara_rule.query();
-                    });
+                Yara_rule.delete({id: id}, function () {
+                    $scope.yara_rules = Yara_rule.query();
+                });
             };
 
             $scope.save = function (id) {
                 if (id) {
-                    Yara_rule.update({id: id}, $scope.yara_rule,
-                        function () {
-                            $scope.yara_rules = Yara_rule.query();
-                            //$scope.clear();
-                        });
+                    Yara_rule.update({id: id}, $scope.yara_rule, function () {
+                        $scope.yara_rules = Yara_rule.query();
+                        //$scope.clear();
+                    });
                 } else {
-                    Yara_rule.save($scope.yara_rule,
-                        function () {
-                            $scope.yara_rules = Yara_rule.query();
-                            //$scope.clear();
-                        });
+                    Yara_rule.save($scope.yara_rule, function () {
+                        $scope.yara_rules = Yara_rule.query();
+                        //$scope.clear();
+                    });
                 }
             };
 
@@ -76,7 +74,13 @@ angular.module('InquestKB')
 
                     "strings": "",
 
-                    "id": ""
+                    "id": "",
+
+                    "tags": [],
+
+                    "addedTags": [],
+
+                    "removedTags": []
                 };
             };
 
@@ -97,8 +101,8 @@ angular.module('InquestKB')
                 });
             };
         }])
-    .controller('Yara_ruleSaveController', ['$scope', '$modalInstance', 'yara_rule', 'Cfg_states',
-        function ($scope, $modalInstance, yara_rule, Cfg_states) {
+    .controller('Yara_ruleSaveController', ['$scope', '$http', '$modalInstance', 'yara_rule', 'Cfg_states',
+        function ($scope, $http, $modalInstance, yara_rule, Cfg_states) {
             $scope.yara_rule = yara_rule;
 
             $scope.cfg_states = Cfg_states.query();
@@ -110,4 +114,21 @@ angular.module('InquestKB')
             $scope.cancel = function () {
                 $modalInstance.dismiss('cancel');
             };
+
+            $scope.addedTag = function ($tag) {
+                $scope.yara_rule.addedTags.push($tag)
+            };
+
+            $scope.removedTag = function ($tag) {
+                $scope.yara_rule.removedTags.push($tag)
+            };
+
+            $scope.loadTags = function (query) {
+                return $http.get('/InquestKB/tags', {cache: false}).then(function (response) {
+                    var tags = response.data;
+                    return tags.filter(function (tag) {
+                        return tag.text.toLowerCase().indexOf(query.toLowerCase()) !== -1;
+                    });
+                });
+            }
         }]);

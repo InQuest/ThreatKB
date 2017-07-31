@@ -17,25 +17,22 @@ angular.module('InquestKB')
             };
 
             $scope.delete = function (id) {
-                C2dns.delete({id: id},
-                    function () {
-                        $scope.c2dns = C2dns.query();
-                    });
+                C2dns.delete({id: id}, function () {
+                    $scope.c2dns = C2dns.query();
+                });
             };
 
             $scope.save = function (id) {
                 if (id) {
-                    C2dns.update({id: id}, $scope.c2dns,
-                        function () {
-                            $scope.c2dns = C2dns.query();
-                            //$scope.clear();
-                        });
+                    C2dns.update({id: id}, $scope.c2dns, function () {
+                        $scope.c2dns = C2dns.query();
+                        //$scope.clear();
+                    });
                 } else {
-                    C2dns.save($scope.c2dns,
-                        function () {
-                            $scope.c2dns = C2dns.query();
-                            //$scope.clear();
-                        });
+                    C2dns.save($scope.c2dns, function () {
+                        $scope.c2dns = C2dns.query();
+                        //$scope.clear();
+                    });
                 }
             };
 
@@ -60,7 +57,13 @@ angular.module('InquestKB')
 
                     "expiration_timestamp": "",
 
-                    "id": ""
+                    "id": "",
+
+                    "tags": [],
+
+                    "addedTags": [],
+
+                    "removedTags": []
                 };
             };
 
@@ -85,20 +88,14 @@ angular.module('InquestKB')
         function ($scope, $http, $modalInstance, c2dns) {
             $scope.c2dns = c2dns;
 
-
             $scope.date_createdDateOptions = {
-                dateFormat: 'yy-mm-dd',
-
-
+                dateFormat: 'yy-mm-dd'
             };
             $scope.date_modifiedDateOptions = {
-                dateFormat: 'yy-mm-dd',
-
-
+                dateFormat: 'yy-mm-dd'
             };
             $scope.expiration_timestampDateOptions = {
                 dateFormat: 'yy-mm-dd',
-
                 minDate: 1
             };
 
@@ -110,15 +107,20 @@ angular.module('InquestKB')
                 $modalInstance.dismiss('cancel');
             };
 
-            $scope.tags = [];
+            $scope.addedTag = function ($tag) {
+                $scope.c2dns.addedTags.push($tag)
+            };
 
-            $scope.loadTags = function($query) {
-                return $http.get('/InquestKB/tags', {cache: true}).then(function(response) {
+            $scope.removedTag = function ($tag) {
+                $scope.c2dns.removedTags.push($tag)
+            };
+
+            $scope.loadTags = function (query) {
+                return $http.get('/InquestKB/tags', {cache: false}).then(function (response) {
                     var tags = response.data;
-                    return tags.filter(function(tag) {
-                        return tag.text.toLowerCase().indexOf($query.toLowerCase()) != -1;
+                    return tags.filter(function (tag) {
+                        return tag.text.toLowerCase().indexOf(query.toLowerCase()) !== -1;
                     });
                 });
             }
-
         }]);
