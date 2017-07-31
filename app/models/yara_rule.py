@@ -1,4 +1,5 @@
 from app import db
+from app.models.comments import Comments
 
 
 class Yara_rule(db.Model):

@@ -201,6 +201,21 @@
 
 
             </div>
+
+            <div class="form-group" >
+                <label>Comments</label>
+
+                <ul class="list-group">
+                    <li class="list-group-item" ng-repeat="comment in yara_rule.comments">{{ comment.comment }} <span
+                            class="pull-right">{{ comment.user.email }}</span></li>
+                </ul>
+
+                <div class="input-group" ng-model="new_comment">
+                    <input class="form-control" type="text" placeholder="Leave a comment" ng-model="new_comment.comment">
+                    <span class="input-group-addon" ng-click="add_comment()">Post</span>
+                </div>
+            </div>
+
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" ng-click="cancel()">Cancel
                 </button>

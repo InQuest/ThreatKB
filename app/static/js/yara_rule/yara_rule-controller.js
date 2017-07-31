@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('InquestKB')
-    .controller('Yara_ruleController', ['$scope', '$modal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states',
-        function ($scope, $modal, resolvedYara_rule, Yara_rule, Cfg_states) {
+    .controller('Yara_ruleController', ['$scope', '$modal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states', 'Comments',
+        function ($scope, $modal, resolvedYara_rule, Yara_rule, Cfg_states, Comments) {
 
             $scope.yara_rules = resolvedYara_rule;
             $scope.create = function () {
@@ -13,6 +13,7 @@ angular.module('InquestKB')
             $scope.update = function (id) {
                 $scope.yara_rule = Yara_rule.get({id: id});
                 $scope.cfg_states = Cfg_states.query();
+                $scope.yara_rule.comments = Comments.resource.query( {entity_type: Comments.entity_mapping.SIGNATURE, entity_id: id});
                 $scope.open(id);
             };
 
@@ -76,7 +77,9 @@ angular.module('InquestKB')
 
                     "strings": "",
 
-                    "id": ""
+                    "id": "",
+
+                    "comments": []
                 };
             };
 
@@ -97,11 +100,9 @@ angular.module('InquestKB')
                 });
             };
         }])
-    .controller('Yara_ruleSaveController', ['$scope', '$modalInstance', 'yara_rule', 'Cfg_states',
-        function ($scope, $modalInstance, yara_rule, Cfg_states) {
+    .controller('Yara_ruleSaveController', ['$scope', '$modalInstance', 'yara_rule', 'Cfg_states', 'Comments',
+        function ($scope, $modalInstance, yara_rule, Cfg_states, Comments) {
             $scope.yara_rule = yara_rule;
-
-            $scope.cfg_states = Cfg_states.query();
 
             $scope.ok = function () {
                 $modalInstance.close($scope.yara_rule);
@@ -110,4 +111,8 @@ angular.module('InquestKB')
             $scope.cancel = function () {
                 $modalInstance.dismiss('cancel');
             };
+
+            $scope.add_comment = function(){
+                Comments.save($scope.new_comment, )
+            }
         }]);
