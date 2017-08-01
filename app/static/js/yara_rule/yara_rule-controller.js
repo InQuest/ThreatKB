@@ -59,7 +59,7 @@ angular.module('InquestKB')
                     "id": "",
                     "tags": [],
                     "addedTags": [],
-                    "removedTags": []
+                    "removedTags": [],
                     "comments": []
                 };
             };
