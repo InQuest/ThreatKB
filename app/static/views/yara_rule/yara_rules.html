@@ -199,8 +199,29 @@
                     <span class="error" ng-show="form.strings.$error.maxlength">Must be at most 30000 characters.</span>
                 </div>
 
+                <div class="form-group" ng-if="yara_rule">
+                    <label>Comments</label>
+
+                    <ul class="list-group">
+                        <li class="list-group-item justify-content-between"
+                            ng-repeat="comment in yara_rule.comments">{{ comment.comment }}
+                            <span class="pull-right">{{ comment.user.email }}&nbsp;<small>{{ pretty_date(comment.date_created) }}</small></span>
+                        </li>
+                    </ul>
+
+                    <div class="input-group">
+                        <input class="form-control" type="text" placeholder="Enter a comment..."
+                               ng-model="yara_rule.new_comment">
+                        <span class="input-group-btn">
+                            <button class="btn btn-secondary" type="button"
+                                    ng-click="add_comment(yara_rule.id)">Post</button>
+                        </span>
+                    </div>
+                </div>
 
             </div>
+
+
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" ng-click="cancel()">Cancel
                 </button>

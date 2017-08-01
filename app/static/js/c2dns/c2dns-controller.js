@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('InquestKB')
-    .controller('C2dnsController', ['$scope', '$modal', 'resolvedC2dns', 'C2dns',
-        function ($scope, $modal, resolvedC2dns, C2dns) {
+    .controller('C2dnsController', ['$scope', '$modal', 'resolvedC2dns', 'C2dns', 'Cfg_states',
+        function ($scope, $modal, resolvedC2dns, C2dns, Cfg_states) {
 
             $scope.c2dns = resolvedC2dns;
 
@@ -13,6 +13,7 @@ angular.module('InquestKB')
 
             $scope.update = function (id) {
                 $scope.c2dns = C2dns.get({id: id});
+                $scope.cfg_states = Cfg_states.query();
                 $scope.open(id);
             };
 
@@ -81,25 +82,26 @@ angular.module('InquestKB')
                 });
             };
         }])
-    .controller('C2dnsSaveController', ['$scope', '$modalInstance', 'c2dns',
-        function ($scope, $modalInstance, c2dns) {
+    .controller('C2dnsSaveController', ['$scope', '$modalInstance', 'c2dns', 'Cfg_states', 'Comments',
+        function ($scope, $modalInstance, c2dns, Cfg_states, Comments) {
             $scope.c2dns = c2dns;
+            $scope.c2dns.new_comment = "";
+            $scope.Comments = Comments;
 
+            $scope.cfg_states = Cfg_states.query();
 
-            $scope.date_createdDateOptions = {
-                dateFormat: 'yy-mm-dd',
-
-
-            };
-            $scope.date_modifiedDateOptions = {
-                dateFormat: 'yy-mm-dd',
-
-
-            };
-            $scope.expiration_timestampDateOptions = {
-                dateFormat: 'yy-mm-dd',
-
-                minDate: 1
+            $scope.add_comment = function (id) {
+                $scope.Comments.resource.save({
+                    comment: $scope.c2dns.new_comment,
+                    entity_type: Comments.ENTITY_MAPPING.DNS,
+                    entity_id: id
+                }, function () {
+                    $scope.c2dns.new_comment = "";
+                    $scope.c2dns.comments = $scope.Comments.resource.query({
+                        entity_type: Comments.ENTITY_MAPPING.DNS,
+                        entity_id: id
+                    })
+                });
             };
 
             $scope.ok = function () {

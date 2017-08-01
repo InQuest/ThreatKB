@@ -1,6 +1,7 @@
 from app import app, db
 from app.models import c2dns
 from flask import abort, jsonify, request
+from dateutil import parser
 import datetime
 import json
 
@@ -22,15 +23,13 @@ def get_c2dns(id):
 @app.route('/InquestKB/c2dns', methods=['POST'])
 def create_c2dns():
     entity = c2dns.C2dns(
-        date_created=datetime.datetime.strptime(request.json['date_created'], "%Y-%m-%d").date()
-        , date_modified=datetime.datetime.strptime(request.json['date_modified'], "%Y-%m-%d").date()
-        , state=request.json['state']
-        , domain_name=request.json['domain_name']
+        domain_name=request.json['domain_name']
         , match_type=request.json['match_type']
         , reference_link=request.json['reference_link']
         , reference_text=request.json['reference_text']
         , expiration_type=request.json['expiration_type']
-        , expiration_timestamp=datetime.datetime.strptime(request.json['expiration_timestamp'], "%Y-%m-%d").date()
+        , expiration_timestamp=parser.parse(request.json['expiration_timestamp'])
+        , state=request.json['state']['state']
     )
     db.session.add(entity)
     db.session.commit()
@@ -43,15 +42,13 @@ def update_c2dns(id):
     if not entity:
         abort(404)
     entity = c2dns.C2dns(
-        date_created=datetime.datetime.strptime(request.json['date_created'], "%Y-%m-%d").date(),
-        date_modified=datetime.datetime.strptime(request.json['date_modified'], "%Y-%m-%d").date(),
         state=request.json['state'],
         domain_name=request.json['domain_name'],
         match_type=request.json['match_type'],
         reference_link=request.json['reference_link'],
         reference_text=request.json['reference_text'],
         expiration_type=request.json['expiration_type'],
-        expiration_timestamp=datetime.datetime.strptime(request.json['expiration_timestamp'], "%Y-%m-%d").date(),
+        expiration_timestamp=parser.parse(request.json['expiration_timestamp']),
         id=id
     )
     db.session.merge(entity)
