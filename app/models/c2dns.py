@@ -1,30 +1,36 @@
 from app import db
-
+from app.models.comments import Comments
 
 class C2dns(db.Model):
     __tablename__ = "c2dns"
 
     id = db.Column(db.Integer, primary_key=True)
-
-    date_created = db.Column(db.Date)
-
-    date_modified = db.Column(db.Date)
-
+    date_created = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp())
+    date_modified = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp(),
+                              onupdate=db.func.current_timestamp())
     state = db.Column(db.String(32), index=True)
-
     domain_name = db.Column(db.String(2048), index=True)
-
     match_type = db.Column(db.Enum('exact', 'wildcard'))
-
     reference_link = db.Column(db.String(2048))
-
     reference_text = db.Column(db.String(2048))
-
     expiration_type = db.Column(db.String(32))
+    expiration_timestamp = db.Column(db.DateTime(timezone=True))
 
-    expiration_timestamp = db.Column(db.Date)
+    created_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
+    created_user = db.relationship('KBUser', foreign_keys=created_user_id,
+                                   primaryjoin="KBUser.id==C2dns.created_user_id")
+
+    modified_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
+    modified_user = db.relationship('KBUser', foreign_keys=modified_user_id,
+                                    primaryjoin="KBUser.id==C2dns.modified_user_id")
+
+    comments = db.relationship("Comments", foreign_keys=[id],
+                               primaryjoin="and_(Comments.entity_id==C2dns.id, Comments.entity_type=='%s')" % (
+                               Comments.ENTITY_MAPPING["DNS"]), lazy="dynamic")
 
     def to_dict(self):
+        comments = Comments.query.filter_by(entity_id=self.id).filter_by(
+            entity_type=Comments.ENTITY_MAPPING["DNS"]).all()
         return dict(
             date_created=self.date_created.isoformat(),
             date_modified=self.date_modified.isoformat(),
@@ -35,7 +41,10 @@ class C2dns(db.Model):
             reference_text=self.reference_text,
             expiration_type=self.expiration_type,
             expiration_timestamp=self.expiration_timestamp.isoformat(),
-            id=self.id
+            id=self.id,
+            created_user=self.created_user.to_dict(),
+            modified_user=self.modified_user.to_dict(),
+            comments=[comment.to_dict() for comment in comments]
         )
 
     def __repr__(self):

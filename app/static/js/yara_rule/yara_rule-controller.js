@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('InquestKB')
-    .controller('Yara_ruleController', ['$scope', '$modal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states', 'Comments',
-        function ($scope, $modal, resolvedYara_rule, Yara_rule, Cfg_states, Comments) {
+    .controller('Yara_ruleController', ['$scope', '$modal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states',
+        function ($scope, $modal, resolvedYara_rule, Yara_rule, Cfg_states) {
 
             $scope.yara_rules = resolvedYara_rule;
             $scope.create = function () {
@@ -13,7 +13,6 @@ angular.module('InquestKB')
             $scope.update = function (id) {
                 $scope.yara_rule = Yara_rule.get({id: id});
                 $scope.cfg_states = Cfg_states.query();
-                $scope.yara_rule.comments = Comments.resource.query( {entity_type: Comments.entity_mapping.SIGNATURE, entity_id: id});
                 $scope.open(id);
             };
 
@@ -42,43 +41,24 @@ angular.module('InquestKB')
 
             $scope.clear = function () {
                 $scope.yara_rule = {
-
                     "date_created": "",
-
                     "date_modified": "",
-
                     "state": "",
-
                     "name": "",
-
                     "test_status": "",
-
                     "confidence": "",
-
                     "severity": "",
-
                     "description": "",
-
                     "category": "",
-
                     "file_type": "",
-
                     "subcategory1": "",
-
                     "subcategory2": "",
-
                     "subcategory3": "",
-
                     "reference_link": "",
-
                     "reference_text": "",
-
                     "condition": "",
-
                     "strings": "",
-
                     "id": "",
-
                     "comments": []
                 };
             };
@@ -103,6 +83,24 @@ angular.module('InquestKB')
     .controller('Yara_ruleSaveController', ['$scope', '$modalInstance', 'yara_rule', 'Cfg_states', 'Comments',
         function ($scope, $modalInstance, yara_rule, Cfg_states, Comments) {
             $scope.yara_rule = yara_rule;
+            $scope.yara_rule.new_comment = "";
+            $scope.Comments = Comments;
+
+            $scope.cfg_states = Cfg_states.query();
+
+            $scope.add_comment = function (id) {
+                $scope.Comments.resource.save({
+                    comment: $scope.yara_rule.new_comment,
+                    entity_type: Comments.ENTITY_MAPPING.SIGNATURE,
+                    entity_id: id
+                }, function () {
+                    $scope.yara_rule.new_comment = "";
+                    $scope.yara_rule.comments = $scope.Comments.resource.query({
+                        entity_type: Comments.ENTITY_MAPPING.SIGNATURE,
+                        entity_id: id
+                    })
+                });
+            };
 
             $scope.ok = function () {
                 $modalInstance.close($scope.yara_rule);
@@ -112,7 +110,4 @@ angular.module('InquestKB')
                 $modalInstance.dismiss('cancel');
             };
 
-            $scope.add_comment = function(){
-                Comments.save($scope.new_comment, )
-            }
         }]);

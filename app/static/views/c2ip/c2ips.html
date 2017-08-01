@@ -20,7 +20,7 @@
                 </div>
 
 
-                <div class="form-group">
+                <div class="form-group" ng-if="c2ip.date_created">
                     <label>date_created:</label>
 
                     <input type="text" class="form-control" name="date_created" ui-date="date_createdDateOptions"
@@ -28,13 +28,29 @@
                            ng-model="c2ip.date_created" ng-required="true"/>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" ng-if="c2ip.date_modified">
                     <label>date_modified:</label>
 
                     <input type="text" class="form-control" name="date_modified" ui-date="date_modifiedDateOptions"
                            ui-date-format="yy-mm-dd"
                            ng-model="c2ip.date_modified" ng-required="true"/>
                 </div>
+
+
+                <div class="form-group">
+                    <label>state:</label>
+
+                    <ui-select ng-model="c2ip.state">
+                        <ui-select-match placeholder="Select a state..">
+                            <span ng-bind="$select.selected.state || c2ip.state"></span>
+                        </ui-select-match>
+                        <ui-select-choices repeat="state in (cfg_states | filter: $select.search) track by state.id">
+                            <span ng-bind="state.state"></span>
+                        </ui-select-choices>
+                    </ui-select>
+
+                </div>
+
 
                 <div class="form-group">
                     <label>ip:</label>
@@ -80,7 +96,7 @@
                     <label>state:</label>
 
                     <input type="text" class="form-control" name="state"
-                           ng-model="c2ip.state" ng-required="false"
+                           ng-model="c2ip.st" ng-required="false"
                            ng-maxlength=64/>
                     <span class="error" ng-show="form.state.$error.minlength">Must be at least  characters.</span>
                     <span class="error" ng-show="form.state.$error.maxlength">Must be at most 64 characters.</span>
@@ -130,6 +146,25 @@
                            ng-model="c2ip.expiration_timestamp" ng-required="false"/>
                 </div>
 
+                <div class="form-group" ng-if="c2ip">
+                    <label>Comments</label>
+
+                    <ul class="list-group">
+                        <li class="list-group-item justify-content-between"
+                            ng-repeat="comment in c2ip.comments">{{ comment.comment }}
+                            <span class="pull-right">{{ comment.user.email }}&nbsp;<small>{{ pretty_date(comment.date_created) }}</small></span>
+                        </li>
+                    </ul>
+
+                    <div class="input-group">
+                        <input class="form-control" type="text" placeholder="Enter a comment..."
+                               ng-model="c2ip.new_comment">
+                        <span class="input-group-btn">
+                            <button class="btn btn-secondary" type="button"
+                                    ng-click="add_comment(c2ip.id)">Post</button>
+                        </span>
+                    </div>
+                </div>
 
             </div>
             <div class="modal-footer">
