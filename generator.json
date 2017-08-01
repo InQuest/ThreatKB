@@ -330,7 +330,20 @@
                     "required": true
                 }
             ]
-        }
+        },
+		{
+			"name": "tags",
+			"attrs": [
+				{
+					"attrName": "text",
+					"attrType": "String",
+					"minLength": "",
+					"maxLength": "256",
+					"enumValues": [],
+					"required": true
+				}
+			]
+		}
     ],
     "resources": []
 }

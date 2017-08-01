@@ -22,6 +22,8 @@ from app.models import cfg_reference_text_templates
 from app.models import cfg_states
 from app.models import comments
 from app.models import authentication
+from app.models import tags
+from app.models import tags_mapping
 
 from app.routes import index
 from app.routes import authentication
@@ -31,6 +33,8 @@ from app.routes import yara_rules
 from app.routes import cfg_reference_text_templates
 from app.routes import cfg_states
 from app.routes import comments
+from app.routes import tags
+from app.routes import tags_mapping
 
 
 @app.before_first_request

@@ -1,4 +1,5 @@
 from app import db
+from app.routes import tags_mapping
 from app.models.comments import Comments
 
 class C2ip(db.Model):
@@ -31,6 +32,12 @@ class C2ip(db.Model):
                                primaryjoin="and_(Comments.entity_id==C2ip.id, Comments.entity_type=='%s')" % (
                                Comments.ENTITY_MAPPING["IP"]), lazy="dynamic")
 
+    tags = []
+
+    addedTags = []
+
+    removedTags = []
+
     def to_dict(self):
         return dict(
             date_created=self.date_created.isoformat(),
@@ -45,6 +52,9 @@ class C2ip(db.Model):
             expiration_type=self.expiration_type,
             expiration_timestamp=self.expiration_timestamp.isoformat(),
             id=self.id,
+            tags=tags_mapping.get_tags_for_source(self.__tablename__, self.id),
+            addedTags=[],
+            removedTags=[],
             created_user=self.created_user.to_dict(),
             modified_user=self.modified_user.to_dict(),
             comments=[comment.to_dict() for comment in self.comments]

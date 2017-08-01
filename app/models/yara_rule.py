@@ -1,6 +1,6 @@
 from app import db
+from app.routes import tags_mapping
 from app.models.comments import Comments
-
 
 class Yara_rule(db.Model):
     __tablename__ = "yara_rules"
@@ -25,6 +25,10 @@ class Yara_rule(db.Model):
     condition = db.Column(db.String(2048))
     strings = db.Column(db.String(30000))
 
+    tags = []
+    addedTags = []
+    removedTags = []
+    
     created_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
     created_user = db.relationship('KBUser', foreign_keys=created_user_id,
                                    primaryjoin="KBUser.id==Yara_rule.created_user_id")
@@ -59,6 +63,9 @@ class Yara_rule(db.Model):
             condition=self.condition,
             strings=self.strings,
             id=self.id,
+            tags=tags_mapping.get_tags_for_source(self.__tablename__, self.id),
+            addedTags=[],
+            removedTags=[],
             comments=[comment.to_dict() for comment in self.comments],
             created_user=self.created_user.to_dict(),
             modified_user=self.modified_user.to_dict()
