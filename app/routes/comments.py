@@ -7,6 +7,7 @@ from flask.ext.login import login_required, current_user
 
 @app.route('/InquestKB/comments', methods=['GET'])
 def get_all_comments():
+    app.logger.debug("args are: '%s'" % (request.args))
     entity_type = request.args.get("entity_type", None)
     entity_id = request.args.get("entity_id", None)
     entities = comments.Comments.query

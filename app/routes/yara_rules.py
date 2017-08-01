@@ -1,6 +1,7 @@
 from app import app, db
 from app.models import yara_rule
 from flask import abort, jsonify, request
+from flask.ext.login import current_user
 import datetime
 import json
 
@@ -24,9 +25,7 @@ def get_yara_rule(id):
 @app.route('/InquestKB/yara_rules', methods=['POST'])
 def create_yara_rule():
     entity = yara_rule.Yara_rule(
-        date_created=datetime.datetime.now()
-        , date_modified=datetime.datetime.now()
-        , state=request.json['state']['state']
+        state=request.json['state']['state']
         , name=request.json['name']
         , test_status=request.json['test_status']
         , confidence=request.json['confidence']
@@ -41,6 +40,8 @@ def create_yara_rule():
         , reference_text=request.json['reference_text']
         , condition=request.json['condition']
         , strings=request.json['strings']
+        , created_user_id=current_user.id
+        , modified_user_id=current_user.id
     )
     db.session.add(entity)
     db.session.commit()
@@ -56,8 +57,6 @@ def update_yara_rule(id):
     if not entity:
         abort(404)
     entity = yara_rule.Yara_rule(
-        date_created=datetime.datetime.strptime(request.json['date_created'], "%Y-%m-%d").date(),
-        date_modified=datetime.datetime.strptime(request.json['date_modified'], "%Y-%m-%d").date(),
         state=request.json['state']['state'],
         name=request.json['name'],
         test_status=request.json['test_status'],
@@ -73,7 +72,8 @@ def update_yara_rule(id):
         reference_text=request.json['reference_text'],
         condition=request.json['condition'],
         strings=request.json['strings'],
-        id=id
+        id=id,
+        modified_user_id=current_user.id
     )
     db.session.merge(entity)
     db.session.commit()

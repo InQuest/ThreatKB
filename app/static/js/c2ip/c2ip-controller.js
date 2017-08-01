@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('InquestKB')
-    .controller('C2ipController', ['$scope', '$modal', 'resolvedC2ip', 'C2ip',
-        function ($scope, $modal, resolvedC2ip, C2ip) {
+    .controller('C2ipController', ['$scope', '$modal', 'resolvedC2ip', 'C2ip', 'Cfg_states',
+        function ($scope, $modal, resolvedC2ip, C2ip, Cfg_states) {
 
             $scope.c2ips = resolvedC2ip;
 
@@ -13,6 +13,7 @@ angular.module('InquestKB')
 
             $scope.update = function (id) {
                 $scope.c2ip = C2ip.get({id: id});
+                $scope.cfg_states = Cfg_states.query();
                 $scope.open(id);
             };
 
@@ -88,20 +89,26 @@ angular.module('InquestKB')
                 });
             };
         }])
-    .controller('C2ipSaveController', ['$scope', '$http', '$modalInstance', 'c2ip',
-        function ($scope, $http, $modalInstance, c2ip) {
-            $scope.c2ip = c2ip;
+    .controller('C2ipSaveController', ['$scope', '$http', '$modalInstance', 'c2ip', 'Comments', 'Cfg_states',
+        function ($scope, $http, $modalInstance, c2ip, Comments, Cfg_states) {
+            $scope.c2ip = c2ip
+            $scope.c2ip.new_comment = "";
+            $scope.Comments = Comments;
 
+            $scope.cfg_states = Cfg_states.query();
 
-            $scope.date_createdDateOptions = {
-                dateFormat: 'yy-mm-dd'
-            };
-            $scope.date_modifiedDateOptions = {
-                dateFormat: 'yy-mm-dd'
-            };
-            $scope.expiration_timestampDateOptions = {
-                dateFormat: 'yy-mm-dd',
-                minDate: 1
+            $scope.add_comment = function (id) {
+                $scope.Comments.resource.save({
+                    comment: $scope.c2ip.new_comment,
+                    entity_type: Comments.ENTITY_MAPPING.IP,
+                    entity_id: id
+                }, function () {
+                    $scope.c2ip.new_comment = "";
+                    $scope.c2ip.comments = $scope.Comments.resource.query({
+                        entity_type: Comments.ENTITY_MAPPING.IP,
+                        entity_id: id
+                    })
+                });
             };
 
             $scope.ok = function () {

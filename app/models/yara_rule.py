@@ -1,53 +1,49 @@
 from app import db
 from app.routes import tags_mapping
-
+from app.models.comments import Comments
 
 class Yara_rule(db.Model):
     __tablename__ = "yara_rules"
 
     id = db.Column(db.Integer, primary_key=True)
-
-    date_created = db.Column(db.Date)
-
-    date_modified = db.Column(db.Date)
-
+    date_created = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp())
+    date_modified = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp(),
+                              onupdate=db.func.current_timestamp())
     state = db.Column(db.String(32), index=True)
-
     name = db.Column(db.String(128), index=True)
-
     test_status = db.Column(db.String(16))
-
     confidence = db.Column(db.Integer)
-
     severity = db.Column(db.Integer)
-
     description = db.Column(db.String(4096))
-
     category = db.Column(db.String(32))
-
     file_type = db.Column(db.String(32))
-
     subcategory1 = db.Column(db.String(32))
-
     subcategory2 = db.Column(db.String(32))
-
     subcategory3 = db.Column(db.String(32))
-
     reference_link = db.Column(db.String(2048))
-
     reference_text = db.Column(db.String(2048))
-
     condition = db.Column(db.String(2048))
-
     strings = db.Column(db.String(30000))
 
     tags = []
-
     addedTags = []
-
     removedTags = []
+    
+    created_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
+    created_user = db.relationship('KBUser', foreign_keys=created_user_id,
+                                   primaryjoin="KBUser.id==Yara_rule.created_user_id")
+
+    modified_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
+    modified_user = db.relationship('KBUser', foreign_keys=modified_user_id,
+                                    primaryjoin="KBUser.id==Yara_rule.modified_user_id")
+
+    comments = db.relationship("Comments", foreign_keys=[id],
+                               primaryjoin="and_(Comments.entity_id==Yara_rule.id, Comments.entity_type=='%s')" % (
+                               Comments.ENTITY_MAPPING["SIGNATURE"]), lazy="dynamic")
 
     def to_dict(self):
+        comments = Comments.query.filter_by(entity_id=self.id).filter_by(
+            entity_type=Comments.ENTITY_MAPPING["SIGNATURE"]).all()
         return dict(
             date_created=self.date_created.isoformat(),
             date_modified=self.date_modified.isoformat(),
@@ -69,7 +65,10 @@ class Yara_rule(db.Model):
             id=self.id,
             tags=tags_mapping.get_tags_for_source(self.__tablename__, self.id),
             addedTags=[],
-            removedTags=[]
+            removedTags=[],
+            comments=[comment.to_dict() for comment in self.comments],
+            created_user=self.created_user.to_dict(),
+            modified_user=self.modified_user.to_dict()
         )
 
     def __repr__(self):
