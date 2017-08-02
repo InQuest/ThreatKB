@@ -1,22 +1,21 @@
 from app import app, db
 from app.models import c2ip
 from flask import abort, jsonify, request
-from flask.ext.login import current_user
+from flask.ext.login import current_user, login_required
 from dateutil import parser
-import datetime
 import json
 
 from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
 
-
-
 @app.route('/InquestKB/c2ips', methods=['GET'])
+@login_required
 def get_all_c2ips():
     entities = c2ip.C2ip.query.all()
     return json.dumps([entity.to_dict() for entity in entities])
 
 
 @app.route('/InquestKB/c2ips/<int:id>', methods=['GET'])
+@login_required
 def get_c2ip(id):
     entity = c2ip.C2ip.query.get(id)
     if not entity:
@@ -25,6 +24,7 @@ def get_c2ip(id):
 
 
 @app.route('/InquestKB/c2ips', methods=['POST'])
+@login_required
 def create_c2ip():
     entity = c2ip.C2ip(
         ip=request.json['ip']
@@ -49,6 +49,7 @@ def create_c2ip():
 
 
 @app.route('/InquestKB/c2ips/<int:id>', methods=['PUT'])
+@login_required
 def update_c2ip(id):
     entity = c2ip.C2ip.query.get(id)
     if not entity:
@@ -76,6 +77,7 @@ def update_c2ip(id):
 
 
 @app.route('/InquestKB/c2ips/<int:id>', methods=['DELETE'])
+@login_required
 def delete_c2ip(id):
     entity = c2ip.C2ip.query.get(id)
     tag_mapping_to_delete = entity.to_dict()['tags']

@@ -1,17 +1,19 @@
 from app import app, db
 from app.models import cfg_states
 from flask import abort, jsonify, request
-import datetime
+from flask.ext.login import login_required
 import json
 
 
 @app.route('/InquestKB/cfg_states', methods=['GET'])
+@login_required
 def get_all_cfg_states():
     entities = cfg_states.Cfg_states.query.all()
     return json.dumps([entity.to_dict() for entity in entities])
 
 
 @app.route('/InquestKB/cfg_states/<int:id>', methods=['GET'])
+@login_required
 def get_cfg_states(id):
     entity = cfg_states.Cfg_states.query.get(id)
     if not entity:
@@ -20,6 +22,7 @@ def get_cfg_states(id):
 
 
 @app.route('/InquestKB/cfg_states', methods=['POST'])
+@login_required
 def create_cfg_states():
     entity = cfg_states.Cfg_states(
         state=request.json['state']
@@ -30,6 +33,7 @@ def create_cfg_states():
 
 
 @app.route('/InquestKB/cfg_states/<int:id>', methods=['PUT'])
+@login_required
 def update_cfg_states(id):
     entity = cfg_states.Cfg_states.query.get(id)
     if not entity:
@@ -44,6 +48,7 @@ def update_cfg_states(id):
 
 
 @app.route('/InquestKB/cfg_states/<int:id>', methods=['DELETE'])
+@login_required
 def delete_cfg_states(id):
     entity = cfg_states.Cfg_states.query.get(id)
     if not entity:
