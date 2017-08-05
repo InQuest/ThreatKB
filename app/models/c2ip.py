@@ -30,7 +30,7 @@ class C2ip(db.Model):
 
     comments = db.relationship("Comments", foreign_keys=[id],
                                primaryjoin="and_(Comments.entity_id==C2ip.id, Comments.entity_type=='%s')" % (
-                               Comments.ENTITY_MAPPING["IP"]), lazy="dynamic")
+                               Comments.ENTITY_MAPPING["IP"]))
 
     tags = []
 

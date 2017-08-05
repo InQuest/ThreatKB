@@ -3,7 +3,6 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.bcrypt import Bcrypt
 from flask.ext.login import LoginManager
 import logging
-import os
 
 app = Flask(__name__, static_url_path='')
 app.secret_key = "a" * 24  # os.urandom(24)
