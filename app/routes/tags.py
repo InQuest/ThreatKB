@@ -1,16 +1,19 @@
 from app import app, db
 from app.models import tags
 from flask import abort, jsonify, request
+from flask.ext.login import login_required
 import json
 
 
 @app.route('/InquestKB/tags', methods=['GET'])
+@login_required
 def get_all_tags():
     entities = tags.Tags.query.all()
     return json.dumps([entity.to_dict() for entity in entities])
 
 
 @app.route('/InquestKB/tags/<int:id>', methods=['GET'])
+@login_required
 def get_tags(id):
     entity = tags.Tags.query.get(id)
     if not entity:
@@ -19,6 +22,7 @@ def get_tags(id):
 
 
 @app.route('/InquestKB/tags', methods=['POST'])
+@login_required
 def create_tags():
     created_tag = create_tag(request.json['text'])
     return jsonify(created_tag.to_dict()), 201

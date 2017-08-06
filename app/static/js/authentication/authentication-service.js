@@ -96,7 +96,7 @@ angular.module('InquestKB').factory('AuthService',
                 return $http.get('/InquestKB/status')
                     // handle success
                     .then(function(success) {
-                        if (success.status == 200) {
+                            if (success.status == 200 && success.data.status) {
                             user = true;
                         } else {
                             user = false;

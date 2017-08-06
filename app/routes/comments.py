@@ -1,11 +1,11 @@
 from app import app, db
 from app.models import comments
 from flask import abort, jsonify, request
-import json
 from flask.ext.login import login_required, current_user
-
+import json
 
 @app.route('/InquestKB/comments', methods=['GET'])
+@login_required
 def get_all_comments():
     app.logger.debug("args are: '%s'" % (request.args))
     entity_type = request.args.get("entity_type", None)

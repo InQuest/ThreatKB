@@ -1,20 +1,20 @@
 from app import app, db
 from app.models import yara_rule
 from flask import abort, jsonify, request
-from flask.ext.login import current_user
-import datetime
-import json
-
+from flask.ext.login import current_user, login_required
 from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
+import json
 
 
 @app.route('/InquestKB/yara_rules', methods=['GET'])
+@login_required
 def get_all_yara_rules():
     entities = yara_rule.Yara_rule.query.all()
     return json.dumps([entity.to_dict() for entity in entities])
 
 
 @app.route('/InquestKB/yara_rules/<int:id>', methods=['GET'])
+@login_required
 def get_yara_rule(id):
     entity = yara_rule.Yara_rule.query.get(id)
     if not entity:
@@ -23,6 +23,7 @@ def get_yara_rule(id):
 
 
 @app.route('/InquestKB/yara_rules', methods=['POST'])
+@login_required
 def create_yara_rule():
     entity = yara_rule.Yara_rule(
         state=request.json['state']['state']
@@ -52,12 +53,13 @@ def create_yara_rule():
 
 
 @app.route('/InquestKB/yara_rules/<int:id>', methods=['PUT'])
+@login_required
 def update_yara_rule(id):
     entity = yara_rule.Yara_rule.query.get(id)
     if not entity:
         abort(404)
     entity = yara_rule.Yara_rule(
-        state=request.json['state']['state'],
+        state=request.json['state'],
         name=request.json['name'],
         test_status=request.json['test_status'],
         confidence=request.json['confidence'],
@@ -85,6 +87,7 @@ def update_yara_rule(id):
 
 
 @app.route('/InquestKB/yara_rules/<int:id>', methods=['DELETE'])
+@login_required
 def delete_yara_rule(id):
     entity = yara_rule.Yara_rule.query.get(id)
     tag_mapping_to_delete = entity.to_dict()['tags']

@@ -1,7 +1,7 @@
 from app import app, bcrypt
 from app.models.authentication import KBUser
 from flask import request, jsonify, session
-from flask.ext.login import current_user
+from flask.ext.login import current_user, login_required
 import flask_login
 
 @app.route('/InquestKB/login', methods=['POST'])
@@ -20,6 +20,7 @@ def login():
 
 
 @app.route('/InquestKB/logout')
+@login_required
 def logout():
     session.pop('logged_in', None)
     flask_login.logout_user()

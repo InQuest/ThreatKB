@@ -1,14 +1,15 @@
 from app import app, db
 from app.models import c2dns
 from flask import abort, jsonify, request
+from flask.ext.login import login_required, current_user
 from dateutil import parser
-import datetime
 import json
 
 from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
 
 
 @app.route('/InquestKB/c2dns', methods=['GET'])
+@login_required
 def get_all_c2dns():
     entities = c2dns.C2dns.query.all()
     return json.dumps([entity.to_dict() for entity in entities])
@@ -23,6 +24,7 @@ def get_c2dns(id):
 
 
 @app.route('/InquestKB/c2dns', methods=['POST'])
+@login_required
 def create_c2dns():
     entity = c2dns.C2dns(
         domain_name=request.json['domain_name']
@@ -32,6 +34,8 @@ def create_c2dns():
         , expiration_type=request.json['expiration_type']
         , expiration_timestamp=parser.parse(request.json['expiration_timestamp'])
         , state=request.json['state']['state']
+        , created_user_id=current_user.id
+        , modified_user_id=current_user.id
     )
     db.session.add(entity)
     db.session.commit()
@@ -42,6 +46,7 @@ def create_c2dns():
 
 
 @app.route('/InquestKB/c2dns/<int:id>', methods=['PUT'])
+@login_required
 def update_c2dns(id):
     entity = c2dns.C2dns.query.get(id)
     if not entity:
@@ -54,7 +59,8 @@ def update_c2dns(id):
         reference_text=request.json['reference_text'],
         expiration_type=request.json['expiration_type'],
         expiration_timestamp=parser.parse(request.json['expiration_timestamp']),
-        id=id
+        id=id,
+        modified_user_id=current_user.id
     )
     db.session.merge(entity)
     db.session.commit()
@@ -66,6 +72,7 @@ def update_c2dns(id):
 
 
 @app.route('/InquestKB/c2dns/<int:id>', methods=['DELETE'])
+@login_required
 def delete_c2dns(id):
     entity = c2dns.C2dns.query.get(id)
     tag_mapping_to_delete = entity.to_dict()['tags']

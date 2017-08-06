@@ -1,17 +1,19 @@
 from app import app, db
 from app.models import cfg_reference_text_templates
 from flask import abort, jsonify, request
-import datetime
+from flask.ext.login import login_required
 import json
 
 
 @app.route('/InquestKB/cfg_reference_text_templates', methods=['GET'])
+@login_required
 def get_all_cfg_reference_text_templates():
     entities = cfg_reference_text_templates.Cfg_reference_text_templates.query.all()
     return json.dumps([entity.to_dict() for entity in entities])
 
 
 @app.route('/InquestKB/cfg_reference_text_templates/<int:id>', methods=['GET'])
+@login_required
 def get_cfg_reference_text_templates(id):
     entity = cfg_reference_text_templates.Cfg_reference_text_templates.query.get(id)
     if not entity:
@@ -20,6 +22,7 @@ def get_cfg_reference_text_templates(id):
 
 
 @app.route('/InquestKB/cfg_reference_text_templates', methods=['POST'])
+@login_required
 def create_cfg_reference_text_templates():
     entity = cfg_reference_text_templates.Cfg_reference_text_templates(
         template_text=request.json['template_text']
@@ -30,6 +33,7 @@ def create_cfg_reference_text_templates():
 
 
 @app.route('/InquestKB/cfg_reference_text_templates/<int:id>', methods=['PUT'])
+@login_required
 def update_cfg_reference_text_templates(id):
     entity = cfg_reference_text_templates.Cfg_reference_text_templates.query.get(id)
     if not entity:
@@ -44,6 +48,7 @@ def update_cfg_reference_text_templates(id):
 
 
 @app.route('/InquestKB/cfg_reference_text_templates/<int:id>', methods=['DELETE'])
+@login_required
 def delete_cfg_reference_text_templates(id):
     entity = cfg_reference_text_templates.Cfg_reference_text_templates.query.get(id)
     if not entity:

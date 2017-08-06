@@ -9,10 +9,13 @@
                 <button type="button" class="close"
                         ng-click="cancel()">&times;
                 </button>
-                <h4 class="modal-title" id="myYara_ruleLabel">Create or edit a Signature</h4>
+
+                <h4 class="modal-title" id="myC2ipLabel" ng-if="!yara_rule.id">Create Signature Artifact</h4>
+                <h4 class="modal-title" id="myC2ipLabel" ng-if="yara_rule.id">Edit Signature Artifact</h4>
+
             </div>
             <div class="modal-body">
-                <div class="form-group">
+                <div class="form-group" ng-if="yara_rule.id">
                     <label>ID</label>
                     <input type="text" class="form-control" name="id" ng-model="yara_rule.id" readonly>
                 </div>
@@ -202,28 +205,33 @@
                 <div class="form-group">
                     <label>tags:</label>
 
-                    <tags-input ng-model="yara_rule.tags" on-tag-added="addedTag($tag)" on-tag-removed="removedTag($tag)">
+                    <tags-input ng-model="yara_rule.tags" on-tag-added="addedTag($tag)"
+                                on-tag-removed="removedTag($tag)">
                         <auto-complete minlength="2" source="loadTags($query)"></auto-complete>
                     </tags-input>
                 </div>
 
-                <div class="form-group" ng-if="yara_rule">
+                <div class="form-group" ng-if="yara_rule.id">
                     <label>Comments</label>
 
-                    <ul class="list-group">
-                        <li class="list-group-item justify-content-between"
-                            ng-repeat="comment in yara_rule.comments">{{ comment.comment }}
-                            <span class="pull-right">{{ comment.user.email }}&nbsp;<small>{{ pretty_date(comment.date_created) }}</small></span>
-                        </li>
-                    </ul>
-
                     <div class="input-group">
-                        <input class="form-control" type="text" placeholder="Enter a comment..."
-                               ng-model="yara_rule.new_comment">
+                        <textarea class="form-control" placeholder="Enter a comment..." rows="1"
+                                  ng-model="yara_rule.new_comment"></textarea>
+
                         <span class="input-group-btn">
                             <button class="btn btn-secondary" type="button"
                                     ng-click="add_comment(yara_rule.id)">Post</button>
                         </span>
+                    </div>
+                    <BR>
+
+                    <div>
+                        <ul class="list-group">
+                            <li class="list-group-item justify-content-between"
+                                ng-repeat="comment in yara_rule.comments | orderBy:'-date_created'">{{ print_comment(comment) }}
+                                <span class="pull-right">{{ comment.user.email }}&nbsp;<small>{{ pretty_date(comment.date_created) }}</small></span>
+                            </li>
+                        </ul>
                     </div>
                 </div>
 
@@ -294,44 +302,44 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="yara_rule in yara_rules track by $index">
-                <td ng-if="yara_rule.id">{{ yara_rule.id }}</td>
+            <tr ng-repeat="yara_rule in yara_rules track by $index" ng-if="yara_rule.date_created">
+                <td>{{ yara_rule.id }}</td>
 
-                <td ng-if="yara_rule.date_created">{{ yara_rule.date_created  | date:'yyyy-MM-dd'}}</td>
+                <td>{{ yara_rule.date_created  | date:'yyyy-MM-dd'}}</td>
 
-                <td ng-if="yara_rule.date_modified">{{ yara_rule.date_modified  | date:'yyyy-MM-dd'}}</td>
+                <td>{{ yara_rule.date_modified  | date:'yyyy-MM-dd'}}</td>
 
-                <td ng-if="yara_rule.state">{{ yara_rule.state }}</td>
+                <td>{{ yara_rule.state }}</td>
 
-                <td ng-if="yara_rule.name">{{ yara_rule.name }}</td>
+                <td>{{ yara_rule.name }}</td>
 
-                <td ng-if="yara_rule.test_status">{{ yara_rule.test_status }}</td>
+                <td>{{ yara_rule.test_status }}</td>
 
-                <td ng-if="yara_rule.confidence">{{ yara_rule.confidence }}</td>
+                <td>{{ yara_rule.confidence }}</td>
 
-                <td ng-if="yara_rule.severity">{{ yara_rule.severity }}</td>
+                <td>{{ yara_rule.severity }}</td>
 
-                <td ng-if="yara_rule.description">{{ yara_rule.description }}</td>
+                <td>{{ yara_rule.description }}</td>
 
-                <td ng-if="yara_rule.category">{{ yara_rule.category }}</td>
+                <td>{{ yara_rule.category }}</td>
 
-                <td ng-if="yara_rule.file_type">{{ yara_rule.file_type }}</td>
+                <td>{{ yara_rule.file_type }}</td>
 
-                <td ng-if="yara_rule.subcategory1">{{ yara_rule.subcategory1 }}</td>
+                <td>{{ yara_rule.subcategory1 }}</td>
 
-                <td ng-if="yara_rule.subcategory2">{{ yara_rule.subcategory2 }}</td>
+                <td>{{ yara_rule.subcategory2 }}</td>
 
-                <td ng-if="yara_rule.subcategory3">{{ yara_rule.subcategory3 }}</td>
+                <td>{{ yara_rule.subcategory3 }}</td>
 
-                <td ng-if="yara_rule.reference_link">{{ yara_rule.reference_link }}</td>
+                <td>{{ yara_rule.reference_link }}</td>
 
-                <td ng-if="yara_rule.reference_text">{{ yara_rule.reference_text }}</td>
+                <td>{{ yara_rule.reference_text }}</td>
 
-                <td ng-if="yara_rule.condition">{{ yara_rule.condition }}</td>
+                <td>{{ yara_rule.condition }}</td>
 
-                <td ng-if="yara_rule.strings">{{ yara_rule.strings }}</td>
+                <td>{{ yara_rule.strings }}</td>
 
-                <td ng-if="yara_rule.id">
+                <td>
                     <button type="submit"
                             ng-click="update(yara_rule.id)"
                             class="btn">

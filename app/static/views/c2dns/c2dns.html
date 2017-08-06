@@ -9,10 +9,12 @@
                 <button type="button" class="close"
                         ng-click="cancel()">&times;
                 </button>
-                <h4 class="modal-title" id="myC2dnsLabel">Create or edit a C2 DNS</h4>
+                <h4 class="modal-title" id="myC2ipLabel" ng-if="!c2dns.id">Create DNS Artifact</h4>
+                <h4 class="modal-title" id="myC2ipLabel" ng-if="c2dns.id">Edit DNS Artifact</h4>
+
             </div>
             <div class="modal-body">
-                <div class="form-group">
+                <div class="form-group" ng-if="c2dns.id">
                     <label>ID</label>
                     <input type="text" class="form-control" name="id"
                            ng-model="c2dns.id" readonly>
@@ -123,23 +125,27 @@
                     </tags-input>
                 </div>
 
-                <div class="form-group" ng-if="c2dns">
+                <div class="form-group" ng-if="c2dns.id">
                     <label>Comments</label>
 
-                    <ul class="list-group">
-                        <li class="list-group-item justify-content-between"
-                            ng-repeat="comment in c2dns.comments">{{ comment.comment }}
-                            <span class="pull-right">{{ comment.user.email }}&nbsp;<small>{{ pretty_date(comment.date_created) }}</small></span>
-                        </li>
-                    </ul>
 
                     <div class="input-group">
-                        <input class="form-control" type="text" placeholder="Enter a comment..."
-                               ng-model="c2dns.new_comment">
+                        <textarea class="form-control" placeholder="Enter a comment..." rows="1"
+                                  ng-model="c2dns.new_comment"></textarea>
+
                         <span class="input-group-btn">
                             <button class="btn btn-secondary" type="button"
                                     ng-click="add_comment(c2dns.id)">Post</button>
                         </span>
+                    </div>
+                    <BR>
+                    <div>
+                        <ul class="list-group">
+                            <li class="list-group-item justify-content-between"
+                                ng-repeat="comment in c2dns.comments | orderBy:'-date_created'">{{ print_comment(comment) }}
+                                <span class="pull-right">{{ comment.user.email }}&nbsp;<small>{{ pretty_date(comment.date_created) }}</small></span>
+                            </li>
+                        </ul>
                     </div>
                 </div>
 
@@ -193,28 +199,28 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="c2dns in c2dns track by $index">
-                <td ng-if="c2dns.id">{{ c2dns.id }}</td>
+            <tr ng-repeat="c2dns in c2dns track by $index" ng-if="c2dns.date_created">
+                <td>{{ c2dns.id }}</td>
 
-                <td ng-if="c2dns.date_created">{{ c2dns.date_created  | date:'yyyy-MM-dd'}}</td>
+                <td>{{ c2dns.date_created  | date:'yyyy-MM-dd'}}</td>
 
-                <td ng-if="c2dns.date_modified">{{ c2dns.date_modified  | date:'yyyy-MM-dd'}}</td>
+                <td>{{ c2dns.date_modified  | date:'yyyy-MM-dd'}}</td>
 
-                <td ng-if="c2dns.state">{{ c2dns.state }}</td>
+                <td>{{ c2dns.state }}</td>
 
-                <td ng-if="c2dns.domain_name">{{ c2dns.domain_name }}</td>
+                <td>{{ c2dns.domain_name }}</td>
 
-                <td ng-if="c2dns.match_type">{{ c2dns.match_type }}</td>
+                <td>{{ c2dns.match_type }}</td>
 
-                <td ng-if="c2dns.reference_link">{{ c2dns.reference_link }}</td>
+                <td>{{ c2dns.reference_link }}</td>
 
-                <td ng-if="c2dns.reference_text">{{ c2dns.reference_text }}</td>
+                <td>{{ c2dns.reference_text }}</td>
 
-                <td ng-if="c2dns.expiration_type">{{ c2dns.expiration_type }}</td>
+                <td>{{ c2dns.expiration_type }}</td>
 
-                <td ng-if="c2dns.expiration_timestamp">{{ c2dns.expiration_timestamp  | date:'yyyy-MM-dd'}}</td>
+                <td>{{ c2dns.expiration_timestamp  | date:'yyyy-MM-dd'}}</td>
 
-                <td ng-if="c2dns.id">
+                <td>
                     <button type="submit"
                             ng-click="update(c2dns.id)"
                             class="btn">
