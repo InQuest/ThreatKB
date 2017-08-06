@@ -27,7 +27,7 @@ class C2dns(db.Model):
 
     comments = db.relationship("Comments", foreign_keys=[id],
                                primaryjoin="and_(Comments.entity_id==C2dns.id, Comments.entity_type=='%s')" % (
-                               Comments.ENTITY_MAPPING["DNS"]))
+                               Comments.ENTITY_MAPPING["DNS"]), lazy="dynamic")
 
     tags = []
 

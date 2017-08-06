@@ -39,7 +39,7 @@ class Yara_rule(db.Model):
 
     comments = db.relationship("Comments", foreign_keys=[id],
                                primaryjoin="and_(Comments.entity_id==Yara_rule.id, Comments.entity_type=='%s')" % (
-                               Comments.ENTITY_MAPPING["SIGNATURE"]))
+                               Comments.ENTITY_MAPPING["SIGNATURE"]), lazy="dynamic")
 
     def to_dict(self):
         comments = Comments.query.filter_by(entity_id=self.id).filter_by(

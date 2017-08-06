@@ -9,8 +9,8 @@ class Comments(db.Model):
     date_modified = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp(),
                               onupdate=db.func.current_timestamp())
     comment = db.Column(db.String(65000))
-    entity_type = db.Column(db.Integer(), index=True, nullable=False)
-    entity_id = db.Column(db.Integer(), index=True, nullable=False)
+    entity_type = db.Column(db.Integer(unsigned=True), index=True, nullable=False)
+    entity_id = db.Column(db.Integer(unsigned=True), index=True, nullable=False)
 
     user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
 
