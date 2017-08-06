@@ -1,0 +1,108 @@
+-------------------------------------------------------------------------------
+Typical Database development flow.
+-------------------------------------------------------------------------------
+1. Make an update to your database schema (in your development environment) and test it out.
+2. Activate virtualenv.
+   $ source flask/bin/activate
+2. Generate migration script
+   # From root directory of project
+   $ python manage.py db migrate -m "comment"
+3. Review the migration script generated to ensure it looks good
+4. Perform the database upgrade
+   $ python manage.py db upgrade
+5. Commit your changes and migration script to Git.
+
+
+-------------------------------------------------------------------------------
+Initialization DB Migration
+-------------------------------------------------------------------------------
+1. Activate virtualenv
+ThreatKB (staging) $ source flask/bin/activate
+
+2. Execute DB Initialization
+(flask) ThreatKB (staging) $ python manage.py db init
+  Creating directory /Users/dac/InQuest/ThreatKB/migrations ... done
+  Creating directory /Users/dac/InQuest/ThreatKB/migrations/versions ... done
+  Generating /Users/dac/InQuest/ThreatKB/migrations/alembic.ini ... done
+  Generating /Users/dac/InQuest/ThreatKB/migrations/env.py ... done
+  Generating /Users/dac/InQuest/ThreatKB/migrations/env.pyc ... done
+  Generating /Users/dac/InQuest/ThreatKB/migrations/README ... done
+  Generating /Users/dac/InQuest/ThreatKB/migrations/script.py.mako ... done
+  Please edit configuration/connection/logging settings in
+  '/Users/dac/InQuest/ThreatKB/migrations/alembic.ini' before proceeding.
+
+
+-------------------------------------------------------------------------------
+Generate initial migration
+-------------------------------------------------------------------------------
+1. Activate virtualenv
+ThreatKB (staging) $ source flask/bin/activate
+
+2. Execute DB Migration
+(flask) ThreatKB (staging) $ python manage.py db migrate -m "initial migration"
+INFO  [alembic.runtime.migration] Context impl MySQLImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.autogenerate.compare] Detected added table 'cfg_reference_text_templates'
+INFO  [alembic.autogenerate.compare] Detected added table 'cfg_states'
+INFO  [alembic.autogenerate.compare] Detected added table 'kb_users'
+INFO  [alembic.autogenerate.compare] Detected added table 'tags'
+INFO  [alembic.autogenerate.compare] Detected added table 'tags_mapping'
+INFO  [alembic.autogenerate.compare] Detected added index 'ix_tags_mapping_source_id' on '['source_id']'
+INFO  [alembic.autogenerate.compare] Detected added index 'ix_tags_mapping_source_table' on '['source_table']'
+INFO  [alembic.autogenerate.compare] Detected added index 'ix_tags_mapping_tag_id' on '['tag_id']'
+INFO  [alembic.autogenerate.compare] Detected added table 'c2dns'
+INFO  [alembic.autogenerate.compare] Detected added index 'ix_c2dns_domain_name' on '['domain_name']'
+INFO  [alembic.autogenerate.compare] Detected added index 'ix_c2dns_state' on '['state']'
+INFO  [alembic.autogenerate.compare] Detected added table 'c2ip'
+INFO  [alembic.autogenerate.compare] Detected added index 'ix_c2ip_ip' on '['ip']'
+INFO  [alembic.autogenerate.compare] Detected added index 'ix_c2ip_state' on '['state']'
+INFO  [alembic.autogenerate.compare] Detected added table 'comments'
+INFO  [alembic.autogenerate.compare] Detected added index 'ix_comments_entity_id' on '['entity_id']'
+INFO  [alembic.autogenerate.compare] Detected added index 'ix_comments_entity_type' on '['entity_type']'
+INFO  [alembic.autogenerate.compare] Detected added table 'yara_rules'
+INFO  [alembic.autogenerate.compare] Detected added index 'ix_yara_rules_name' on '['name']'
+INFO  [alembic.autogenerate.compare] Detected added index 'ix_yara_rules_state' on '['state']'
+  Generating /Users/dac/InQuest/ThreatKB/migrations/versions/421d2ad99d7f_initial_migration.py ... done
+
+
+-------------------------------------------------------------------------------
+Perform initial upgrade
+-------------------------------------------------------------------------------
+1. Activate virtualenv
+ThreatKB (staging) $ source flask/bin/activate
+
+2. Perform initial upgrade
+(flask) ThreatKB (staging) $ python manage.py db upgrade
+INFO  [alembic.runtime.migration] Context impl MySQLImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 421d2ad99d7f, initial migration
+
+
+-------------------------------------------------------------------------------
+Other Useful Commands
+-------------------------------------------------------------------------------
+(flask) ThreatKB (staging) $ python manage.py db --help
+usage: Perform database migrations
+
+Perform database migrations
+
+positional arguments:
+  {upgrade,heads,merge,migrate,stamp,show,current,edit,init,downgrade,branches,history,revision}
+    upgrade             Upgrade to a later version
+    heads               Show current available heads in the script directory
+    merge               Merge two revisions together. Creates a new migration
+                        file
+    migrate             Alias for 'revision --autogenerate'
+    stamp               'stamp' the revision table with the given revision;
+                        don't run any migrations
+    show                Show the revision denoted by the given symbol.
+    current             Display the current revision for each database.
+    edit                Edit current revision.
+    init                Creates a new migration repository
+    downgrade           Revert to a previous version
+    branches            Show current branch points
+    history             List changeset scripts in chronological order.
+    revision            Create a new revision file.
+
+optional arguments:
+  -?, --help            show this help message and exit
