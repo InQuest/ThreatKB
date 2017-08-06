@@ -9,11 +9,12 @@
                 <button type="button" class="close"
                         ng-click="cancel()">&times;
                 </button>
-                <h4 class="modal-title" id="myC2ipLabel">Create or edit a C2ip</h4>
+                <h4 class="modal-title" id="myC2ipLabel" ng-if="!c2ip.id">Create IP Artifact</h4>
+                <h4 class="modal-title" id="myC2ipLabel" ng-if="c2ip.id">Edit IP Artifact</h4>
 
             </div>
             <div class="modal-body">
-                <div class="form-group">
+                <div class="form-group" ng-if="c2ip.id">
                     <label>ID</label>
                     <input type="text" class="form-control" name="id"
                            ng-model="c2ip.id" readonly>
@@ -228,32 +229,32 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="c2ip in c2ips | toArray:false | filter:ip_filter track by $index">
-                <td ng-if="c2ip.id">{{ c2ip.id }}</td>
+            <tr ng-repeat="c2ip in c2ips | toArray:false | filter:ip_filter track by $index" ng-if="c2ip.date_created">
+                <td>{{ c2ip.id }}</td>
 
-                <td ng-if="c2ip.date_created">{{ c2ip.date_created  | date:'yyyy-MM-dd'}}</td>
+                <td>{{ c2ip.date_created  | date:'yyyy-MM-dd'}}</td>
 
-                <td ng-if="c2ipd.date_modified">{{ c2ip.date_modified  | date:'yyyy-MM-dd'}}</td>
+                <td>{{ c2ip.date_modified  | date:'yyyy-MM-dd'}}</td>
 
-                <td ng-if="c2ip.ip">{{ c2ip.ip }}</td>
+                <td>{{ c2ip.ip }}</td>
 
-                <td ng-if="c2ip.asn">{{ c2ip.asn }}</td>
+                <td>{{ c2ip.asn }}</td>
 
-                <td ng-if="c2ip.country">{{ c2ip.country }}</td>
+                <td>{{ c2ip.country }}</td>
 
-                <td ng-if="c2ip.city">{{ c2ip.city }}</td>
+                <td>{{ c2ip.city }}</td>
 
-                <td ng-if="c2ip.state">{{ c2ip.state }}</td>
+                <td>{{ c2ip.state }}</td>
 
-                <td ng-if="c2ip.reference_link">{{ c2ip.reference_link }}</td>
+                <td>{{ c2ip.reference_link }}</td>
 
-                <td ng-if="c2ip.reference_text">{{ c2ip.reference_text }}</td>
+                <td>{{ c2ip.reference_text }}</td>
 
-                <td ng-if="c2ip.expiration_type">{{ c2ip.expiration_type }}</td>
+                <td>{{ c2ip.expiration_type }}</td>
 
-                <td ng-if="c2ip.expiration_timestamp">{{ c2ip.expiration_timestamp  | date:'yyyy-MM-dd'}}</td>
+                <td>{{ c2ip.expiration_timestamp  | date:'yyyy-MM-dd'}}</td>
 
-                <td ng-if="c2ip.id">
+                <td>
                     <button type="submit"
                             ng-click="update(c2ip.id)"
                             class="btn">
