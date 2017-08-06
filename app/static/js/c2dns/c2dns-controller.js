@@ -93,7 +93,15 @@ angular.module('InquestKB')
 
             $scope.cfg_states = Cfg_states.query();
 
+            $scope.print_comment = function (comment) {
+                return comment.comment.replace(/(?:\r\n|\r|\n)/g, "<BR>");
+            };
+
             $scope.add_comment = function (id) {
+                if (!$scope.c2dns.new_comment) {
+                    return;
+                }
+
                 $scope.Comments.resource.save({
                     comment: $scope.c2dns.new_comment,
                     entity_type: Comments.ENTITY_MAPPING.DNS,

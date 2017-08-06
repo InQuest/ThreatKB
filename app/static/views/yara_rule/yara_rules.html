@@ -205,7 +205,8 @@
                 <div class="form-group">
                     <label>tags:</label>
 
-                    <tags-input ng-model="yara_rule.tags" on-tag-added="addedTag($tag)" on-tag-removed="removedTag($tag)">
+                    <tags-input ng-model="yara_rule.tags" on-tag-added="addedTag($tag)"
+                                on-tag-removed="removedTag($tag)">
                         <auto-complete minlength="2" source="loadTags($query)"></auto-complete>
                     </tags-input>
                 </div>
@@ -222,13 +223,16 @@
                                     ng-click="add_comment(yara_rule.id)">Post</button>
                         </span>
                     </div>
+                    <BR>
 
-                    <ul class="list-group">
-                        <li class="list-group-item justify-content-between"
-                            ng-repeat="comment in yara_rule.comments">{{ comment.comment }}
-                            <span class="pull-right">{{ comment.user.email }}&nbsp;<small>{{ pretty_date(comment.date_created) }}</small></span>
-                        </li>
-                    </ul>
+                    <div>
+                        <ul class="list-group">
+                            <li class="list-group-item justify-content-between"
+                                ng-repeat="comment in yara_rule.comments | orderBy:'-date_created'">{{ print_comment(comment) }}
+                                <span class="pull-right">{{ comment.user.email }}&nbsp;<small>{{ pretty_date(comment.date_created) }}</small></span>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
 
             </div>

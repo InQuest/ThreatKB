@@ -158,20 +158,23 @@
                 <div class="form-group" ng-if="c2ip">
                     <label>Comments</label>
 
-                    <ul class="list-group">
-                        <li class="list-group-item justify-content-between"
-                            ng-repeat="comment in c2ip.comments">{{ comment.comment }}
-                            <span class="pull-right">{{ comment.user.email }}&nbsp;<small>{{ pretty_date(comment.date_created) }}</small></span>
-                        </li>
-                    </ul>
-
                     <div class="input-group">
-                        <input class="form-control" type="text" placeholder="Enter a comment..."
-                               ng-model="c2ip.new_comment">
+                        <textarea class="form-control" placeholder="Enter a comment..." rows="1"
+                                  ng-model="c2ip.new_comment"></textarea>
+
                         <span class="input-group-btn">
                             <button class="btn btn-secondary" type="button"
                                     ng-click="add_comment(c2ip.id)">Post</button>
                         </span>
+                    </div>
+                    <BR>
+                    <div>
+                        <ul class="list-group">
+                            <li class="list-group-item justify-content-between"
+                                ng-repeat="comment in c2ip.comments | orderBy:'-date_created'">{{ print_comment(comment) }}
+                                <span class="pull-right">{{ comment.user.email }}&nbsp;<small>{{ pretty_date(comment.date_created) }}</small></span>
+                            </li>
+                        </ul>
                     </div>
                 </div>
 
