@@ -77,3 +77,32 @@ INFO  [alembic.runtime.migration] Context impl MySQLImpl.
 INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
 INFO  [alembic.runtime.migration] Running upgrade  -> 421d2ad99d7f, initial migration
 
+
+-------------------------------------------------------------------------------
+Other Useful Commands
+-------------------------------------------------------------------------------
+(flask) ThreatKB (staging) $ python manage.py db --help
+usage: Perform database migrations
+
+Perform database migrations
+
+positional arguments:
+  {upgrade,heads,merge,migrate,stamp,show,current,edit,init,downgrade,branches,history,revision}
+    upgrade             Upgrade to a later version
+    heads               Show current available heads in the script directory
+    merge               Merge two revisions together. Creates a new migration
+                        file
+    migrate             Alias for 'revision --autogenerate'
+    stamp               'stamp' the revision table with the given revision;
+                        don't run any migrations
+    show                Show the revision denoted by the given symbol.
+    current             Display the current revision for each database.
+    edit                Edit current revision.
+    init                Creates a new migration repository
+    downgrade           Revert to a previous version
+    branches            Show current branch points
+    history             List changeset scripts in chronological order.
+    revision            Create a new revision file.
+
+optional arguments:
+  -?, --help            show this help message and exit
