@@ -44,14 +44,14 @@ ThreatKB (staging) $ grunt server
 
 ## Miscellaneous
 
-### Encrypting password
+### Hashing password for insert in kb_users table
 ```
-(flask) ThreatKB (staging) $ ./encrypt.py abc123
+(flask) ThreatKB (staging) $ ./hash_pass.py abc123
 $2b$12$Kfana8UbHxYwrksmXS5NiudRTG/m0hRloUwN/hc1mxl/dx5fPTwMC
 ```
 
 ### Inserting Test User in DB
 ```sql
 INSERT INTO kb_users (email, password, admin)
-VALUES ('test@test.com', '<encrypted pass>', 1);
+VALUES ('test@test.com', '<hashed pass>', 1);
 ```
