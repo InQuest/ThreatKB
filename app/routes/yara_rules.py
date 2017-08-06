@@ -26,7 +26,7 @@ def get_yara_rule(id):
 @login_required
 def create_yara_rule():
     entity = yara_rule.Yara_rule(
-        state=request.json['state']
+        state=request.json['state']['state']
         , name=request.json['name']
         , test_status=request.json['test_status']
         , confidence=request.json['confidence']
