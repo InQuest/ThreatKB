@@ -5,7 +5,7 @@
 
             .CodeMirror {
                 border: 1px solid #dddddd;
-                height: 435px;
+                height: 285px;
                 cursor: text;
             }
 
@@ -71,11 +71,7 @@
                            readonly>
                 </div>
 
-                <ui-codemirror ui-codemirror-opts="editorOptions"></ui-codemirror>
-                <!--
-                <div class="form-group" style="clear:both;">
-                <textarea id="code" cols="80" rows="30"  style="max-width:100%; resize:vertical;"></textarea>
-              </div>-->
+                <ui-codemirror ui-codemirror-opts="editor_options" ng-model="foo"></ui-codemirror>
 
                 <div class="form-group">
                     <label>state:</label>
