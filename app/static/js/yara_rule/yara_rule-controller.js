@@ -88,6 +88,7 @@ angular.module('InquestKB')
             $scope.Comments = Comments;
 
             $scope.cfg_states = Cfg_states.query();
+            $scope.do_not_bump_revision = false;
 
             $scope.print_comment = function (comment) {
                 return comment.comment.replace(/(?:\r\n|\r|\n)/g, "<BR>");
@@ -101,7 +102,8 @@ angular.module('InquestKB')
                 $scope.Comments.resource.save({
                     comment: $scope.yara_rule.new_comment,
                     entity_type: Comments.ENTITY_MAPPING.SIGNATURE,
-                    entity_id: id
+                    entity_id: id,
+                    do_not_bump_revision: $scope.do_not_bump_revision
                 }, function () {
                     $scope.yara_rule.new_comment = "";
                     $scope.yara_rule.comments = $scope.Comments.resource.query({

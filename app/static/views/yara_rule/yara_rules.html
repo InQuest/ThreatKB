@@ -239,9 +239,14 @@
 
 
             <div class="modal-footer">
+                <div class="pull-left">
+                    <input type="checkbox" class="pull-left" ng-model="do_not_bump_revision">
+                    &nbsp;Do not dump revision
+                </div>
                 <button type="button" class="btn btn-default" ng-click="cancel()">Cancel
                 </button>
-                <button type="submit" ng-disabled="form.$invalid" class="btn btn-primary">Save</button>
+                <button type="submit" ng-disabled="form.$invalid || form.$pristine" class="btn btn-primary">Save
+                </button>
             </div>
         </form>
     </script>

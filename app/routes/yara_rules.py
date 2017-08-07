@@ -4,6 +4,7 @@ from flask import abort, jsonify, request
 from flask.ext.login import current_user, login_required
 from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
 import json
+import datetime
 
 
 @app.route('/InquestKB/yara_rules', methods=['GET'])
@@ -55,9 +56,12 @@ def create_yara_rule():
 @app.route('/InquestKB/yara_rules/<int:id>', methods=['PUT'])
 @login_required
 def update_yara_rule(id):
-    entity = yara_rule.Yara_rule.query.get(id)
-    if not entity:
+    do_not_bump_revision = request.args.get("do_not_bump_revision", False)
+
+    old_entity = yara_rule.Yara_rule.query.get(id)
+    if not old_entity:
         abort(404)
+
     entity = yara_rule.Yara_rule(
         state=request.json['state'],
         name=request.json['name'],
@@ -75,10 +79,17 @@ def update_yara_rule(id):
         condition=request.json['condition'],
         strings=request.json['strings'],
         id=id,
-        modified_user_id=current_user.id
+        modified_user_id=current_user.id,
+        revision=old_entity.revision if do_not_bump_revision else old_entity.revision + 1
     )
     db.session.merge(entity)
     db.session.commit()
+
+    if not do_not_bump_revision:
+        db.session.add(yara_rule.Yara_rule_history(date_created=old_entity.date_created, revision=old_entity.revision,
+                                                   rule_json=json.dumps(old_entity.to_revision_dict()),
+                                                   user_id=current_user.id,
+                                                   yara_rule_id=old_entity.id))
 
     create_tags_mapping(entity.__tablename__, entity.id, request.json['addedTags'])
     delete_tags_mapping(entity.__tablename__, entity.id, request.json['removedTags'])
