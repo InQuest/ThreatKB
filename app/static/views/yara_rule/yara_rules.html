@@ -1,6 +1,42 @@
 <div>
 
     <script type="text/ng-template" id="yara_rule-save.html">
+        <style type="text/css">
+
+            .CodeMirror {
+                border: 1px solid #dddddd;
+                height: 435px;
+                cursor: text;
+            }
+
+            #rulesets .CodeMirror {
+                border-bottom: None;
+            }
+
+            .CodeMirror-scroll {
+                height: 435px;
+            }
+
+            .popover {
+                width: auto;
+            }
+
+            .popover-title {
+                display: none;
+            }
+
+            .popover-table td {
+                padding: 0 10px;
+                font-size: 11px;
+            }
+
+            .popover-content {
+                -webkit-border-radius: 3px;
+                -moz-border-radius: 3px;
+                border-radius: 3px;
+            }
+
+        </style>
         <form name="form" role="form" novalidate
               class="ng-scope ng-invalid ng-invalid-required ng-dirty"
               ng-submit="ok()">
@@ -34,6 +70,12 @@
                     <input type="text" class="form-control" name="date_modified" ng-model="yara_rule.date_modified"
                            readonly>
                 </div>
+
+                <ui-codemirror ui-codemirror-opts="editorOptions"></ui-codemirror>
+                <!--
+                <div class="form-group" style="clear:both;">
+                <textarea id="code" cols="80" rows="30"  style="max-width:100%; resize:vertical;"></textarea>
+              </div>-->
 
                 <div class="form-group">
                     <label>state:</label>

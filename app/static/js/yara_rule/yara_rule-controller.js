@@ -93,6 +93,12 @@ angular.module('InquestKB')
                 return comment.comment.replace(/(?:\r\n|\r|\n)/g, "<BR>");
             };
 
+            $scope.editorOptions = {
+                lineWrapping: true,
+                lineNumbers: true,
+                mode: 'yara',
+            };
+
             $scope.add_comment = function (id) {
                 if (!$scope.yara_rule.new_comment) {
                     return;
