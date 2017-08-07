@@ -25,6 +25,7 @@ from app.models import comments
 from app.models import authentication
 from app.models import tags
 from app.models import tags_mapping
+from app.models import files
 
 from app.routes import index
 from app.routes import authentication
@@ -36,7 +37,7 @@ from app.routes import cfg_states
 from app.routes import comments
 from app.routes import tags
 from app.routes import tags_mapping
-
+from app.routes import files
 
 @app.before_first_request
 def setup_logging():

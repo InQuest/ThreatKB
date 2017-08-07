@@ -38,6 +38,7 @@ def create_tag(tag_text):
 
 
 @app.route('/InquestKB/tags/<int:id>', methods=['PUT'])
+@login_required
 def update_tags(id):
     entity = tags.Tags.query.get(id)
     if not entity:
@@ -52,6 +53,7 @@ def update_tags(id):
 
 
 @app.route('/InquestKB/tags/<int:id>', methods=['DELETE'])
+@login_required
 def delete_tags(id):
     entity = tags.Tags.query.get(id)
     if not entity:
