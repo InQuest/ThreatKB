@@ -51,6 +51,10 @@
 
             </div>
             <div class="modal-body">
+
+                <label>Signature Editor</label>
+                <ui-codemirror ui-codemirror-opts="editor_options" ng-model="foo"></ui-codemirror>
+                <BR>
                 <div class="form-group" ng-if="yara_rule.id">
                     <label>ID</label>
                     <input type="text" class="form-control" name="id" ng-model="yara_rule.id" readonly>
@@ -70,8 +74,6 @@
                     <input type="text" class="form-control" name="date_modified" ng-model="yara_rule.date_modified"
                            readonly>
                 </div>
-
-                <ui-codemirror ui-codemirror-opts="editor_options" ng-model="foo"></ui-codemirror>
 
                 <div class="form-group">
                     <label>state:</label>
