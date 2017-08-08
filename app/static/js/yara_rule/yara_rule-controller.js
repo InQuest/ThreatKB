@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('InquestKB')
-    .controller('Yara_ruleController', ['$scope', '$modal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states',
-        function ($scope, $modal, resolvedYara_rule, Yara_rule, Cfg_states) {
+    .controller('Yara_ruleController', ['$scope', '$uibModal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states',
+        function ($scope, $uibModal, resolvedYara_rule, Yara_rule, Cfg_states) {
 
             $scope.yara_rules = resolvedYara_rule;
 
@@ -65,9 +65,10 @@ angular.module('InquestKB')
             };
 
             $scope.open = function (id) {
-                var yara_ruleSave = $modal.open({
+                var yara_ruleSave = $uibModal.open({
                     templateUrl: 'yara_rule-save.html',
                     controller: 'Yara_ruleSaveController',
+                    size: 'lg',
                     resolve: {
                         yara_rule: function () {
                             return $scope.yara_rule;
@@ -81,8 +82,8 @@ angular.module('InquestKB')
                 });
             };
         }])
-    .controller('Yara_ruleSaveController', ['$scope', '$http', '$modalInstance', 'yara_rule', 'Cfg_states', 'Comments',
-        function ($scope, $http, $modalInstance, yara_rule, Cfg_states, Comments) {
+    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModal', 'yara_rule', 'Cfg_states', 'Comments',
+        function ($scope, $http, $uibModal, yara_rule, Cfg_states, Comments) {
             $scope.yara_rule = yara_rule;
             $scope.yara_rule.new_comment = "";
             $scope.Comments = Comments;
@@ -121,11 +122,11 @@ angular.module('InquestKB')
             };
 
             $scope.ok = function () {
-                $modalInstance.close($scope.yara_rule);
+                $uibModal.close($scope.yara_rule);
             };
 
             $scope.cancel = function () {
-                $modalInstance.dismiss('cancel');
+                $uibModal.dismiss('cancel');
             };
 
             $scope.addedTag = function ($tag) {

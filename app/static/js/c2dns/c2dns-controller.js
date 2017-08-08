@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('InquestKB')
-    .controller('C2dnsController', ['$scope', '$modal', 'resolvedC2dns', 'C2dns', 'Cfg_states',
-        function ($scope, $modal, resolvedC2dns, C2dns, Cfg_states) {
+    .controller('C2dnsController', ['$scope', '$uibModal', 'resolvedC2dns', 'C2dns', 'Cfg_states',
+        function ($scope, $uibModal, resolvedC2dns, C2dns, Cfg_states) {
 
             $scope.c2dns = resolvedC2dns;
 
@@ -69,9 +69,10 @@ angular.module('InquestKB')
             };
 
             $scope.open = function (id) {
-                var c2dnsSave = $modal.open({
+                var c2dnsSave = $uibModal.open({
                     templateUrl: 'c2dns-save.html',
                     controller: 'C2dnsSaveController',
+                    size: 'lg',
                     resolve: {
                         c2dns: function () {
                             return $scope.c2dns;
@@ -85,8 +86,8 @@ angular.module('InquestKB')
                 });
             };
         }])
-    .controller('C2dnsSaveController', ['$scope', '$http', '$modalInstance', 'c2dns', 'Cfg_states', 'Comments',
-        function ($scope, $http, $modalInstance, c2dns, Cfg_states, Comments) {
+    .controller('C2dnsSaveController', ['$scope', '$http', '$uibModal', 'c2dns', 'Cfg_states', 'Comments',
+        function ($scope, $http, $uibModal, c2dns, Cfg_states, Comments) {
             $scope.c2dns = c2dns;
             $scope.c2dns.new_comment = "";
             $scope.Comments = Comments;
@@ -116,11 +117,11 @@ angular.module('InquestKB')
             };
 
             $scope.ok = function () {
-                $modalInstance.close($scope.c2dns);
+                $uibModal.close($scope.c2dns);
             };
 
             $scope.cancel = function () {
-                $modalInstance.dismiss('cancel');
+                $uibModal.dismiss('cancel');
             };
 
             $scope.addedTag = function ($tag) {
