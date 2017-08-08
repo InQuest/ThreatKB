@@ -122,11 +122,11 @@ angular.module('InquestKB')
             };
 
             $scope.ok = function () {
-                $modalInstance.close($scope.yara_rule);
+                $uibModal.close($scope.yara_rule);
             };
 
             $scope.cancel = function () {
-                $modalInstance.dismiss('cancel');
+                $uibModal.dismiss('cancel');
             };
 
             $scope.addedTag = function ($tag) {
