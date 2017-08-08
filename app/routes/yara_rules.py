@@ -39,8 +39,8 @@ def create_yara_rule():
         , subcategory3=request.json['subcategory3']
         , reference_link=request.json['reference_link']
         , reference_text=request.json['reference_text']
-        , condition=request.json['condition']
-        , strings=request.json['strings']
+        , condition=yara_rule.Yara_rule.make_yara_sane(request.json['condition'], "condition:")
+        , strings=yara_rule.Yara_rule.make_yara_sane(request.json['strings'], "strings:")
         , created_user_id=current_user.id
         , modified_user_id=current_user.id
     )
@@ -72,8 +72,8 @@ def update_yara_rule(id):
         subcategory3=request.json['subcategory3'],
         reference_link=request.json['reference_link'],
         reference_text=request.json['reference_text'],
-        condition=request.json['condition'],
-        strings=request.json['strings'],
+        condition=yara_rule.Yara_rule.make_yara_sane(request.json["condition"], "condition:"),
+        strings=yara_rule.Yara_rule.make_yara_sane(request.json["strings"], "strings:"),
         id=id,
         modified_user_id=current_user.id
     )

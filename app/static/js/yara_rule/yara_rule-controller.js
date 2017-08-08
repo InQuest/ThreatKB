@@ -89,8 +89,16 @@ angular.module('InquestKB')
 
             $scope.cfg_states = Cfg_states.query();
 
+            $scope.just_opened = true;
+
             $scope.print_comment = function (comment) {
                 return comment.comment.replace(/(?:\r\n|\r|\n)/g, "<BR>");
+            };
+
+            $scope.editor_options = {
+                lineWrapping: false,
+                lineNumbers: true,
+                mode: 'yara'
             };
 
             $scope.add_comment = function (id) {

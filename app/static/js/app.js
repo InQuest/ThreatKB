@@ -1,5 +1,5 @@
 // Declare app level module which depends on filters, and services
-angular.module('InquestKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize', 'ui.select', 'ngTagsInput', 'angular-toArrayFilter'])
+angular.module('InquestKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize', 'ui.select', 'ngTagsInput', 'angular-toArrayFilter', 'ui.codemirror'])
     .config(['$routeProvider', function ($routeProvider) {
         $routeProvider
             .when('/', {

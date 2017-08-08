@@ -1,6 +1,42 @@
 <div>
 
     <script type="text/ng-template" id="yara_rule-save.html">
+        <style type="text/css">
+
+            .CodeMirror {
+                border: 1px solid #dddddd;
+                height: 285px;
+                cursor: text;
+            }
+
+            #rulesets .CodeMirror {
+                border-bottom: None;
+            }
+
+            .CodeMirror-scroll {
+                height: 435px;
+            }
+
+            .popover {
+                width: auto;
+            }
+
+            .popover-title {
+                display: none;
+            }
+
+            .popover-table td {
+                padding: 0 10px;
+                font-size: 11px;
+            }
+
+            .popover-content {
+                -webkit-border-radius: 3px;
+                -moz-border-radius: 3px;
+                border-radius: 3px;
+            }
+
+        </style>
         <form name="form" role="form" novalidate
               class="ng-scope ng-invalid ng-invalid-required ng-dirty"
               ng-submit="ok()">
@@ -15,11 +51,18 @@
 
             </div>
             <div class="modal-body">
+
+                <label>Strings Editor</label>
+                <ui-codemirror ui-codemirror-opts="editor_options" ng-model="yara_rule.strings"></ui-codemirror>
+                <BR>
+
+                <label>Conditions Editor</label>
+                <ui-codemirror ui-codemirror-opts="editor_options" ng-model="yara_rule.condition"></ui-codemirror>
+                <BR>
                 <div class="form-group" ng-if="yara_rule.id">
                     <label>ID</label>
                     <input type="text" class="form-control" name="id" ng-model="yara_rule.id" readonly>
                 </div>
-
 
                 <div class="form-group" ng-if="yara_rule.date_created">
                     <label>date_created:</label>
@@ -179,27 +222,6 @@
                           ng-show="form.reference_text.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
                           ng-show="form.reference_text.$error.maxlength">Must be at most 2048 characters.</span>
-                </div>
-
-                <div class="form-group">
-                    <label>condition:</label>
-
-                    <input type="text" class="form-control" name="condition"
-                           ng-model="yara_rule.condition" ng-required="true"
-                           ng-maxlength="2048"/>
-                    <span class="error" ng-show="form.condition.$error.minlength">Must be at least  characters.</span>
-                    <span class="error"
-                          ng-show="form.condition.$error.maxlength">Must be at most 2048 characters.</span>
-                </div>
-
-                <div class="form-group">
-                    <label>strings:</label>
-
-                    <input type="text" class="form-control" name="strings"
-                           ng-model="yara_rule.strings" ng-required="true"
-                           ng-maxlength="30000"/>
-                    <span class="error" ng-show="form.strings.$error.minlength">Must be at least  characters.</span>
-                    <span class="error" ng-show="form.strings.$error.maxlength">Must be at most 30000 characters.</span>
                 </div>
 
                 <div class="form-group">
