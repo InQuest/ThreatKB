@@ -2,7 +2,7 @@
   "name": "InquestKB",
   "version": "0.0.0",
   "dependencies": {
-    "angular-bootstrap": "~0.10.0",
+      "angular-bootstrap": "2.5.0",
     "angular-resource": "~1.2.13",
     "angular-route": "~1.2.13",
     "angular-ui-date": "~0.0.3",
