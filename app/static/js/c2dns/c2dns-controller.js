@@ -72,6 +72,7 @@ angular.module('InquestKB')
                 var c2dnsSave = $uibModal.open({
                     templateUrl: 'c2dns-save.html',
                     controller: 'C2dnsSaveController',
+                    size: 'lg',
                     resolve: {
                         c2dns: function () {
                             return $scope.c2dns;

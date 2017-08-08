@@ -76,6 +76,7 @@ angular.module('InquestKB')
                 var c2ipSave = $uibModal.open({
                     templateUrl: 'c2ip-save.html',
                     controller: 'C2ipSaveController',
+                    size: 'lg',
                     resolve: {
                         c2ip: function () {
                             return $scope.c2ip;

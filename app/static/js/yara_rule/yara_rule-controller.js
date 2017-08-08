@@ -68,12 +68,12 @@ angular.module('InquestKB')
                 var yara_ruleSave = $uibModal.open({
                     templateUrl: 'yara_rule-save.html',
                     controller: 'Yara_ruleSaveController',
+                    size: 'lg',
                     resolve: {
                         yara_rule: function () {
                             return $scope.yara_rule;
                         }
-                    },
-                    size: 'lg'
+                    }
                 });
 
                 yara_ruleSave.result.then(function (entity) {
