@@ -88,6 +88,7 @@ angular.module('InquestKB')
             $scope.Comments = Comments;
 
             $scope.cfg_states = Cfg_states.query();
+            $scope.do_not_bump_revision = false;
 
             $scope.just_opened = true;
 

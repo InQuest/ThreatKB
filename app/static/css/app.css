@@ -49,3 +49,7 @@ table td:last-child {
 span.glyphicon {
     font-size: 1.4em;
 }
+
+.form-control {
+    font-weight: normal;
+}

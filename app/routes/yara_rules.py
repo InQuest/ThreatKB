@@ -4,6 +4,7 @@ from flask import abort, jsonify, request
 from flask.ext.login import current_user, login_required
 from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
 import json
+import datetime
 
 
 @app.route('/InquestKB/yara_rules', methods=['GET'])
@@ -55,9 +56,18 @@ def create_yara_rule():
 @app.route('/InquestKB/yara_rules/<int:id>', methods=['PUT'])
 @login_required
 def update_yara_rule(id):
+    do_not_bump_revision = request.json.get("do_not_bump_revision", False)
+
     entity = yara_rule.Yara_rule.query.get(id)
     if not entity:
         abort(404)
+
+    if not do_not_bump_revision:
+        db.session.add(yara_rule.Yara_rule_history(date_created=entity.date_created, revision=entity.revision,
+                                                   rule_json=json.dumps(entity.to_revision_dict()),
+                                                   user_id=current_user.id,
+                                                   yara_rule_id=entity.id))
+
     entity = yara_rule.Yara_rule(
         state=request.json['state'],
         name=request.json['name'],
@@ -75,10 +85,14 @@ def update_yara_rule(id):
         condition=yara_rule.Yara_rule.make_yara_sane(request.json["condition"], "condition:"),
         strings=yara_rule.Yara_rule.make_yara_sane(request.json["strings"], "strings:"),
         id=id,
-        modified_user_id=current_user.id
+        modified_user_id=current_user.id,
+        revision=entity.revision if do_not_bump_revision else entity.revision + 1
     )
     db.session.merge(entity)
     db.session.commit()
+
+    # THIS IS UGLY. FIGURE OUT WHY MERGE ISN'T WORKING
+    entity = yara_rule.Yara_rule.query.get(entity.id)
 
     create_tags_mapping(entity.__tablename__, entity.id, request.json['addedTags'])
     delete_tags_mapping(entity.__tablename__, entity.id, request.json['removedTags'])
