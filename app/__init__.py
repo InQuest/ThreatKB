@@ -13,6 +13,8 @@ login_manager.init_app(app)
 
 bcrypt = Bcrypt(app)
 
+app.config["SQLALCHEMY_ECHO"] = True
+
 from app.models import authentication
 from app.models import c2ip
 from app.models import c2dns

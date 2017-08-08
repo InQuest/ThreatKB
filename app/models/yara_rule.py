@@ -62,8 +62,8 @@ class Yara_rule(db.Model):
             subcategory3=self.subcategory3,
             reference_link=self.reference_link,
             reference_text=self.reference_text,
-            condition=self.condition,
-            strings=self.strings,
+            condition="condition:\n\t%s" % self.condition,
+            strings="strings:\n\t%s" % self.strings,
             id=self.id,
             tags=tags_mapping.get_tags_for_source(self.__tablename__, self.id),
             addedTags=[],
@@ -85,7 +85,6 @@ class Yara_rule(db.Model):
 
     def __repr__(self):
         return '<Yara_rule %r>' % (self.id)
-
 
 class Yara_rule_history(db.Model):
     __tablename__ = "yara_rules_history"
@@ -113,3 +112,8 @@ class Yara_rule_history(db.Model):
 
     def __repr__(self):
         return '<Yara_rule_history %r>' % (self.id)
+
+    @staticmethod
+    def make_yara_sane(text, type_):
+        type_ = "%s:" if not type_.endswith(":") else type_
+        return "\n\t".join([string.strip().strip("\t") for string in text.split("\n") if type_ not in string]).strip()
