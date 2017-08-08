@@ -71,7 +71,8 @@ class Yara_rule(db.Model):
             comments=[comment.to_dict() for comment in self.comments],
             revisions=[revision.to_dict() for revision in revisions],
             created_user=self.created_user.to_dict(),
-            modified_user=self.modified_user.to_dict()
+            modified_user=self.modified_user.to_dict(),
+            revision=self.revision
         )
 
     def to_revision_dict(self):
@@ -85,6 +86,12 @@ class Yara_rule(db.Model):
 
     def __repr__(self):
         return '<Yara_rule %r>' % (self.id)
+
+    @staticmethod
+    def make_yara_sane(text, type_):
+        type_ = "%s:" if not type_.endswith(":") else type_
+        return "\n\t".join([string.strip().strip("\t") for string in text.split("\n") if type_ not in string]).strip()
+
 
 class Yara_rule_history(db.Model):
     __tablename__ = "yara_rules_history"
@@ -112,8 +119,3 @@ class Yara_rule_history(db.Model):
 
     def __repr__(self):
         return '<Yara_rule_history %r>' % (self.id)
-
-    @staticmethod
-    def make_yara_sane(text, type_):
-        type_ = "%s:" if not type_.endswith(":") else type_
-        return "\n\t".join([string.strip().strip("\t") for string in text.split("\n") if type_ not in string]).strip()
