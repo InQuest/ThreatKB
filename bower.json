@@ -25,6 +25,6 @@
   },
   "resolutions": {
     "angular-bootstrap": "2.5.0",
-    "angular": ">=1"
+    "angular": "1.6.5"
   }
 }
