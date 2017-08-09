@@ -68,6 +68,9 @@ def update_yara_rule(id):
                                                    user_id=current_user.id,
                                                    yara_rule_id=entity.id))
 
+    if not entity.revision:
+        entity.revision = 1
+
     entity = yara_rule.Yara_rule(
         state=request.json['state'],
         name=request.json['name'],

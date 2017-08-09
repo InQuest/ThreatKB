@@ -83,8 +83,8 @@ angular.module('InquestKB')
                 });
             };
         }])
-    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModal', 'yara_rule', 'Cfg_states', 'Comments', 'Upload', 'Files',
-        function ($scope, $http, $uibModal, yara_rule, Cfg_states, Comments, Upload, Files) {
+    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', 'yara_rule', 'Cfg_states', 'Comments',
+        function ($scope, $http, $uibModalInstance, yara_rule, Cfg_states, Comments) {
             $scope.yara_rule = yara_rule;
             $scope.yara_rule.new_comment = "";
             $scope.Comments = Comments;
@@ -155,11 +155,11 @@ angular.module('InquestKB')
                 }
             };
             $scope.ok = function () {
-                $uibModal.close($scope.yara_rule);
+                $uibModalInstance.close($scope.yara_rule);
             };
 
             $scope.cancel = function () {
-                $uibModal.dismiss('cancel');
+                $uibModalInstance.dismiss('cancel');
             };
 
             $scope.addedTag = function ($tag) {

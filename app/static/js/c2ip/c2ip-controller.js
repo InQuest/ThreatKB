@@ -90,8 +90,8 @@ angular.module('InquestKB')
                 });
             };
         }])
-    .controller('C2ipSaveController', ['$scope', '$http', '$uibModal', 'c2ip', 'Comments', 'Cfg_states',
-        function ($scope, $http, $uibModal, c2ip, Comments, Cfg_states) {
+    .controller('C2ipSaveController', ['$scope', '$http', '$uibModalInstance', 'c2ip', 'Comments', 'Cfg_states',
+        function ($scope, $http, $uibModalInstance, c2ip, Comments, Cfg_states) {
             $scope.c2ip = c2ip
             $scope.c2ip.new_comment = "";
             $scope.Comments = Comments;
@@ -121,11 +121,11 @@ angular.module('InquestKB')
             };
 
             $scope.ok = function () {
-                $uibModal.close($scope.c2ip);
+                $uibModalInstance.close($scope.c2ip);
             };
 
             $scope.cancel = function () {
-                $uibModal.dismiss('cancel');
+                $uibModalInstance.dismiss('cancel');
             };
 
             $scope.addedTag = function ($tag) {

@@ -86,8 +86,8 @@ angular.module('InquestKB')
                 });
             };
         }])
-    .controller('C2dnsSaveController', ['$scope', '$http', '$uibModal', 'c2dns', 'Cfg_states', 'Comments',
-        function ($scope, $http, $uibModal, c2dns, Cfg_states, Comments) {
+    .controller('C2dnsSaveController', ['$scope', '$http', '$uibModalInstance', 'c2dns', 'Cfg_states', 'Comments',
+        function ($scope, $http, $uibModalInstance, c2dns, Cfg_states, Comments) {
             $scope.c2dns = c2dns;
             $scope.c2dns.new_comment = "";
             $scope.Comments = Comments;
@@ -117,11 +117,11 @@ angular.module('InquestKB')
             };
 
             $scope.ok = function () {
-                $uibModal.close($scope.c2dns);
+                $uibModalInstance.close($scope.c2dns);
             };
 
             $scope.cancel = function () {
-                $uibModal.dismiss('cancel');
+                $uibModalInstance.dismiss('cancel');
             };
 
             $scope.addedTag = function ($tag) {
