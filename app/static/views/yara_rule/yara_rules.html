@@ -285,7 +285,10 @@
                     <br />
                     <div>
                         <ul class="list-group">
-                            <li ng-repeat="f in yara_rule.files">{{f.filename}}</li>
+                            <li class="list-group-item justify-content-between" ng-repeat="f in yara_rule.files | orderBy:'-date_modified'">
+                                <a href="InquestKB/files/{{f.entity_type}}/{{f.entity_id}}/{{f.id}}">{{ f.filename }}</a>
+                                <span class="pull-right">{{ f.user.email }}&nbsp;<small>{{ pretty_date(f.date_modified) }}</small></span>
+                            </li>
                         </ul>
                     </div>
                 </div>
