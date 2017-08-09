@@ -60,7 +60,8 @@ angular.module('InquestKB')
                     "tags": [],
                     "addedTags": [],
                     "removedTags": [],
-                    "comments": []
+                    "comments": [],
+                    "files": []
                 };
             };
 
@@ -82,11 +83,12 @@ angular.module('InquestKB')
                 });
             };
         }])
-    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModal', 'yara_rule', 'Cfg_states', 'Comments',
-        function ($scope, $http, $uibModal, yara_rule, Cfg_states, Comments) {
+    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModal', 'yara_rule', 'Cfg_states', 'Comments', 'Upload', 'Files',
+        function ($scope, $http, $uibModal, yara_rule, Cfg_states, Comments, Upload, Files) {
             $scope.yara_rule = yara_rule;
             $scope.yara_rule.new_comment = "";
             $scope.Comments = Comments;
+            $scope.Files = Files;
 
             $scope.cfg_states = Cfg_states.query();
             $scope.do_not_bump_revision = false;
@@ -120,7 +122,38 @@ angular.module('InquestKB')
                     })
                 });
             };
-
+            $scope.$watch('files', function () {
+                $scope.upload($scope.files);
+            });
+            $scope.upload = function (id, files) {
+                if (files && files.length) {
+                    for (var i = 0; i < files.length; i++) {
+                        var file = files[i];
+                        if (!file.$error) {
+                            Upload.upload({
+                                url: '/InquestKB/file_upload',
+                                method: 'POST',
+                                data: {
+                                    file: file,
+                                    entity_type: Files.ENTITY_MAPPING.SIGNATURE,
+                                    entity_id: id
+                                }
+                            }).then(function (resp) {
+                                console.log('Success ' + resp.config.data.file.name + 'uploaded.');
+                                $scope.yara_rule.files = $scope.Files.resource.query({
+                                    entity_type: Files.ENTITY_MAPPING.SIGNATURE,
+                                    entity_id: id
+                                })
+                            }, function (resp) {
+                                console.log('Error status: ' + resp.status);
+                            }, function (evt) {
+                                var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
+                                console.log('progress: ' + progressPercentage + '% ' + evt.config.data.file.name);
+                            });
+                        }
+                    }
+                }
+            };
             $scope.ok = function () {
                 $uibModal.close($scope.yara_rule);
             };

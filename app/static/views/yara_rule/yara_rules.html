@@ -252,8 +252,7 @@
                                     ng-click="add_comment(yara_rule.id)">Post</button>
                         </span>
                     </div>
-                    <BR>
-
+                    <br />
                     <div>
                         <ul class="list-group">
                             <li class="list-group-item justify-content-between"
@@ -273,6 +272,26 @@
 
                 </div>
 
+                <div class="form-group" ng-if="yara_rule.id">
+                    <label>Attachments</label>
+                    <div ngf-select="" ngf-drop="" ng-model="files" ngf-model-invalid="invalidFiles"
+                         ngf-change="upload(yara_rule.id, $files, $file, $newFiles, $duplicateFiles, $invalidFiles, $event)"
+                         ngf-model-options="modelOptionsObj" ngf-multiple="true" ngf-pattern="pattern"
+                         ngf-accept="acceptSelect" ngf-drag-over-class="dragover" ngf-validate="validateObj"
+                         ngf-allow-dir="true" class="drop-box" ngf-drop-available="dropAvailable">Select Files
+                      <span ng-show="dropAvailable"> or Drop Files</span>
+                    </div>
+                    <div ngf-no-file-drop>File Drag/Drop is not supported for this browser</div>
+                    <br />
+                    <div>
+                        <ul class="list-group">
+                            <li class="list-group-item justify-content-between" ng-repeat="f in yara_rule.files | orderBy:'-date_modified'">
+                                <a href="InquestKB/files/{{f.entity_type}}/{{f.entity_id}}/{{f.id}}">{{ f.filename }}</a>
+                                <span class="pull-right">{{ f.user.email }}&nbsp;<small>{{ pretty_date(f.date_modified) }}</small></span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
 
 

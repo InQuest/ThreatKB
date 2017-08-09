@@ -68,8 +68,8 @@
         </div>
     </nav>
 </div>
+
 <!-- /.container -->
-</nav>
 <div class="container" ng-view></div>
 <script src="lib/jquery/dist/jquery.js"></script>
 <script src="lib/jquery-ui/jquery-ui.js"></script>
@@ -85,6 +85,8 @@
 <script src="js/codemirror/codemirror.js"></script>
 <script src="js/codemirror/yara.js"></script>
 <script src="lib/angular-ui-codemirror/ui-codemirror.min.js"></script>
+<script src="lib/ng-file-upload-shim/ng-file-upload-shim.js"></script> <!-- for no html5 browsers support -->
+<script src="lib/ng-file-upload/ng-file-upload.js"></script>
 
 <script src="js/app.js"></script>
 
@@ -110,6 +112,7 @@
 <script src="js/tags_mapping/tags_mapping-service.js"></script>
 <script src="js/authentication/authentication-service.js"></script>
 <script src="js/comments/comments-service.js"></script>
+<script src="js/files/files-service.js"></script>
 <!-- /Services -->
 
 </body>

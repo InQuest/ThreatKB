@@ -1,7 +1,9 @@
 from app import db
+from app.models.files import Files
 from app.routes import tags_mapping
 from app.models.comments import Comments
 import json
+
 
 class Yara_rule(db.Model):
     __tablename__ = "yara_rules"
@@ -41,11 +43,17 @@ class Yara_rule(db.Model):
 
     comments = db.relationship("Comments", foreign_keys=[id],
                                primaryjoin="and_(Comments.entity_id==Yara_rule.id, Comments.entity_type=='%s')" % (
-                               Comments.ENTITY_MAPPING["SIGNATURE"]),
-                               lazy="dynamic")
+                                   Comments.ENTITY_MAPPING["SIGNATURE"]), lazy="dynamic")
+
+    files = db.relationship("Files", foreign_keys=[id],
+                            primaryjoin="and_(Files.entity_id==Yara_rule.id, Files.entity_type=='%s')" % (
+                                Files.ENTITY_MAPPING["SIGNATURE"]), lazy="dynamic")
 
     def to_dict(self):
         revisions = Yara_rule_history.query.filter_by(yara_rule_id=self.id).all()
+        comments = Comments.query.filter_by(entity_id=self.id).filter_by(
+            entity_type=Comments.ENTITY_MAPPING["SIGNATURE"]).all()
+        files = Files.query.filter_by(entity_id=self.id).filter_by(entity_type=Files.ENTITY_MAPPING["SIGNATURE"]).all()
         return dict(
             date_created=self.date_created.isoformat(),
             date_modified=self.date_modified.isoformat(),
@@ -70,6 +78,7 @@ class Yara_rule(db.Model):
             removedTags=[],
             comments=[comment.to_dict() for comment in self.comments],
             revisions=[revision.to_dict() for revision in revisions],
+            files=[file.to_dict() for file in self.files],
             created_user=self.created_user.to_dict(),
             modified_user=self.modified_user.to_dict(),
             revision=self.revision
