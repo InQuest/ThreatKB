@@ -26,6 +26,7 @@ from app.models import authentication
 from app.models import tags
 from app.models import tags_mapping
 from app.models import files
+from app.models import cfg_category_range_mapping
 
 from app.routes import index
 from app.routes import authentication
@@ -39,6 +40,7 @@ from app.routes import tags
 from app.routes import tags_mapping
 from app.routes import files
 from app.routes import import_
+from app.routes import cfg_category_range_mapping
 
 @app.before_first_request
 def setup_logging():

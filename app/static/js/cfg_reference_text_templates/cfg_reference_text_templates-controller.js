@@ -65,16 +65,16 @@ angular.module('InquestKB')
                 });
             };
         }])
-    .controller('Cfg_reference_text_templatesSaveController', ['$scope', '$uibModal', 'cfg_reference_text_templates',
-        function ($scope, $uibModal, cfg_reference_text_templates) {
+    .controller('Cfg_reference_text_templatesSaveController', ['$scope', '$uibModalInstance', 'cfg_reference_text_templates',
+        function ($scope, $uibModalInstance, cfg_reference_text_templates) {
             $scope.cfg_reference_text_templates = cfg_reference_text_templates;
 
 
             $scope.ok = function () {
-                $uibModal.close($scope.cfg_reference_text_templates);
+                $uibModalInstance.close($scope.cfg_reference_text_templates);
             };
 
             $scope.cancel = function () {
-                $uibModal.dismiss('cancel');
+                $uibModalInstance.dismiss('cancel');
             };
         }]);

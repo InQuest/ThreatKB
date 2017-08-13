@@ -1,0 +1,115 @@
+<div>
+
+    <script type="text/ng-template" id="cfg_category_range_mapping-save.html">
+        <form name="form" novalidate
+              class="ng-scope ng-invalid ng-invalid-required ng-dirty"
+              ng-submit="ok()">
+
+            <div class="modal-header">
+                <button type="button" class="close"
+                        ng-click="cancel()">&times;
+                </button>
+                <h4 class="modal-title" id="myCfgCategoryRangeMappingLabel">Create or edit a
+                    Category Range Mapping</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" ng-if="cfg_category_range_mapping.id">
+                    <label>ID</label>
+                    <label type="text" class="form-control" name="id"
+                           ng-model="cfg_category_range_mapping.id">{{ cfg_category_range_mapping.id }}</label>
+                </div>
+
+                <div class="form-group">
+                    <label>category:</label>
+
+                    <input class="form-control" name="category"
+                           ng-model="cfg_category_range_mapping.category" ng-required="true"
+                           ng-maxlength="255"/>
+                    <span class="error"
+                          ng-show="form.template_text.$error.maxlength">Must be at most 255 characters.</span>
+                </div>
+
+                <div class="form-group">
+                    <label>range min:</label>
+
+                    <input type="number" class="form-control" name="range_min"
+                           ng-model="cfg_category_range_mapping.range_min" ng-required="true"/>
+                </div>
+
+                <div class="form-group">
+                    <label>range max:</label>
+
+                    <input type="number" class="form-control" name="range_max"
+                           ng-model="cfg_category_range_mapping.range_max" ng-required="true"/>
+                </div>
+
+                <div class="form-group">
+                    <label>current:</label>
+
+                    <input type="number" class="form-control" name="current"
+                           ng-model="cfg_category_range_mapping.current" ng-required="true"/>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" ng-click="cancel()">Cancel</button>
+                <button ng-disabled="form.$invalid" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </script>
+
+    <br>
+    <div class="container-fluid">
+
+        <div class="inner-addon left-addon col-md-4" style="padding-left:0;">
+            <i class="glyphicon glyphicon-search"></i>
+            <input class="form-control" placeholder="Search" ng-model="search"/>
+        </div>
+        <a class="btn-link pull-right" style="color:inherit;" ng-click="create()">
+            <span class="glyphicon glyphicon-plus-sign"></span>
+        </a>
+    </div>
+
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>ID</th>
+
+                <th>Category</th>
+
+                <th>Range Min</th>
+
+                <th>Range Max</th>
+
+                <th>Current</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="crm in cfg_category_range_mapping | toArray:false | filter:search track by $index">
+                <td ng-if="crm.id">{{ crm.id }}</td>
+
+                <td ng-if="crm.category">{{ crm.category }}</td>
+
+                <td ng-if="crm.range_min">{{ crm.range_min }}</td>
+
+                <td ng-if="crm.range_max">{{ crm.range_max }}</td>
+
+                <td ng-if="crm.current">{{ crm.current }}</td>
+
+                <td ng-if="crm.id" style="float:right">
+                    <button ng-click="update(crm.id)"
+                            class="btn">
+                        <span class="glyphicon glyphicon-pencil"></span> Edit
+                    </button>
+                    <button ng-click="delete(crm.id)"
+                            class="btn btn-danger">
+                        <span class="glyphicon glyphicon-remove-circle"></span> Delete
+                    </button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
