@@ -101,6 +101,22 @@ class Yara_rule(db.Model):
         type_ = "%s:" if not type_.endswith(":") else type_
         return "\n\t".join([string.strip().strip("\t") for string in text.split("\n") if type_ not in string]).strip()
 
+    @classmethod
+    def get_yara_rule_from_yara_dict(cls, yara_dict):
+        yara_rule = Yara_rule()
+        yara_rule.name = yara_dict["rule_name"]
+
+        possible_fields = ["description, ""confidence", "test_status", "severity", "category", "file_type",
+                           "subcategory1", "subcategory2", "subcategory3"]
+        for possible_field in possible_fields:
+            if possible_field in yara_dict["metadata"].keys():
+                setattr(yara_rule, possible_field, yara_dict["metadata"][possible_field])
+
+        yara_rule.condition = " ".join(yara_dict["condition_terms"])
+        yara_rule.strings = "\n".join(
+            ["%s = %s %s" % (r["name"], r["value"], " ".join(r["modifiers"])) for r in yara_dict["strings"]])
+        return yara_rule
+
 
 class Yara_rule_history(db.Model):
     __tablename__ = "yara_rules_history"
