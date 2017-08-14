@@ -43,11 +43,11 @@
                            ng-model="cfg_category_range_mapping.range_max" ng-required="true"/>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" ng-if="cfg_category_range_mapping.id">
                     <label>current:</label>
 
-                    <input type="number" class="form-control" name="current"
-                           ng-model="cfg_category_range_mapping.current" ng-required="true"/>
+                    <input type="text" ng-readonly="true" class="form-control" name="current"
+                           ng-model="cfg_category_range_mapping.current"/>
                 </div>
 
             </div>
@@ -96,7 +96,7 @@
 
                 <td ng-if="crm.range_max">{{ crm.range_max }}</td>
 
-                <td ng-if="crm.current">{{ crm.current }}</td>
+                <td ng-if="crm.id">{{ crm.current }}</td>
 
                 <td ng-if="crm.id" style="float:right">
                     <button ng-click="update(crm.id)"

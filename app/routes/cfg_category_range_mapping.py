@@ -27,8 +27,7 @@ def create_cfg_category_range_mapping():
     entity = cfg_category_range_mapping.CfgCategoryRangeMapping(
         category=request.json['category'],
         range_min=request.json['range_min'],
-        range_max=request.json['range_max'],
-        current=request.json['current']
+        range_max=request.json['range_max']
     )
     db.session.add(entity)
     db.session.commit()
@@ -45,12 +44,27 @@ def update_cfg_category_range_mapping(id):
         category=request.json['category'],
         range_min=request.json['range_min'],
         range_max=request.json['range_max'],
-        current=request.json['current'],
         id=id
     )
     db.session.merge(entity)
     db.session.commit()
     return jsonify(entity.to_dict()), 200
+
+
+def update_cfg_category_range_mapping_current(id, current):
+    entity = cfg_category_range_mapping.CfgCategoryRangeMapping.query.get(id)
+    if not entity:
+        return
+    entity = cfg_category_range_mapping.CfgCategoryRangeMapping(
+        category=entity.category,
+        range_min=entity.range_min,
+        range_max=entity.range_max,
+        current=current,
+        id=id
+    )
+    db.session.merge(entity)
+    db.session.commit()
+    return
 
 
 @app.route('/InquestKB/cfg_category_range_mapping/<int:id>', methods=['DELETE'])

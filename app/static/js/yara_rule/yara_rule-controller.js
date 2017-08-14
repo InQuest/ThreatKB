@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('InquestKB')
-    .controller('Yara_ruleController', ['$scope', '$uibModal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states', 'Files',
-        function ($scope, $uibModal, resolvedYara_rule, Yara_rule, Cfg_states, Files) {
+    .controller('Yara_ruleController', ['$scope', '$uibModal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states', 'Files', 'CfgCategoryRangeMapping',
+        function ($scope, $uibModal, resolvedYara_rule, Yara_rule, Cfg_states, Files, CfgCategoryRangeMapping) {
 
             $scope.yara_rules = resolvedYara_rule;
 
@@ -14,6 +14,7 @@ angular.module('InquestKB')
             $scope.update = function (id) {
                 $scope.yara_rule = Yara_rule.get({id: id});
                 $scope.cfg_states = Cfg_states.query();
+                $scope.cfg_category_range_mapping = CfgCategoryRangeMapping.query();
                 $scope.open(id);
             };
 
@@ -27,12 +28,10 @@ angular.module('InquestKB')
                 if (id) {
                     Yara_rule.update({id: id}, $scope.yara_rule, function () {
                         $scope.yara_rules = Yara_rule.query();
-                        //$scope.clear();
                     });
                 } else {
                     Yara_rule.save($scope.yara_rule, function () {
                         $scope.yara_rules = Yara_rule.query();
-                        //$scope.clear();
                     });
                 }
             };
@@ -56,6 +55,7 @@ angular.module('InquestKB')
                     "reference_text": "",
                     "condition": "",
                     "strings": "",
+                    "signature_id": "",
                     "id": "",
                     "tags": [],
                     "addedTags": [],
@@ -83,14 +83,15 @@ angular.module('InquestKB')
                 });
             };
         }])
-    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', 'yara_rule', 'Cfg_states', 'Comments', 'Files',
-        function ($scope, $http, $uibModalInstance, yara_rule, Cfg_states, Comments, Files) {
+    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', 'yara_rule', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping',
+        function ($scope, $http, $uibModalInstance, yara_rule, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping) {
             $scope.yara_rule = yara_rule;
             $scope.yara_rule.new_comment = "";
             $scope.Comments = Comments;
             $scope.Files = Files;
 
             $scope.cfg_states = Cfg_states.query();
+            $scope.cfg_category_range_mapping = CfgCategoryRangeMapping.query();
             $scope.do_not_bump_revision = false;
 
             $scope.just_opened = true;

@@ -8,7 +8,7 @@ class CfgCategoryRangeMapping(db.Model):
     category = db.Column(db.String(255), unique=True, nullable=False)
     range_min = db.Column(db.Integer(unsigned=True), index=True, nullable=False)
     range_max = db.Column(db.Integer(unsigned=True), index=True, nullable=False)
-    current = db.Column(db.Integer(unsigned=True), index=True, nullable=False)
+    current = db.Column(db.Integer(unsigned=True), index=True, nullable=True)
 
     def to_dict(self):
         return dict(

@@ -19,7 +19,7 @@ class Yara_rule(db.Model):
     confidence = db.Column(db.Integer)
     severity = db.Column(db.Integer)
     description = db.Column(db.String(4096))
-    category = db.Column(db.String(32))
+    category = db.Column(db.String(32), index=True)
     file_type = db.Column(db.String(32))
     subcategory1 = db.Column(db.String(32))
     subcategory2 = db.Column(db.String(32))
@@ -28,6 +28,7 @@ class Yara_rule(db.Model):
     reference_text = db.Column(db.String(2048))
     condition = db.Column(db.String(2048))
     strings = db.Column(db.String(30000))
+    signature_id = db.Column(db.Integer(unsigned=True), index=True, nullable=False)
 
     tags = []
     addedTags = []
@@ -72,13 +73,14 @@ class Yara_rule(db.Model):
             reference_text=self.reference_text,
             condition="condition:\n\t%s" % self.condition,
             strings="strings:\n\t%s" % self.strings,
+            signature_id=self.signature_id,
             id=self.id,
             tags=tags_mapping.get_tags_for_source(self.__tablename__, self.id),
             addedTags=[],
             removedTags=[],
-            comments=[comment.to_dict() for comment in self.comments],
+            comments=[comment.to_dict() for comment in comments],
             revisions=[revision.to_dict() for revision in revisions],
-            files=[file.to_dict() for file in self.files],
+            files=[file.to_dict() for file in files],
             created_user=self.created_user.to_dict(),
             modified_user=self.modified_user.to_dict(),
             revision=self.revision
