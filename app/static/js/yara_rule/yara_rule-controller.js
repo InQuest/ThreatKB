@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('InquestKB')
-    .controller('Yara_ruleController', ['$scope', '$uibModal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states',
-        function ($scope, $uibModal, resolvedYara_rule, Yara_rule, Cfg_states) {
+    .controller('Yara_ruleController', ['$scope', '$uibModal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states', 'Files',
+        function ($scope, $uibModal, resolvedYara_rule, Yara_rule, Cfg_states, Files) {
 
             $scope.yara_rules = resolvedYara_rule;
 
@@ -83,8 +83,8 @@ angular.module('InquestKB')
                 });
             };
         }])
-    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', 'yara_rule', 'Cfg_states', 'Comments',
-        function ($scope, $http, $uibModalInstance, yara_rule, Cfg_states, Comments) {
+    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', 'yara_rule', 'Cfg_states', 'Comments', 'Files',
+        function ($scope, $http, $uibModalInstance, yara_rule, Cfg_states, Comments, Files) {
             $scope.yara_rule = yara_rule;
             $scope.yara_rule.new_comment = "";
             $scope.Comments = Comments;

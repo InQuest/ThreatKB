@@ -2,6 +2,9 @@ from app import db
 from app.routes import tags_mapping
 from app.models.comments import Comments
 
+import ipwhois
+import json
+
 class C2ip(db.Model):
     __tablename__ = "c2ip"
 
@@ -59,6 +62,26 @@ class C2ip(db.Model):
             modified_user=self.modified_user.to_dict(),
             comments=[comment.to_dict() for comment in self.comments]
         )
+
+    @classmethod
+    def get_c2ip_from_ip(cls, ip):
+        whois = json.loads(ipwhois.IPWhois(ip))
+
+        c2ip = C2ip()
+        c2ip.ip = ip
+        c2ip.asn = whois.get("asn_description", None)
+
+        net = {}
+        for range in whois.get("nets", []):
+            if range["cidr"] == whois["asn_cidr"]:
+                net = range
+                break
+
+        c2ip.country = net.get("country", None)
+        c2ip.city = net.get("city", None)
+        c2ip.state = net.get("state", None)
+        return c2ip
+
 
     def __repr__(self):
         return '<C2ip %r>' % (self.id)

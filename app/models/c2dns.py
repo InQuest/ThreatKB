@@ -47,7 +47,7 @@ class C2dns(db.Model):
             reference_link=self.reference_link,
             reference_text=self.reference_text,
             expiration_type=self.expiration_type,
-            expiration_timestamp=self.expiration_timestamp.isoformat(),
+            expiration_timestamp=self.expiration_timestamp.isoformat() if self.expiration_timestamp else None,
             id=self.id,
             tags=tags_mapping.get_tags_for_source(self.__tablename__, self.id),
             addedTags=[],
@@ -56,6 +56,12 @@ class C2dns(db.Model):
             modified_user=self.modified_user.to_dict(),
             comments=[comment.to_dict() for comment in comments]
         )
+
+    @classmethod
+    def get_c2dns_from_hostname(cls, hostname):
+        c2dns = C2dns()
+        c2dns.domain_name = hostname
+        return c2dns
 
     def __repr__(self):
         return '<C2dns %r>' % (self.id)

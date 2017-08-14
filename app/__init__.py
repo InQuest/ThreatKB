@@ -38,6 +38,7 @@ from app.routes import comments
 from app.routes import tags
 from app.routes import tags_mapping
 from app.routes import files
+from app.routes import import_
 
 @app.before_first_request
 def setup_logging():

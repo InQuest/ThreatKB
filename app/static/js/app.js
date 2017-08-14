@@ -1,6 +1,6 @@
 // Declare app level module which depends on filters, and services
-angular.module('InquestKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize', 'ui.select', 'ngTagsInput',
-                                'angular-toArrayFilter', 'ui.codemirror', 'ngFileUpload'])
+angular.module('InquestKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize', 'ui.select', 'ngTagsInput', 'angular-growl',
+    'angular-toArrayFilter', 'ui.codemirror', 'ngFileUpload'])
     .config(['$routeProvider', function ($routeProvider) {
         $routeProvider
             .when('/', {
@@ -62,22 +62,12 @@ angular.module('InquestKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitiz
                 templateUrl: 'views/tags/tags.html',
                 controller: 'TagsController',
                 access: {restricted: true},
-                resolve:{
+                resolve: {
                     resolvedTags: ['Tags', function (Tags) {
                         return Tags.query();
                     }]
                 }
             })
-            // .when('/tags_mapping', {
-            //     templateUrl: 'views/tags_mapping/tags_mapping.html',
-            //     controller: 'Tags_mappingController',
-            //     access: {restricted: true},
-            //     resolve:{
-            //         resolvedTags_mapping: ['Tags_mapping', function (Tags_mapping) {
-            //             return Tags_mapping.query();
-            //         }]
-            //     }
-            // })
             .when('/yara_rules', {
                 templateUrl: 'views/yara_rule/yara_rules.html',
                 controller: 'Yara_ruleController',
@@ -87,11 +77,17 @@ angular.module('InquestKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitiz
                         return Yara_rule.query();
                     }]
                 }
+            })
+            .when('/import', {
+                templateUrl: 'views/import/import.html',
+                controller: 'ImportController',
+                access: {restricted: true}
             }).otherwise({
             redirectTo: '/'
         });
 
-    }]);
+    }])
+;
 
 angular.module('InquestKB').run(function ($rootScope, $location, AuthService) {
 
