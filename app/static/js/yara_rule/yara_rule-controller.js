@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('InquestKB')
-    .controller('Yara_ruleController', ['$scope', '$uibModal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states', 'Files', 'CfgCategoryRangeMapping',
-        function ($scope, $uibModal, resolvedYara_rule, Yara_rule, Cfg_states, Files, CfgCategoryRangeMapping) {
+    .controller('Yara_ruleController', ['$scope', '$uibModal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states', 'CfgCategoryRangeMapping',
+        function ($scope, $uibModal, resolvedYara_rule, Yara_rule, Cfg_states, CfgCategoryRangeMapping) {
 
             $scope.yara_rules = resolvedYara_rule;
 
