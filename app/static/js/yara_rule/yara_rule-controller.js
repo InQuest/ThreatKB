@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('InquestKB')
-    .controller('Yara_ruleController', ['$scope', '$modal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states',
-        function ($scope, $modal, resolvedYara_rule, Yara_rule, Cfg_states) {
+    .controller('Yara_ruleController', ['$scope', '$uibModal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states', 'Files',
+        function ($scope, $uibModal, resolvedYara_rule, Yara_rule, Cfg_states, Files) {
 
             $scope.yara_rules = resolvedYara_rule;
 
@@ -60,14 +60,16 @@ angular.module('InquestKB')
                     "tags": [],
                     "addedTags": [],
                     "removedTags": [],
-                    "comments": []
+                    "comments": [],
+                    "files": []
                 };
             };
 
             $scope.open = function (id) {
-                var yara_ruleSave = $modal.open({
+                var yara_ruleSave = $uibModal.open({
                     templateUrl: 'yara_rule-save.html',
                     controller: 'Yara_ruleSaveController',
+                    size: 'lg',
                     resolve: {
                         yara_rule: function () {
                             return $scope.yara_rule;
@@ -81,16 +83,26 @@ angular.module('InquestKB')
                 });
             };
         }])
-    .controller('Yara_ruleSaveController', ['$scope', '$http', '$modalInstance', 'yara_rule', 'Cfg_states', 'Comments',
-        function ($scope, $http, $modalInstance, yara_rule, Cfg_states, Comments) {
+    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', 'yara_rule', 'Cfg_states', 'Comments', 'Files',
+        function ($scope, $http, $uibModalInstance, yara_rule, Cfg_states, Comments, Files) {
             $scope.yara_rule = yara_rule;
             $scope.yara_rule.new_comment = "";
             $scope.Comments = Comments;
+            $scope.Files = Files;
 
             $scope.cfg_states = Cfg_states.query();
+            $scope.do_not_bump_revision = false;
+
+            $scope.just_opened = true;
 
             $scope.print_comment = function (comment) {
                 return comment.comment.replace(/(?:\r\n|\r|\n)/g, "<BR>");
+            };
+
+            $scope.editor_options = {
+                lineWrapping: false,
+                lineNumbers: true,
+                mode: 'yara'
             };
 
             $scope.add_comment = function (id) {
@@ -110,13 +122,44 @@ angular.module('InquestKB')
                     })
                 });
             };
-
+            $scope.$watch('files', function () {
+                $scope.upload($scope.files);
+            });
+            $scope.upload = function (id, files) {
+                if (files && files.length) {
+                    for (var i = 0; i < files.length; i++) {
+                        var file = files[i];
+                        if (!file.$error) {
+                            Upload.upload({
+                                url: '/InquestKB/file_upload',
+                                method: 'POST',
+                                data: {
+                                    file: file,
+                                    entity_type: Files.ENTITY_MAPPING.SIGNATURE,
+                                    entity_id: id
+                                }
+                            }).then(function (resp) {
+                                console.log('Success ' + resp.config.data.file.name + 'uploaded.');
+                                $scope.yara_rule.files = $scope.Files.resource.query({
+                                    entity_type: Files.ENTITY_MAPPING.SIGNATURE,
+                                    entity_id: id
+                                })
+                            }, function (resp) {
+                                console.log('Error status: ' + resp.status);
+                            }, function (evt) {
+                                var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
+                                console.log('progress: ' + progressPercentage + '% ' + evt.config.data.file.name);
+                            });
+                        }
+                    }
+                }
+            };
             $scope.ok = function () {
-                $modalInstance.close($scope.yara_rule);
+                $uibModalInstance.close($scope.yara_rule);
             };
 
             $scope.cancel = function () {
-                $modalInstance.dismiss('cancel');
+                $uibModalInstance.dismiss('cancel');
             };
 
             $scope.addedTag = function ($tag) {
