@@ -11,11 +11,13 @@
     <link href="lib/ng-tags-input/ng-tags-input.css" rel="stylesheet">
     <link href="lib/angular-bootstrap/ui-bootstrap-csp.css" rel="stylesheet"/>
     <link href="css/codemirror.css" rel="stylesheet">
+    <link href="lib/angular-growl-v2/build/angular-growl.min.css" rel="stylesheet"/>
 
     <link href="css/app.css" rel="stylesheet">
 </head>
 <body>
 <div ng-controller="AuthController">
+    <div growl></div>
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
         <div class="container">
             <div class="navbar-header">
@@ -56,6 +58,10 @@
                         <a href="#!/tags">Tags</a>
                     </li>
 
+
+                    <li>
+                        <a href="#!/import">Import</a>
+                    </li>
                 </ul>
                 <ul class="nav navbar-nav pull-right" ng-show="isLoggedIn()">
                     <li class="pull-right">
@@ -87,6 +93,7 @@
 <script src="lib/angular-ui-codemirror/ui-codemirror.min.js"></script>
 <script src="lib/ng-file-upload-shim/ng-file-upload-shim.js"></script> <!-- for no html5 browsers support -->
 <script src="lib/ng-file-upload/ng-file-upload.js"></script>
+<script src="lib/angular-growl-v2/build/angular-growl.min.js"></script>
 
 <script src="js/app.js"></script>
 
@@ -100,6 +107,7 @@
 <script src="js/tags/tags-controller.js"></script>
 <script src="js/tags_mapping/tags_mapping-controller.js"></script>
 <script src="js/authentication/authentication-controller.js"></script>
+<script src="js/import/import-controller.js"></script>
 <!-- /Controllers -->
 
 <!-- Services -->
@@ -113,6 +121,7 @@
 <script src="js/authentication/authentication-service.js"></script>
 <script src="js/comments/comments-service.js"></script>
 <script src="js/files/files-service.js"></script>
+<script src="js/import/import-service.js"></script>
 <!-- /Services -->
 
 </body>

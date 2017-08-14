@@ -1,0 +1,33 @@
+<br>
+<div class="container-fluid">
+
+    <div class="form-group">
+        <form form name="form" role="form" novalidate
+              class="ng-scope ng-invalid ng-invalid-required ng-dirty">
+            <label style="padding:5px;">Import:</label>
+
+            <span class="pull-right">
+                    Autocommit&nbsp;
+                    <input type="checkbox" ng-model="autocommit">
+                &nbsp;&nbsp;
+                    <button type="button" class="btn btn-secondary" ng-click="import_artifacts()"
+                            ng-disabled="form.$invalid || form.$pristine">Extract Artifacts</button></span>
+            <textarea class="form-control" rows="20" ng-model="import_text"></textarea>
+        </form>
+    </div>
+
+    <br/>
+    <div class="form-group" ng-if="artifacts">
+        <label style="padding:5px;">Extracted Artifacts</label>
+        <span class="pull-right">
+            <button type="button" class="btn btn-secondary" ng-click="commit_artifacts(artifacts)">Commit</button>
+        </span>
+        <ul class="list-group">
+            <li class="list-group-item "
+                ng-repeat="artifact in artifacts">
+                {{ artifact.type }}
+                <span class="pull-right">{{ artifact.artifact }}</span>
+            </li>
+        </ul>
+    </div>
+</div>
