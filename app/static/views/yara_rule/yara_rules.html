@@ -57,6 +57,11 @@
                     <label type="text" class="form-control">{{ yara_rule.id }}</label>
                 </div>
 
+                <div class="form-group" ng-if="yara_rule.signature_id">
+                    <label>Signature ID</label>
+                    <label type="text" class="form-control">{{ yara_rule.signature_id }}</label>
+                </div>
+
                 <div class="form-group" ng-if="yara_rule.id">
                     <label>Revision</label>
                     <label type="text" class="form-control">{{ yara_rule.revision }} - {{ yara_rule.date_modified }}
@@ -153,12 +158,14 @@
 
                 <div class="form-group">
                     <label>category:</label>
-
-                    <input type="text" class="form-control" name="category"
-                           ng-model="yara_rule.category" ng-required="true"
-                           ng-maxlength="32"/>
-                    <span class="error" ng-show="form.category.$error.minlength">Must be at least  characters.</span>
-                    <span class="error" ng-show="form.category.$error.maxlength">Must be at most 32 characters.</span>
+                    <ui-select ng-model="yara_rule.category">
+                        <ui-select-match placeholder="Select a Category ...">
+                            <span ng-bind="$select.selected.category || yara_rule.category"></span>
+                        </ui-select-match>
+                        <ui-select-choices repeat="category in (cfg_category_range_mapping | filter: $select.search) track by category.id">
+                            <span ng-bind="category.category"></span>
+                        </ui-select-choices>
+                    </ui-select>
                 </div>
 
                 <div class="form-group">
@@ -327,6 +334,8 @@
             <tr>
                 <th>ID</th>
 
+                <th>Signature ID</th>
+
                 <th>date_created</th>
 
                 <th>date_modified</th>
@@ -366,6 +375,8 @@
             <tbody>
             <tr ng-repeat="yara_rule in yara_rules track by $index" ng-if="yara_rule.date_created">
                 <td>{{ yara_rule.id }}</td>
+
+                <td>{{ yara_rule.signature_id }}</td>
 
                 <td>{{ yara_rule.date_created  | date:'yyyy-MM-dd'}}</td>
 
