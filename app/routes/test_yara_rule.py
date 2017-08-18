@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import os
 import time
 import datetime
@@ -74,5 +72,4 @@ rule %s
                                                       user_id=current_user.id))
         db.session.commit()
 
-
-    return '', 201
+    return '', 200
