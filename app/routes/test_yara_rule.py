@@ -50,7 +50,7 @@ rule %s
     rule = yara.load(file=rule_buffer)
 
     total_file_count = 0
-    count_of_files_triggered = 0
+    count_of_files_matched = 0
     for f in yara_rule_entity.files:
         total_file_count += 1
         file_path = os.path.join(app.config['FILE_STORE_PATH'],
@@ -59,9 +59,20 @@ rule %s
                                  str(f.filename))
         matches = rule.match(file_path)
         if matches and matches.__sizeof__() > 0:
-            count_of_files_triggered += 1
+            count_of_files_matched += 1
 
     end_time = time.time()
     end_time_str = datetime.datetime.fromtimestamp(end_time).strftime('%Y-%m-%d %H:%M:%S')
+
+    if total_file_count > 0:
+        db.session.add(yara_rule.Yara_testing_history(yara_rule_id=yara_rule_entity.id,
+                                                      revision=yara_rule_entity.revision,
+                                                      start_time=start_time_str,
+                                                      end_time=end_time_str,
+                                                      files_tested=total_file_count,
+                                                      files_matched=count_of_files_matched,
+                                                      user_id=current_user.id))
+        db.session.commit()
+
 
     return '', 201
