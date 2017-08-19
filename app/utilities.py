@@ -7,6 +7,7 @@ import ply.lex as lex
 import ply.yacc as yacc
 
 from urlparse import urlparse
+from  more_itertools import unique_everseen
 
 # Appears that Ply needs to read the source, so disable bytecode.
 sys.dont_write_bytecode
@@ -33,9 +34,8 @@ def extract_dns(text):
 #####################################################################
 
 def extract_yara_rules(text):
-    yara_rules = re.compile(r"^[\t\s]*rule[\t\s][^\r\n]*?\{.*?\}[\s\t]*(?:$|\r?\n)", re.MULTILINE | re.DOTALL).findall(
-        text)
-    return parse_yara_rules_text("\n".join(yara_rules))
+    yara_rules = re.compile(r"^[\t\s]*rule[\t\s][^\r\n]+(?:\{|[\r\n][\r\n\s\t]*\{).*?\r?\n[\t\s]*\}[\s\t]*(?:$|\r?\n)", re.MULTILINE | re.DOTALL).findall(text)
+    return parse_yara_rules_text("\n".join(yara_rules)) if yara_rules else []
 
 
 #####################################################################
@@ -44,11 +44,14 @@ def extract_artifacts(text):
     ips = extract_ips(text)
     dns = extract_dns(text)
     yara_rules = extract_yara_rules(text)
+    temp = []
 
-    output = [{"type": "IP", "artifact": ip} for ip in ips]
-    output.extend([{"type": "DNS", "artifact": hostname} for hostname in dns])
-    output.extend(
-        [{"type": "YARA_RULE", "artifact": yara_rule["rule_name"], "rule": yara_rule} for yara_rule in yara_rules])
+    output = [{"type": "IP", "artifact": ip} for ip in list(unique_everseen(ips))]
+    output.extend([{"type": "DNS", "artifact": hostname} for hostname in list(unique_everseen(dns))])
+    for yara_rule in yara_rules:
+        if not yara_rule["rule_name"] in temp:
+            temp.append(yara_rule["rule_name"])
+            output.append({"type": "YARA_RULE", "artifact": yara_rule["rule_name"], "rule": yara_rule})
     return output
 
 
