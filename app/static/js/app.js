@@ -47,6 +47,16 @@ angular.module('InquestKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitiz
                     }]
                 }
             })
+            .when('/cfg_category_range_mapping', {
+                templateUrl: 'views/cfg_category_range_mapping/cfg_category_range_mapping.html',
+                controller: 'CfgCategoryRangeMappingController',
+                access: {restricted: true},
+                resolve: {
+                    resolvedCfgCategoryRangeMapping: ['CfgCategoryRangeMapping', function (CfgCategoryRangeMapping) {
+                        return CfgCategoryRangeMapping.query();
+                    }]
+                }
+            })
             .when('/cfg_states', {
                 templateUrl: 'views/cfg_states/cfg_states.html',
                 controller: 'Cfg_statesController',
