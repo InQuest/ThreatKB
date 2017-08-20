@@ -118,7 +118,8 @@
                     <label>tags:</label>
 
                     <tags-input ng-model="c2dns.tags" on-tag-added="addedTag($tag)" on-tag-removed="removedTag($tag)">
-                        <auto-complete minlength="2" source="loadTags($query)"></auto-complete>
+                        <auto-complete minlength="2" source="loadTags($query)" load-on-focus="true"
+                                       load-on-empty="true"></auto-complete>
                     </tags-input>
                 </div>
 
