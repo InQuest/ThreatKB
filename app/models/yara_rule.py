@@ -2,7 +2,10 @@ from app import db
 from app.models.files import Files
 from app.routes import tags_mapping
 from app.models.comments import Comments
+from app.models.cfg_category_range_mapping import CfgCategoryRangeMapping
+from sqlalchemy.event import listens_for
 import json
+
 
 
 class Yara_rule(db.Model):
@@ -116,9 +119,16 @@ class Yara_rule(db.Model):
 
         yara_rule.condition = " ".join(yara_dict["condition_terms"])
         yara_rule.strings = "\n".join(
-            ["%s = %s %s" % (r["name"], r["value"], " ".join(r["modifiers"])) for r in yara_dict["strings"]])
+            ["%s = %s %s" % (r["name"], r["value"], " ".join(r["modifiers"]) if "modifiers" in r else "") for r in
+             yara_dict["strings"]])
+        if not yara_rule.category:
+            yara_rule.category = CfgCategoryRangeMapping.DEFAULT_CATEGORY
         return yara_rule
 
+
+@listens_for(Yara_rule, "before_insert")
+def generate_signature_id(mapper, connect, target):
+    target.signature_id = CfgCategoryRangeMapping.get_next_category_signature_id(target.category)
 
 class Yara_rule_history(db.Model):
     __tablename__ = "yara_rules_history"

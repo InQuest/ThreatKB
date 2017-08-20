@@ -28,9 +28,12 @@ angular.module('InquestKB').factory('Import',
 
             }
 
-            function commit_artifacts(artifacts) {
+            function commit_artifacts(artifacts, shared_reference) {
                 // send a post request to the server
-                return $http.post('/InquestKB/import/commit', {artifacts: artifacts})
+                return $http.post('/InquestKB/import/commit', {
+                    artifacts: artifacts,
+                    shared_reference: shared_reference
+                })
                     .then(function (success) {
                         if (success.status === 201 && success.data.artifacts) {
                             return success.data.artifacts;

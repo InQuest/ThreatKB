@@ -4,29 +4,41 @@
     <div class="form-group">
         <form form name="form" role="form" novalidate
               class="ng-scope ng-invalid ng-invalid-required ng-dirty">
-            <label style="padding:5px;">Import:</label>
+            <div style="padding-bottom: 10px;">
+                <label style="padding:5px;">Import:</label>
 
-            <span class="pull-right">
+                <span class="pull-right">
                     Autocommit&nbsp;
                     <input type="checkbox" ng-model="autocommit">
                 &nbsp;&nbsp;
                     <button type="button" class="btn btn-secondary" ng-click="import_artifacts()"
                             ng-disabled="form.$invalid || form.$pristine">Extract Artifacts</button></span>
-            <textarea class="form-control" rows="20" ng-model="import_text"></textarea>
+            </div>
+            <div style="padding-bottom: 5px;">
+                <input class="form-control" ng-model="shared_reference" placeholder="Shared reference link..."/>
+            </div>
+            <textarea class="form-control" rows="10" ng-model="import_text" placeholder="Import text..."></textarea>
         </form>
     </div>
 
     <br/>
     <div class="form-group" ng-if="artifacts">
-        <label style="padding:5px;">Extracted Artifacts</label>
-        <span class="pull-right">
-            <button type="button" class="btn btn-secondary" ng-click="commit_artifacts(artifacts)">Commit</button>
+        <div style="padding-bottom: 5px;">
+            <label style="padding:5px;">Extracted Artifacts</label>
+            <span class="pull-right">
+            <button type="button" class="btn btn-secondary" ng-click="uncheck_all()">Uncheck All</button>
+            <button type="button" class="btn btn-secondary" ng-click="check_all()">Check All</button>
+            <button type="button" class="btn btn-secondary"
+                    ng-click="commit_artifacts(artifacts)">Commit ({{ commit_counter }})</button>
         </span>
+        </div>
         <ul class="list-group">
             <li class="list-group-item "
                 ng-repeat="artifact in artifacts">
-                {{ artifact.type }}
-                <span class="pull-right">{{ artifact.artifact }}</span>
+                <input type="checkbox" class="pull-left" ng-model="checked_indexes[$index]"
+                       ng-change="update_commit_counter($index)"/>
+                &nbsp;&nbsp;&nbsp;&nbsp;{{ artifact.artifact }}
+                <span class="pull-right">{{ artifact.type }}</span>
             </li>
         </ul>
     </div>
