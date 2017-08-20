@@ -95,6 +95,7 @@ angular.module('InquestKB')
             $scope.do_not_bump_revision = false;
 
             $scope.just_opened = true;
+            $scope.testing = false;
 
             $scope.print_comment = function (comment) {
                 return comment.comment.replace(/(?:\r\n|\r|\n)/g, "<BR>");
@@ -178,5 +179,20 @@ angular.module('InquestKB')
                         return tag.text.toLowerCase().indexOf(query.toLowerCase()) !== -1;
                     });
                 });
+            };
+
+            $scope.$watch('testing', function () {
+                $scope.testButtonText = $scope.testing ? 'Testing...' : 'Test Signature Now';
+            });
+
+            $scope.testSignature = function (id) {
+                if (!$scope.testing) {
+                    $scope.testing = true;
+                    return $http.get('/InquestKB/test_yara_rule/' + id, {cache: false}).then(function (response) {
+                        var testResponse = response.data;
+                        $scope.testing = false;
+                        return true;
+                    });
+                }
             }
         }]);

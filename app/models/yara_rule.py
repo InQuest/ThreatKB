@@ -146,3 +146,34 @@ class Yara_rule_history(db.Model):
 
     def __repr__(self):
         return '<Yara_rule_history %r>' % (self.id)
+
+
+class Yara_testing_history(db.Model):
+    __tablename__ = "yara_testing_history"
+
+    id = db.Column(db.Integer, primary_key=True)
+    yara_rule_id = db.Column(db.Integer, db.ForeignKey("yara_rules.id"), nullable=False)
+    revision = db.Column(db.Integer(unsigned=True), nullable=False)
+
+    start_time = db.Column(db.DateTime(timezone=True), nullable=False)
+    end_time = db.Column(db.DateTime(timezone=True), nullable=False)
+    files_tested = db.Column(db.Integer(unsigned=True), nullable=False)
+    files_matched = db.Column(db.Integer(unsigned=True), nullable=False)
+
+    user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
+    user = db.relationship('KBUser', foreign_keys=user_id,
+                           primaryjoin="KBUser.id==Yara_testing_history.user_id")
+
+    def to_dict(self):
+        return dict(
+            yara_rule_id=self.yara_rule_id,
+            revision=self.revision,
+            start_time=self.date_created.isoformat(),
+            end_time=self.date_created.isoformat(),
+            files_tested=self.files_tested,
+            files_matched=self.files_matched,
+            user=self.user.to_dict()
+        )
+
+    def __repr__(self):
+        return '<YaraTestingHistory %r>' % self.id
