@@ -23,19 +23,12 @@ def test_yara_rule(rule_id):
     rule_string = """
 rule %s
 {
-    meta:
-        author = "%s"
-        description = "%s"
-        version = "%s"
     strings:
         %s
     condition:
         %s
 }
 """ % (yara_rule_entity.name,
-       yara_rule_entity.created_user.email,
-       yara_rule_entity.description,
-       yara_rule_entity.revision,
        yara_rule_entity.strings,
        yara_rule_entity.condition)
 
