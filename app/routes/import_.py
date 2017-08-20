@@ -7,7 +7,7 @@ from app.utilities import extract_artifacts
 
 #####################################################################
 
-def save_artifacts(artifacts):
+def save_artifacts(artifacts, shared_reference=None):
     state = "Imported"
     return_artifacts = []
 
@@ -21,22 +21,29 @@ def save_artifacts(artifacts):
                 ip = c2ip.C2ip.get_c2ip_from_ip(artifact["artifact"])
                 ip.created_user_id, ip.modified_user_id = current_user.id, current_user.id
                 ip.state = state
+                if shared_reference:
+                    ip.reference_link = shared_reference
                 db.session.add(ip)
                 return_artifacts.append(ip)
             elif artifact["type"].lower() == "dns":
                 dns = c2dns.C2dns.get_c2dns_from_hostname(artifact["artifact"])
                 dns.created_user_id, dns.modified_user_id = current_user.id, current_user.id
                 dns.state = state
+                if shared_reference:
+                    dns.reference_link = shared_reference
                 db.session.add(dns)
                 return_artifacts.append(dns)
             elif artifact["type"].lower() == "yara_rule":
                 yr = yara_rule.Yara_rule.get_yara_rule_from_yara_dict(artifact["rule"])
                 yr.created_user_id, yr.modified_user_id = current_user.id, current_user.id
                 yr.state = state
+                if shared_reference:
+                    yr.reference_link = shared_reference
                 db.session.add(yr)
                 return_artifacts.append(yr)
-        except:
-            pass
+        except Exception, e:
+            app.logger.exception(e)
+            app.logger.error("Failed to commit artifacts '%s'" % (artifact))
 
     db.session.commit()
     return [artifact.to_dict() for artifact in return_artifacts]
@@ -68,9 +75,10 @@ def import_artifacts():
 @login_required
 def commit_artifacts():
     artifacts = request.json.get("artifacts", None)
+    shared_reference = request.json.get("shared_reference", None)
 
     if not artifacts:
         abort(404)
 
-    artifacts = save_artifacts(artifacts)
+    artifacts = save_artifacts(artifacts, shared_reference)
     return jsonify({"artifacts": artifacts}), 201
