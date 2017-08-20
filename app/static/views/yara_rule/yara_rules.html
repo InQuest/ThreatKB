@@ -374,7 +374,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="yara_rule in yara_rules track by $index" ng-if="yara_rule.date_created">
+            <tr ng-repeat="yara_rule in yara_rules | filter:search track by $index" ng-if="yara_rule.date_created">
                 <td>{{ yara_rule.id }}</td>
 
                 <td>{{ yara_rule.signature_id }}</td>
