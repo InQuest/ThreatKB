@@ -83,8 +83,8 @@ angular.module('InquestKB')
                 });
             };
         }])
-    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', 'yara_rule', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping',
-        function ($scope, $http, $uibModalInstance, yara_rule, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping) {
+    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', 'yara_rule', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl',
+        function ($scope, $http, $uibModalInstance, yara_rule, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl) {
             $scope.yara_rule = yara_rule;
             $scope.yara_rule.new_comment = "";
             $scope.Comments = Comments;
@@ -192,6 +192,12 @@ angular.module('InquestKB')
                     $scope.testing = true;
                     return $http.get('/InquestKB/test_yara_rule/' + id, {cache: false}).then(function (response) {
                         var testResponse = response.data;
+                        growl.info("Success!<br />"
+                            + "---------------------<br/>"
+                            + "Total Files: " + testResponse['files_tested'] + "<br/>"
+                            + "Matches Found: " + testResponse['files_matched'] + "<br/>"
+                            + "Tests Killed: " + testResponse['tests_terminated'],
+                            {ttl: 3000});
                         $scope.testing = false;
                         return true;
                     }, function (error) {
