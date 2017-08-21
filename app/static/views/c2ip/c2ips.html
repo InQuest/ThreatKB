@@ -230,7 +230,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="c2ip in c2ips filter:search track by $index" ng-if="c2ip.date_created">
+            <tr ng-repeat="c2ip in c2ips | filter:search track by $index" ng-if="c2ip.date_created">
                 <td>{{ c2ip.id }}</td>
 
                 <td>{{ c2ip.date_created  | date:'yyyy-MM-dd'}}</td>
