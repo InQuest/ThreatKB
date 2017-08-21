@@ -159,7 +159,7 @@ class Yara_testing_history(db.Model):
     end_time = db.Column(db.DateTime(timezone=True), nullable=False)
     files_tested = db.Column(db.Integer(unsigned=True), nullable=False)
     files_matched = db.Column(db.Integer(unsigned=True), nullable=False)
-    avg_millis_per_file = db.Column(db.Integer(unsigned=True), nullable=False)
+    avg_millis_per_file = db.Column(db.Float, nullable=False)
 
     user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
     user = db.relationship('KBUser', foreign_keys=user_id,
