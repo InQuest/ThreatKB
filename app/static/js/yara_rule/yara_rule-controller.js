@@ -177,6 +177,8 @@ angular.module('InquestKB')
                     var tags = response.data;
                     return tags.filter(function (tag) {
                         return tag.text.toLowerCase().indexOf(query.toLowerCase()) !== -1;
+                    }, function (error) {
+                        growl.error(error, {ttl: -1});
                     });
                 });
             };
@@ -192,6 +194,8 @@ angular.module('InquestKB')
                         var testResponse = response.data;
                         $scope.testing = false;
                         return true;
+                    }, function (error) {
+                        growl.error(error, {ttl: -1});
                     });
                 }
             }

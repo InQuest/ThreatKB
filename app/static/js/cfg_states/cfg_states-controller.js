@@ -62,6 +62,8 @@ angular.module('InquestKB')
                 cfg_statesSave.result.then(function (entity) {
                     $scope.cfg_states = entity;
                     $scope.save(id);
+                }, function (error) {
+                    growl.error(error, {ttl: -1});
                 });
             };
         }])

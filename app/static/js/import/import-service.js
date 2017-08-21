@@ -22,7 +22,7 @@ angular.module('InquestKB').factory('Import',
                                 //TODO
                             }
                         }, function (error) {
-                            //TODO
+                        return $q.reject(error.data);
                         }
                     );
 
@@ -41,7 +41,7 @@ angular.module('InquestKB').factory('Import',
                             //TODO
                         }
                     }, function (error) {
-                        //TODO
+                        return $q.reject(error.data);
                     });
 
             }

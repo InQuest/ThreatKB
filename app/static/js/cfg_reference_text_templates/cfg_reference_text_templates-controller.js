@@ -62,6 +62,8 @@ angular.module('InquestKB')
                 cfg_reference_text_templatesSave.result.then(function (entity) {
                     $scope.cfg_reference_text_templates = entity;
                     $scope.save(id);
+                }, function (error) {
+                    growl.error(error, {ttl: -1});
                 });
             };
         }])

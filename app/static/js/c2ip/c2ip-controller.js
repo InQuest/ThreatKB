@@ -142,6 +142,8 @@ angular.module('InquestKB')
                     return tags.filter(function (tag) {
                         return tag.text.toLowerCase().indexOf(query.toLowerCase()) !== -1;
                     });
+                }, function (error) {
+                    growl.error(error, {ttl: -1});
                 });
             }
         }]);

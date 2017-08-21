@@ -54,6 +54,7 @@ def save_artifacts(artifacts, shared_reference=None):
 @app.route('/InquestKB/import', methods=['POST'])
 @login_required
 def import_artifacts():
+    raise Exception("foo")
     autocommit = request.json.get("autocommit", 0)
 
     import_text = request.json.get('import_text', None)

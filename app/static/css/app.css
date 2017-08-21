@@ -66,3 +66,7 @@ span.glyphicon {
 .dragover {
     border: 5px dashed blue;
 }
+
+.growl-container.growl-fixed {
+    max-width: 500px;
+}

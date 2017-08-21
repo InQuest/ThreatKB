@@ -41,10 +41,10 @@ angular.module('InquestKB')
 
       $scope.clear = function () {
         $scope.tags = {
-          
+
           "text": "",
-          
-          "id": ""
+
+            "id": ""
         };
       };
 
@@ -62,6 +62,8 @@ angular.module('InquestKB')
         tagsSave.result.then(function (entity) {
           $scope.tags = entity;
           $scope.save(id);
+        }, function (error) {
+            growl.error(error, {ttl: -1});
         });
       };
     }])
@@ -69,9 +71,8 @@ angular.module('InquestKB')
     function ($scope, $uibModalInstance, tags) {
       $scope.tags = tags;
 
-      
 
-      $scope.ok = function () {
+        $scope.ok = function () {
         $uibModalInstance.close($scope.tags);
       };
 

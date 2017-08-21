@@ -83,6 +83,8 @@ angular.module('InquestKB')
                 c2dnsSave.result.then(function (entity) {
                     $scope.c2dns = entity;
                     $scope.save(id);
+                }, function (error) {
+                    growl.error(error, {ttl: -1});
                 });
             };
         }])
@@ -138,6 +140,8 @@ angular.module('InquestKB')
                     return tags.filter(function (tag) {
                         return tag.text.toLowerCase().indexOf(query.toLowerCase()) !== -1;
                     });
+                }, function (error) {
+                    growl.error(error, {ttl: -1});
                 });
             }
         }]);

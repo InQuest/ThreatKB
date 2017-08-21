@@ -35,7 +35,10 @@ angular.module('InquestKB').controller('ImportController',
                 }
 
                 Import.commit_artifacts(artifacts_to_commit, $scope.shared_reference).then(function (data) {
-                    growl.info("Successfully committed " + data.length + " artifacts.", {ttl: 3000});
+                    growl.info("Successfully committed " + data.length + " artifacts.", {
+                        ttl: 3000,
+                        disableCountDown: true
+                    });
                     $scope.clear();
                 });
             }
@@ -44,7 +47,10 @@ angular.module('InquestKB').controller('ImportController',
 
                 Import.import_artifacts($scope.import_text, $scope.autocommit).then(function (data) {
                         if ($scope.autocommit) {
-                            growl.info("Successfully committed " + data.length + " artifacts.", {ttl: 3000});
+                            growl.info("Successfully committed " + data.length + " artifacts.", {
+                                ttl: 3000,
+                                disableCountDown: true
+                            });
                             $scope.clear();
                         } else {
                             if (data.length > 0) {
@@ -55,12 +61,12 @@ angular.module('InquestKB').controller('ImportController',
                                 }
                                 $scope.commit_counter = $scope.artifacts.length;
                             } else {
-                                growl.info("No artifacts extracted from text.", {ttl: 3000})
+                                growl.info("No artifacts extracted from text.", {ttl: 3000, disableCountDown: true})
                                 $scope.clear();
                             }
                         }
-
-
+                    }, function (error) {
+                        growl.error(error, {ttl: -1});
                     }
                 );
             };

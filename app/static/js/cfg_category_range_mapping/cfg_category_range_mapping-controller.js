@@ -61,6 +61,8 @@ angular.module('InquestKB')
                 CfgCategoryRangeMappingSave.result.then(function (entity) {
                     $scope.cfg_category_range_mapping = entity;
                     $scope.save(id);
+                }, function (error) {
+                    growl.error(error, {ttl: -1});
                 });
             };
         }])
