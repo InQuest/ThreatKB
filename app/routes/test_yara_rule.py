@@ -71,7 +71,6 @@ def test_yara_rule(rule_id):
     end_time = time.time()
     end_time_str = datetime.datetime.fromtimestamp(end_time).strftime('%Y-%m-%d %H:%M:%S')
 
-    print(total_file_time / total_file_count)
     if total_file_count > 0:
         db.session.add(Yara_testing_history(yara_rule_id=yara_rule_entity.id,
                                             revision=yara_rule_entity.revision,
