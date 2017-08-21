@@ -84,7 +84,7 @@ def upload_file():
 
 @app.route('/InquestKB/files/<string:entity_type>/<int:entity_id>/<int:file_id>', methods=['GET'])
 @login_required
-def get_file(entity_type, entity_id, file_id):
+def get_file_for_entity(entity_type, entity_id, file_id):
     file_entity = files.Files.query.get(file_id)
 
     if not file_entity or not entity_type or not entity_id:

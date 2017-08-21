@@ -1,0 +1,76 @@
+<div>
+    <script type = "text/ng-template" id="files-save.html">
+        <form name="form" role="form" novalidate
+              class="ng-scope ng-invalid ng-invalid-required ng-dirty"
+              ng-submit="ok()">
+
+            <div class="modal-header">
+                <button type="button" class="close"
+                        ng-click="cancel()">&times;</button>
+                <h4 class="modal-title" id="myFilesLabel">Upload Files</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Attachments</label>
+                    <div ngf-select="" ngf-drop="" ng-model="files" ngf-model-invalid="invalidFiles"
+                         ngf-change="upload(yara_rule.id, $files, $file, $newFiles, $duplicateFiles, $invalidFiles, $event)"
+                         ngf-model-options="modelOptionsObj" ngf-multiple="true" ngf-pattern="pattern"
+                         ngf-accept="acceptSelect" ngf-drag-over-class="dragover" ngf-validate="validateObj"
+                         ngf-allow-dir="true" class="drop-box" ngf-drop-available="dropAvailable">Select Files
+                      <span ng-show="dropAvailable"> or Drop Files</span>
+                    </div>
+                    <div ngf-no-file-drop>File Drag/Drop is not supported for this browser</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" ng-click="cancel()">Cancel</button>
+                <button ng-disabled="form.$invalid" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </script>
+
+    <br>
+    <div class="container-fluid">
+
+        <div class="inner-addon left-addon col-md-4" style="padding-left:0px;">
+            <i class="glyphicon glyphicon-search"></i>
+            <input type="text" class="form-control" placeholder="Search" ng-model="search"/>
+        </div>
+        <a class="btn-link pull-right" style="color:inherit;" ng-click="create()">
+            <span class="glyphicon glyphicon-plus-sign"></span>
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>ID</th>
+
+                <th>filename</th>
+
+                <th>content_type</th>
+
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="file in files | toArray:false | filter:search track by $index">
+                <td ng-if="file.id">{{file.id}}</td>
+
+                <td ng-if="file.filename">{{file.filename }}</td>
+
+                <td ng-if="file.content_type">{{file.content_type }}</td>
+
+                <td ng-if="file.id" style="float:right">
+                    <button ng-click="update(file.id)" class="btn">
+                        <span class="glyphicon glyphicon-pencil"></span> Edit
+                    </button>
+                    <button ng-click="delete(file.id)" class="btn btn-danger">
+                        <span class="glyphicon glyphicon-remove-circle"></span> Delete
+                    </button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

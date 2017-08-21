@@ -12,8 +12,8 @@ class Files(db.Model):
                               onupdate=db.func.current_timestamp())
     filename = db.Column(db.String(65000))
     content_type = db.Column(db.String(100))
-    entity_type = db.Column(db.Integer(unsigned=True), index=True, nullable=False)
-    entity_id = db.Column(db.Integer(unsigned=True), index=True, nullable=False)
+    entity_type = db.Column(db.Integer(unsigned=True), index=True, nullable=True)
+    entity_id = db.Column(db.Integer(unsigned=True), index=True, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
     user = db.relationship('KBUser', foreign_keys=user_id)
 

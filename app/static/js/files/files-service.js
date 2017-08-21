@@ -3,7 +3,8 @@ angular.module('InquestKB')
         return {
             resource: $resource('InquestKB/files/:id', {}, {
                 'query': {method: 'GET', isArray: true},
-                'get': {method: 'GET'}
+                'get': {method: 'GET'},
+                'update': {method: 'PUT'}
             }),
             ENTITY_MAPPING: {SIGNATURE: 1}
         };

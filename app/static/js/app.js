@@ -103,10 +103,20 @@ angular.module('InquestKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitiz
                 templateUrl: 'views/import/import.html',
                 controller: 'ImportController',
                 access: {restricted: true}
-            }).otherwise({
-            redirectTo: '/'
-        });
-
+            })
+            .when('/files', {
+                templateUrl: 'views/files/files.html',
+                controller: 'FilesController',
+                access: {restricted: true},
+                resolve: {
+                    resolvedFiles: ['Files', function (Files) {
+                        return Files.query();
+                    }]
+                }
+            })
+            .otherwise({
+                redirectTo: '/'
+            });
     }])
 ;
 
