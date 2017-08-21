@@ -27,6 +27,7 @@ jsonpickle==0.9.5
 Mako==1.0.7
 MarkupSafe==1.0
 migrate==0.3.8
+more-itertools==3.2.0
 MySQL-python==1.2.5
 ply==3.10
 pycparser==2.18
