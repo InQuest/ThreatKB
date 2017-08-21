@@ -7,7 +7,7 @@ import ply.lex as lex
 import ply.yacc as yacc
 
 from urlparse import urlparse
-from  more_itertools import unique_everseen
+from more_itertools import unique_everseen
 
 # Appears that Ply needs to read the source, so disable bytecode.
 sys.dont_write_bytecode
