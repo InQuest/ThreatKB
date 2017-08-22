@@ -8,6 +8,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 FILE_STORE_PATH = "/tmp"
+MAX_MILLIS_PER_FILE_THRESHOLD = 3.0
 
 try:
     SQLALCHEMY_DATABASE_URI
