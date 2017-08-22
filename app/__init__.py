@@ -18,6 +18,7 @@ app.config["SQLALCHEMY_ECHO"] = True
 from app.models import authentication
 from app.models import c2ip
 from app.models import c2dns
+from app.models import cfg_settings
 from app.models import yara_rule
 from app.models import cfg_reference_text_templates
 from app.models import cfg_states
@@ -32,6 +33,7 @@ from app.routes import index
 from app.routes import authentication
 from app.routes import c2ips
 from app.routes import c2dns
+from app.routes import cfg_settings
 from app.routes import yara_rules
 from app.routes import cfg_reference_text_templates
 from app.routes import cfg_states
