@@ -57,6 +57,17 @@ angular.module('InquestKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitiz
                     }]
                 }
             })
+            .when('/cfg_settings', {
+                templateUrl: 'views/cfg_settings/cfg_settings.html',
+                controller: 'Cfg_settingsController',
+
+                access: {restricted: true},
+                resolve: {
+                    resolvedCfg_settings: ['Cfg_settings', function (Cfg_settings) {
+                        return Cfg_settings.query();
+                    }]
+                }
+            })
             .when('/cfg_states', {
                 templateUrl: 'views/cfg_states/cfg_states.html',
                 controller: 'Cfg_statesController',
