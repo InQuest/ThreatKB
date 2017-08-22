@@ -1,8 +1,11 @@
 'use strict';
 
 angular.module('InquestKB').controller('ImportController',
-    ['$scope', '$location', 'Import', 'growl',
-        function ($scope, $location, Import, growl) {
+    ['$scope', '$location', 'Import', 'growl', 'Cfg_states',
+        function ($scope, $location, Import, growl, Cfg_states) {
+
+            $scope.cfg_states = Cfg_states.query();
+            $scope.shared_state = {};
 
             $scope.update_commit_counter = function (index) {
                 if ($scope.checked_indexes[index]) {
@@ -34,7 +37,7 @@ angular.module('InquestKB').controller('ImportController',
                     }
                 }
 
-                Import.commit_artifacts(artifacts_to_commit, $scope.shared_reference).then(function (data) {
+                Import.commit_artifacts(artifacts_to_commit, $scope.shared_reference, $scope.shared_state.state.state).then(function (data) {
                     growl.info("Successfully committed " + data.length + " artifacts.", {
                         ttl: 3000,
                         disableCountDown: true
@@ -44,8 +47,11 @@ angular.module('InquestKB').controller('ImportController',
             }
 
             $scope.import_artifacts = function () {
+                if ($scope.shared_state.state === undefined) {
+                    $scope.shared_state.state = {};
+                }
 
-                Import.import_artifacts($scope.import_text, $scope.autocommit).then(function (data) {
+                Import.import_artifacts($scope.import_text, $scope.autocommit, $scope.shared_reference, $scope.shared_state.state.state).then(function (data) {
                         if ($scope.autocommit) {
                             growl.info("Successfully committed " + data.length + " artifacts.", {
                                 ttl: 3000,
@@ -77,6 +83,8 @@ angular.module('InquestKB').controller('ImportController',
                 $scope.artifacts = null;
                 $scope.checked_indexes = [];
                 $scope.shared_reference = "";
+                $scope.cfg_states = Cfg_states.query();
+                $scope.shared_state = {};
             };
 
         }]);

@@ -9,12 +9,14 @@ angular.module('InquestKB').factory('Import',
                 commit_artifacts: commit_artifacts
             });
 
-            function import_artifacts(import_text, autocommit) {
-
-                autocommit = (typeof autocommit !== 'undefined') ? autocommit : 0;
-
+            function import_artifacts(import_text, autocommit, shared_reference, shared_state) {
                 // send a post request to the server
-                return $http.post('/InquestKB/import', {import_text: import_text, autocommit: autocommit})
+                return $http.post('/InquestKB/import', {
+                    import_text: import_text,
+                    autocommit: autocommit,
+                    shared_reference: shared_reference,
+                    shared_state: shared_state
+                })
                     .then(function (success) {
                             if (success.status === 200 && success.data.artifacts) {
                                 return success.data.artifacts;
@@ -28,11 +30,12 @@ angular.module('InquestKB').factory('Import',
 
             }
 
-            function commit_artifacts(artifacts, shared_reference) {
+            function commit_artifacts(artifacts, shared_reference, shared_state) {
                 // send a post request to the server
                 return $http.post('/InquestKB/import/commit', {
                     artifacts: artifacts,
-                    shared_reference: shared_reference
+                    shared_reference: shared_reference,
+                    shared_state: shared_state
                 })
                     .then(function (success) {
                         if (success.status === 201 && success.data.artifacts) {

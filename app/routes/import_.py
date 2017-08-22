@@ -7,12 +7,12 @@ from app.utilities import extract_artifacts
 
 #####################################################################
 
-def save_artifacts(artifacts, shared_reference=None):
-    state = "Imported"
+def save_artifacts(artifacts, shared_reference=None, shared_state=None):
+    default_state = "Imported"
     return_artifacts = []
 
-    if not cfg_states.Cfg_states.query.filter_by(state=state).first():
-        db.session.add(cfg_states.Cfg_states(state=state))
+    if not cfg_states.Cfg_states.query.filter_by(state=default_state).first():
+        db.session.add(cfg_states.Cfg_states(state=default_state))
         db.session.commit()
 
     for artifact in artifacts:
@@ -20,25 +20,32 @@ def save_artifacts(artifacts, shared_reference=None):
             if artifact["type"].lower() == "ip":
                 ip = c2ip.C2ip.get_c2ip_from_ip(artifact["artifact"])
                 ip.created_user_id, ip.modified_user_id = current_user.id, current_user.id
-                ip.state = state
+                ip.state = default_state if not shared_state else shared_state
                 if shared_reference:
                     ip.reference_link = shared_reference
+
                 db.session.add(ip)
                 return_artifacts.append(ip)
             elif artifact["type"].lower() == "dns":
                 dns = c2dns.C2dns.get_c2dns_from_hostname(artifact["artifact"])
                 dns.created_user_id, dns.modified_user_id = current_user.id, current_user.id
-                dns.state = state
+                dns.state = default_state if not shared_state else shared_state
                 if shared_reference:
                     dns.reference_link = shared_reference
+                if shared_state:
+                    dns.state = shared_state
+
                 db.session.add(dns)
                 return_artifacts.append(dns)
             elif artifact["type"].lower() == "yara_rule":
                 yr = yara_rule.Yara_rule.get_yara_rule_from_yara_dict(artifact["rule"])
                 yr.created_user_id, yr.modified_user_id = current_user.id, current_user.id
-                yr.state = state
+                yr.state = default_state if not shared_state else shared_state
                 if shared_reference:
                     yr.reference_link = shared_reference
+                if shared_state:
+                    yr.state = shared_state
+
                 db.session.add(yr)
                 return_artifacts.append(yr)
         except Exception, e:
@@ -54,10 +61,10 @@ def save_artifacts(artifacts, shared_reference=None):
 @app.route('/InquestKB/import', methods=['POST'])
 @login_required
 def import_artifacts():
-    raise Exception("foo")
     autocommit = request.json.get("autocommit", 0)
-
     import_text = request.json.get('import_text', None)
+    shared_state = request.json.get('shared_state', None)
+    shared_reference = request.json.get("shared_reference", None)
 
     if not import_text:
         abort(404)
@@ -65,7 +72,7 @@ def import_artifacts():
     artifacts = extract_artifacts(import_text)
 
     if autocommit:
-        artifacts = save_artifacts(artifacts)
+        artifacts = save_artifacts(artifacts=artifacts, shared_reference=shared_reference, shared_state=shared_state)
 
     return jsonify({"artifacts": artifacts})
 
@@ -77,9 +84,10 @@ def import_artifacts():
 def commit_artifacts():
     artifacts = request.json.get("artifacts", None)
     shared_reference = request.json.get("shared_reference", None)
+    shared_state = request.json.get('shared_state', None)
 
     if not artifacts:
         abort(404)
 
-    artifacts = save_artifacts(artifacts, shared_reference)
+    artifacts = save_artifacts(artifacts=artifacts, shared_reference=shared_reference, shared_state=shared_state)
     return jsonify({"artifacts": artifacts}), 201
