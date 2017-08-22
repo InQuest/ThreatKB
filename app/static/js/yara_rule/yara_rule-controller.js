@@ -11,6 +11,10 @@ angular.module('InquestKB')
                 $scope.open();
             };
 
+            $scope.export = function () {
+                //
+            };
+
             $scope.update = function (id) {
                 $scope.yara_rule = Yara_rule.get({id: id});
                 $scope.cfg_states = Cfg_states.query();

@@ -10,6 +10,11 @@ body {
     padding: 10px;
 }
 
+table {
+    table-layout: fixed;
+    word-wrap: break-word;
+}
+
 table td:last-child {
     width: 100%;
     align: right;

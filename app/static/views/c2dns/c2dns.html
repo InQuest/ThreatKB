@@ -19,16 +19,27 @@
                     <label type="text" class="form-control" name="id" ng-model="c2dns.id">{{ c2dns.id }}</label>
                 </div>
 
+                <div class="form-group">
+                    <label>Domain Name:</label>
+                    <span class="error" ng-show="form.domain_name.$error.minlength">Must be at least  characters.</span>
+                    <span class="error"
+                          ng-show="form.domain_name.$error.maxlength">Must be at most 2048 characters.</span>
+                    <span class="error text-danger" ng-if="!c2dns.domain_name">*</span>
+                    <input type="text" class="form-control" name="domain_name"
+                           ng-model="c2dns.domain_name" ng-required="true"
+                           ng-maxlength="2048"/>
+                </div>
+
 
                 <div class="form-group" ng-if="c2dns.date_created">
-                    <label>date_created:</label>
+                    <label>Date Created:</label>
 
                     <label type="text" class="form-control" name="date_created"
                            ng-model="c2dns.date_created">{{ c2dns.date_created }}</label>
                 </div>
 
                 <div class="form-group" ng-if="c2dns.date_modified">
-                    <label>date_modified:</label>
+                    <label>Date Modified:</label>
 
                     <label type="text" class="form-control" name="date_modified"
                            ng-model="c2dns.date_modified">{{ c2dns.date_modified }}</label>
@@ -36,7 +47,8 @@
 
 
                 <div class="form-group">
-                    <label>state:</label>
+                    <label>State:</label>
+                    <span class="error text-danger" ng-if="!c2dns.state">*</span>
 
                     <ui-select ng-model="c2dns.state">
                         <ui-select-match placeholder="Select a state..">
@@ -49,20 +61,8 @@
 
                 </div>
 
-
                 <div class="form-group">
-                    <label>domain_name:</label>
-
-                    <input type="text" class="form-control" name="domain_name"
-                           ng-model="c2dns.domain_name" ng-required="true"
-                           ng-maxlength="2048"/>
-                    <span class="error" ng-show="form.domain_name.$error.minlength">Must be at least  characters.</span>
-                    <span class="error"
-                          ng-show="form.domain_name.$error.maxlength">Must be at most 2048 characters.</span>
-                </div>
-
-                <div class="form-group">
-                    <label>match_type:</label>
+                    <label>Match Type:</label>
 
                     <label class="radio"><input type="radio" name="match_type" value="exact"
                                                 ng-model="c2dns.match_type" ng-required="true" ng-checked="true"/> exact
@@ -71,32 +71,9 @@
                                                 ng-model="c2dns.match_type" ng-required="true"/> wildcard </label>
                 </div>
 
-                <div class="form-group">
-                    <label>reference_link:</label>
-
-                    <input type="text" class="form-control" name="reference_link"
-                           ng-model="c2dns.reference_link" ng-required="true"
-                           ng-maxlength="2048"/>
-                    <span class="error"
-                          ng-show="form.reference_link.$error.minlength">Must be at least  characters.</span>
-                    <span class="error"
-                          ng-show="form.reference_link.$error.maxlength">Must be at most 2048 characters.</span>
-                </div>
 
                 <div class="form-group">
-                    <label>reference_text:</label>
-
-                    <input type="text" class="form-control" name="reference_text"
-                           ng-model="c2dns.reference_text" ng-required="false"
-                           ng-maxlength="2048"/>
-                    <span class="error"
-                          ng-show="form.reference_text.$error.minlength">Must be at least  characters.</span>
-                    <span class="error"
-                          ng-show="form.reference_text.$error.maxlength">Must be at most 2048 characters.</span>
-                </div>
-
-                <div class="form-group">
-                    <label>expiration_type:</label>
+                    <label>Expiration Type:</label>
 
                     <input type="text" class="form-control" name="expiration_type"
                            ng-model="c2dns.expiration_type" ng-required="true"
@@ -108,15 +85,40 @@
                 </div>
 
                 <div class="form-group">
-                    <label>expiration_timestamp:</label>
+                    <label>Expiration Timestamp:</label>
 
                     <input type="text" class="form-control" name="expiration_timestamp"
                            ui-date="expiration_timestampDateOptions" ui-date-format="yy-mm-dd"
                            ng-model="c2dns.expiration_timestamp" ng-required="false"/>
                 </div>
 
+
                 <div class="form-group">
-                    <label>tags:</label>
+                    <label>Reference Link:</label>
+
+                    <input type="text" class="form-control" name="reference_link"
+                           ng-model="c2dns.reference_link" ng-required="true"
+                           ng-maxlength="2048"/>
+                    <span class="error"
+                          ng-show="form.reference_link.$error.minlength">Must be at least  characters.</span>
+                    <span class="error"
+                          ng-show="form.reference_link.$error.maxlength">Must be at most 2048 characters.</span>
+                </div>
+
+                <div class="form-group">
+                    <label>Reference Text:</label>
+
+                    <input type="text" class="form-control" name="reference_text"
+                           ng-model="c2dns.reference_text" ng-required="false"
+                           ng-maxlength="2048"/>
+                    <span class="error"
+                          ng-show="form.reference_text.$error.minlength">Must be at least  characters.</span>
+                    <span class="error"
+                          ng-show="form.reference_text.$error.maxlength">Must be at most 2048 characters.</span>
+                </div>
+
+                <div class="form-group">
+                    <label>Tags:</label>
 
                     <tags-input ng-model="c2dns.tags" on-tag-added="addedTag($tag)" on-tag-removed="removedTag($tag)">
                         <auto-complete minlength="2" source="loadTags($query)" load-on-focus="true"
@@ -175,60 +177,36 @@
         <table class="table table-striped">
             <thead>
             <tr>
-                <th>ID</th>
+                <th>Domain Name</th>
 
-                <th>date_created</th>
+                <th>State</th>
 
-                <th>date_modified</th>
-
-                <th>state</th>
-
-                <th>domain_name</th>
-
-                <th>match_type</th>
-
-                <th>reference_link</th>
-
-                <th>reference_text</th>
-
-                <th>expiration_type</th>
-
-                <th>expiration_timestamp</th>
+                <th>Match Type</th>
 
             </tr>
             </thead>
             <tbody>
             <tr ng-repeat="c2dns in c2dns | filter:search track by $index" ng-if="c2dns.date_created">
-                <td>{{ c2dns.id }}</td>
-
-                <td>{{ c2dns.date_created  | date:'yyyy-MM-dd'}}</td>
-
-                <td>{{ c2dns.date_modified  | date:'yyyy-MM-dd'}}</td>
-
-                <td>{{ c2dns.state }}</td>
 
                 <td>{{ c2dns.domain_name }}</td>
 
+                <td>{{ c2dns.state }}</td>
+
                 <td>{{ c2dns.match_type }}</td>
-
-                <td>{{ c2dns.reference_link }}</td>
-
-                <td>{{ c2dns.reference_text }}</td>
 
                 <td>{{ c2dns.expiration_type }}</td>
 
-                <td>{{ c2dns.expiration_timestamp  | date:'yyyy-MM-dd'}}</td>
 
                 <td>
                     <button type="submit"
                             ng-click="update(c2dns.id)"
-                            class="btn">
-                        <span class="glyphicon glyphicon-pencil"></span> Edit
+                            class="btn btn-sm">
+                        <small><span class="glyphicon glyphicon-pencil"></span></small>&nbsp;Edit
                     </button>
                     <button type="submit"
                             ng-click="delete(c2dns.id)"
-                            class="btn btn-danger">
-                        <span class="glyphicon glyphicon-remove-circle"></span> Delete
+                            class="btn btn-sm btn-danger">
+                        <small><span class="glyphicon glyphicon-remove-circle"></span></small>&nbsp;Delete
                     </button>
                 </td>
             </tr>

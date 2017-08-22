@@ -70,30 +70,32 @@
                 </div>
 
                 <label>Strings Editor</label>
+                <span class="error text-danger" ng-if="!yara_rule.strings">*</span>
                 <ui-codemirror ui-codemirror-opts="editor_options" ng-model="yara_rule.strings"></ui-codemirror>
                 <BR>
 
                 <label>Conditions Editor</label>
+                <span class="error text-danger" ng-if="!yara_rule.condition">*</span>
                 <ui-codemirror ui-codemirror-opts="editor_options" ng-model="yara_rule.condition"></ui-codemirror>
                 <BR>
 
                 <div class="form-group" ng-if="yara_rule.date_created">
-                    <label>date_created:</label>
+                    <label>Date Created:</label>
 
                     <label type="text" class="form-control" name="date_created"
                            ng-model="yara_rule.date_created">{{ yara_rule.date_created }}</label>
                 </div>
 
                 <div class="form-group" ng-if="yara_rule.date_modified">
-                    <label>date_modified:</label>
+                    <label>Date Modified:</label>
 
                     <label type="text" class="form-control" name="date_modified"
                            ng-model="yara_rule.date_modified">{{ yara_rule.date_modified }}</label>
                 </div>
 
                 <div class="form-group">
-                    <label>state:</label>
-
+                    <label>State:</label>
+                    <span class="error text-danger" ng-if="!yara_rule.state">*</span>
                     <ui-select ng-model="yara_rule.state">
                         <ui-select-match placeholder="Select a state..">
                             <span ng-bind="$select.selected.state || yara_rule.state"></span>
@@ -106,59 +108,57 @@
                 </div>
 
                 <div class="form-group">
-                    <label>name:</label>
-
+                    <label>Name:</label>
+                    <span class="error" ng-show="form.name.$error.minlength">Must be at least  characters.</span>
+                    <span class="error" ng-show="form.name.$error.maxlength">Must be at most 128 characters.</span>
+                    <span class="error text-danger" ng-if="!yara_rule.name">*</span>
                     <input type="text" class="form-control" name="name"
                            ng-model="yara_rule.name" ng-required="true"
                            ng-maxlength="128"/>
-                    <span class="error" ng-show="form.name.$error.minlength">Must be at least  characters.</span>
-                    <span class="error" ng-show="form.name.$error.maxlength">Must be at most 128 characters.</span>
+                </div>
+
+                <div class="form-group" ng-if="yara_rule.test_status">
+                    <label>Test Status:</label>
+
+                    <label type="text" class="form-control" name="date_modified"
+                           ng-model="yara_rule.test_status">{{ yara_rule.test_status }}</label>
                 </div>
 
                 <div class="form-group">
-                    <label>test_status:</label>
-
-                    <input type="text" class="form-control" name="test_status"
-                           ng-model="yara_rule.test_status" ng-required="true"
-                           ng-maxlength="16"/>
-                    <span class="error" ng-show="form.test_status.$error.minlength">Must be at least  characters.</span>
-                    <span class="error"
-                          ng-show="form.test_status.$error.maxlength">Must be at most 16 characters.</span>
-                </div>
-
-                <div class="form-group">
-                    <label>confidence:</label>
-
+                    <label>Confidence:</label>
+                    <span class="error" ng-show="form.confidence.$error.min">Must be greater than or equal to 0.</span>
+                    <span class="error" ng-show="form.confidence.$error.max">Must be less than or equal to 10.</span>
+                    <span class="error text-danger" ng-if="!yara_rule.confidence">*</span>
                     <input type="number" class="form-control" name="confidence"
                            ng-model="yara_rule.confidence" ng-required="true"
                            min=0 max=10/>
-                    <span class="error" ng-show="form.confidence.$error.min">Must be greater than or equal to 0.</span>
-                    <span class="error" ng-show="form.confidence.$error.max">Must be less than or equal to 10.</span>
                 </div>
 
                 <div class="form-group">
-                    <label>severity:</label>
-
+                    <label>Severity:</label>
+                    <span class="error" ng-show="form.severity.$error.min">Must be greater than or equal to 0.</span>
+                    <span class="error" ng-show="form.severity.$error.max">Must be less than or equal to 10.</span>
+                    <span class="error text-danger" ng-if="!yara_rule.severity">*</span>
                     <input type="number" class="form-control" name="severity"
                            ng-model="yara_rule.severity" ng-required="true"
                            min=0 max=10/>
-                    <span class="error" ng-show="form.severity.$error.min">Must be greater than or equal to 0.</span>
-                    <span class="error" ng-show="form.severity.$error.max">Must be less than or equal to 10.</span>
                 </div>
 
                 <div class="form-group">
-                    <label>description:</label>
-
-                    <input type="text" class="form-control" name="description"
-                           ng-model="yara_rule.description" ng-required="true"
-                           ng-maxlength="4096"/>
+                    <label>Description:</label>
                     <span class="error" ng-show="form.description.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
                           ng-show="form.description.$error.maxlength">Must be at most 4096 characters.</span>
+                    <span class="error text-danger" ng-if="!yara_rule.severity">*</span>
+                    <input type="text" class="form-control" name="description"
+                           ng-model="yara_rule.description" ng-required="true"
+                           ng-maxlength="4096"/>
+
                 </div>
 
                 <div class="form-group">
-                    <label>category:</label>
+                    <label>Category:</label>
+                    <span class="error text-danger" ng-if="!yara_rule.category">*</span>
                     <ui-select ng-model="yara_rule.category">
                         <ui-select-match placeholder="Select a Category ...">
                             <span ng-bind="$select.selected.category || yara_rule.category"></span>
@@ -170,53 +170,53 @@
                 </div>
 
                 <div class="form-group">
-                    <label>file_type:</label>
-
+                    <label>File Type:</label>
+                    <span class="error" ng-show="form.file_type.$error.minlength">Must be at least  characters.</span>
+                    <span class="error" ng-show="form.file_type.$error.maxlength">Must be at most 32 characters.</span>
+                    <span class="error text-danger" ng-if="!yara_rule.file_type">*</span>
                     <input type="text" class="form-control" name="file_type"
                            ng-model="yara_rule.file_type" ng-required="true"
                            ng-maxlength="32"/>
-                    <span class="error" ng-show="form.file_type.$error.minlength">Must be at least  characters.</span>
-                    <span class="error" ng-show="form.file_type.$error.maxlength">Must be at most 32 characters.</span>
+
                 </div>
 
                 <div class="form-group">
-                    <label>subcategory1:</label>
-
-                    <input type="text" class="form-control" name="subcategory1"
-                           ng-model="yara_rule.subcategory1" ng-required="false"
-                           ng-maxlength="32"/>
+                    <label>SubCategory 1:</label>
                     <span class="error"
                           ng-show="form.subcategory1.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
                           ng-show="form.subcategory1.$error.maxlength">Must be at most 32 characters.</span>
+                    <input type="text" class="form-control" name="subcategory1"
+                           ng-model="yara_rule.subcategory1" ng-required="false"
+                           ng-maxlength="32"/>
                 </div>
 
                 <div class="form-group">
-                    <label>subcategory2:</label>
-
-                    <input type="text" class="form-control" name="subcategory2"
-                           ng-model="yara_rule.subcategory2" ng-required="false"
-                           ng-maxlength="32"/>
+                    <label>Subcategory 2:</label>
                     <span class="error"
                           ng-show="form.subcategory2.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
                           ng-show="form.subcategory2.$error.maxlength">Must be at most 32 characters.</span>
+                    <input type="text" class="form-control" name="subcategory2"
+                           ng-model="yara_rule.subcategory2" ng-required="false"
+                           ng-maxlength="32"/>
+
                 </div>
 
                 <div class="form-group">
-                    <label>subcategory3:</label>
-
-                    <input type="text" class="form-control" name="subcategory3"
-                           ng-model="yara_rule.subcategory3" ng-required="false"
-                           ng-maxlength="32"/>
+                    <label>Subcategory 3:</label>
                     <span class="error"
                           ng-show="form.subcategory3.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
                           ng-show="form.subcategory3.$error.maxlength">Must be at most 32 characters.</span>
+
+                    <input type="text" class="form-control" name="subcategory3"
+                           ng-model="yara_rule.subcategory3" ng-required="false"
+                           ng-maxlength="32"/>
                 </div>
 
                 <div class="form-group">
-                    <label>reference_link:</label>
+                    <label>Reference Link:</label>
 
                     <input type="text" class="form-control" name="reference_link"
                            ng-model="yara_rule.reference_link" ng-required="true"
@@ -228,7 +228,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>reference_text:</label>
+                    <label>Reference Text:</label>
 
                     <input type="text" class="form-control" name="reference_text"
                            ng-model="yara_rule.reference_text" ng-required="false"
@@ -240,7 +240,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>tags:</label>
+                    <label>Tags:</label>
 
                     <tags-input ng-model="yara_rule.tags" on-tag-added="addedTag($tag)"
                                 on-tag-removed="removedTag($tag)">
@@ -324,7 +324,7 @@
             <i class="glyphicon glyphicon-search"></i>
             <input type="text" class="form-control" placeholder="Search" ng-model="search"/>
         </div>
-        <a class="btn-link pull-right" style="color:inherit;" ng-click="create()">
+        <a class="btn-link pull-right" style="color:inherit;" ng-click="create()" title="Create Signatures">
             <span class="glyphicon glyphicon-plus-sign"></span>
         </a>
     </div>
@@ -333,96 +333,46 @@
         <table class="table table-striped">
             <thead>
             <tr>
-                <th>ID</th>
 
                 <th>Signature ID</th>
 
-                <th>date_created</th>
+                <th>Name</th>
 
-                <th>date_modified</th>
+                <th>Category</th>
 
-                <th>state</th>
+                <th>Confidence</th>
 
-                <th>name</th>
+                <th>Severity</th>
 
-                <th>test_status</th>
-
-                <th>confidence</th>
-
-                <th>severity</th>
-
-                <th>description</th>
-
-                <th>category</th>
-
-                <th>file_type</th>
-
-                <th>subcategory1</th>
-
-                <th>subcategory2</th>
-
-                <th>subcategory3</th>
-
-                <th>reference_link</th>
-
-                <th>reference_text</th>
-
-                <th>condition</th>
-
-                <th>strings</th>
+                <th>State</th>
 
             </tr>
             </thead>
             <tbody>
             <tr ng-repeat="yara_rule in yara_rules | filter:search track by $index" ng-if="yara_rule.date_created">
-                <td>{{ yara_rule.id }}</td>
 
                 <td>{{ yara_rule.signature_id }}</td>
 
-                <td>{{ yara_rule.date_created  | date:'yyyy-MM-dd'}}</td>
-
-                <td>{{ yara_rule.date_modified  | date:'yyyy-MM-dd'}}</td>
-
-                <td>{{ yara_rule.state }}</td>
-
                 <td>{{ yara_rule.name }}</td>
 
-                <td>{{ yara_rule.test_status }}</td>
+                <td>{{ yara_rule.category }}</td>
 
                 <td>{{ yara_rule.confidence }}</td>
 
                 <td>{{ yara_rule.severity }}</td>
 
-                <td>{{ yara_rule.description }}</td>
-
-                <td>{{ yara_rule.category }}</td>
-
-                <td>{{ yara_rule.file_type }}</td>
-
-                <td>{{ yara_rule.subcategory1 }}</td>
-
-                <td>{{ yara_rule.subcategory2 }}</td>
-
-                <td>{{ yara_rule.subcategory3 }}</td>
-
-                <td>{{ yara_rule.reference_link }}</td>
-
-                <td>{{ yara_rule.reference_text }}</td>
-
-                <td>{{ yara_rule.condition }}</td>
-
-                <td>{{ yara_rule.strings }}</td>
+                <td>{{ yara_rule.state }}</td>
 
                 <td>
-                    <button type="submit"
+                    <button type="button"
                             ng-click="update(yara_rule.id)"
-                            class="btn">
-                        <span class="glyphicon glyphicon-pencil"></span> Edit
+                            class="btn btn-sm">
+                        <small><span class="glyphicon glyphicon-pencil"></span></small>&nbsp;Edit
                     </button>
                     <button type="submit"
                             ng-click="delete(yara_rule.id)"
-                            class="btn btn-danger">
-                        <span class="glyphicon glyphicon-remove-circle"></span> Delete
+                            class="btn btn-sm btn-danger">
+                        <small><span class="glyphicon glyphicon-remove-circle"></span></small>&nbsp;Delete
                     </button>
                 </td>
             </tr>
