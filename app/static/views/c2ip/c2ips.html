@@ -114,6 +114,7 @@
 
                 <div class="form-group">
                     <label>Reference Text:</label>
+                    <span class="error text-danger" ng-if="!c2ip.reference_text">*</span>
                     <span class="error"
                           ng-show="form.reference_text.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
