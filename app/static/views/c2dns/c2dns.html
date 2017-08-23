@@ -64,11 +64,16 @@
                 <div class="form-group">
                     <label>Match Type:</label>
 
-                    <label class="radio"><input type="radio" name="match_type" value="exact"
-                                                ng-model="c2dns.match_type" ng-required="true" ng-checked="true"/> exact
-                    </label>
-                    <label class="radio"><input type="radio" name="match_type" value="wildcard"
-                                                ng-model="c2dns.match_type" ng-required="true"/> wildcard </label>
+                    <ui-select ng-model="c2dns.match_type">
+                        <ui-select-match placeholder="Select a match type..">
+                            <span ng-bind="$select.selected.match_type || c2dns.match_type"></span>
+                        </ui-select-match>
+                        <ui-select-choices repeat="match_type in (match_types | filter: $select.search)">
+                            <span>{{ match_type }}</span>
+                        </ui-select-choices>
+                    </ui-select>
+
+                    </ui-select>
                 </div>
 
 
@@ -76,7 +81,7 @@
                     <label>Expiration Type:</label>
 
                     <input type="text" class="form-control" name="expiration_type"
-                           ng-model="c2dns.expiration_type" ng-required="true"
+                           ng-model="c2dns.expiration_type" ng-required="false"
                            ng-maxlength="32"/>
                     <span class="error"
                           ng-show="form.expiration_type.$error.minlength">Must be at least  characters.</span>
@@ -97,7 +102,7 @@
                     <label>Reference Link:</label>
 
                     <input type="text" class="form-control" name="reference_link"
-                           ng-model="c2dns.reference_link" ng-required="true"
+                           ng-model="c2dns.reference_link" ng-required="false"
                            ng-maxlength="2048"/>
                     <span class="error"
                           ng-show="form.reference_link.$error.minlength">Must be at least  characters.</span>
@@ -113,7 +118,7 @@
                           ng-show="form.reference_text.$error.maxlength">Must be at most 2048 characters.</span>
                     <span class="error text-danger" ng-if="!c2dns.reference_text">*</span>
                     <input type="text" class="form-control" name="reference_text"
-                           ng-model="c2dns.reference_text" ng-required="false"
+                           ng-model="c2dns.reference_text" ng-required="true"
                            ng-maxlength="2048"/>
                 </div>
 
@@ -163,7 +168,7 @@
     <br>
     <div class="container-fluid">
 
-        <div class="inner-addon left-addon col-md-4" style="padding-left:0px;">
+        <div class="inner-addon left-addon col-md-4" style="padding-left: 0px; padding-right:0px;">
             <i class="glyphicon glyphicon-search"></i>
             <input type="text" class="form-control" placeholder="Search" ng-model="search"/>
         </div>

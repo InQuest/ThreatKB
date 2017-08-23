@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('InquestKB')
-    .controller('C2ipController', ['$scope', '$uibModal', 'resolvedC2ip', 'C2ip', 'Cfg_states',
-        function ($scope, $uibModal, resolvedC2ip, C2ip, Cfg_states) {
+    .controller('C2ipController', ['$scope', '$uibModal', 'resolvedC2ip', 'C2ip', 'Cfg_states', 'growl',
+        function ($scope, $uibModal, resolvedC2ip, C2ip, Cfg_states, growl) {
 
             $scope.c2ips = resolvedC2ip;
 
@@ -33,6 +33,8 @@ angular.module('InquestKB')
                     C2ip.save($scope.c2ip, function () {
                         $scope.c2ips = C2ip.query();
                         //$scope.clear();
+                    }, function (error) {
+                        growl.error(error.data, {ttl: -1});
                     });
                 }
             };
@@ -92,7 +94,7 @@ angular.module('InquestKB')
         }])
     .controller('C2ipSaveController', ['$scope', '$http', '$uibModalInstance', 'c2ip', 'Comments', 'Cfg_states',
         function ($scope, $http, $uibModalInstance, c2ip, Comments, Cfg_states) {
-            $scope.c2ip = c2ip
+            $scope.c2ip = c2ip;
             $scope.c2ip.new_comment = "";
             $scope.Comments = Comments;
 
@@ -143,7 +145,7 @@ angular.module('InquestKB')
                         return tag.text.toLowerCase().indexOf(query.toLowerCase()) !== -1;
                     });
                 }, function (error) {
-                    growl.error(error, {ttl: -1});
+                    growl.error(error.data, {ttl: -1});
                 });
             }
         }]);

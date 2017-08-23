@@ -31,12 +31,13 @@ def create_c2ip():
         , asn=request.json['asn']
         , country=request.json['country']
         , city=request.json['city']
-        , st=request.json['st']
+        , st=request.json.get('st', None)
         , state=request.json['state']['state']
         , reference_link=request.json['reference_link']
         , reference_text=request.json['reference_text']
         , expiration_type=request.json['expiration_type']
-        , expiration_timestamp=parser.parse(request.json['expiration_timestamp'])
+        , expiration_timestamp=parser.parse(request.json['expiration_timestamp']) if request.json.get("expiration_type",
+                                                                                                      None) else None
         , created_user_id=current_user.id
         , modified_user_id=current_user.id
     )

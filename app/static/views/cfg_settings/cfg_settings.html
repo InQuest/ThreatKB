@@ -9,7 +9,8 @@
                 <button type="button" class="close"
                         ng-click="cancel()">&times;
                 </button>
-                <h4 class="modal-title" id="myCfg_settingsLabel">Create or edit a Cfg_settings</h4>
+                <h4 class="modal-title" id="myC2ipLabel" ng-if="!cfg_settings.id">Create Config Setting Artifact</h4>
+                <h4 class="modal-title" id="myC2ipLabel" ng-if="cfg_settings.id">Edit Config Artifact</h4>
             </div>
             <div class="modal-body">
                 <div class="form-group">

@@ -32,7 +32,8 @@ def create_c2dns():
         , reference_link=request.json['reference_link']
         , reference_text=request.json['reference_text']
         , expiration_type=request.json['expiration_type']
-        , expiration_timestamp=parser.parse(request.json['expiration_timestamp'])
+        , expiration_timestamp=parser.parse(request.json['expiration_timestamp']) if request.json.get("expiration_type",
+                                                                                                      None) else None
         , state=request.json['state']['state']
         , created_user_id=current_user.id
         , modified_user_id=current_user.id

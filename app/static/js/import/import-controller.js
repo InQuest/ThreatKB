@@ -72,7 +72,7 @@ angular.module('InquestKB').controller('ImportController',
                             }
                         }
                     }, function (error) {
-                        growl.error(error, {ttl: -1});
+                    growl.error(error.data, {ttl: -1});
                     }
                 );
             };

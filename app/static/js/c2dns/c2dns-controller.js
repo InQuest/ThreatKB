@@ -33,6 +33,8 @@ angular.module('InquestKB')
                     C2dns.save($scope.c2dns, function () {
                         $scope.c2dns = C2dns.query();
                         //$scope.clear();
+                    }, function (error) {
+                        growl.error(error.data, {ttl: -1});
                     });
                 }
             };
@@ -83,8 +85,6 @@ angular.module('InquestKB')
                 c2dnsSave.result.then(function (entity) {
                     $scope.c2dns = entity;
                     $scope.save(id);
-                }, function (error) {
-                    growl.error(error, {ttl: -1});
                 });
             };
         }])
@@ -93,6 +93,12 @@ angular.module('InquestKB')
             $scope.c2dns = c2dns;
             $scope.c2dns.new_comment = "";
             $scope.Comments = Comments;
+
+
+            $scope.match_types = ['exact', 'wildcard'];
+            if (!$scope.c2dns.match_type) {
+                $scope.c2dns.match_type = $scope.match_types[0];
+            }
 
             $scope.cfg_states = Cfg_states.query();
 
@@ -141,7 +147,7 @@ angular.module('InquestKB')
                         return tag.text.toLowerCase().indexOf(query.toLowerCase()) !== -1;
                     });
                 }, function (error) {
-                    growl.error(error, {ttl: -1});
+                    growl.error(error.data, {ttl: -1});
                 });
             }
         }]);

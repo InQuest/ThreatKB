@@ -33,7 +33,9 @@ angular.module('InquestKB')
                     CfgCategoryRangeMapping.save($scope.cfg_category_range_mapping,
                         function () {
                             $scope.cfg_category_range_mapping = CfgCategoryRangeMapping.query();
-                        });
+                        }, function (error) {
+                            growl.error(error.data, {ttl: -1});
+                        })
                 }
             };
 
@@ -61,8 +63,6 @@ angular.module('InquestKB')
                 CfgCategoryRangeMappingSave.result.then(function (entity) {
                     $scope.cfg_category_range_mapping = entity;
                     $scope.save(id);
-                }, function (error) {
-                    growl.error(error, {ttl: -1});
                 });
             };
         }])

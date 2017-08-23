@@ -62,8 +62,6 @@ angular.module('InquestKB')
         tagsSave.result.then(function (entity) {
           $scope.tags = entity;
           $scope.save(id);
-        }, function (error) {
-            growl.error(error, {ttl: -1});
         });
       };
     }])

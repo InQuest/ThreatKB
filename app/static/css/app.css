@@ -15,6 +15,11 @@ table {
     word-wrap: break-word;
 }
 
+.container-fluid {
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
 table td:last-child {
     width: 100%;
     align: right;

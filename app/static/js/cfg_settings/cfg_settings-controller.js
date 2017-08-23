@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('InquestKB')
-    .controller('Cfg_settingsController', ['$scope', '$modal', 'resolvedCfg_settings', 'Cfg_settings',
-        function ($scope, $modal, resolvedCfg_settings, Cfg_settings) {
+    .controller('Cfg_settingsController', ['$scope', '$uibModal', 'resolvedCfg_settings', 'Cfg_settings',
+        function ($scope, $uibModal, resolvedCfg_settings, Cfg_settings) {
 
             $scope.cfg_settings = resolvedCfg_settings;
 
@@ -49,7 +49,7 @@ angular.module('InquestKB')
             };
 
             $scope.open = function (key) {
-                var cfg_settingsSave = $modal.open({
+                var cfg_settingsSave = $uibModal.open({
                     templateUrl: 'cfg_settings-save.html',
                     controller: 'Cfg_settingsSaveController',
                     resolve: {
@@ -65,16 +65,16 @@ angular.module('InquestKB')
                 });
             };
         }])
-    .controller('Cfg_settingsSaveController', ['$scope', '$modalInstance', 'cfg_settings',
-        function ($scope, $modalInstance, cfg_settings) {
+    .controller('Cfg_settingsSaveController', ['$scope', '$uibModalInstance', 'cfg_settings',
+        function ($scope, $uibModalInstance, cfg_settings) {
             $scope.cfg_settings = cfg_settings;
 
 
             $scope.ok = function () {
-                $modalInstance.close($scope.cfg_settings);
+                $uibModalInstance.close($scope.cfg_settings);
             };
 
             $scope.cancel = function () {
-                $modalInstance.dismiss('cancel');
+                $uibModalInstance.dismiss('cancel');
             };
         }]);
