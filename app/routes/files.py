@@ -13,13 +13,9 @@ from app.models import files
 def get_all_files():
     entity_type = request.args.get("entity_type", None)
     entity_id = request.args.get("entity_id", None)
-    entities = files.Files.query
-    if entity_type:
-        entities = entities.filter_by(entity_type=entity_type)
-    if entity_id:
-        entities = entities.filter_by(entity_id=entity_id)
 
-    entities = entities.all()
+    entities = files.Files.query.filter_by(entity_type=entity_type,
+                                           entity_id=entity_id).all()
     return json.dumps([entity.to_dict() for entity in entities])
 
 
@@ -37,8 +33,8 @@ def upload_file():
     if f:
         filename = secure_filename(f.filename)
         full_path = os.path.join(app.config['FILE_STORE_PATH'],
-                                 request.values['entity_type'],
-                                 request.values['entity_id'],
+                                 request.values['entity_type'] if 'entity_type' in request.values else "",
+                                 request.values['entity_id'] if 'entity_id' in request.values else "",
                                  filename)
         if not os.path.exists(os.path.dirname(full_path)):
             try:
@@ -56,15 +52,16 @@ def upload_file():
 
         f.save(full_path)
 
-        file_entity = files.Files.query.filter_by(entity_type=request.values['entity_type'],
-                                                  entity_id=request.values['entity_id'],
-                                                  filename=f.filename).first()
+        file_entity = files.Files.query.filter_by(
+            entity_type=(request.values['entity_type'] if 'entity_type' in request.values else None),
+            entity_id=(request.values['entity_id'] if 'entity_id' in request.values else None),
+            filename=f.filename).first()
         if not file_entity:
             file_entity = files.Files(
                 filename=f.filename,
                 content_type=f.content_type,
-                entity_type=request.values['entity_type'],
-                entity_id=request.values['entity_id'],
+                entity_type=(request.values['entity_type'] if 'entity_type' in request.values else None),
+                entity_id=(request.values['entity_id'] if 'entity_id' in request.values else None),
                 user_id=current_user.id
             )
             db.session.add(file_entity)
@@ -84,15 +81,15 @@ def upload_file():
 
 @app.route('/InquestKB/files/<string:entity_type>/<int:entity_id>/<int:file_id>', methods=['GET'])
 @login_required
-def get_file(entity_type, entity_id, file_id):
+def get_file_for_entity(entity_type, entity_id, file_id):
     file_entity = files.Files.query.get(file_id)
 
-    if not file_entity or not entity_type or not entity_id:
+    if not file_entity:
         abort(404)
 
     full_path = os.path.join(app.config['FILE_STORE_PATH'],
-                             str(files.Files.ENTITY_MAPPING[entity_type]),
-                             str(entity_id),
+                             str(files.Files.ENTITY_MAPPING[entity_type]) if entity_type != "0" else "",
+                             str(entity_id) if entity_id != 0 else "",
                              secure_filename(file_entity.filename))
     if not os.path.exists(full_path):
         abort(404)
@@ -100,3 +97,22 @@ def get_file(entity_type, entity_id, file_id):
     return send_file(full_path,
                      attachment_filename="{}".format(file_entity.filename),
                      as_attachment=True)
+
+
+@app.route('/InquestKB/files/<int:file_id>', methods=['DELETE'])
+@login_required
+def delete_file(file_id):
+    entity = files.Files.query.get(file_id)
+    if not entity:
+        abort(404)
+
+    full_path = os.path.join(app.config['FILE_STORE_PATH'],
+                             entity.entity_type if entity.entity_type else "",
+                             entity.entity_id if entity.entity_id else "",
+                             secure_filename(entity.filename))
+    if os.path.exists(full_path):
+        os.remove(full_path)
+
+    db.session.delete(entity)
+    db.session.commit()
+    return '', 204

@@ -46,6 +46,7 @@ from app.routes import cfg_category_range_mapping
 from app.routes import test_yara_rule
 from app.routes import error_handling
 
+
 @app.before_first_request
 def setup_logging():
     app.logger.addHandler(logging.StreamHandler())

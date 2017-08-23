@@ -32,7 +32,7 @@
 
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse navbar-ex1-collapse">
-                <ul class="nav navbar-nav" ng-if="isLoggedIn()">
+                <ul class="nav navbar-nav" style="font-size: small" ng-if="isLoggedIn()">
 
                     <li>
                         <a href="#!/c2ips">C2 IP</a>
@@ -70,6 +70,9 @@
                         <a href="#!/cfg_settings">Settings</a>
                     </li>
 
+                    <li>
+                        <a href="#!/files">Files</a>
+                    </li>
                 </ul>
                 <ul class="nav navbar-nav pull-right" ng-show="isLoggedIn()">
                     <li class="pull-right">
@@ -116,6 +119,7 @@
 <script src="js/tags/tags-controller.js"></script>
 <script src="js/tags_mapping/tags_mapping-controller.js"></script>
 <script src="js/cfg_category_range_mapping/cfg_category_range_mapping-controller.js"></script>
+<script src="js/files/files-controller.js"></script>
 <script src="js/authentication/authentication-controller.js"></script>
 <script src="js/import/import-controller.js"></script>
 <!-- /Controllers -->
