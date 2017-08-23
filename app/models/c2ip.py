@@ -66,7 +66,7 @@ class C2ip(db.Model):
 
     @classmethod
     def get_c2ip_from_ip(cls, ip):
-        whois = json.loads(ipwhois.IPWhois(ip))
+        whois = ipwhois.IPWhois(ip).lookup_whois()
 
         c2ip = C2ip()
         c2ip.ip = ip

@@ -38,7 +38,18 @@ angular.module('InquestKB').controller('ImportController',
                 }
 
                 Import.commit_artifacts(artifacts_to_commit, $scope.shared_reference, $scope.shared_state.state.state).then(function (data) {
-                    growl.info("Successfully committed " + data.length + " artifacts.", {
+                    var message = "";
+                    if (data.committed) {
+                        message = "Successfully committed " + data.committed.length + " artifacts.<BR><BR>";
+                    }
+                    if (data.duplicates) {
+                        message += "There were " + data.duplicates.length + " duplicates that were not committed.<BR><BR>";
+                        for (var duplicate in data.duplicates) {
+                            message += data.duplicates[key].artifact + "<BR>";
+                        }
+                    }
+
+                    growl.info(message, {
                         ttl: 3000,
                         disableCountDown: true
                     });
@@ -53,7 +64,18 @@ angular.module('InquestKB').controller('ImportController',
 
                 Import.import_artifacts($scope.import_text, $scope.autocommit, $scope.shared_reference, $scope.shared_state.state.state).then(function (data) {
                         if ($scope.autocommit) {
-                            growl.info("Successfully committed " + data.length + " artifacts.", {
+                            var message = "";
+                            if (data.committed) {
+                                message = "Successfully committed " + data.committed.length + " artifacts.<BR><BR>";
+                            }
+                            if (data.duplicates) {
+                                message += "There were " + data.duplicates.length + " duplicates that were not committed.<BR><BR>";
+                                for (var key in data.duplicates) {
+                                    message += data.duplicates[key].artifact + "<BR>";
+                                }
+                            }
+
+                            growl.info(message, {
                                 ttl: 3000,
                                 disableCountDown: true
                             });
