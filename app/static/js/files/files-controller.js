@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('InquestKB')
-    .controller('FilesController', ['$scope', '$uibModal', 'resolvedFiles', 'Files',
-        function ($scope, $uibModal, resolvedFiles, Files) {
+    .controller('FilesController', ['$scope', '$uibModal', 'resolvedFiles', 'Files', 'Upload', 'growl',
+        function ($scope, $uibModal, resolvedFiles, Files, Upload, growl) {
 
             $scope.files = resolvedFiles;
 
@@ -36,18 +36,12 @@ angular.module('InquestKB')
                     $scope.refresh();
                 });
             };
-        }])
-    .controller('FilesSaveController', ['$scope', '$uibModalInstance', 'files', 'growl', 'Upload',
-        function ($scope, $uibModalInstance, files, growl, Upload) {
-            $scope.files = files;
 
-            $scope.ok = function () {
-                $uibModalInstance.close($scope.files);
-            };
 
             $scope.$watch('files', function () {
                 $scope.upload($scope.files);
             });
+
             $scope.upload = function (id, files) {
                 if (files && files.length) {
                     for (var i = 0; i < files.length; i++) {
@@ -61,8 +55,9 @@ angular.module('InquestKB')
                                 }
                             }).then(function (resp) {
                                 growl.info('Success ' + resp.config.data.file.name + ' uploaded.', {ttl: 3000});
+                                $scope.refresh();
                             }, function (resp) {
-                                growl.info('Error status: ' + resp.status, {ttl: 3000});
+                                growl.error(resp.data, {ttl: -1});
                             }, function (evt) {
                                 var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
                                 console.log('progress: ' + progressPercentage + '% ' + evt.config.data.file.name);
@@ -71,4 +66,5 @@ angular.module('InquestKB')
                     }
                 }
             };
-        }]);
+
+        }])
