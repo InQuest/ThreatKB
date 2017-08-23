@@ -1,12 +1,13 @@
 <div>
-    <script type = "text/ng-template" id="files-save.html">
+    <script type="text/ng-template" id="files-save.html">
         <form name="form" role="form" novalidate
               class="ng-scope ng-invalid ng-invalid-required ng-dirty"
               ng-submit="ok()">
 
             <div class="modal-header">
                 <button type="button" class="close"
-                        ng-click="cancel()">&times;</button>
+                        ng-click="ok()">&times;
+                </button>
                 <h4 class="modal-title" id="myFilesLabel">Upload Files</h4>
             </div>
             <div class="modal-body">
@@ -17,14 +18,13 @@
                          ngf-model-options="modelOptionsObj" ngf-multiple="true" ngf-pattern="pattern"
                          ngf-accept="acceptSelect" ngf-drag-over-class="dragover" ngf-validate="validateObj"
                          ngf-allow-dir="true" class="drop-box" ngf-drop-available="dropAvailable">Select Files
-                      <span ng-show="dropAvailable"> or Drop Files</span>
+                        <span ng-show="dropAvailable"> or Drop Files</span>
                     </div>
                     <div ngf-no-file-drop>File Drag/Drop is not supported for this browser</div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" ng-click="cancel()">Cancel</button>
-                <button ng-disabled="form.$invalid" class="btn btn-primary">Save</button>
+                <button ng-disabled="form.$invalid" class="btn btn-primary">Close</button>
             </div>
         </form>
     </script>
@@ -36,7 +36,7 @@
             <i class="glyphicon glyphicon-search"></i>
             <input type="text" class="form-control" placeholder="Search" ng-model="search"/>
         </div>
-        <a class="btn-link pull-right" style="color:inherit;" ng-click="create()">
+        <a class="btn-link pull-right" style="color:inherit;" ng-click="create()" title="Upload Files">
             <span class="glyphicon glyphicon-plus-sign"></span>
         </a>
     </div>
@@ -47,25 +47,30 @@
             <tr>
                 <th>ID</th>
 
-                <th>filename</th>
+                <th>Filename</th>
 
-                <th>content_type</th>
+                <th>Content Type</th>
+
+                <th>Modified Date</th>
 
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="file in files | toArray:false | filter:search track by $index">
-                <td ng-if="file.id">{{file.id}}</td>
+            <tr ng-repeat="f in files | orderBy:'-date_modified' | toArray:false | filter:search track by $index">
+                <td ng-if="f.id">{{f.id}}</td>
 
-                <td ng-if="file.filename">{{file.filename }}</td>
+                <td ng-if="f.filename">
+                    <a href="InquestKB/files/{{f.entity_type == null ? 0 : f.entity_type }}/{{f.entity_id == null ? 0 : f.entity_id}}/{{f.id}}">{{ f.filename }}</a>
+                </td>
 
-                <td ng-if="file.content_type">{{file.content_type }}</td>
+                <td ng-if="f.content_type">{{f.content_type }}</td>
 
-                <td ng-if="file.id" style="float:right">
-                    <button ng-click="update(file.id)" class="btn">
-                        <span class="glyphicon glyphicon-pencil"></span> Edit
-                    </button>
-                    <button ng-click="delete(file.id)" class="btn btn-danger">
+                <td ng-if="f.id">
+                    <small>{{ pretty_date(f.date_modified) }}</small>
+                </td>
+
+                <td ng-if="f.id" style="float:right">
+                    <button ng-click="delete(f.id)" class="btn btn-danger">
                         <span class="glyphicon glyphicon-remove-circle"></span> Delete
                     </button>
                 </td>

@@ -1,3 +1,5 @@
+'use strict';
+
 angular.module('InquestKB')
     .factory('Files', ['$resource', function ($resource) {
         return {

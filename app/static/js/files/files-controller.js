@@ -7,42 +7,20 @@ angular.module('InquestKB')
             $scope.files = resolvedFiles;
 
             $scope.create = function () {
-                $scope.clear();
                 $scope.open();
             };
 
-            $scope.update = function (id) {
-                $scope.files = Files.get({id: id});
-                $scope.open(id);
-            };
-
             $scope.delete = function (id) {
-                Files.delete({id: id}, function () {
-                    $scope.files = Files.query();
+                Files.resource.delete({id: id}, function () {
+                    $scope.files = Files.resource.query();
                 });
             };
 
-            $scope.save = function (id) {
-                if (id) {
-                    Files.update({id: id}, $scope.files, function () {
-                        $scope.files = Files.query();
-                    });
-                } else {
-                    Files.save($scope.files, function () {
-                        $scope.files = Files.query();
-                    });
-                }
+            $scope.refresh = function () {
+                $scope.files = Files.resource.query();
             };
 
-            $scope.clear = function () {
-                $scope.files = {
-                    "filename": "",
-                    "content_type": "",
-                    "id": ""
-                };
-            };
-
-            $scope.open = function (id) {
+            $scope.open = function () {
                 var filesSave = $uibModal.open({
                     templateUrl: 'files-save.html',
                     controller: 'FilesSaveController',
@@ -55,19 +33,42 @@ angular.module('InquestKB')
 
                 filesSave.result.then(function (entity) {
                     $scope.files = entity;
-                    $scope.save(id);
+                    $scope.refresh();
                 });
             };
         }])
-    .controller('FilesSaveController', ['$scope', '$uibModalInstance', 'files',
-        function ($scope, $uibModalInstance, files) {
+    .controller('FilesSaveController', ['$scope', '$uibModalInstance', 'files', 'growl', 'Upload',
+        function ($scope, $uibModalInstance, files, growl, Upload) {
             $scope.files = files;
 
             $scope.ok = function () {
                 $uibModalInstance.close($scope.files);
             };
 
-            $scope.cancel = function () {
-                $uibModalInstance.dismiss('cancel');
+            $scope.$watch('files', function () {
+                $scope.upload($scope.files);
+            });
+            $scope.upload = function (id, files) {
+                if (files && files.length) {
+                    for (var i = 0; i < files.length; i++) {
+                        var file = files[i];
+                        if (!file.$error) {
+                            Upload.upload({
+                                url: '/InquestKB/file_upload',
+                                method: 'POST',
+                                data: {
+                                    file: file
+                                }
+                            }).then(function (resp) {
+                                growl.info('Success ' + resp.config.data.file.name + ' uploaded.', {ttl: 3000});
+                            }, function (resp) {
+                                growl.info('Error status: ' + resp.status, {ttl: 3000});
+                            }, function (evt) {
+                                var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
+                                console.log('progress: ' + progressPercentage + '% ' + evt.config.data.file.name);
+                            });
+                        }
+                    }
+                }
             };
         }]);
