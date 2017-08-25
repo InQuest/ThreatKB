@@ -9,20 +9,52 @@ import yara
 from sqlalchemy import func
 
 from app import app, db
-from app.models import yara_rule
+from app.models import yara_rule, files
 from flask import abort, jsonify, request
 from flask.ext.login import current_user, login_required
 
 from app.models.yara_rule import Yara_testing_history
 
 
+@app.route('/ThreatKB/test_yara_rule', methods=['POST'])
+@login_required
+def clean_yara_test():
+    pattern = request.values['pattern'] if 'pattern' in request.values else ".*"
+    sig_ids = request.values['sig_ids'] if 'sig_ids' in request.values else []
+
+    if sig_ids.__len__() == 0:
+        sig_ids = get_all_sig_ids()
+
+    total_file_count = 0
+    count_of_files_matched = 0
+    tests_terminated = 0
+    for rule_id in sig_ids:
+        yara_rule_entity = yara_rule.Yara_rule.query.get(rule_id)
+        if not yara_rule_entity:
+            abort(404)
+
+        strings = "$a = /%s/" % pattern
+        condition = "$a"
+        result = test_yara_rule(yara_rule_entity, strings, condition, True)
+        total_file_count += result["files_tested"]
+        count_of_files_matched += result["files_matched"]
+        tests_terminated += result["tests_terminated"]
+
+    return jsonify(dict(files_tested=total_file_count,
+                        files_matched=count_of_files_matched,
+                        tests_terminated=tests_terminated)), 200
+
+
 @app.route('/ThreatKB/test_yara_rule/<int:rule_id>', methods=['GET'])
 @login_required
-def test_yara_rule(rule_id):
+def test_yara_rule_rest(rule_id):
     yara_rule_entity = yara_rule.Yara_rule.query.get(rule_id)
     if not yara_rule_entity:
         abort(404)
+    return jsonify(test_yara_rule(yara_rule_entity, None, None, False)), 200
 
+
+def test_yara_rule(yara_rule_entity, strings, condition, test_clean):
     old_avg = db.session.query(func.avg(Yara_testing_history.avg_millis_per_file).label('average')) \
         .filter(Yara_testing_history.yara_rule_id == yara_rule_entity.id) \
         .scalar()
@@ -30,17 +62,19 @@ def test_yara_rule(rule_id):
     start_time = time.time()
     start_time_str = datetime.datetime.fromtimestamp(start_time).strftime('%Y-%m-%d %H:%M:%S')
 
-    rule = get_yara_rule(yara_rule_entity)
+    rule = get_yara_rule(yara_rule_entity, strings, condition)
 
     total_file_count, count_of_files_matched, tests_terminated, total_file_time = 0, 0, 0, 0
     threshold = app.config['MAX_MILLIS_PER_FILE_THRESHOLD']
     processes = []
     manager_dicts = []
-    for f in yara_rule_entity.files:
+    files_to_test = files.Files.query.filter_by(entity_type=None,
+                                                entity_id=None).all() if test_clean else yara_rule_entity.files
+    for f in files_to_test:
         total_file_count += 1
         file_path = os.path.join(app.config['FILE_STORE_PATH'],
-                                 str(f.entity_type),
-                                 str(f.entity_id),
+                                 str(f.entity_type) if f.entity_type is not None else "",
+                                 str(f.entity_id) if f.entity_id is not None else "",
                                  str(f.filename))
         manager = multiprocessing.Manager()
         manager_dict = manager.dict()
@@ -82,12 +116,12 @@ def test_yara_rule(rule_id):
                                             user_id=current_user.id))
         db.session.commit()
 
-    return jsonify(dict(files_tested=total_file_count,
-                        files_matched=count_of_files_matched,
-                        tests_terminated=tests_terminated)), 200
+    return dict(files_tested=total_file_count,
+                files_matched=count_of_files_matched,
+                tests_terminated=tests_terminated)
 
 
-def get_yara_rule(yara_rule_entity):
+def get_yara_rule(yara_rule_entity, strings, condition):
     rule_string = """
     rule %s
     {
@@ -97,8 +131,8 @@ def get_yara_rule(yara_rule_entity):
             %s
     }
     """ % (yara_rule_entity.name,
-           yara_rule_entity.strings,
-           yara_rule_entity.condition)
+           yara_rule_entity.strings if not strings else strings,
+           yara_rule_entity.condition if not condition else condition)
 
     rule_buffer = StringIO.StringIO()
 
@@ -119,3 +153,12 @@ def perform_rule_match(rule, file_path, manager_dict):
         manager_dict['match'] = True
     else:
         manager_dict['match'] = False
+
+
+def get_all_sig_ids():
+    sig_ids = []
+    yara_rules = yara_rule.Yara_rule.query.all()
+    for rule in yara_rules:
+        sig_ids.append(rule.id)
+
+    return sig_ids
