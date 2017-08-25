@@ -8,9 +8,9 @@ import yara
 
 from sqlalchemy import func
 
-from app import app, db
+from app import app, db, celery
 from app.models import yara_rule, files
-from flask import abort, jsonify, request
+from flask import abort, jsonify, request, json
 from flask.ext.login import current_user, login_required
 
 from app.models.yara_rule import Yara_testing_history
@@ -20,29 +20,30 @@ from app.models.yara_rule import Yara_testing_history
 @login_required
 def clean_yara_test():
     pattern = request.values['pattern'] if 'pattern' in request.values else ".*"
-    sig_ids = request.values['sig_ids'] if 'sig_ids' in request.values else []
+    sig_ids = json.loads(request.values['sig_ids']) if 'sig_ids' in request.values else []
 
     if sig_ids.__len__() == 0:
         sig_ids = get_all_sig_ids()
 
-    total_file_count = 0
-    count_of_files_matched = 0
-    tests_terminated = 0
+    results = []
     for rule_id in sig_ids:
         yara_rule_entity = yara_rule.Yara_rule.query.get(rule_id)
         if not yara_rule_entity:
-            abort(404)
+            results.append(dict(sig_id=rule_id,
+                                error="Error encountered"))
+        else:
+            files_to_test = files.Files.query \
+                .filter_by(entity_type=None, entity_id=None) \
+                .filter(files.Files.filename.op('regexp')(r'%s' % pattern)) \
+                .all()
+            result = test_yara_rule_task.delay(yara_rule_entity, files_to_test)
+            result.wait()
+            results.append(dict(sig_id=yara_rule_entity.id,
+                                files_tested=result["files_tested"],
+                                files_matched=result["files_matched"],
+                                tests_terminated=result["tests_terminated"]))
 
-        strings = "$a = /%s/" % pattern
-        condition = "$a"
-        result = test_yara_rule(yara_rule_entity, strings, condition, True)
-        total_file_count += result["files_tested"]
-        count_of_files_matched += result["files_matched"]
-        tests_terminated += result["tests_terminated"]
-
-    return jsonify(dict(files_tested=total_file_count,
-                        files_matched=count_of_files_matched,
-                        tests_terminated=tests_terminated)), 200
+    return json.dumps(results), 200
 
 
 @app.route('/ThreatKB/test_yara_rule/<int:rule_id>', methods=['GET'])
@@ -51,10 +52,15 @@ def test_yara_rule_rest(rule_id):
     yara_rule_entity = yara_rule.Yara_rule.query.get(rule_id)
     if not yara_rule_entity:
         abort(404)
-    return jsonify(test_yara_rule(yara_rule_entity, None, None, False)), 200
+    return jsonify(test_yara_rule(yara_rule_entity, yara_rule_entity.files)), 200
 
 
-def test_yara_rule(yara_rule_entity, strings, condition, test_clean):
+@celery.task()
+def test_yara_rule_task(yara_rule_entity, files_to_test):
+    return test_yara_rule(yara_rule_entity, files_to_test)
+
+
+def test_yara_rule(yara_rule_entity, files_to_test):
     old_avg = db.session.query(func.avg(Yara_testing_history.avg_millis_per_file).label('average')) \
         .filter(Yara_testing_history.yara_rule_id == yara_rule_entity.id) \
         .scalar()
@@ -62,14 +68,12 @@ def test_yara_rule(yara_rule_entity, strings, condition, test_clean):
     start_time = time.time()
     start_time_str = datetime.datetime.fromtimestamp(start_time).strftime('%Y-%m-%d %H:%M:%S')
 
-    rule = get_yara_rule(yara_rule_entity, strings, condition)
+    rule = get_yara_rule(yara_rule_entity)
 
     total_file_count, count_of_files_matched, tests_terminated, total_file_time = 0, 0, 0, 0
     threshold = app.config['MAX_MILLIS_PER_FILE_THRESHOLD']
     processes = []
     manager_dicts = []
-    files_to_test = files.Files.query.filter_by(entity_type=None,
-                                                entity_id=None).all() if test_clean else yara_rule_entity.files
     for f in files_to_test:
         total_file_count += 1
         file_path = os.path.join(app.config['FILE_STORE_PATH'],
@@ -121,7 +125,7 @@ def test_yara_rule(yara_rule_entity, strings, condition, test_clean):
                 tests_terminated=tests_terminated)
 
 
-def get_yara_rule(yara_rule_entity, strings, condition):
+def get_yara_rule(yara_rule_entity):
     rule_string = """
     rule %s
     {
@@ -131,8 +135,8 @@ def get_yara_rule(yara_rule_entity, strings, condition):
             %s
     }
     """ % (yara_rule_entity.name,
-           yara_rule_entity.strings if not strings else strings,
-           yara_rule_entity.condition if not condition else condition)
+           yara_rule_entity.strings,
+           yara_rule_entity.condition)
 
     rule_buffer = StringIO.StringIO()
 

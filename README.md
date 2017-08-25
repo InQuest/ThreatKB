@@ -44,6 +44,34 @@ ThreatKB (staging) $ grunt server
 
 ## Miscellaneous
 
+### redis
+#### Install
+```
+# Using Homebrew on Mac
+$ brew install redis
+```
+
+#### Launch on startup
+```
+# To launch redis-server on computer start (Mac)
+$ ln -sfv /usr/local/opt/redis/*.plist ~/Library/LaunchAgents
+$ launchctl load ~/Library/LaunchAgents/homebrew.mxcl.redis.plist
+
+# To unload from startup
+$ launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.redis.plist
+```
+
+#### Start
+```
+$ redis-server /usr/local/etc/redis.conf
+```
+
+#### Test
+```
+$ redis-cli ping
+PONG
+```
+
 ### Hashing password for insert in kb_users table
 ```
 (flask) ThreatKB (staging) $ ./hash_pass.py abc123

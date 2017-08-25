@@ -2,16 +2,39 @@ from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.bcrypt import Bcrypt
 from flask.ext.login import LoginManager
+from celery import Celery
 import logging
+
 
 app = Flask(__name__, static_url_path='')
 app.secret_key = "a" * 24  # os.urandom(24)
 app.config.from_object('config')
+
+
+def make_celery(flask_app):
+    celery_app = Celery(flask_app.import_name,
+                        backend=flask_app.config['BROKER_URL'],
+                        broker=flask_app.config['BROKER_URL'])
+    celery_app.conf.update(flask_app.config)
+    task_base = celery_app.Task
+
+    class ContextTask(task_base):
+        abstract = True
+
+        def __call__(self, *args, **kwargs):
+            with flask_app.app_context():
+                return task_base.__call__(self, *args, **kwargs)
+
+    celery_app.Task = ContextTask
+
+    return celery_app
+
+
 db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
-
 bcrypt = Bcrypt(app)
+celery = make_celery(app)
 
 app.config["SQLALCHEMY_ECHO"] = True
 
