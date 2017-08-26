@@ -56,6 +56,7 @@
 
                 <th>text</th>
 
+                <th style="width: 120px;">Actions</th>
             </tr>
             </thead>
             <tbody>
@@ -65,16 +66,18 @@
                 <td ng-if="tag.text">{{tag.text }}</td>
 
                 <td ng-if="tag.id" style="float:right">
-                    <button type="submit"
-                            ng-click="update(tag.id)"
-                            class="btn">
-                        <span class="glyphicon glyphicon-pencil"></span> Edit
-                    </button>
-                    <button type="submit"
-                            ng-click="delete(tag.id)"
-                            class="btn btn-danger">
-                        <span class="glyphicon glyphicon-remove-circle"></span> Delete
-                    </button>
+                    <center>
+                        <button type="submit"
+                                ng-click="update(tag.id)"
+                                class="btn btn-sm">
+                            <small><span class="glyphicon glyphicon-pencil"></span></small>
+                        </button>
+                        <button type="submit"
+                                ng-click="delete(tag.id)"
+                                class="btn btn-sm btn-danger">
+                            <small><span class="glyphicon glyphicon-remove-circle"></span></small>
+                        </button>
+                    </center>
                 </td>
             </tr>
             </tbody>
