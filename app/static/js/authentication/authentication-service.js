@@ -14,13 +14,17 @@ angular.module('InquestKB').factory('AuthService',
                 getUserStatus: getUserStatus
             });
 
+            function getUsers(){
+                return $http.get('/InquestKB/u')
+            };
+
             function isLoggedIn() {
                 if (user) {
                     return true;
                 } else {
                     return false;
                 }
-            }
+            };
 
             function login(email, password) {
                 // create a new instance of deferred

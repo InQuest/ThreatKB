@@ -1,10 +1,12 @@
 'use strict';
 
 angular.module('InquestKB')
-    .controller('Yara_ruleController', ['$scope', '$uibModal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states', 'CfgCategoryRangeMapping',
-        function ($scope, $uibModal, resolvedYara_rule, Yara_rule, Cfg_states, CfgCategoryRangeMapping) {
+    .controller('Yara_ruleController', ['$scope', '$uibModal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states', 'CfgCategoryRangeMapping', 'Users',
+        function ($scope, $uibModal, resolvedYara_rule, Yara_rule, Cfg_states, CfgCategoryRangeMapping, Users) {
 
             $scope.yara_rules = resolvedYara_rule;
+
+            $scope.users = Users.query();
 
             $scope.create = function () {
                 $scope.clear();
@@ -18,6 +20,7 @@ angular.module('InquestKB')
             $scope.update = function (id) {
                 $scope.yara_rule = Yara_rule.get({id: id});
                 $scope.cfg_states = Cfg_states.query();
+                $scope.users = Users.query();
                 $scope.cfg_category_range_mapping = CfgCategoryRangeMapping.query();
                 $scope.open(id);
             };
@@ -87,12 +90,13 @@ angular.module('InquestKB')
                 });
             };
         }])
-    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', 'yara_rule', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl',
-        function ($scope, $http, $uibModalInstance, yara_rule, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl) {
+    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', 'yara_rule', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users',
+        function ($scope, $http, $uibModalInstance, yara_rule, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users) {
             $scope.yara_rule = yara_rule;
             $scope.yara_rule.new_comment = "";
             $scope.Comments = Comments;
             $scope.Files = Files;
+            $scope.users = Users.query();
 
             $scope.cfg_states = Cfg_states.query();
             $scope.cfg_category_range_mapping = CfgCategoryRangeMapping.query();

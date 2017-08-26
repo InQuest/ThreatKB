@@ -1,7 +1,7 @@
 from flask import abort, jsonify, request
 from flask.ext.login import login_required, current_user
 from app import app, db
-from app.models import c2ip, c2dns, yara_rule, cfg_states, authentication, comments
+from app.models import c2ip, c2dns, yara_rule, cfg_states, users, comments
 from app.utilities import extract_artifacts
 
 
