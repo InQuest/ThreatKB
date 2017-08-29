@@ -114,6 +114,11 @@ angular.module('InquestKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitiz
                 controller: 'ImportController',
                 access: {restricted: true}
             })
+            .when('/releases', {
+                templateUrl: 'views/releases/release.html',
+                controller: 'Release',
+                access: {restricted: true}
+            })
             .otherwise({
                 redirectTo: '/'
             });

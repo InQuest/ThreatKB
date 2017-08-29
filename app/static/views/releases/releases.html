@@ -1,0 +1,91 @@
+<div>
+
+    <script type="text/ng-template" id="cfg_settings-save.html">
+        <form name="form" role="form" novalidate
+              class="ng-scope ng-invalid ng-invalid-required ng-dirty"
+              ng-submit="ok()">
+
+            <div class="modal-header">
+                <button type="button" class="close"
+                        ng-click="cancel()">&times;
+                </button>
+                <h4 class="modal-title" ng-if="!release.id">Create Release</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Name</label>
+                    <span class="error text-danger" ng-if="!release.name">*</span>
+                    <input type="text" class="form-control" name="key"
+                           ng-model="release.name" ng-required="true"/>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="pull-left" style="padding: 5px 0 0 5px;">
+                    <input type="checkbox" class="pull-left" ng-model="release.is_test_release">
+                    &nbsp;This Is A Test Release
+                </div>
+                <button type="button" class="btn btn-default" ng-click="cancel()">Cancel
+                </button>
+                <button type="submit" ng-disabled="form.$invalid" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </script>
+
+    <br>
+    <div class="container-fluid">
+
+        <div class="inner-addon left-addon col-md-4" style="padding-left:0px;">
+            <i class="glyphicon glyphicon-search"></i>
+            <input type="text" class="form-control" placeholder="Search" ng-model="search"/>
+        </div>
+        <a class="btn-link pull-right" style="color:inherit;" ng-click="create()">
+            <span class="glyphicon glyphicon-plus-sign"></span>
+        </a>
+    </div>
+
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Name</th>
+
+                <th>Date Created</th>
+
+                <th>Created By</th>
+
+                <th>Test Release</th>
+
+                <th style="width: 120px;">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="release in cfg_settings | toArray:false | filter:search track by $index">
+                <td ng-if="release.name">{{ release.name }}</td>
+
+                <td ng-if="release.date_created">{{ release.date_created }}</td>
+
+                <td ng-if="release.user.email">{{ release.user.email }}</td>
+
+                <td ng-if="release.is_test_release">Yes</td>
+                <td ng-if="!release.is_test_release">No</td>
+
+                <td ng-if="release.key" style="float:right">
+                    <center>
+                        <button type="submit"
+                                ng-click="delete(release.key)"
+                                class="btn btn-sm btn-danger">
+                            <small><span class="glyphicon glyphicon-remove-circle"></span></small>
+                        </button>
+                        <button type="submit"
+                                ng-click="delete(release.key)"
+                                class="btn btn-sm btn-danger">
+                            <small><span class="glyphicon glyphicon-remove-circle"></span></small>
+                        </button>
+                    </center>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
