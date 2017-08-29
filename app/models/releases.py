@@ -1,5 +1,5 @@
 from app import db
-from app.models import releases, c2dns, c2ip, yara_rule, cfg_settings
+from app.models import c2dns, c2ip, yara_rule, cfg_settings
 from sqlalchemy import and_
 
 import json
@@ -35,7 +35,7 @@ class Release(db.Model):
         if self.release_data:
             return self.release_data
 
-        release_state = releases.Release.query.filter(releases.Release.is_test_release > 0).first()
+        release_state = Release.query.filter(Release.is_test_release > 0).first()
         if not release_state:
             raise Exception("You need to specify a production release state first.")
 
@@ -51,8 +51,7 @@ class Release(db.Model):
             "IP": {"IP": {entity.to_dict()["id"]: entity.to_dict() for entity in dns}, "Added": [], "Removed": [],
                    "Modified": []}}
 
-        last_release = releases.Release.query.filter(releases.Release.is_test_release == 0).order_by(
-            releases.Release.id.desc()).first()
+        last_release = Release.query.filter(Release.is_test_release == 0).order_by(Release.id.desc()).first()
 
         if not last_release:
             release_data["Signatures"]["Added"] = release_data["Signatures"]["Signatures"]
