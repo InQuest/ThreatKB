@@ -29,4 +29,4 @@ def generate_signature_id(mapper, connect, target):
 @listens_for(Cfg_states, "before_update")
 def generate_signature_id(mapper, connect, target):
     if target.is_release_state > 0:
-        Cfg_states.query.update(dict(is_release_state=0))
+        Cfg_states.query.filter(Cfg_states.id != target.id).update(dict(is_release_state=0))
