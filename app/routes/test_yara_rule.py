@@ -5,6 +5,7 @@ import time
 import datetime
 import StringIO
 import yara
+from collections import namedtuple
 
 from sqlalchemy import func
 
@@ -32,16 +33,19 @@ def clean_yara_test():
             results.append(dict(sig_id=rule_id,
                                 error="Error encountered"))
         else:
-            files_to_test = files.Files.query \
+            file_entities = files.Files.query \
                 .filter_by(entity_type=None, entity_id=None) \
                 .filter(files.Files.filename.op('regexp')(r'%s' % pattern)) \
                 .all()
-            result = test_yara_rule_task.delay(yara_rule_entity, files_to_test)
-            result.wait()
-            results.append(dict(sig_id=yara_rule_entity.id,
-                                files_tested=result["files_tested"],
-                                files_matched=result["files_matched"],
-                                tests_terminated=result["tests_terminated"]))
+            files_to_test = []
+            for f in file_entities:
+                files_to_test.append(f.id)
+
+            result = test_yara_rule_task.delay(yara_rule_entity.id, files_to_test)
+            # results.append(dict(sig_id=yara_rule_entity.id,
+            #                     files_tested=result["files_tested"],
+            #                     files_matched=result["files_matched"],
+            #                     tests_terminated=result["tests_terminated"]))
 
     return json.dumps(results), 200
 
@@ -51,13 +55,21 @@ def clean_yara_test():
 def test_yara_rule_rest(rule_id):
     yara_rule_entity = yara_rule.Yara_rule.query.get(rule_id)
     if not yara_rule_entity:
-        abort(404)
+        abort(500)
     return jsonify(test_yara_rule(yara_rule_entity, yara_rule_entity.files)), 200
 
 
 @celery.task()
-def test_yara_rule_task(yara_rule_entity, files_to_test):
-    return test_yara_rule(yara_rule_entity, files_to_test)
+def test_yara_rule_task(rule_id, files_to_test):
+    yara_rule_entity = yara_rule.Yara_rule.query.get(rule_id)
+    if not yara_rule_entity:
+        abort(500)
+
+    file_entities = files.Files.query \
+        .filter(files.Files.id.in_(files_to_test)) \
+        .all()
+    [next(f for f in file_entities if f.id == id) for id in files_to_test]
+    return test_yara_rule(yara_rule_entity, file_entities)
 
 
 def test_yara_rule(yara_rule_entity, files_to_test):
