@@ -5,9 +5,9 @@ import time
 import datetime
 import StringIO
 import yara
-from collections import namedtuple
 
 from sqlalchemy import func
+from sqlalchemy.ext.serializer import loads, dumps
 
 from app import app, db, celery
 from app.models import yara_rule, files
@@ -37,15 +37,8 @@ def clean_yara_test():
                 .filter_by(entity_type=None, entity_id=None) \
                 .filter(files.Files.filename.op('regexp')(r'%s' % pattern)) \
                 .all()
-            files_to_test = []
-            for f in file_entities:
-                files_to_test.append(f.id)
 
-            result = test_yara_rule_task.delay(yara_rule_entity.id, files_to_test)
-            # results.append(dict(sig_id=yara_rule_entity.id,
-            #                     files_tested=result["files_tested"],
-            #                     files_matched=result["files_matched"],
-            #                     tests_terminated=result["tests_terminated"]))
+            test_yara_rule_task.delay(yara_rule_entity.id, dumps(file_entities), current_user.id)
 
     return json.dumps(results), 200
 
@@ -56,23 +49,18 @@ def test_yara_rule_rest(rule_id):
     yara_rule_entity = yara_rule.Yara_rule.query.get(rule_id)
     if not yara_rule_entity:
         abort(500)
-    return jsonify(test_yara_rule(yara_rule_entity, yara_rule_entity.files)), 200
+    return jsonify(test_yara_rule(yara_rule_entity, yara_rule_entity.files, current_user.id)), 200
 
 
 @celery.task()
-def test_yara_rule_task(rule_id, files_to_test):
+def test_yara_rule_task(rule_id, files_to_test, user):
     yara_rule_entity = yara_rule.Yara_rule.query.get(rule_id)
     if not yara_rule_entity:
         abort(500)
-
-    file_entities = files.Files.query \
-        .filter(files.Files.id.in_(files_to_test)) \
-        .all()
-    [next(f for f in file_entities if f.id == id) for id in files_to_test]
-    return test_yara_rule(yara_rule_entity, file_entities)
+    return test_yara_rule(yara_rule_entity, loads(files_to_test), user, True)
 
 
-def test_yara_rule(yara_rule_entity, files_to_test):
+def test_yara_rule(yara_rule_entity, files_to_test, user, is_async=False):
     old_avg = db.session.query(func.avg(Yara_testing_history.avg_millis_per_file).label('average')) \
         .filter(Yara_testing_history.yara_rule_id == yara_rule_entity.id) \
         .scalar()
@@ -92,17 +80,21 @@ def test_yara_rule(yara_rule_entity, files_to_test):
                                  str(f.entity_type) if f.entity_type is not None else "",
                                  str(f.entity_id) if f.entity_id is not None else "",
                                  str(f.filename))
-        manager = multiprocessing.Manager()
-        manager_dict = manager.dict()
-        if old_avg:
-            p = multiprocessing.Process(target=perform_rule_match, args=(rule, file_path, manager_dict))
-            processes.append(p)
-            p.start()
-        else:
-            perform_rule_match(rule, file_path, manager_dict)
-        manager_dicts.append(manager_dict)
 
-    if old_avg:
+        if not is_async:
+            manager = multiprocessing.Manager()
+            manager_dict = manager.dict()
+            if old_avg:
+                p = multiprocessing.Process(target=perform_rule_match, args=(rule, file_path, manager_dict))
+                processes.append(p)
+                p.start()
+            else:
+                perform_rule_match(rule, file_path, manager_dict)
+            manager_dicts.append(manager_dict)
+        else:
+            manager_dicts.append(perform_rule_match(rule, file_path, dict()))
+
+    if old_avg and not is_async:
         time.sleep((old_avg * threshold) / 1000.0)
         for p in processes:
             p.join()
@@ -129,7 +121,7 @@ def test_yara_rule(yara_rule_entity, files_to_test):
                                             files_tested=total_file_count,
                                             files_matched=count_of_files_matched,
                                             avg_millis_per_file=((total_file_time / total_file_count) * 1000),
-                                            user_id=current_user.id))
+                                            user_id=user))
         db.session.commit()
 
     return dict(files_tested=total_file_count,
@@ -169,6 +161,7 @@ def perform_rule_match(rule, file_path, manager_dict):
         manager_dict['match'] = True
     else:
         manager_dict['match'] = False
+    return manager_dict
 
 
 def get_all_sig_ids():
