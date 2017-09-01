@@ -42,7 +42,17 @@ ThreatKB (staging) $ flask/bin/python run.py
 ThreatKB (staging) $ grunt server
 ```
 
+## Databases
+Please see ThreatKB/migrations/README.
+
 ## Miscellaneous
+
+### celery
+Requires running inside virtualenv. Needs to be running in order for testing Clean Corpus of files.
+```
+ThreatKB (staging) $ source flask/bin/activate
+(flask) ThreatKB (staging) $ celery -A app.celery worker -E
+```
 
 ### redis
 #### Install
@@ -70,6 +80,12 @@ $ redis-server /usr/local/etc/redis.conf
 ```
 $ redis-cli ping
 PONG
+```
+
+#### Monitor
+```
+$ redis-cli monitor
+OK
 ```
 
 ### Hashing password for insert in kb_users table
