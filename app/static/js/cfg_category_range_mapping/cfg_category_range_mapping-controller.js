@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('InquestKB')
+angular.module('ThreatKB')
     .controller('CfgCategoryRangeMappingController', ['$scope', '$uibModal', 'resolvedCfgCategoryRangeMapping', 'CfgCategoryRangeMapping',
         function ($scope, $uibModal, resolvedCfgCategoryRangeMapping, CfgCategoryRangeMapping) {
 

@@ -4,7 +4,8 @@ from flask import request, jsonify, session
 from flask.ext.login import current_user, login_required
 import flask_login
 
-@app.route('/InquestKB/login', methods=['POST'])
+
+@app.route('/ThreatKB/login', methods=['POST'])
 def login():
     app.logger.info("login called with payload: '%s'" % (request.data))
     json_data = request.json
@@ -19,7 +20,7 @@ def login():
     return jsonify({'result': status})
 
 
-@app.route('/InquestKB/logout')
+@app.route('/ThreatKB/logout')
 @login_required
 def logout():
     session.pop('logged_in', None)
@@ -27,7 +28,7 @@ def logout():
     return jsonify({'result': 'success'})
 
 
-@app.route('/InquestKB/status')
+@app.route('/ThreatKB/status')
 def status():
     app.logger.debug("status current_user is '%s'" % (str(current_user)))
     if session.get('logged_in'):

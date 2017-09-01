@@ -1,4 +1,4 @@
-angular.module('InquestKB').controller('AuthController',
+angular.module('ThreatKB').controller('AuthController',
     ['$scope', '$location', 'AuthService',
         function ($scope, $location, AuthService) {
 

@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('InquestKB')
+angular.module('ThreatKB')
   .controller('TagsController', ['$scope', '$uibModal', 'resolvedTags', 'Tags',
     function ($scope, $uibModal, resolvedTags, Tags) {
 

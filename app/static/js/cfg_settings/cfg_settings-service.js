@@ -1,8 +1,8 @@
 'use strict';
 
-angular.module('InquestKB')
+angular.module('ThreatKB')
     .factory('Cfg_settings', ['$resource', function ($resource) {
-        return $resource('InquestKB/cfg_settings/:key', {}, {
+        return $resource('ThreatKB/cfg_settings/:key', {}, {
             'query': {method: 'GET', isArray: true},
             'get': {method: 'GET'},
             'update': {method: 'PUT'}

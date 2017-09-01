@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('InquestKB')
+angular.module('ThreatKB')
     .controller('Cfg_statesController', ['$scope', '$uibModal', 'resolvedCfg_states', 'Cfg_states',
         function ($scope, $uibModal, resolvedCfg_states, Cfg_states) {
 

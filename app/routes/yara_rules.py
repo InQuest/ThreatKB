@@ -9,14 +9,14 @@ import json
 import datetime
 
 
-@app.route('/InquestKB/yara_rules', methods=['GET'])
+@app.route('/ThreatKB/yara_rules', methods=['GET'])
 @login_required
 def get_all_yara_rules():
     entities = yara_rule.Yara_rule.query.all()
     return json.dumps([entity.to_dict() for entity in entities])
 
 
-@app.route('/InquestKB/yara_rules/<int:id>', methods=['GET'])
+@app.route('/ThreatKB/yara_rules/<int:id>', methods=['GET'])
 @login_required
 def get_yara_rule(id):
     entity = yara_rule.Yara_rule.query.get(id)
@@ -25,7 +25,7 @@ def get_yara_rule(id):
     return jsonify(entity.to_dict())
 
 
-@app.route('/InquestKB/yara_rules', methods=['POST'])
+@app.route('/ThreatKB/yara_rules', methods=['POST'])
 @login_required
 def create_yara_rule():
     new_sig_id = 0
@@ -62,7 +62,7 @@ def create_yara_rule():
     return jsonify(entity.to_dict()), 201
 
 
-@app.route('/InquestKB/yara_rules/<int:id>', methods=['PUT'])
+@app.route('/ThreatKB/yara_rules/<int:id>', methods=['PUT'])
 @login_required
 def update_yara_rule(id):
     do_not_bump_revision = request.json.get("do_not_bump_revision", False)
@@ -127,7 +127,7 @@ def update_yara_rule(id):
     return jsonify(entity.to_dict()), 200
 
 
-@app.route('/InquestKB/yara_rules/<int:id>', methods=['DELETE'])
+@app.route('/ThreatKB/yara_rules/<int:id>', methods=['DELETE'])
 @login_required
 def delete_yara_rule(id):
     entity = yara_rule.Yara_rule.query.get(id)

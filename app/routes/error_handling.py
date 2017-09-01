@@ -17,11 +17,11 @@ def handle_exception(exception):
     re.sub(r'\"[^\"]+\/([^\"]+)', r"\1", traceback.format_exc().replace("\n", "<BR>").replace(" ", "&nbsp;"))), 500
 
 
-@app.route('/InquestKB/error', methods=["GET"])
+@app.route('/ThreatKB/error', methods=["GET"])
 def do_error():
     return "Generic 500 error", 500
 
 
-@app.route("/InquestKB/exception", methods=["GET"])
+@app.route("/ThreatKB/exception", methods=["GET"])
 def do_exception():
     raise Exception("Generic 500 exception")

@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('InquestKB')
+angular.module('ThreatKB')
     .controller('C2dnsController', ['$scope', '$uibModal', 'resolvedC2dns', 'C2dns', 'Cfg_states',
         function ($scope, $uibModal, resolvedC2dns, C2dns, Cfg_states) {
 
@@ -141,7 +141,7 @@ angular.module('InquestKB')
             };
 
             $scope.loadTags = function (query) {
-                return $http.get('/InquestKB/tags', {cache: false}).then(function (response) {
+                return $http.get('/ThreatKB/tags', {cache: false}).then(function (response) {
                     var tags = response.data;
                     return tags.filter(function (tag) {
                         return tag.text.toLowerCase().indexOf(query.toLowerCase()) !== -1;

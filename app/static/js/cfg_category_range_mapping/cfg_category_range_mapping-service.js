@@ -1,8 +1,8 @@
 'use strict';
 
-angular.module('InquestKB')
+angular.module('ThreatKB')
     .factory('CfgCategoryRangeMapping', ['$resource', function ($resource) {
-        return $resource('InquestKB/cfg_category_range_mapping/:id', {}, {
+        return $resource('ThreatKB/cfg_category_range_mapping/:id', {}, {
             'query': {method: 'GET', isArray: true},
             'get': {method: 'GET'},
             'update': {method: 'PUT'}

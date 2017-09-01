@@ -1,5 +1,5 @@
 // Declare app level module which depends on filters, and services
-angular.module('InquestKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize', 'ui.select', 'ngTagsInput', 'angular-growl',
+angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize', 'ui.select', 'ngTagsInput', 'angular-growl',
     'angular-toArrayFilter', 'ui.codemirror', 'ngFileUpload'])
     .config(['$routeProvider', function ($routeProvider) {
         $routeProvider
@@ -120,7 +120,7 @@ angular.module('InquestKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitiz
     }])
 ;
 
-angular.module('InquestKB').run(function ($rootScope, $location, AuthService) {
+angular.module('ThreatKB').run(function ($rootScope, $location, AuthService) {
 
     $rootScope.pretty_date = function prettyDate(time) {
         var date = new Date((time || "").replace(/-/g, "/").replace(/[TZ]/g, " ")),

@@ -5,14 +5,14 @@ from flask.ext.login import login_required
 import json
 
 
-@app.route('/InquestKB/tags', methods=['GET'])
+@app.route('/ThreatKB/tags', methods=['GET'])
 @login_required
 def get_all_tags():
     entities = tags.Tags.query.all()
     return json.dumps([entity.to_dict() for entity in entities])
 
 
-@app.route('/InquestKB/tags/<int:id>', methods=['GET'])
+@app.route('/ThreatKB/tags/<int:id>', methods=['GET'])
 @login_required
 def get_tags(id):
     entity = tags.Tags.query.get(id)
@@ -21,7 +21,7 @@ def get_tags(id):
     return jsonify(entity.to_dict())
 
 
-@app.route('/InquestKB/tags', methods=['POST'])
+@app.route('/ThreatKB/tags', methods=['POST'])
 @login_required
 def create_tags():
     created_tag = create_tag(request.json['text'])
@@ -37,7 +37,7 @@ def create_tag(tag_text):
     return entity
 
 
-@app.route('/InquestKB/tags/<int:id>', methods=['PUT'])
+@app.route('/ThreatKB/tags/<int:id>', methods=['PUT'])
 @login_required
 def update_tags(id):
     entity = tags.Tags.query.get(id)
@@ -52,7 +52,7 @@ def update_tags(id):
     return jsonify(entity.to_dict()), 200
 
 
-@app.route('/InquestKB/tags/<int:id>', methods=['DELETE'])
+@app.route('/ThreatKB/tags/<int:id>', methods=['DELETE'])
 @login_required
 def delete_tags(id):
     entity = tags.Tags.query.get(id)

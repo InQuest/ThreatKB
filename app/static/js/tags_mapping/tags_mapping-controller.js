@@ -1,6 +1,6 @@
 // 'use strict';
 //
-// angular.module('InquestKB')
+// angular.module('ThreatKB')
 //   .controller('Tags_mappingController', ['$scope', 'resolvedTags_mapping', 'Tags_mapping',
 //     function ($scope, resolvedTags_mapping, Tags_mapping) {
 //

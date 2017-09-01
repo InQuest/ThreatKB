@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('InquestKB')
+angular.module('ThreatKB')
     .controller('Cfg_reference_text_templatesController', ['$scope', '$uibModal', 'resolvedCfg_reference_text_templates', 'Cfg_reference_text_templates',
         function ($scope, $uibModal, resolvedCfg_reference_text_templates, Cfg_reference_text_templates) {
 

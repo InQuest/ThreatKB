@@ -1,4 +1,4 @@
-angular.module('InquestKB').factory('AuthService',
+angular.module('ThreatKB').factory('AuthService',
     ['$q', '$timeout', '$http',
         function ($q, $timeout, $http) {
 
@@ -27,7 +27,7 @@ angular.module('InquestKB').factory('AuthService',
                 var deferred = $q.defer();
 
                 // send a post request to the server
-                $http.post('/InquestKB/login', {email: email, password: password})
+                $http.post('/ThreatKB/login', {email: email, password: password})
                     .then(function(success) {
                         if (success.status === 200 && success.data.result) {
                             user = true;
@@ -52,7 +52,7 @@ angular.module('InquestKB').factory('AuthService',
                 var deferred = $q.defer();
 
                 // send a get request to the server
-                $http.get('/InquestKB/logout')
+                $http.get('/ThreatKB/logout')
                     // handle success
                     .then(function(success) {
                         user = false;
@@ -74,7 +74,7 @@ angular.module('InquestKB').factory('AuthService',
                 var deferred = $q.defer();
 
                 // send a post request to the server
-                $http.post('/InquestKB/register', {email: email, password: password})
+                $http.post('/ThreatKB/register', {email: email, password: password})
                     // handle success
                     .then(function(success) {
                         if (success.status === 200 && success.data.result) {
@@ -93,7 +93,7 @@ angular.module('InquestKB').factory('AuthService',
             }
 
             function getUserStatus() {
-                return $http.get('/InquestKB/status')
+                return $http.get('/ThreatKB/status')
                     // handle success
                     .then(function(success) {
                             if (success.status == 200 && success.data.status) {

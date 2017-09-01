@@ -8,7 +8,7 @@ from app import app, db
 from app.models import files
 
 
-@app.route('/InquestKB/files', methods=['GET'])
+@app.route('/ThreatKB/files', methods=['GET'])
 @login_required
 def get_all_files():
     entity_type = request.args.get("entity_type", None)
@@ -19,7 +19,7 @@ def get_all_files():
     return json.dumps([entity.to_dict() for entity in entities])
 
 
-@app.route('/InquestKB/file_upload', methods=['POST'])
+@app.route('/ThreatKB/file_upload', methods=['POST'])
 @login_required
 def upload_file():
     if 'file' not in request.files:
@@ -79,7 +79,7 @@ def upload_file():
     return jsonify(fileStatus=False)
 
 
-@app.route('/InquestKB/files/<string:entity_type>/<int:entity_id>/<int:file_id>', methods=['GET'])
+@app.route('/ThreatKB/files/<string:entity_type>/<int:entity_id>/<int:file_id>', methods=['GET'])
 @login_required
 def get_file_for_entity(entity_type, entity_id, file_id):
     file_entity = files.Files.query.get(file_id)
@@ -99,7 +99,7 @@ def get_file_for_entity(entity_type, entity_id, file_id):
                      as_attachment=True)
 
 
-@app.route('/InquestKB/files/<int:file_id>', methods=['DELETE'])
+@app.route('/ThreatKB/files/<int:file_id>', methods=['DELETE'])
 @login_required
 def delete_file(file_id):
     entity = files.Files.query.get(file_id)
