@@ -1,6 +1,6 @@
 // Declare app level module which depends on filters, and services
 angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize', 'ui.select', 'ngTagsInput', 'angular-growl',
-    'angular-toArrayFilter', 'ui.codemirror', 'ngFileUpload'])
+    'angular-toArrayFilter', 'ui.codemirror', 'ngFileUpload', 'ngPassword', 'ngMessages'])
     .config(['$routeProvider', function ($routeProvider) {
         $routeProvider
             .when('/', {
@@ -106,6 +106,16 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                 resolve: {
                     resolvedFiles: ['Files', function (Files) {
                         return Files.resource.query();
+                    }]
+                }
+            })
+            .when('/users', {
+                templateUrl: 'views/users/users.html',
+                controller: 'UsersController',
+                access: {restricted: true},
+                resolve: {
+                    resolvedUsers: ['UserService', function (UserService) {
+                        return UserService.query();
                     }]
                 }
             })
