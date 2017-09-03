@@ -66,7 +66,8 @@ angular.module('ThreatKB')
                     "password": "",
                     "passwordConfirm": "",
                     "admin": false,
-                    "active": true
+                    "active": true,
+                    "registered_on": "",
                 };
             };
 
