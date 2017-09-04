@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('InquestKB')
+angular.module('ThreatKB')
     .factory('Release', ['$resource', '$q', '$timeout', '$http', function ($resource, $q, $timeout, $http) {
 
         var release_resource = $resource('InquestKB/releases/:id', {}, {

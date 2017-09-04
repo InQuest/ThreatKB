@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('InquestKB')
+angular.module('ThreatKB')
     .controller('ReleaseController', ['$scope', '$uibModal', 'resolvedRelease', 'Release', 'growl', 'FileSaver', 'Blob',
         function ($scope, $uibModal, resolvedRelease, Release, growl, FileSaver, Blob) {
 
