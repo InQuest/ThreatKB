@@ -20,7 +20,7 @@
     "ng-file-upload-shim": "^12.2.13",
     "angular-growl-v2": "^0.7.9",
     "angular-password": "^1.0.3",
-    "angular-messages": "^1.6.6"
+    "angular-messages": "^1.6.6",
     "angular-file-saver": "^1.1.3"
   },
   "devDependencies": {
