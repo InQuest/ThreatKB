@@ -9,6 +9,9 @@ import json
 
 
 class Yara_rule(db.Model):
+    metadata_fields = ["description, ""confidence", "test_status", "severity", "category", "file_type",
+                       "subcategory1", "subcategory2", "subcategory3", "reference_text", "reference_link"]
+
     __tablename__ = "yara_rules"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -102,18 +105,36 @@ class Yara_rule(db.Model):
         return '<Yara_rule %r>' % (self.id)
 
     @staticmethod
+    def to_yara_rule_string(yara_dict):
+        yara_rule_text = "rule %s\n{\n\n" % (yara_dict.get("name"))
+        for field in Yara_rule.metadata_fields:
+            if yara_dict.get(field, None):
+                yara_rule_text += "\t%s = %s" % (field, yara_dict[field])
+
+        if not "strings:" in yara_dict["strings"]:
+            yara_rule_text += "\n\tstrings:\n\t%s" % (yara_dict["strings"])
+        else:
+            yara_rule_text += "\n\t\t%s" % (yara_dict["strings"])
+
+        if not "condition" in yara_dict["condition"]:
+            yara_rule_text += "\n\tcondition:\n\t\t%s\n\n}" % (yara_dict["condition"])
+        else:
+            yara_rule_text += "\n\t%s\n\n}" % (yara_dict["condition"])
+
+        return yara_rule_text
+
+
+    @staticmethod
     def make_yara_sane(text, type_):
         type_ = "%s:" if not type_.endswith(":") else type_
         return "\n\t".join([string.strip().strip("\t") for string in text.split("\n") if type_ not in string]).strip()
 
-    @classmethod
-    def get_yara_rule_from_yara_dict(cls, yara_dict):
+    @staticmethod
+    def get_yara_rule_from_yara_dict(yara_dict):
         yara_rule = Yara_rule()
         yara_rule.name = yara_dict["rule_name"]
 
-        possible_fields = ["description, ""confidence", "test_status", "severity", "category", "file_type",
-                           "subcategory1", "subcategory2", "subcategory3"]
-        for possible_field in possible_fields:
+        for possible_field in Yara_rule.metadata_fields:
             if possible_field in yara_dict["metadata"].keys():
                 setattr(yara_rule, possible_field, yara_dict["metadata"][possible_field])
 
