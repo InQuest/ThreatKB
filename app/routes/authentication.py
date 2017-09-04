@@ -1,5 +1,6 @@
 from app import app, db, bcrypt
-from app.models.authentication import KBUser
+from app.models.users import KBUser
+from app.models import yara_rule, c2dns, c2ip
 from flask import request, jsonify, session, json, abort
 from flask.ext.login import current_user, login_required
 import flask_login
@@ -31,8 +32,16 @@ def logout():
 @app.route('/ThreatKB/users', methods=['GET'])
 @login_required
 def get_all_users():
-    users = KBUser.query.all()
-    return json.dumps([user.to_dict() for user in users])
+    include_inactive = request.args.get("include_inactive", False)
+
+    if not include_inactive:
+        users = KBUser.query.filter(KBUser.active > 0).all()
+    else:
+        users = KBUser.query.all()
+
+    users = [user.to_dict() for user in users]
+    users.append({"email": "Clear Owner"})
+    return json.dumps(users)
 
 
 @login_required
@@ -76,9 +85,13 @@ def update_user(user_id):
         id=user.id
     )
 
+    if not user.active:
+        yara_rule.Yara_rule.query.filter(yara_rule.Yara_rule.owner_user_id == user_id).update(dict(owner_user_id=None))
+        c2dns.C2dns.query.filter(c2dns.C2dns.owner_user_id == user_id).update(dict(owner_user_id=None))
+        c2ip.C2ip.query.filter(c2ip.C2ip.owner_user_id == user_id).update(dict(owner_user_id=None))
+
     db.session.merge(user)
     db.session.commit()
-
     user = KBUser.query.get(user_id)
 
     return jsonify(user.to_dict()), 200

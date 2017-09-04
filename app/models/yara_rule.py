@@ -48,6 +48,10 @@ class Yara_rule(db.Model):
     modified_user = db.relationship('KBUser', foreign_keys=modified_user_id,
                                     primaryjoin="KBUser.id==Yara_rule.modified_user_id")
 
+    owner_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=True)
+    owner_user = db.relationship('KBUser', foreign_keys=owner_user_id,
+                                    primaryjoin="KBUser.id==Yara_rule.owner_user_id")
+
     comments = db.relationship("Comments", foreign_keys=[id],
                                primaryjoin="and_(Comments.entity_id==Yara_rule.id, Comments.entity_type=='%s')" % (
                                    Comments.ENTITY_MAPPING["SIGNATURE"]), lazy="dynamic")
@@ -89,6 +93,7 @@ class Yara_rule(db.Model):
             files=[file.to_dict() for file in files],
             created_user=self.created_user.to_dict(),
             modified_user=self.modified_user.to_dict(),
+            owner_user=self.owner_user.to_dict() if self.owner_user else None,
             revision=self.revision
         )
 

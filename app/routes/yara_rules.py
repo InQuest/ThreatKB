@@ -110,6 +110,8 @@ def update_yara_rule(id):
         signature_id=temp_sig_id,
         id=id,
         modified_user_id=current_user.id,
+        owner_user_id=request.json['owner_user']['id'] if request.json.get("owner_user", None) and request.json[
+            "owner_user"].get("id", None) else None,
         revision=entity.revision if do_not_bump_revision else entity.revision + 1
     )
     db.session.merge(entity)

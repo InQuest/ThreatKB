@@ -1,23 +1,22 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('Yara_ruleController', ['$scope', '$uibModal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states', 'CfgCategoryRangeMapping',
-        function ($scope, $uibModal, resolvedYara_rule, Yara_rule, Cfg_states, CfgCategoryRangeMapping) {
+    .controller('Yara_ruleController', ['$scope', '$uibModal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states', 'CfgCategoryRangeMapping', 'Users',
+        function ($scope, $uibModal, resolvedYara_rule, Yara_rule, Cfg_states, CfgCategoryRangeMapping, Users) {
 
             $scope.yara_rules = resolvedYara_rule;
+
+            $scope.users = Users.query();
 
             $scope.create = function () {
                 $scope.clear();
                 $scope.open();
             };
 
-            $scope.export = function () {
-                //
-            };
-
             $scope.update = function (id) {
                 $scope.yara_rule = Yara_rule.get({id: id});
                 $scope.cfg_states = Cfg_states.query();
+                $scope.users = Users.query();
                 $scope.cfg_category_range_mapping = CfgCategoryRangeMapping.query();
                 $scope.open(id);
             };
@@ -28,7 +27,13 @@ angular.module('ThreatKB')
                 });
             };
 
-            $scope.save = function (id) {
+            $scope.save = function (id_or_rule) {
+                var id = id_or_rule;
+                if (typeof(id_or_rule) == "object") {
+                    id = id_or_rule.id;
+                    $scope.yara_rule = id_or_rule;
+                }
+
                 if (id) {
                     Yara_rule.update({id: id}, $scope.yara_rule, function () {
                         $scope.yara_rules = Yara_rule.query();
@@ -87,8 +92,8 @@ angular.module('ThreatKB')
                 });
             };
         }])
-    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', 'yara_rule', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl',
-        function ($scope, $http, $uibModalInstance, yara_rule, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl) {
+    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', 'yara_rule', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users',
+        function ($scope, $http, $uibModalInstance, yara_rule, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users) {
             $scope.yara_rule = yara_rule;
             $scope.yara_rule.new_comment = "";
             $scope.Comments = Comments;

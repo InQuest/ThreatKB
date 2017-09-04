@@ -17,7 +17,7 @@ angular.module('ThreatKB')
 
             function isLoggedIn() {
                 return !!user;
-            }
+            };
 
             function login(email, password) {
                 // create a new instance of deferred

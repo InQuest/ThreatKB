@@ -346,11 +346,9 @@
 
                 <th style="width: 140px;">Category</th>
 
-                <th style="width:120px">Confidence</th>
-
-                <th style="width:120px">Severity</th>
-
                 <th style="width: 100px;">State</th>
+
+                <th style="width: 260px;">Owner</th>
 
                 <th style="width: 120px;">Actions</th>
 
@@ -365,25 +363,32 @@
 
                 <td>{{ yara_rule.category }}</td>
 
-                <td>{{ yara_rule.confidence }}</td>
-
-                <td>{{ yara_rule.severity }}</td>
-
                 <td>{{ yara_rule.state }}</td>
 
                 <td>
-                    <center>
-                        <button type="button"
-                                ng-click="update(yara_rule.id)"
-                                class="btn btn-sm">
-                            <small><span class="glyphicon glyphicon-pencil"></span></small>
-                        </button>
-                        <button type="submit"
-                                ng-click="delete(yara_rule.id)"
-                                class="btn btn-sm btn-danger">
-                            <small><span class="glyphicon glyphicon-remove-circle"></span></small>
-                        </button>
-                    </center>
+                    <ui-select ng-model="yara_rule.owner_user" on-select="save(yara_rule)">
+                        <ui-select-match placeholder="Select an owner ...">
+                            <small><span ng-bind="$select.selected.email || yara_rule.owner_user.email"></span></small>
+                        </ui-select-match>
+                        <ui-select-choices
+                                repeat="person in (users | filter: $select.search) track by person.id">
+                            <small><span ng-bind="person.email"></span></small>
+                        </ui-select-choices>
+                    </ui-select>
+
+                </td>
+
+                <td>
+                    <button type="button"
+                            ng-click="update(yara_rule.id)"
+                            class="btn btn-sm">
+                        <small><span class="glyphicon glyphicon-pencil"></span></small>
+                    </button>
+                    <button type="submit"
+                            ng-click="delete(yara_rule.id)"
+                            class="btn btn-sm btn-danger">
+                        <small><span class="glyphicon glyphicon-remove-circle"></span></small>
+                    </button>
                 </td>
             </tr>
             </tbody>

@@ -53,7 +53,8 @@ def update_c2dns(id):
     if not entity:
         abort(404)
     entity = c2dns.C2dns(
-        state=request.json['state']['state'],
+        state=request.json['state']['state'] if request.json['state'] and 'state' in request.json['state'] else
+        request.json['state'],
         domain_name=request.json['domain_name'],
         match_type=request.json['match_type'],
         reference_link=request.json['reference_link'],
@@ -62,6 +63,8 @@ def update_c2dns(id):
         expiration_timestamp=parser.parse(request.json['expiration_timestamp']) if request.json.get(
             "expiration_timestamp", None) else None,
         id=id,
+        owner_user_id=request.json['owner_user']['id'] if request.json.get("owner_user", None) and request.json[
+            "owner_user"].get("id", None) else None,
         modified_user_id=current_user.id
     )
     db.session.merge(entity)

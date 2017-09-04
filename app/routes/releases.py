@@ -6,14 +6,15 @@ from app.models import releases
 import tempfile
 import uuid
 
-@app.route('/InquestKB/releases', methods=['GET'])
+
+@app.route('/ThreatKB/releases', methods=['GET'])
 @login_required
 def get_all_releases():
     entities = releases.Release.query.filter_by().all()
     return json.dumps([entity.to_dict() for entity in entities])
 
 
-@app.route('/InquestKB/releases/<int:release_id>', methods=['GET'])
+@app.route('/ThreatKB/releases/<int:release_id>', methods=['GET'])
 @login_required
 def get_release(release_id):
     entity = releases.Release.query.get(release_id)
@@ -24,7 +25,7 @@ def get_release(release_id):
     return json.dumps(entity)
 
 
-@app.route('/InquestKB/releases/<int:release_id>/release_notes', methods=['GET'])
+@app.route('/ThreatKB/releases/<int:release_id>/release_notes', methods=['GET'])
 @login_required
 def generate_release_notes(release_id):
     entity = releases.Release.query.get(release_id)
@@ -41,7 +42,7 @@ def generate_release_notes(release_id):
     return send_file(tfile, attachment_filename=filename, mimetype="text/plain", as_attachment=True)
 
 
-@app.route('/InquestKB/releases/<int:release_id>/signature_export', methods=['GET'])
+@app.route('/ThreatKB/releases/<int:release_id>/signature_export', methods=['GET'])
 @login_required
 def generate_signature_export(release_id):
     entity = releases.Release.query.get(release_id)
@@ -59,7 +60,7 @@ def generate_signature_export(release_id):
     return send_file(tfile, attachment_filename=filename, as_attachment=True)
 
 
-@app.route('/InquestKB/releases', methods=['POST'])
+@app.route('/ThreatKB/releases', methods=['POST'])
 @login_required
 def create_release():
     release = releases.Release(
@@ -77,7 +78,7 @@ def create_release():
     return jsonify(release.to_dict())
 
 
-@app.route('/InquestKB/releases/<int:release_id>', methods=['DELETE'])
+@app.route('/ThreatKB/releases/<int:release_id>', methods=['DELETE'])
 @login_required
 def delete_release(release_id):
     entity = releases.Release.query.get(release_id)

@@ -3,13 +3,13 @@
 angular.module('ThreatKB')
     .factory('Release', ['$resource', '$q', '$timeout', '$http', function ($resource, $q, $timeout, $http) {
 
-        var release_resource = $resource('InquestKB/releases/:id', {}, {
+        var release_resource = $resource('/ThreatKB/releases/:id', {}, {
             'query': {method: 'GET', isArray: true},
             'get': {method: 'GET'}
         });
 
         function generate_release_notes(id) {
-            return $http.get('/InquestKB/releases/' + id + '/release_notes', {cache: false}).then(function (response) {
+            return $http.get('/ThreatKB/releases/' + id + '/release_notes', {cache: false}).then(function (response) {
                 return response;
             }, function (error) {
                 return $q.reject(error.data);
@@ -17,7 +17,7 @@ angular.module('ThreatKB')
         };
 
         function generate_signature_export(id) {
-            return $http.get('/InquestKB/releases/' + id + '/signature_export', {
+            return $http.get('/ThreatKB/releases/' + id + '/signature_export', {
                 cache: false,
                 responseType: "arraybuffer"
             }).then(function (response) {

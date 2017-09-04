@@ -190,6 +190,8 @@
 
                 <th>Expiration Type</th>
 
+                <th style="width: 260px;">Owner</th>
+
                 <th style="width: 120px;">Actions</th>
             </tr>
             </thead>
@@ -203,6 +205,19 @@
                 <td>{{ c2dns.match_type }}</td>
 
                 <td>{{ c2dns.expiration_type }}</td>
+
+                <td>
+                    <ui-select ng-model="c2dns.owner_user" on-select="save(c2dns)">
+                        <ui-select-match placeholder="Select an owner ...">
+                            <small><span ng-bind="$select.selected.email || c2dns.owner_user.email"></span></small>
+                        </ui-select-match>
+                        <ui-select-choices
+                                repeat="person in (users | filter: $select.search) track by person.id">
+                            <small><span ng-bind="person.email"></span></small>
+                        </ui-select-choices>
+                    </ui-select>
+
+                </td>
 
                 <td>
                     <center>

@@ -31,6 +31,10 @@ class C2ip(db.Model):
     modified_user = db.relationship('KBUser', foreign_keys=modified_user_id,
                                     primaryjoin="KBUser.id==C2ip.modified_user_id")
 
+    owner_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=True)
+    owner_user = db.relationship('KBUser', foreign_keys=owner_user_id,
+                                    primaryjoin="KBUser.id==C2ip.owner_user_id")
+
     comments = db.relationship("Comments", foreign_keys=[id],
                                primaryjoin="and_(Comments.entity_id==C2ip.id, Comments.entity_type=='%s')" % (
                                Comments.ENTITY_MAPPING["IP"]), lazy="dynamic")
@@ -61,6 +65,7 @@ class C2ip(db.Model):
             removedTags=[],
             created_user=self.created_user.to_dict(),
             modified_user=self.modified_user.to_dict(),
+            owner_user=self.owner_user.to_dict() if self.owner_user else None,
             comments=[comment.to_dict() for comment in self.comments]
         )
 

@@ -1,10 +1,12 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('C2dnsController', ['$scope', '$uibModal', 'resolvedC2dns', 'C2dns', 'Cfg_states',
-        function ($scope, $uibModal, resolvedC2dns, C2dns, Cfg_states) {
+    .controller('C2dnsController', ['$scope', '$uibModal', 'resolvedC2dns', 'C2dns', 'Cfg_states', 'Users',
+        function ($scope, $uibModal, resolvedC2dns, C2dns, Cfg_states, Users) {
 
             $scope.c2dns = resolvedC2dns;
+
+            $scope.users = Users.query();
 
             $scope.create = function () {
                 $scope.clear();
@@ -14,6 +16,7 @@ angular.module('ThreatKB')
             $scope.update = function (id) {
                 $scope.c2dns = C2dns.get({id: id});
                 $scope.cfg_states = Cfg_states.query();
+                $scope.users = Users.query();
                 $scope.open(id);
             };
 
@@ -23,7 +26,13 @@ angular.module('ThreatKB')
                 });
             };
 
-            $scope.save = function (id) {
+            $scope.save = function (id_or_dns) {
+                var id = id_or_dns;
+                if (typeof(id_or_dns) == "object") {
+                    id = id_or_dns.id;
+                    $scope.c2dns = id_or_dns;
+                }
+
                 if (id) {
                     C2dns.update({id: id}, $scope.c2dns, function () {
                         $scope.c2dns = C2dns.query();

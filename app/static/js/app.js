@@ -114,7 +114,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                 access: {restricted: true},
                 resolve: {
                     resolvedUsers: ['UserService', function (UserService) {
-                        return UserService.query();
+                        return UserService.query({include_inactive: 1});
                     }]
                 }
             })
