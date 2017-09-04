@@ -1,5 +1,5 @@
 {
-  "name": "InquestKB",
+    "name": "ThreatKB",
   "version": "0.0.0",
   "dependencies": {
     "angular-bootstrap": "2.5.0",

@@ -8,14 +8,14 @@ import json
 from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
 
 
-@app.route('/InquestKB/c2dns', methods=['GET'])
+@app.route('/ThreatKB/c2dns', methods=['GET'])
 @login_required
 def get_all_c2dns():
     entities = c2dns.C2dns.query.all()
     return json.dumps([entity.to_dict() for entity in entities])
 
 
-@app.route('/InquestKB/c2dns/<int:id>', methods=['GET'])
+@app.route('/ThreatKB/c2dns/<int:id>', methods=['GET'])
 def get_c2dns(id):
     entity = c2dns.C2dns.query.get(id)
     if not entity:
@@ -23,7 +23,7 @@ def get_c2dns(id):
     return jsonify(entity.to_dict())
 
 
-@app.route('/InquestKB/c2dns', methods=['POST'])
+@app.route('/ThreatKB/c2dns', methods=['POST'])
 @login_required
 def create_c2dns():
     entity = c2dns.C2dns(
@@ -46,7 +46,7 @@ def create_c2dns():
     return jsonify(entity.to_dict()), 201
 
 
-@app.route('/InquestKB/c2dns/<int:id>', methods=['PUT'])
+@app.route('/ThreatKB/c2dns/<int:id>', methods=['PUT'])
 @login_required
 def update_c2dns(id):
     entity = c2dns.C2dns.query.get(id)
@@ -74,7 +74,7 @@ def update_c2dns(id):
     return jsonify(entity.to_dict()), 200
 
 
-@app.route('/InquestKB/c2dns/<int:id>', methods=['DELETE'])
+@app.route('/ThreatKB/c2dns/<int:id>', methods=['DELETE'])
 @login_required
 def delete_c2dns(id):
     entity = c2dns.C2dns.query.get(id)

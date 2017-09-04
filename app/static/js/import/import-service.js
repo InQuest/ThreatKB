@@ -1,4 +1,4 @@
-angular.module('InquestKB').factory('Import',
+angular.module('ThreatKB').factory('Import',
     ['$q', '$timeout', '$http',
         function ($q, $timeout, $http) {
 
@@ -11,7 +11,7 @@ angular.module('InquestKB').factory('Import',
 
             function import_artifacts(import_text, autocommit, shared_reference, shared_state) {
                 // send a post request to the server
-                return $http.post('/InquestKB/import', {
+                return $http.post('/ThreatKB/import', {
                     import_text: import_text,
                     autocommit: autocommit,
                     shared_reference: shared_reference,
@@ -32,7 +32,7 @@ angular.module('InquestKB').factory('Import',
 
             function commit_artifacts(artifacts, shared_reference, shared_state) {
                 // send a post request to the server
-                return $http.post('/InquestKB/import/commit', {
+                return $http.post('/ThreatKB/import/commit', {
                     artifacts: artifacts,
                     shared_reference: shared_reference,
                     shared_state: shared_state

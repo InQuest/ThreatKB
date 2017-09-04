@@ -1,8 +1,8 @@
 'use strict';
 
-angular.module('InquestKB')
+angular.module('ThreatKB')
     .factory('Yara_rule', ['$resource', function ($resource) {
-        return $resource('InquestKB/yara_rules/:id', {}, {
+        return $resource('ThreatKB/yara_rules/:id', {}, {
             'query': {method: 'GET', isArray: true},
             'get': {method: 'GET'},
             'update': {method: 'PUT'}

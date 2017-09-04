@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('InquestKB').controller('ImportController',
+angular.module('ThreatKB').controller('ImportController',
     ['$scope', '$location', 'Import', 'growl', 'Cfg_states',
         function ($scope, $location, Import, growl, Cfg_states) {
 

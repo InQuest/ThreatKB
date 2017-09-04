@@ -5,14 +5,14 @@ from flask.ext.login import login_required
 import json
 
 
-@app.route('/InquestKB/cfg_reference_text_templates', methods=['GET'])
+@app.route('/ThreatKB/cfg_reference_text_templates', methods=['GET'])
 @login_required
 def get_all_cfg_reference_text_templates():
     entities = cfg_reference_text_templates.Cfg_reference_text_templates.query.all()
     return json.dumps([entity.to_dict() for entity in entities])
 
 
-@app.route('/InquestKB/cfg_reference_text_templates/<int:id>', methods=['GET'])
+@app.route('/ThreatKB/cfg_reference_text_templates/<int:id>', methods=['GET'])
 @login_required
 def get_cfg_reference_text_templates(id):
     entity = cfg_reference_text_templates.Cfg_reference_text_templates.query.get(id)
@@ -21,7 +21,7 @@ def get_cfg_reference_text_templates(id):
     return jsonify(entity.to_dict())
 
 
-@app.route('/InquestKB/cfg_reference_text_templates', methods=['POST'])
+@app.route('/ThreatKB/cfg_reference_text_templates', methods=['POST'])
 @login_required
 def create_cfg_reference_text_templates():
     entity = cfg_reference_text_templates.Cfg_reference_text_templates(
@@ -32,7 +32,7 @@ def create_cfg_reference_text_templates():
     return jsonify(entity.to_dict()), 201
 
 
-@app.route('/InquestKB/cfg_reference_text_templates/<int:id>', methods=['PUT'])
+@app.route('/ThreatKB/cfg_reference_text_templates/<int:id>', methods=['PUT'])
 @login_required
 def update_cfg_reference_text_templates(id):
     entity = cfg_reference_text_templates.Cfg_reference_text_templates.query.get(id)
@@ -47,7 +47,7 @@ def update_cfg_reference_text_templates(id):
     return jsonify(entity.to_dict()), 200
 
 
-@app.route('/InquestKB/cfg_reference_text_templates/<int:id>', methods=['DELETE'])
+@app.route('/ThreatKB/cfg_reference_text_templates/<int:id>', methods=['DELETE'])
 @login_required
 def delete_cfg_reference_text_templates(id):
     entity = cfg_reference_text_templates.Cfg_reference_text_templates.query.get(id)

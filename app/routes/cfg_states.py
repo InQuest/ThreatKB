@@ -5,14 +5,14 @@ from flask.ext.login import login_required
 import json
 
 
-@app.route('/InquestKB/cfg_states', methods=['GET'])
+@app.route('/ThreatKB/cfg_states', methods=['GET'])
 @login_required
 def get_all_cfg_states():
     entities = cfg_states.Cfg_states.query.all()
     return json.dumps([entity.to_dict() for entity in entities])
 
 
-@app.route('/InquestKB/cfg_states/<int:id>', methods=['GET'])
+@app.route('/ThreatKB/cfg_states/<int:id>', methods=['GET'])
 @login_required
 def get_cfg_states(id):
     entity = cfg_states.Cfg_states.query.get(id)
@@ -21,7 +21,7 @@ def get_cfg_states(id):
     return jsonify(entity.to_dict())
 
 
-@app.route('/InquestKB/cfg_states', methods=['POST'])
+@app.route('/ThreatKB/cfg_states', methods=['POST'])
 @login_required
 def create_cfg_states():
     entity = cfg_states.Cfg_states(
@@ -33,7 +33,7 @@ def create_cfg_states():
     return jsonify(entity.to_dict()), 201
 
 
-@app.route('/InquestKB/cfg_states/<int:id>', methods=['PUT'])
+@app.route('/ThreatKB/cfg_states/<int:id>', methods=['PUT'])
 @login_required
 def update_cfg_states(id):
     entity = cfg_states.Cfg_states.query.get(id)
@@ -49,7 +49,7 @@ def update_cfg_states(id):
     return jsonify(entity.to_dict()), 200
 
 
-@app.route('/InquestKB/cfg_states/<int:id>', methods=['DELETE'])
+@app.route('/ThreatKB/cfg_states/<int:id>', methods=['DELETE'])
 @login_required
 def delete_cfg_states(id):
     entity = cfg_states.Cfg_states.query.get(id)

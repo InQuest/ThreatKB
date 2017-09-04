@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('InquestKB')
+angular.module('ThreatKB')
     .controller('FilesController', ['$scope', '$uibModal', 'resolvedFiles', 'Files', 'Upload', 'growl',
         function ($scope, $uibModal, resolvedFiles, Files, Upload, growl) {
 
@@ -48,7 +48,7 @@ angular.module('InquestKB')
                         var file = files[i];
                         if (!file.$error) {
                             Upload.upload({
-                                url: '/InquestKB/file_upload',
+                                url: '/ThreatKB/file_upload',
                                 method: 'POST',
                                 data: {
                                     file: file

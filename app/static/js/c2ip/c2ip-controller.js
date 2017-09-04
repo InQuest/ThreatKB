@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('InquestKB')
+angular.module('ThreatKB')
     .controller('C2ipController', ['$scope', '$uibModal', 'resolvedC2ip', 'C2ip', 'Cfg_states', 'growl',
         function ($scope, $uibModal, resolvedC2ip, C2ip, Cfg_states, growl) {
 
@@ -139,7 +139,7 @@ angular.module('InquestKB')
             };
 
             $scope.loadTags = function (query) {
-                return $http.get('/InquestKB/tags', {cache: false}).then(function (response) {
+                return $http.get('/ThreatKB/tags', {cache: false}).then(function (response) {
                     var tags = response.data;
                     return tags.filter(function (tag) {
                         return tag.text.toLowerCase().indexOf(query.toLowerCase()) !== -1;

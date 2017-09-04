@@ -1,8 +1,8 @@
 'use strict';
 
-angular.module('InquestKB')
+angular.module('ThreatKB')
     .factory('C2ip', ['$resource', function ($resource) {
-        return $resource('InquestKB/c2ips/:id', {}, {
+        return $resource('ThreatKB/c2ips/:id', {}, {
             'query': {method: 'GET', isArray: true},
             'get': {method: 'GET'},
             'update': {method: 'PUT'}

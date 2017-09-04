@@ -1,7 +1,7 @@
 {
-    "name": "inquestkb",
+    "name": "threatkb",
     "version": "0.0.0",
-    "description": "Description for InquestKB",
+    "description": "Description for ThreatKB",
     "dependencies": {},
     "devDependencies": {
         "grunt": "~0.4.2",

@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('InquestKB')
+angular.module('ThreatKB')
     .controller('Yara_ruleController', ['$scope', '$uibModal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states', 'CfgCategoryRangeMapping',
         function ($scope, $uibModal, resolvedYara_rule, Yara_rule, Cfg_states, CfgCategoryRangeMapping) {
 
@@ -137,7 +137,7 @@ angular.module('InquestKB')
                         var file = files[i];
                         if (!file.$error) {
                             Upload.upload({
-                                url: '/InquestKB/file_upload',
+                                url: '/ThreatKB/file_upload',
                                 method: 'POST',
                                 data: {
                                     file: file,
@@ -177,7 +177,7 @@ angular.module('InquestKB')
             };
 
             $scope.loadTags = function (query) {
-                return $http.get('/InquestKB/tags', {cache: false}).then(function (response) {
+                return $http.get('/ThreatKB/tags', {cache: false}).then(function (response) {
                     var tags = response.data;
                     return tags.filter(function (tag) {
                         return tag.text.toLowerCase().indexOf(query.toLowerCase()) !== -1;
@@ -194,7 +194,7 @@ angular.module('InquestKB')
             $scope.testSignature = function (id) {
                 if (!$scope.testing) {
                     $scope.testing = true;
-                    return $http.get('/InquestKB/test_yara_rule/' + id, {cache: false}).then(function (response) {
+                    return $http.get('/ThreatKB/test_yara_rule/' + id, {cache: false}).then(function (response) {
                         var testResponse = response.data;
                         growl.info("Success!<br />"
                             + "---------------------<br/>"

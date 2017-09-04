@@ -4,7 +4,8 @@ from flask import abort, jsonify, request
 from flask.ext.login import login_required, current_user
 import json
 
-@app.route('/InquestKB/comments', methods=['GET'])
+
+@app.route('/ThreatKB/comments', methods=['GET'])
 @login_required
 def get_all_comments():
     app.logger.debug("args are: '%s'" % (request.args))
@@ -20,7 +21,7 @@ def get_all_comments():
     return json.dumps([entity.to_dict() for entity in entities])
 
 
-@app.route('/InquestKB/comments/<int:id>', methods=['GET'])
+@app.route('/ThreatKB/comments/<int:id>', methods=['GET'])
 @login_required
 def get_comments(id):
     entity = comments.Comments.query.get(id)
@@ -29,7 +30,7 @@ def get_comments(id):
     return jsonify(entity.to_dict())
 
 
-@app.route('/InquestKB/comments', methods=['POST'])
+@app.route('/ThreatKB/comments', methods=['POST'])
 @login_required
 def create_comments():
     entity = comments.Comments(
@@ -43,7 +44,7 @@ def create_comments():
     return jsonify(entity.to_dict()), 201
 
 
-@app.route('/InquestKB/comments/<int:id>', methods=['DELETE'])
+@app.route('/ThreatKB/comments/<int:id>', methods=['DELETE'])
 @login_required
 def delete_comments(id):
     entity = comments.Comments.query.get(id)

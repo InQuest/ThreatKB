@@ -80,7 +80,7 @@ def save_artifacts(artifacts, shared_reference=None, shared_state=None):
 
 #####################################################################
 
-@app.route('/InquestKB/import', methods=['POST'])
+@app.route('/ThreatKB/import', methods=['POST'])
 @login_required
 def import_artifacts():
     autocommit = request.json.get("autocommit", 0)
@@ -101,7 +101,7 @@ def import_artifacts():
 
 #####################################################################
 
-@app.route('/InquestKB/import/commit', methods=['POST'])
+@app.route('/ThreatKB/import/commit', methods=['POST'])
 @login_required
 def commit_artifacts():
     artifacts = request.json.get("artifacts", None)

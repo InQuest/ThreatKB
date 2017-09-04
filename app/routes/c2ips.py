@@ -7,14 +7,15 @@ import json
 
 from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
 
-@app.route('/InquestKB/c2ips', methods=['GET'])
+
+@app.route('/ThreatKB/c2ips', methods=['GET'])
 @login_required
 def get_all_c2ips():
     entities = c2ip.C2ip.query.all()
     return json.dumps([entity.to_dict() for entity in entities])
 
 
-@app.route('/InquestKB/c2ips/<int:id>', methods=['GET'])
+@app.route('/ThreatKB/c2ips/<int:id>', methods=['GET'])
 @login_required
 def get_c2ip(id):
     entity = c2ip.C2ip.query.get(id)
@@ -23,7 +24,7 @@ def get_c2ip(id):
     return jsonify(entity.to_dict())
 
 
-@app.route('/InquestKB/c2ips', methods=['POST'])
+@app.route('/ThreatKB/c2ips', methods=['POST'])
 @login_required
 def create_c2ip():
     entity = c2ip.C2ip(
@@ -49,7 +50,7 @@ def create_c2ip():
     return jsonify(entity.to_dict()), 201
 
 
-@app.route('/InquestKB/c2ips/<int:id>', methods=['PUT'])
+@app.route('/ThreatKB/c2ips/<int:id>', methods=['PUT'])
 @login_required
 def update_c2ip(id):
     entity = c2ip.C2ip.query.get(id)
@@ -79,7 +80,7 @@ def update_c2ip(id):
     return jsonify(entity.to_dict()), 200
 
 
-@app.route('/InquestKB/c2ips/<int:id>', methods=['DELETE'])
+@app.route('/ThreatKB/c2ips/<int:id>', methods=['DELETE'])
 @login_required
 def delete_c2ip(id):
     entity = c2ip.C2ip.query.get(id)

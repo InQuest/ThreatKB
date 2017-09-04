@@ -5,14 +5,14 @@ from flask.ext.login import login_required
 import json
 
 
-@app.route('/InquestKB/cfg_category_range_mapping', methods=['GET'])
+@app.route('/ThreatKB/cfg_category_range_mapping', methods=['GET'])
 @login_required
 def get_all_cfg_category_range_mappings():
     entities = cfg_category_range_mapping.CfgCategoryRangeMapping.query.all()
     return json.dumps([entity.to_dict() for entity in entities])
 
 
-@app.route('/InquestKB/cfg_category_range_mapping/<int:id>', methods=['GET'])
+@app.route('/ThreatKB/cfg_category_range_mapping/<int:id>', methods=['GET'])
 @login_required
 def get_cfg_category_range_mapping(id):
     entity = cfg_category_range_mapping.CfgCategoryRangeMapping.query.get(id)
@@ -21,7 +21,7 @@ def get_cfg_category_range_mapping(id):
     return jsonify(entity.to_dict())
 
 
-@app.route('/InquestKB/cfg_category_range_mapping', methods=['POST'])
+@app.route('/ThreatKB/cfg_category_range_mapping', methods=['POST'])
 @login_required
 def create_cfg_category_range_mapping():
     entity = cfg_category_range_mapping.CfgCategoryRangeMapping(
@@ -34,7 +34,7 @@ def create_cfg_category_range_mapping():
     return jsonify(entity.to_dict()), 201
 
 
-@app.route('/InquestKB/cfg_category_range_mapping/<int:id>', methods=['PUT'])
+@app.route('/ThreatKB/cfg_category_range_mapping/<int:id>', methods=['PUT'])
 @login_required
 def update_cfg_category_range_mapping(id):
     entity = cfg_category_range_mapping.CfgCategoryRangeMapping.query.get(id)
@@ -67,7 +67,7 @@ def update_cfg_category_range_mapping_current(id, current):
     return
 
 
-@app.route('/InquestKB/cfg_category_range_mapping/<int:id>', methods=['DELETE'])
+@app.route('/ThreatKB/cfg_category_range_mapping/<int:id>', methods=['DELETE'])
 @login_required
 def delete_cfg_category_range_mapping(id):
     entity = cfg_category_range_mapping.CfgCategoryRangeMapping.query.get(id)

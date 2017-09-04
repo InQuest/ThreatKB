@@ -1,7 +1,7 @@
-angular.module('InquestKB')
+angular.module('ThreatKB')
     .factory('Comments', ['$resource', function ($resource) {
         return {
-            resource: $resource('InquestKB/comments/:id', {}, {
+            resource: $resource('ThreatKB/comments/:id', {}, {
                 'query': {method: 'GET', isArray: true},
                 'get': {method: 'GET'},
                 'update': {method: 'PUT'}

@@ -38,7 +38,7 @@ module.exports = function (grunt) {
         connect: {
             proxies: [
                 {
-                    context: '/InquestKB',
+                    context: '/ThreatKB',
                     host: 'localhost',
                     port: 5000,
                     https: false,

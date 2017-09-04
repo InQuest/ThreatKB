@@ -16,7 +16,7 @@ from flask.ext.login import current_user, login_required
 from app.models.yara_rule import Yara_testing_history
 
 
-@app.route('/InquestKB/test_yara_rule/<int:rule_id>', methods=['GET'])
+@app.route('/ThreatKB/test_yara_rule/<int:rule_id>', methods=['GET'])
 @login_required
 def test_yara_rule(rule_id):
     yara_rule_entity = yara_rule.Yara_rule.query.get(rule_id)
