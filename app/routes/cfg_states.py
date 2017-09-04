@@ -25,7 +25,8 @@ def get_cfg_states(id):
 @login_required
 def create_cfg_states():
     entity = cfg_states.Cfg_states(
-        state=request.json['state']
+        state=request.json['state'],
+        is_release_state=0 if not request.json.get("is_release_state", None) else 1
     )
     db.session.add(entity)
     db.session.commit()
@@ -40,7 +41,8 @@ def update_cfg_states(id):
         abort(404)
     entity = cfg_states.Cfg_states(
         state=request.json['state'],
-        id=id
+        id=id,
+        is_release_state=0 if not request.json.get("is_release_state", None) else 1
     )
     db.session.merge(entity)
     db.session.commit()
