@@ -1,6 +1,6 @@
 // Declare app level module which depends on filters, and services
-angular.module('InquestKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize', 'ui.select', 'ngTagsInput', 'angular-growl',
-    'angular-toArrayFilter', 'ui.codemirror', 'ngFileUpload'])
+angular.module('InquestKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize', 'ui.select', 'ngTagsInput', 'angular-growl', 'ngFileSaver',
+    'angular-toArrayFilter', 'ui.codemirror', 'ngFileUpload', 'ngFileSaver'])
     .config(['$routeProvider', function ($routeProvider) {
         $routeProvider
             .when('/', {
@@ -60,7 +60,6 @@ angular.module('InquestKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitiz
             .when('/cfg_settings', {
                 templateUrl: 'views/cfg_settings/cfg_settings.html',
                 controller: 'Cfg_settingsController',
-
                 access: {restricted: true},
                 resolve: {
                     resolvedCfg_settings: ['Cfg_settings', function (Cfg_settings) {
@@ -115,9 +114,14 @@ angular.module('InquestKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitiz
                 access: {restricted: true}
             })
             .when('/releases', {
-                templateUrl: 'views/releases/release.html',
-                controller: 'Release',
-                access: {restricted: true}
+                templateUrl: 'views/releases/releases.html',
+                controller: 'ReleaseController',
+                access: {restricted: true},
+                resolve: {
+                    resolvedRelease: ['Release', function (Release) {
+                        return Release.resource.query();
+                    }]
+                }
             })
             .otherwise({
                 redirectTo: '/'

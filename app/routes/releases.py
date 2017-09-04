@@ -1,12 +1,10 @@
-import os
-
-from dateutil import parser
-from flask import abort, jsonify, request, send_file, json
+from flask import abort, jsonify, request, send_file, json, Response
 from flask.ext.login import login_required, current_user
-from werkzeug.utils import secure_filename
 from app import app, db
 from app.models import releases
 
+import tempfile
+import uuid
 
 @app.route('/InquestKB/releases', methods=['GET'])
 @login_required
@@ -28,44 +26,55 @@ def get_release(release_id):
 
 @app.route('/InquestKB/releases/<int:release_id>/release_notes', methods=['GET'])
 @login_required
-def get_release_notes(release_id):
+def generate_release_notes(release_id):
     entity = releases.Release.query.get(release_id)
 
     if not entity:
         abort(404)
 
-    return entity.generate_release_notes()
+    filename = str(release_id) + "_release_notes.txt"
+    content = entity.generate_release_notes()
+    content.seek(0)
+    tfile = "%s/%s" % (tempfile.gettempdir(), str(uuid.uuid4()).replace("-", ""))
+    with open(tfile, "w") as t:
+        t.write(content.read())
+    return send_file(tfile, attachment_filename=filename, mimetype="text/plain", as_attachment=True)
 
 
 @app.route('/InquestKB/releases/<int:release_id>/signature_export', methods=['GET'])
 @login_required
-def get_release_notes(release_id):
+def generate_signature_export(release_id):
     entity = releases.Release.query.get(release_id)
 
     if not entity:
         abort(404)
 
-    return entity.generate_signature_export()
+    filename = str(release_id) + "_release.zip"
+    content = entity.generate_signature_export()
+    content.seek(0)
+
+    tfile = "%s/%s" % (tempfile.gettempdir(), str(uuid.uuid4()).replace("-", ""))
+    with open(tfile, "w") as t:
+        t.write(content.read())
+    return send_file(tfile, attachment_filename=filename, as_attachment=True)
 
 
 @app.route('/InquestKB/releases', methods=['POST'])
 @login_required
 def create_release():
-    release = releases.Releases(
+    release = releases.Release(
         name=request.json.get("name", None),
-        date_start=parser.parse(request.json["date_start"]),
-        state_dns=request.json["state_dns"],
-        state_ip=request.json["state_ip"],
-        state_yara_rule=request.json["state_yara_rule"],
+        is_test_release=request.json.get("is_test_release", 0),
         created_user_id=current_user.id
     )
 
-    if request.json.get("date_end", None):
-        release.date_end = parser.parse(request.json["date_end"])
+    release.release_data = release.get_release_data()
+    release.created_user = current_user
+    db.session.merge(release)
+    db.session.commit()
 
-    release.release_data = releases.Release.get_release_data()
-
-    return jsonify(release)
+    release = releases.Release.query.filter(release.id).first()
+    return jsonify(release.to_dict())
 
 
 @app.route('/InquestKB/releases/<int:release_id>', methods=['DELETE'])

@@ -1,9 +1,11 @@
-from app import db
-from app.models import c2dns, c2ip, yara_rule, cfg_settings
+from app import db, app
+from app.models import c2dns, c2ip, yara_rule, cfg_settings, cfg_states
 from sqlalchemy import and_
-
+from dateutil import parser
 import json
-
+import datetime
+import StringIO
+import zipfile
 
 class Release(db.Model):
     __tablename__ = "releases"
@@ -28,14 +30,18 @@ class Release(db.Model):
             name=self.name,
             is_test_release=self.is_test_release,
             release_data=self.release_data,
-            created_user=self.created_user.to_dict()
+            date_created=self.date_created.isoformat(),
+            created_user=self.created_user.to_dict(),
+            num_signatures=len(self.release_data_dict["Signatures"]["Signatures"]),
+            num_ips=len(self.release_data_dict["IP"]["IP"]),
+            num_dns=len(self.release_data_dict["DNS"]["DNS"])
         )
 
     def get_release_data(self):
         if self.release_data:
             return self.release_data
 
-        release_state = Release.query.filter(Release.is_test_release > 0).first()
+        release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
         if not release_state:
             raise Exception("You need to specify a production release state first.")
 
@@ -57,56 +63,57 @@ class Release(db.Model):
             release_data["Signatures"]["Added"] = release_data["Signatures"]["Signatures"]
             release_data["IP"]["Added"] = release_data["IP"]["IP"]
             release_data["DNS"]["Added"] = release_data["DNS"]["DNS"]
-            return release_data
+            return json.dumps(release_data)
 
-        last_release = json.loads(last_release.release_data)
+        last_release = last_release.release_data_dict
 
         ##### SIGNATURES #######
         release_signature_ids = release_data["Signatures"]["Signatures"].keys()
-        last_release_signature_ids = last_release["Signatures"]["Signatures"].keys()
+        last_release_signature_ids = [long(release_id) for release_id in
+                                      last_release["Signatures"]["Signatures"].keys()]
 
-        for signature in release_data["Signatures"]["Signatures"]:
+        for signature in release_data["Signatures"]["Signatures"].values():
             signature_id = signature["id"]
             if not signature_id in last_release_signature_ids:
                 release_data["Signatures"]["Added"].append(signature)
             else:
-                if signature["date_modified"] > self.date_created:
+                if parser.parse(signature["date_modified"]) > datetime.datetime.now():
                     release_data["Signatures"]["Modified"].append(signature)
-                del last_release["Signatures"]["Signatures"][signature_id]
+                del last_release["Signatures"]["Signatures"][str(signature_id)]
 
-        for signature in last_release["Signatures"]["Signatures"]:
+        for signature in last_release["Signatures"]["Signatures"].values():
             release_data["Signatures"]["Removed"].append(signature)
 
         ###### IPs ########
         release_ips = release_data["IP"]["IP"].keys()
-        last_release_ips = last_release["IP"]["IP"].keys()
+        last_release_ips = [long(release_id) for release_id in last_release["IP"]["IP"].keys()]
 
-        for ip in release_data["IP"]["IP"]:
+        for ip in release_data["IP"]["IP"].values():
             ip_id = ip["id"]
             if not ip_id in last_release_ips:
                 release_data["IP"]["Added"].append(ip)
             else:
-                if ip["date_modified"] > self.date_created:
+                if parser.parse(ip["date_modified"]) > datetime.datetime.now():
                     release_data["IP"]["Modified"].append(ip)
-                del last_release["IP"]["IP"][ip_id]
+                del last_release["IP"]["IP"][str(ip_id)]
 
-        for ip in last_release["IP"]["IP"]:
+        for ip in last_release["IP"]["IP"].values():
             release_data["IP"]["Removed"].append(ip)
 
         ###### DNS #######
         release_dns = release_data["DNS"]["DNS"].keys()
-        last_release_dns = last_release["DNS"]["DNS"].keys()
+        last_release_dns = [long(release_id) for release_id in last_release["DNS"]["DNS"].keys()]
 
-        for dns in release_data["DNS"]["DNS"]:
+        for dns in release_data["DNS"]["DNS"].values():
             dns_id = dns["id"]
             if not dns_id in last_release_dns:
                 release_data["DNS"]["Added"].append(dns)
             else:
-                if ip["date_modified"] > self.date_created:
+                if parser.parse(ip["date_modified"]) > datetime.datetime.now():
                     release_data["DNS"]["Modified"].append(dns)
-                del last_release["DNS"]["DNS"][dns_id]
+                del last_release["DNS"]["DNS"][str(dns_id)]
 
-        for ip in last_release["DNS"]["DNS"]:
+        for ip in last_release["DNS"]["DNS"].values():
             release_data["DNS"]["Removed"].append(ip)
 
         return json.dumps(release_data)
@@ -118,32 +125,51 @@ class Release(db.Model):
                                                                     cfg_settings.Cfg_settings.key == "RELEASE_POSTPEND_TEXT")).first()
 
         message = prepend_text.value if prepend_text else ""
-        message += "New Signatures\n%s" % "-" * 10
+        message += "New Signatures\n%s\n" % ("-" * 10)
         message += "\n\n".join(["EventID: %s\nName: %s\nCategory: %s\nConfidence: %s\nSeverity: %s\nDescription: %s" % (
         entity["signature_id"], entity["name"], entity["category"], entity["confidence"], entity["severity"],
         entity["description"]) for entity in self.release_data_dict["Signatures"]["Added"]]) if \
-        self.release_data_dict["Signatures"]["Added"] else "NA"
-        message += "\n\nRemoved Signatures\n%s" % "-" * 10
+            len(self.release_data_dict["Signatures"]["Added"]) > 0 else "NA"
+        message += "\n\nRemoved Signatures\n%s\n" % ("-" * 10)
         message += "\n\n".join(["EventID: %s\nName: %s\nCategory: %s\nConfidence: %s\nSeverity: %s\nDescription: %s" % (
         entity["signature_id"], entity["name"], entity["category"], entity["confidence"], entity["severity"],
         entity["description"]) for entity in self.release_data_dict["Signatures"]["Removed"]]) if \
-        self.release_data_dict["Signatures"]["Removed"] else "NA"
-        message += "\n\nModified Signatures\n%s" % "-" * 10
+            len(self.release_data_dict["Signatures"]["Removed"]) > 0 else "NA"
+        message += "\n\nModified Signatures\n%s\n" % ("-" * 10)
         message += "\n\n".join(["EventID: %s\nName: %s\nCategory: %s\nConfidence: %s\nSeverity: %s\nDescription: %s" % (
         entity["signature_id"], entity["name"], entity["category"], entity["confidence"], entity["severity"],
         entity["description"]) for entity in self.release_data_dict["Signatures"]["Modified"]]) if \
-        self.release_data_dict["Signatures"]["Modified"] else "NA"
+            len(self.release_data_dict["Signatures"]["Modified"]) > 0 else "NA"
 
-        message += "Feed Content\n%s" % "-" * 10
+        message += "\n\nFeed Content\n%s\n" % ("-" * 10)
         message += "C2IPs Added: %s\n" % (len(self.release_data_dict["IP"]["Added"]))
         message += "C2IPs Removed: %s\n" % (len(self.release_data_dict["IP"]["Removed"]))
         message += "C2 Domains Added: %s\n" % (len(self.release_data_dict["DNS"]["Added"]))
         message += "C2 Domains Removed: %s\n" % (len(self.release_data_dict["DNS"]["Removed"]))
 
-        return message
+        stream = StringIO.StringIO()
+        stream.write(message)
+        return stream
 
     def generate_signature_export(self):
-        pass
+        release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
+        if not release_state:
+            raise Exception("You need to specify a production release state first.")
+
+        combined_rules = {}
+        for signature in self.release_data_dict["Signatures"]["Signatures"].values():
+            category = signature.get("category")
+            if not signature["category"] in combined_rules:
+                combined_rules[category] = ""
+
+            combined_rules[category] += yara_rule.Yara_rule.to_yara_rule_string(signature)
+
+        memzip = StringIO.StringIO()
+        z = zipfile.ZipFile(memzip, mode="w", compression=zipfile.ZIP_DEFLATED)
+        for category, rules in combined_rules.iteritems():
+            z.writestr("%s.yar" % (category), rules)
+
+        return memzip
 
     def __repr__(self):
-        return '<Tags %r>' % (self.id)
+        return '<Release %r>' % (self.id)

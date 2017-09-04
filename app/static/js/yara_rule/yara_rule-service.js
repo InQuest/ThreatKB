@@ -8,19 +8,3 @@ angular.module('InquestKB')
             'update': {method: 'PUT'}
         });
     }]);
-
-angular.module('InquestKB')
-    .factory('Yara_ruleExport', ['$q', '$timeout', '$http',
-        function ($q, $timeout, $http) {
-
-            return ({export: export_signatures});
-
-            function export_signatures() {
-                return $http.get('/InquestKB/yara_rules', {}).then(function (data) {
-
-                }, function (error) {
-                    return $q.reject(error.data);
-                })
-            };
-
-        }]);

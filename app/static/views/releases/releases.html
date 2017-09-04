@@ -1,6 +1,6 @@
 <div>
 
-    <script type="text/ng-template" id="cfg_settings-save.html">
+    <script type="text/ng-template" id="release-save.html">
         <form name="form" role="form" novalidate
               class="ng-scope ng-invalid ng-invalid-required ng-dirty"
               ng-submit="ok()">
@@ -48,37 +48,57 @@
         <table class="table table-striped">
             <thead>
             <tr>
-                <th>Name</th>
+                <th style="width: 100px;">Name</th>
 
-                <th>Date Created</th>
+                <th style="width: 200px;">Date Created</th>
 
-                <th>Created By</th>
+                <th style="width: 280px;">Created By</th>
 
                 <th>Test Release</th>
 
-                <th style="width: 120px;">Actions</th>
+                <th>Signatures</th>
+
+                <th>IPs</th>
+
+                <th>Domains</th>
+
+                <th style="width: 140px;">Actions</th>
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="release in cfg_settings | toArray:false | filter:search track by $index">
-                <td ng-if="release.name">{{ release.name }}</td>
+            <tr ng-repeat="release in releases | orderBy:'-date_created' | filter:{name:search} track by $index "
+                ng-if="release.date_created">
+                <td>{{ release.name }}</td>
 
-                <td ng-if="release.date_created">{{ release.date_created }}</td>
+                <td>{{ release.date_created }}</td>
 
-                <td ng-if="release.user.email">{{ release.user.email }}</td>
+                <td>{{ release.created_user.email }}</td>
 
                 <td ng-if="release.is_test_release">Yes</td>
                 <td ng-if="!release.is_test_release">No</td>
 
-                <td ng-if="release.key" style="float:right">
+                <td>{{ release.num_signatures }}</td>
+
+                <td>{{ release.num_ips }}</td>
+
+                <td>{{ release.num_dns }}</td>
+
+                <td>
                     <center>
                         <button type="submit"
-                                ng-click="delete(release.key)"
-                                class="btn btn-sm btn-danger">
-                            <small><span class="glyphicon glyphicon-remove-circle"></span></small>
+                                ng-click="generate_signature_export(release.id)"
+                                class="btn btn-sm"
+                                title="Generate Signature Export">
+                            <small><span class="glyphicon glyphicon-export"></span></small>
                         </button>
                         <button type="submit"
-                                ng-click="delete(release.key)"
+                                ng-click="generate_release_notes(release.id)"
+                                class="btn btn-sm btn-info"
+                                title="Generate Release Notes">
+                            <small><span class="glyphicon glyphicon-folder-open"></span></small>
+                        </button>
+                        <button type="submit"
+                                ng-click="delete(release.id)"
                                 class="btn btn-sm btn-danger">
                             <small><span class="glyphicon glyphicon-remove-circle"></span></small>
                         </button>

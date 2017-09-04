@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('InquestKB')
-    .controller('ReleaseController', ['$scope', '$uibModal', 'resolvedYara_rule', 'Release',
-        function ($scope, $uibModal, resolvedRelease, Release) {
+    .controller('ReleaseController', ['$scope', '$uibModal', 'resolvedRelease', 'Release', 'growl', 'FileSaver', 'Blob',
+        function ($scope, $uibModal, resolvedRelease, Release, growl, FileSaver, Blob) {
 
             $scope.releases = resolvedRelease;
 
@@ -12,19 +12,21 @@ angular.module('InquestKB')
             };
 
             $scope.delete = function (id) {
-                Release.delete({id: id}, function () {
-                    $scope.releases = Release.query();
+                Release.resource.delete({id: id}, function () {
+                    $scope.releases = Release.resource.query();
                 });
             };
 
             $scope.save = function (id) {
                 if (id) {
-                    Release.update({id: id}, $scope.release, function () {
-                        $scope.releases = Release.query();
+                    Release.resource.update({id: id}, $scope.release, function () {
+                        $scope.releases = Release.resource.query();
                     });
                 } else {
-                    Release.save($scope.release, function () {
-                        $scope.releases = Release.query();
+                    Release.resource.save($scope.release, function () {
+                        $scope.releases = Release.resource.query();
+                    }, function (error) {
+                        growl.error(error.data, {ttl: -1});
                     });
                 }
             };
@@ -42,7 +44,6 @@ angular.module('InquestKB')
                 var releaseSave = $uibModal.open({
                     templateUrl: 'release-save.html',
                     controller: 'ReleaseSaveController',
-                    size: 'sm',
                     resolve: {
                         release: function () {
                             return $scope.release;
@@ -56,14 +57,41 @@ angular.module('InquestKB')
                 });
             };
 
-            $scope.get_release_notes = function (id) {
+            $scope.generate_release_notes = function (id) {
+                Release.generate_release_notes(id).then(function (response) {
+                    var header = response.headers()['content-disposition'];
+                    var startIndex = header.indexOf('filename=');
+                    var filename = header.slice(startIndex + 9);
+                    try {
+                        FileSaver.saveAs(new Blob([response.data], {type: response.headers()["Content-Type"]}), filename);
+                    }
+                    catch (error) {
+                        growl.error(error.message, {ttl: -1});
+                    }
+                }, function (error) {
+                    growl.error(error.data, {ttl: -1});
+                });
+            };
 
+            $scope.generate_signature_export = function (id) {
+                Release.generate_signature_export(id).then(function (response) {
+                    var header = response.headers()['content-disposition'];
+                    var startIndex = header.indexOf('filename=');
+                    var filename = header.slice(startIndex + 9);
+                    try {
+                        FileSaver.saveAs(new Blob([response.data], {type: response.headers()["Content-Type"]}), filename);
+                    }
+                    catch (error) {
+                        growl.error(error.message, {ttl: -1});
+                    }
+                }, function (error) {
+                    growl.error(error.data, {ttl: -1});
+                });
             };
         }
     ])
     .controller('ReleaseSaveController', ['$scope', '$http', '$uibModalInstance', 'Release',
         function ($scope, $http, $uibModalInstance, Release) {
-            $scope.release = release;
 
             $scope.ok = function () {
                 $uibModalInstance.close($scope.release);
