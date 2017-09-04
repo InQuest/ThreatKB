@@ -32,7 +32,7 @@
 
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse navbar-ex1-collapse">
-                <ul class="nav navbar-nav" style="font-size: small" ng-if="isLoggedIn()">
+                <ul class="nav navbar-nav" style="font-size: smaller" ng-if="isLoggedIn()">
 
                     <li>
                         <a href="#!/c2ips">C2 IP</a>
@@ -55,7 +55,7 @@
                     </li>
 
                     <li>
-                        <a href="#!/cfg_category_range_mapping">Cfg Category Range Mapping</a>
+                        <a href="#!/cfg_category_range_mapping">Cfg Categories</a>
                     </li>
 
                     <li>
@@ -72,6 +72,13 @@
 
                     <li>
                         <a href="#!/files">Files</a>
+                    </li>
+
+                    <li>
+                        <a href="#!/users">Users</a>
+                  </li>
+                  <li>
+                        <a href="#!/releases">Releases</a>
                     </li>
                 </ul>
                 <ul class="nav navbar-nav pull-right" ng-show="isLoggedIn()">
@@ -105,6 +112,9 @@
 <script src="lib/ng-file-upload-shim/ng-file-upload-shim.js"></script> <!-- for no html5 browsers support -->
 <script src="lib/ng-file-upload/ng-file-upload.js"></script>
 <script src="lib/angular-growl-v2/build/angular-growl.min.js"></script>
+<script src="lib/angular-password/angular-password.js"></script>
+<script src="lib/angular-messages/angular-messages.js"></script>
+<script src="lib/angular-file-saver/dist/angular-file-saver.bundle.min.js"></script>
 
 <script src="js/app.js"></script>
 
@@ -122,6 +132,7 @@
 <script src="js/files/files-controller.js"></script>
 <script src="js/authentication/authentication-controller.js"></script>
 <script src="js/import/import-controller.js"></script>
+<script src="js/releases/releases-controller.js"></script>
 <!-- /Controllers -->
 
 <!-- Services -->
@@ -138,6 +149,7 @@
 <script src="js/files/files-service.js"></script>
 <script src="js/import/import-service.js"></script>
 <script src="js/authentication/authentication-service.js"></script>
+<script src="js/releases/releases-service.js"></script>
 <!-- /Services -->
 
 </body>

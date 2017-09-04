@@ -65,7 +65,8 @@ def update_c2ip(id):
         reference_link=request.json['reference_link'],
         reference_text=request.json['reference_text'],
         expiration_type=request.json['expiration_type'],
-        expiration_timestamp=parser.parse(request.json['expiration_timestamp']),
+        expiration_timestamp=parser.parse(request.json['expiration_timestamp']) if request.json.get(
+            "expiration_timestamp", None) else None,
         id=id,
         modified_user_id=current_user.id
     )
@@ -75,6 +76,7 @@ def update_c2ip(id):
     create_tags_mapping(entity.__tablename__, entity.id, request.json['addedTags'])
     delete_tags_mapping(entity.__tablename__, entity.id, request.json['removedTags'])
 
+    entity = c2ip.C2ip.query.get(entity.id)
     return jsonify(entity.to_dict()), 200
 
 
