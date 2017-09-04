@@ -1,18 +1,16 @@
 <div>
 
     <br>
-    <center>
-        <div class="form-group" style="width:700px;">
-            <div ngf-select="" ngf-drop="" ng-model="files" ngf-model-invalid="invalidFiles"
-                 ngf-change="upload(yara_rule.id, $files, $file, $newFiles, $duplicateFiles, $invalidFiles, $event)"
-                 ngf-model-options="modelOptionsObj" ngf-multiple="true" ngf-pattern="pattern"
-                 ngf-accept="acceptSelect" ngf-drag-over-class="dragover" ngf-validate="validateObj"
-                 ngf-allow-dir="true" class="drop-box" ngf-drop-available="dropAvailable">Select Files
-                <span ng-show="dropAvailable"> or Drop Files</span>
-            </div>
-            <div ngf-no-file-drop>File Drag/Drop is not supported for this browser</div>
+    <div class="form-group" style="width: 50%; margin: 0 auto;">
+        <div ngf-select="" ngf-drop="" ng-model="files" ngf-model-invalid="invalidFiles"
+             ngf-change="upload(yara_rule.id, $files, $file, $newFiles, $duplicateFiles, $invalidFiles, $event)"
+             ngf-model-options="modelOptionsObj" ngf-multiple="true" ngf-pattern="pattern"
+             ngf-accept="acceptSelect" ngf-drag-over-class="dragover" ngf-validate="validateObj"
+             ngf-allow-dir="true" class="drop-box" ngf-drop-available="dropAvailable">Select Files
+            <span ng-show="dropAvailable"> or Drop Files</span>
         </div>
-    </center>
+        <div ngf-no-file-drop>File Drag/Drop is not supported for this browser</div>
+    </div>
     <br>
     <div class="container-fluid">
 
