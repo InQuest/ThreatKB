@@ -7,22 +7,60 @@ import StringIO
 import yara
 
 from sqlalchemy import func
+from sqlalchemy.ext.serializer import loads, dumps
 
-from app import app, db
-from app.models import yara_rule
-from flask import abort, jsonify, request
+from app import app, db, celery
+from app.models import yara_rule, files
+from flask import abort, jsonify, request, json
 from flask.ext.login import current_user, login_required
 
 from app.models.yara_rule import Yara_testing_history
 
 
+@app.route('/ThreatKB/test_yara_rule', methods=['POST'])
+@login_required
+def clean_yara_test():
+    pattern = request.values['pattern'] if 'pattern' in request.values else ".*"
+    sig_ids = json.loads(request.values['sig_ids']) if 'sig_ids' in request.values else []
+
+    if sig_ids.__len__() == 0:
+        sig_ids = get_all_sig_ids()
+
+    results = []
+    for rule_id in sig_ids:
+        yara_rule_entity = yara_rule.Yara_rule.query.get(rule_id)
+        if not yara_rule_entity:
+            results.append(dict(sig_id=rule_id,
+                                error="Error encountered"))
+        else:
+            file_entities = files.Files.query \
+                .filter_by(entity_type=None, entity_id=None) \
+                .filter(files.Files.filename.op('regexp')(r'%s' % pattern)) \
+                .all()
+
+            test_yara_rule_task.delay(yara_rule_entity.id, dumps(file_entities), current_user.id)
+
+    return json.dumps(results), 200
+
+
 @app.route('/ThreatKB/test_yara_rule/<int:rule_id>', methods=['GET'])
 @login_required
-def test_yara_rule(rule_id):
+def test_yara_rule_rest(rule_id):
     yara_rule_entity = yara_rule.Yara_rule.query.get(rule_id)
     if not yara_rule_entity:
-        abort(404)
+        abort(500)
+    return jsonify(test_yara_rule(yara_rule_entity, yara_rule_entity.files, current_user.id)), 200
 
+
+@celery.task()
+def test_yara_rule_task(rule_id, files_to_test, user):
+    yara_rule_entity = yara_rule.Yara_rule.query.get(rule_id)
+    if not yara_rule_entity:
+        abort(500)
+    return test_yara_rule(yara_rule_entity, loads(files_to_test), user, True)
+
+
+def test_yara_rule(yara_rule_entity, files_to_test, user, is_async=False):
     old_avg = db.session.query(func.avg(Yara_testing_history.avg_millis_per_file).label('average')) \
         .filter(Yara_testing_history.yara_rule_id == yara_rule_entity.id) \
         .scalar()
@@ -36,23 +74,27 @@ def test_yara_rule(rule_id):
     threshold = app.config['MAX_MILLIS_PER_FILE_THRESHOLD']
     processes = []
     manager_dicts = []
-    for f in yara_rule_entity.files:
+    for f in files_to_test:
         total_file_count += 1
         file_path = os.path.join(app.config['FILE_STORE_PATH'],
-                                 str(f.entity_type),
-                                 str(f.entity_id),
+                                 str(f.entity_type) if f.entity_type is not None else "",
+                                 str(f.entity_id) if f.entity_id is not None else "",
                                  str(f.filename))
-        manager = multiprocessing.Manager()
-        manager_dict = manager.dict()
-        if old_avg:
-            p = multiprocessing.Process(target=perform_rule_match, args=(rule, file_path, manager_dict))
-            processes.append(p)
-            p.start()
-        else:
-            perform_rule_match(rule, file_path, manager_dict)
-        manager_dicts.append(manager_dict)
 
-    if old_avg:
+        if not is_async:
+            manager = multiprocessing.Manager()
+            manager_dict = manager.dict()
+            if old_avg:
+                p = multiprocessing.Process(target=perform_rule_match, args=(rule, file_path, manager_dict))
+                processes.append(p)
+                p.start()
+            else:
+                perform_rule_match(rule, file_path, manager_dict)
+            manager_dicts.append(manager_dict)
+        else:
+            manager_dicts.append(perform_rule_match(rule, file_path, dict()))
+
+    if old_avg and not is_async:
         time.sleep((old_avg * threshold) / 1000.0)
         for p in processes:
             p.join()
@@ -79,12 +121,12 @@ def test_yara_rule(rule_id):
                                             files_tested=total_file_count,
                                             files_matched=count_of_files_matched,
                                             avg_millis_per_file=((total_file_time / total_file_count) * 1000),
-                                            user_id=current_user.id))
+                                            user_id=user))
         db.session.commit()
 
-    return jsonify(dict(files_tested=total_file_count,
-                        files_matched=count_of_files_matched,
-                        tests_terminated=tests_terminated)), 200
+    return dict(files_tested=total_file_count,
+                files_matched=count_of_files_matched,
+                tests_terminated=tests_terminated)
 
 
 def get_yara_rule(yara_rule_entity):
@@ -119,3 +161,13 @@ def perform_rule_match(rule, file_path, manager_dict):
         manager_dict['match'] = True
     else:
         manager_dict['match'] = False
+    return manager_dict
+
+
+def get_all_sig_ids():
+    sig_ids = []
+    yara_rules = yara_rule.Yara_rule.query.all()
+    for rule in yara_rules:
+        sig_ids.append(rule.id)
+
+    return sig_ids

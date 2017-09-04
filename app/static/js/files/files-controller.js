@@ -6,10 +6,6 @@ angular.module('ThreatKB')
 
             $scope.files = resolvedFiles;
 
-            $scope.create = function () {
-                $scope.open();
-            };
-
             $scope.delete = function (id) {
                 Files.resource.delete({id: id}, function () {
                     $scope.files = Files.resource.query();
@@ -19,24 +15,6 @@ angular.module('ThreatKB')
             $scope.refresh = function () {
                 $scope.files = Files.resource.query();
             };
-
-            $scope.open = function () {
-                var filesSave = $uibModal.open({
-                    templateUrl: 'files-save.html',
-                    controller: 'FilesSaveController',
-                    resolve: {
-                        files: function () {
-                            return $scope.files;
-                        }
-                    }
-                });
-
-                filesSave.result.then(function (entity) {
-                    $scope.files = entity;
-                    $scope.refresh();
-                });
-            };
-
 
             $scope.$watch('files', function () {
                 $scope.upload($scope.files);
@@ -66,5 +44,4 @@ angular.module('ThreatKB')
                     }
                 }
             };
-
-        }])
+        }]);

@@ -1,7 +1,7 @@
 <div>
 
     <br>
-    <div class="form-group" style="width: 50%; margin: 0 auto;">
+    <div class="form-group" style="width:50%; margin: 0 auto;">
         <div ngf-select="" ngf-drop="" ng-model="files" ngf-model-invalid="invalidFiles"
              ngf-change="upload(yara_rule.id, $files, $file, $newFiles, $duplicateFiles, $invalidFiles, $event)"
              ngf-model-options="modelOptionsObj" ngf-multiple="true" ngf-pattern="pattern"
@@ -18,9 +18,6 @@
             <i class="glyphicon glyphicon-search"></i>
             <input type="text" class="form-control" placeholder="Search" ng-model="search"/>
         </div>
-        <a class="btn-link pull-right" style="color:inherit;" ng-click="create()" title="Upload Files">
-            <span class="glyphicon glyphicon-plus-sign"></span>
-        </a>
     </div>
 
     <div class="table-responsive">
@@ -38,8 +35,8 @@
             <tbody>
             <tr ng-repeat="f in files | orderBy:'-date_modified' | toArray:false | filter:search track by $index">
                 <td ng-if="f.filename">
-                    <a href="ThreatKB/files/{{ f.entity_type == null ? 0 : f.entity_type }}/
-                            {{ f.entity_id == null ? 0 : f.entity_id}}/{{ f.id }}">{{ f.filename }}</a>
+                    <a href="ThreatKB/files/{{ f.entity_type == null ? 0 : f.entity_type }}/{{ f.entity_id == null ? 0 : f.entity_id}}/{{ f.id }}">
+                        {{ f.filename }}</a>
                 </td>
 
                 <td ng-if="f.content_type">{{ f.content_type }}</td>

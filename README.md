@@ -42,7 +42,51 @@ ThreatKB (staging) $ flask/bin/python run.py
 ThreatKB (staging) $ grunt server
 ```
 
+## Databases
+Please see ThreatKB/migrations/README.
+
 ## Miscellaneous
+
+### celery
+Requires running inside virtualenv. Needs to be running in order for testing Clean Corpus of files.
+```
+ThreatKB (staging) $ source flask/bin/activate
+(flask) ThreatKB (staging) $ celery -A app.celery worker -E
+```
+
+### redis
+#### Install
+```
+# Using Homebrew on Mac
+$ brew install redis
+```
+
+#### Launch on startup
+```
+# To launch redis-server on computer start (Mac)
+$ ln -sfv /usr/local/opt/redis/*.plist ~/Library/LaunchAgents
+$ launchctl load ~/Library/LaunchAgents/homebrew.mxcl.redis.plist
+
+# To unload from startup
+$ launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.redis.plist
+```
+
+#### Start
+```
+$ redis-server /usr/local/etc/redis.conf
+```
+
+#### Test
+```
+$ redis-cli ping
+PONG
+```
+
+#### Monitor
+```
+$ redis-cli monitor
+OK
+```
 
 ### Hashing password for insert in kb_users table
 ```
