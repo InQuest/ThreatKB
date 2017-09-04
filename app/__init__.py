@@ -38,7 +38,7 @@ celery = make_celery(app)
 
 app.config["SQLALCHEMY_ECHO"] = True
 
-from app.models import authentication
+from app.models import users
 from app.models import c2ip
 from app.models import c2dns
 from app.models import cfg_settings
@@ -46,7 +46,7 @@ from app.models import yara_rule
 from app.models import cfg_reference_text_templates
 from app.models import cfg_states
 from app.models import comments
-from app.models import authentication
+from app.models import users
 from app.models import tags
 from app.models import tags_mapping
 from app.models import files
@@ -70,6 +70,7 @@ from app.routes import cfg_category_range_mapping
 from app.routes import test_yara_rule
 from app.routes import error_handling
 from app.routes import releases
+from app.routes import users
 
 
 @app.before_first_request
@@ -81,4 +82,4 @@ def setup_logging():
 @login_manager.user_loader
 def load_user(userid):
     app.logger.debug("load_user called with user_id: '%s'" % (str(userid)))
-    return authentication.KBUser.query.get(int(userid))
+    return users.KBUser.query.get(int(userid))

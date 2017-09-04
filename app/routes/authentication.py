@@ -1,5 +1,5 @@
 from app import app, db, bcrypt
-from app.models.authentication import KBUser
+from app.models.users import KBUser
 from flask import request, jsonify, session, json, abort
 from flask.ext.login import current_user, login_required
 import flask_login

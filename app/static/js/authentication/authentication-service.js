@@ -15,9 +15,13 @@ angular.module('ThreatKB')
                 getUserStatus: getUserStatus
             });
 
+            function getUsers(){
+                return $http.get('/InquestKB/u')
+            };
+
             function isLoggedIn() {
                 return !!user;
-            }
+            };
 
             function login(email, password) {
                 // create a new instance of deferred
