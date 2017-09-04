@@ -1,10 +1,12 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('C2ipController', ['$scope', '$uibModal', 'resolvedC2ip', 'C2ip', 'Cfg_states', 'growl',
-        function ($scope, $uibModal, resolvedC2ip, C2ip, Cfg_states, growl) {
+    .controller('C2ipController', ['$scope', '$uibModal', 'resolvedC2ip', 'C2ip', 'Cfg_states', 'growl', 'Users',
+        function ($scope, $uibModal, resolvedC2ip, C2ip, Cfg_states, growl, Users) {
 
             $scope.c2ips = resolvedC2ip;
+
+            $scope.users = Users.query();
 
             $scope.create = function () {
                 $scope.clear();
@@ -14,6 +16,7 @@ angular.module('ThreatKB')
             $scope.update = function (id) {
                 $scope.c2ip = C2ip.get({id: id});
                 $scope.cfg_states = Cfg_states.query();
+                $scope.users = Users.query();
                 $scope.open(id);
             };
 
@@ -23,7 +26,13 @@ angular.module('ThreatKB')
                 });
             };
 
-            $scope.save = function (id) {
+            $scope.save = function (id_or_ip) {
+                var id = id_or_ip;
+                if (typeof(id_or_ip) == "object") {
+                    id = id_or_ip.id;
+                    $scope.c2ip = id_or_ip;
+                }
+
                 if (id) {
                     C2ip.update({id: id}, $scope.c2ip, function () {
                         $scope.c2ips = C2ip.query();

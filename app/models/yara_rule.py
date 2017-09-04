@@ -93,6 +93,7 @@ class Yara_rule(db.Model):
             files=[file.to_dict() for file in files],
             created_user=self.created_user.to_dict(),
             modified_user=self.modified_user.to_dict(),
+            owner_user=self.owner_user.to_dict() if self.owner_user else None,
             revision=self.revision
         )
 

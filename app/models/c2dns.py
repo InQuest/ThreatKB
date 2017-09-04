@@ -58,6 +58,7 @@ class C2dns(db.Model):
             removedTags=[],
             created_user=self.created_user.to_dict(),
             modified_user=self.modified_user.to_dict(),
+            owner_user=self.owner_user.to_dict() if self.owner_user else None,
             comments=[comment.to_dict() for comment in comments]
         )
 

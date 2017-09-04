@@ -340,35 +340,17 @@
             <thead>
             <tr>
 
-<<<<<<< HEAD
                 <th style="width: 120px;">Signature ID</th>
-=======
-                <th style="width: 100px;">Signature ID</th>
->>>>>>> aafb39fd24d6af3818b08d7c14bed53a0940810d
 
                 <th>Name</th>
 
                 <th style="width: 140px;">Category</th>
 
-<<<<<<< HEAD
-                <th style="width:120px">Confidence</th>
-
-                <th style="width:120px">Severity</th>
-
                 <th style="width: 100px;">State</th>
 
+                <th style="width: 260px;">Owner</th>
+
                 <th style="width: 120px;">Actions</th>
-=======
-                <th style="width:100px">Confidence</th>
-
-                <th style="width:100px">Severity</th>
-
-                <th style="width: 80px;">State</th>
-
-                <th>Assigned To</th>
-
-                <th style="width: 100px;">Actions</th>
->>>>>>> aafb39fd24d6af3818b08d7c14bed53a0940810d
 
             </tr>
             </thead>
@@ -381,16 +363,12 @@
 
                 <td>{{ yara_rule.category }}</td>
 
-                <td>{{ yara_rule.confidence }}</td>
-
-                <td>{{ yara_rule.severity }}</td>
-
                 <td>{{ yara_rule.state }}</td>
 
                 <td>
-                    <ui-select ng-model="yara_rule.user" on-select="yara_rule=yara_rule; save(yara_rule.id)">
+                    <ui-select ng-model="yara_rule.owner_user" on-select="save(yara_rule)">
                         <ui-select-match placeholder="Select an owner ...">
-                            <span ng-bind="$select.selected.email || yara_rule.user.email"></span>
+                            <small><span ng-bind="$select.selected.email || yara_rule.owner_user.email"></span></small>
                         </ui-select-match>
                         <ui-select-choices
                                 repeat="person in (users | filter: $select.search) track by person.id">

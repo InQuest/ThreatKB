@@ -27,7 +27,13 @@ angular.module('ThreatKB')
                 });
             };
 
-            $scope.save = function (id) {
+            $scope.save = function (id_or_rule) {
+                var id = id_or_rule;
+                if (typeof(id_or_rule) == "object") {
+                    id = id_or_rule.id;
+                    $scope.yara_rule = id_or_rule;
+                }
+
                 if (id) {
                     Yara_rule.update({id: id}, $scope.yara_rule, function () {
                         $scope.yara_rules = Yara_rule.query();
@@ -92,7 +98,6 @@ angular.module('ThreatKB')
             $scope.yara_rule.new_comment = "";
             $scope.Comments = Comments;
             $scope.Files = Files;
-            $scope.users = Users.query();
 
             $scope.cfg_states = Cfg_states.query();
             $scope.cfg_category_range_mapping = CfgCategoryRangeMapping.query();
