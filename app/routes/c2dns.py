@@ -32,7 +32,8 @@ def create_c2dns():
         , reference_link=request.json['reference_link']
         , reference_text=request.json['reference_text']
         , expiration_type=request.json['expiration_type']
-        , expiration_timestamp=parser.parse(request.json['expiration_timestamp'])
+        , expiration_timestamp=parser.parse(request.json['expiration_timestamp']) if request.json.get("expiration_type",
+                                                                                                      None) else None
         , state=request.json['state']['state']
         , created_user_id=current_user.id
         , modified_user_id=current_user.id
@@ -52,13 +53,14 @@ def update_c2dns(id):
     if not entity:
         abort(404)
     entity = c2dns.C2dns(
-        state=request.json['state'],
+        state=request.json['state']['state'],
         domain_name=request.json['domain_name'],
         match_type=request.json['match_type'],
         reference_link=request.json['reference_link'],
         reference_text=request.json['reference_text'],
         expiration_type=request.json['expiration_type'],
-        expiration_timestamp=parser.parse(request.json['expiration_timestamp']),
+        expiration_timestamp=parser.parse(request.json['expiration_timestamp']) if request.json.get(
+            "expiration_timestamp", None) else None,
         id=id,
         modified_user_id=current_user.id
     )
@@ -68,6 +70,7 @@ def update_c2dns(id):
     create_tags_mapping(entity.__tablename__, entity.id, request.json['addedTags'])
     delete_tags_mapping(entity.__tablename__, entity.id, request.json['removedTags'])
 
+    entity = c2dns.C2dns.query.get(entity.id)
     return jsonify(entity.to_dict()), 200
 
 

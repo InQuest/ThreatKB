@@ -10,6 +10,16 @@ body {
     padding: 10px;
 }
 
+table {
+    table-layout: fixed;
+    word-wrap: break-word;
+}
+
+.container-fluid {
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
 table td:last-child {
     width: 100%;
     align: right;
@@ -48,4 +58,26 @@ table td:last-child {
 
 span.glyphicon {
     font-size: 1.4em;
+    cursor: pointer;
+}
+
+.form-control {
+    font-weight: normal;
+}
+
+.drop-box {
+    background: #F8F8F8;
+    border: 5px dashed #DDD;
+    width: 100%;
+    height: 100px;
+    text-align: center;
+    padding-top: 35px;
+}
+
+.dragover {
+    border: 5px dashed blue;
+}
+
+.growl-container.growl-fixed {
+    max-width: 500px;
 }

@@ -1,5 +1,6 @@
 // Declare app level module which depends on filters, and services
-angular.module('InquestKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize', 'ui.select', 'ngTagsInput', 'angular-toArrayFilter'])
+angular.module('InquestKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize', 'ui.select', 'ngTagsInput', 'angular-growl', 'ngFileSaver',
+    'angular-toArrayFilter', 'ui.codemirror', 'ngFileUpload', 'ngFileSaver'])
     .config(['$routeProvider', function ($routeProvider) {
         $routeProvider
             .when('/', {
@@ -46,6 +47,26 @@ angular.module('InquestKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitiz
                     }]
                 }
             })
+            .when('/cfg_category_range_mapping', {
+                templateUrl: 'views/cfg_category_range_mapping/cfg_category_range_mapping.html',
+                controller: 'CfgCategoryRangeMappingController',
+                access: {restricted: true},
+                resolve: {
+                    resolvedCfgCategoryRangeMapping: ['CfgCategoryRangeMapping', function (CfgCategoryRangeMapping) {
+                        return CfgCategoryRangeMapping.query();
+                    }]
+                }
+            })
+            .when('/cfg_settings', {
+                templateUrl: 'views/cfg_settings/cfg_settings.html',
+                controller: 'Cfg_settingsController',
+                access: {restricted: true},
+                resolve: {
+                    resolvedCfg_settings: ['Cfg_settings', function (Cfg_settings) {
+                        return Cfg_settings.query();
+                    }]
+                }
+            })
             .when('/cfg_states', {
                 templateUrl: 'views/cfg_states/cfg_states.html',
                 controller: 'Cfg_statesController',
@@ -61,22 +82,12 @@ angular.module('InquestKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitiz
                 templateUrl: 'views/tags/tags.html',
                 controller: 'TagsController',
                 access: {restricted: true},
-                resolve:{
+                resolve: {
                     resolvedTags: ['Tags', function (Tags) {
                         return Tags.query();
                     }]
                 }
             })
-            // .when('/tags_mapping', {
-            //     templateUrl: 'views/tags_mapping/tags_mapping.html',
-            //     controller: 'Tags_mappingController',
-            //     access: {restricted: true},
-            //     resolve:{
-            //         resolvedTags_mapping: ['Tags_mapping', function (Tags_mapping) {
-            //             return Tags_mapping.query();
-            //         }]
-            //     }
-            // })
             .when('/yara_rules', {
                 templateUrl: 'views/yara_rule/yara_rules.html',
                 controller: 'Yara_ruleController',
@@ -86,11 +97,37 @@ angular.module('InquestKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitiz
                         return Yara_rule.query();
                     }]
                 }
-            }).otherwise({
-            redirectTo: '/'
-        });
-
-    }]);
+            })
+            .when('/files', {
+                templateUrl: 'views/files/files.html',
+                controller: 'FilesController',
+                access: {restricted: true},
+                resolve: {
+                    resolvedFiles: ['Files', function (Files) {
+                        return Files.resource.query();
+                    }]
+                }
+            })
+            .when('/import', {
+                templateUrl: 'views/import/import.html',
+                controller: 'ImportController',
+                access: {restricted: true}
+            })
+            .when('/releases', {
+                templateUrl: 'views/releases/releases.html',
+                controller: 'ReleaseController',
+                access: {restricted: true},
+                resolve: {
+                    resolvedRelease: ['Release', function (Release) {
+                        return Release.resource.query();
+                    }]
+                }
+            })
+            .otherwise({
+                redirectTo: '/'
+            });
+    }])
+;
 
 angular.module('InquestKB').run(function ($rootScope, $location, AuthService) {
 

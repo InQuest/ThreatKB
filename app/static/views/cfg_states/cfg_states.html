@@ -9,18 +9,21 @@
                 <button type="button" class="close"
                         ng-click="cancel()">&times;
                 </button>
-                <h4 class="modal-title" id="myCfg_statesLabel">Create or edit a Cfg_states</h4>
+
+                <h4 class="modal-title" id="myC2ipLabel" ng-if="!cfg_states.id">Create State</h4>
+                <h4 class="modal-title" id="myC2ipLabel" ng-if="cfg_states.id">Edit State</h4>
+
             </div>
             <div class="modal-body">
-                <div class="form-group">
+                <div class="form-group" ng-if="cfg_states.id">
                     <label>ID</label>
-                    <input type="text" class="form-control" name="id"
-                           ng-model="cfg_states.id" readonly>
+                    <label type="text" class="form-control" name="id"
+                           ng-model="cfg_states.id">{{ cfg_states.id }}</label>
                 </div>
 
 
                 <div class="form-group">
-                    <label>state:</label>
+                    <label>State:</label>
 
                     <input type="text" class="form-control" name="state"
                            ng-model="cfg_states.state" ng-required="true"
@@ -32,6 +35,10 @@
 
             </div>
             <div class="modal-footer">
+                <div class="pull-left" style="padding: 5px 0 0 5px;">
+                    <input type="checkbox" class="pull-left" ng-model="cfg_states.is_release_state">
+                    &nbsp;Use This For Production Releases
+                </div>
                 <button type="button" class="btn btn-default" ng-click="cancel()">Cancel
                 </button>
                 <button type="submit" ng-disabled="form.$invalid" class="btn btn-primary">Save</button>
@@ -60,6 +67,9 @@
 
                 <th>State</th>
 
+                <th>Release State</th>
+
+                <th style="width: 120px;">Actions</th>
             </tr>
             </thead>
             <tbody>
@@ -68,16 +78,19 @@
 
                 <td ng-if="cfg_state.state">{{ cfg_state.state }}</td>
 
+                <td ng-if="cfg_state.is_release_state && cfg_state.id">Yes</td>
+                <td ng-if="!cfg_state.is_release_state && cfg_state.id">No</td>
+
                 <td ng-if="cfg_state.id" style="float:right">
                     <button type="submit"
                             ng-click="update(cfg_state.id)"
-                            class="btn">
-                        <span class="glyphicon glyphicon-pencil"></span> Edit
+                            class="btn btn-sm">
+                        <small><span class="glyphicon glyphicon-pencil"></span></small>
                     </button>
                     <button type="submit"
                             ng-click="delete(cfg_state.id)"
-                            class="btn btn-danger">
-                        <span class="glyphicon glyphicon-remove-circle"></span> Delete
+                            class="btn btn-sm btn-danger">
+                        <small><span class="glyphicon glyphicon-remove-circle"></span></small>
                     </button>
 
                 </td>

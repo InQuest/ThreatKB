@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('InquestKB')
-    .controller('C2dnsController', ['$scope', '$modal', 'resolvedC2dns', 'C2dns', 'Cfg_states',
-        function ($scope, $modal, resolvedC2dns, C2dns, Cfg_states) {
+    .controller('C2dnsController', ['$scope', '$uibModal', 'resolvedC2dns', 'C2dns', 'Cfg_states',
+        function ($scope, $uibModal, resolvedC2dns, C2dns, Cfg_states) {
 
             $scope.c2dns = resolvedC2dns;
 
@@ -33,6 +33,8 @@ angular.module('InquestKB')
                     C2dns.save($scope.c2dns, function () {
                         $scope.c2dns = C2dns.query();
                         //$scope.clear();
+                    }, function (error) {
+                        growl.error(error.data, {ttl: -1});
                     });
                 }
             };
@@ -69,9 +71,10 @@ angular.module('InquestKB')
             };
 
             $scope.open = function (id) {
-                var c2dnsSave = $modal.open({
+                var c2dnsSave = $uibModal.open({
                     templateUrl: 'c2dns-save.html',
                     controller: 'C2dnsSaveController',
+                    size: 'lg',
                     resolve: {
                         c2dns: function () {
                             return $scope.c2dns;
@@ -85,11 +88,17 @@ angular.module('InquestKB')
                 });
             };
         }])
-    .controller('C2dnsSaveController', ['$scope', '$http', '$modalInstance', 'c2dns', 'Cfg_states', 'Comments',
-        function ($scope, $http, $modalInstance, c2dns, Cfg_states, Comments) {
+    .controller('C2dnsSaveController', ['$scope', '$http', '$uibModalInstance', 'c2dns', 'Cfg_states', 'Comments',
+        function ($scope, $http, $uibModalInstance, c2dns, Cfg_states, Comments) {
             $scope.c2dns = c2dns;
             $scope.c2dns.new_comment = "";
             $scope.Comments = Comments;
+
+
+            $scope.match_types = ['exact', 'wildcard'];
+            if (!$scope.c2dns.match_type) {
+                $scope.c2dns.match_type = $scope.match_types[0];
+            }
 
             $scope.cfg_states = Cfg_states.query();
 
@@ -116,11 +125,11 @@ angular.module('InquestKB')
             };
 
             $scope.ok = function () {
-                $modalInstance.close($scope.c2dns);
+                $uibModalInstance.close($scope.c2dns);
             };
 
             $scope.cancel = function () {
-                $modalInstance.dismiss('cancel');
+                $uibModalInstance.dismiss('cancel');
             };
 
             $scope.addedTag = function ($tag) {
@@ -137,6 +146,8 @@ angular.module('InquestKB')
                     return tags.filter(function (tag) {
                         return tag.text.toLowerCase().indexOf(query.toLowerCase()) !== -1;
                     });
+                }, function (error) {
+                    growl.error(error.data, {ttl: -1});
                 });
             }
         }]);

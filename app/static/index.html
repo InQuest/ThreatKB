@@ -5,15 +5,19 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>InquestKB</title>
-    <link href="lib/bootstrap-css/css/bootstrap.css" rel="stylesheet">
+    <link href="lib/bootstrap-css/css/bootstrap.min.css" rel="stylesheet">
     <link href="lib/jquery-ui/themes/smoothness/jquery-ui.css" rel="stylesheet"/>
     <link href="lib/angular-ui-select/dist/select.min.css" rel="stylesheet"/>
     <link href="lib/ng-tags-input/ng-tags-input.css" rel="stylesheet">
+    <link href="lib/angular-bootstrap/ui-bootstrap-csp.css" rel="stylesheet"/>
+    <link href="css/codemirror.css" rel="stylesheet">
+    <link href="lib/angular-growl-v2/build/angular-growl.min.css" rel="stylesheet"/>
 
     <link href="css/app.css" rel="stylesheet">
 </head>
 <body>
 <div ng-controller="AuthController">
+    <div growl></div>
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
         <div class="container">
             <div class="navbar-header">
@@ -28,7 +32,7 @@
 
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse navbar-ex1-collapse">
-                <ul class="nav navbar-nav" ng-show="isLoggedIn()">
+                <ul class="nav navbar-nav" style="font-size: small" ng-if="isLoggedIn()">
 
                     <li>
                         <a href="#!/c2ips">C2 IP</a>
@@ -43,17 +47,36 @@
                     </li>
 
                     <li>
-                        <a href="#!/cfg_reference_text_templates">Config Reference Text</a>
+                        <a href="#!/cfg_reference_text_templates">Cfg Reference Text</a>
                     </li>
 
                     <li>
-                        <a href="#!/cfg_states">Config States</a>
+                        <a href="#!/cfg_states">Cfg States</a>
+                    </li>
+
+                    <li>
+                        <a href="#!/cfg_category_range_mapping">Cfg Categories</a>
                     </li>
 
                     <li>
                         <a href="#!/tags">Tags</a>
                     </li>
 
+                    <li>
+                        <a href="#!/import">Import</a>
+                    </li>
+
+                    <li>
+                        <a href="#!/cfg_settings">Settings</a>
+                    </li>
+
+                    <li>
+                        <a href="#!/files">Files</a>
+                    </li>
+
+                    <li>
+                        <a href="#!/releases">Releases</a>
+                    </li>
                 </ul>
                 <ul class="nav navbar-nav pull-right" ng-show="isLoggedIn()">
                     <li class="pull-right">
@@ -64,9 +87,10 @@
 
             <!-- /.navbar-collapse -->
         </div>
+    </nav>
 </div>
+
 <!-- /.container -->
-</nav>
 <div class="container" ng-view></div>
 <script src="lib/jquery/dist/jquery.js"></script>
 <script src="lib/jquery-ui/jquery-ui.js"></script>
@@ -74,11 +98,18 @@
 <script src="lib/angular/angular.js"></script>
 <script src="lib/angular-resource/angular-resource.js"></script>
 <script src="lib/angular-route/angular-route.js"></script>
-<script src="lib/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+<script src="lib/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
 <script src="lib/angular-sanitize/angular-sanitize.min.js"></script>
 <script src="lib/angular-ui-select/dist/select.min.js"></script>
 <script src="lib/ng-tags-input/ng-tags-input.js"></script>
 <script src="lib/angular-toArrayFilter/toArrayFilter.js"></script>
+<script src="js/codemirror/codemirror.js"></script>
+<script src="js/codemirror/yara.js"></script>
+<script src="lib/angular-ui-codemirror/ui-codemirror.min.js"></script>
+<script src="lib/ng-file-upload-shim/ng-file-upload-shim.js"></script> <!-- for no html5 browsers support -->
+<script src="lib/ng-file-upload/ng-file-upload.js"></script>
+<script src="lib/angular-growl-v2/build/angular-growl.min.js"></script>
+<script src="lib/angular-file-saver/dist/angular-file-saver.bundle.min.js"></script>
 
 <script src="js/app.js"></script>
 
@@ -88,10 +119,15 @@
 <script src="js/c2dns/c2dns-controller.js"></script>
 <script src="js/yara_rule/yara_rule-controller.js"></script>
 <script src="js/cfg_reference_text_templates/cfg_reference_text_templates-controller.js"></script>
+<script src="js/cfg_settings/cfg_settings-controller.js"></script>
 <script src="js/cfg_states/cfg_states-controller.js"></script>
 <script src="js/tags/tags-controller.js"></script>
 <script src="js/tags_mapping/tags_mapping-controller.js"></script>
+<script src="js/cfg_category_range_mapping/cfg_category_range_mapping-controller.js"></script>
+<script src="js/files/files-controller.js"></script>
 <script src="js/authentication/authentication-controller.js"></script>
+<script src="js/import/import-controller.js"></script>
+<script src="js/releases/releases-controller.js"></script>
 <!-- /Controllers -->
 
 <!-- Services -->
@@ -99,11 +135,16 @@
 <script src="js/c2dns/c2dns-service.js"></script>
 <script src="js/yara_rule/yara_rule-service.js"></script>
 <script src="js/cfg_reference_text_templates/cfg_reference_text_templates-service.js"></script>
+<script src="js/cfg_settings/cfg_settings-service.js"></script>
 <script src="js/cfg_states/cfg_states-service.js"></script>
 <script src="js/tags/tags-service.js"></script>
 <script src="js/tags_mapping/tags_mapping-service.js"></script>
-<script src="js/authentication/authentication-service.js"></script>
+<script src="js/cfg_category_range_mapping/cfg_category_range_mapping-service.js"></script>
 <script src="js/comments/comments-service.js"></script>
+<script src="js/files/files-service.js"></script>
+<script src="js/import/import-service.js"></script>
+<script src="js/authentication/authentication-service.js"></script>
+<script src="js/releases/releases-service.js"></script>
 <!-- /Services -->
 
 </body>

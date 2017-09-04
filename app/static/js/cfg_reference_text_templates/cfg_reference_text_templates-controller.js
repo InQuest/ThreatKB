@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('InquestKB')
-    .controller('Cfg_reference_text_templatesController', ['$scope', '$modal', 'resolvedCfg_reference_text_templates', 'Cfg_reference_text_templates',
-        function ($scope, $modal, resolvedCfg_reference_text_templates, Cfg_reference_text_templates) {
+    .controller('Cfg_reference_text_templatesController', ['$scope', '$uibModal', 'resolvedCfg_reference_text_templates', 'Cfg_reference_text_templates',
+        function ($scope, $uibModal, resolvedCfg_reference_text_templates, Cfg_reference_text_templates) {
 
             $scope.cfg_reference_text_templates = resolvedCfg_reference_text_templates;
 
@@ -49,7 +49,7 @@ angular.module('InquestKB')
             };
 
             $scope.open = function (id) {
-                var cfg_reference_text_templatesSave = $modal.open({
+                var cfg_reference_text_templatesSave = $uibModal.open({
                     templateUrl: 'cfg_reference_text_templates-save.html',
                     controller: 'Cfg_reference_text_templatesSaveController',
                     resolve: {
@@ -65,16 +65,16 @@ angular.module('InquestKB')
                 });
             };
         }])
-    .controller('Cfg_reference_text_templatesSaveController', ['$scope', '$modalInstance', 'cfg_reference_text_templates',
-        function ($scope, $modalInstance, cfg_reference_text_templates) {
+    .controller('Cfg_reference_text_templatesSaveController', ['$scope', '$uibModalInstance', 'cfg_reference_text_templates',
+        function ($scope, $uibModalInstance, cfg_reference_text_templates) {
             $scope.cfg_reference_text_templates = cfg_reference_text_templates;
 
 
             $scope.ok = function () {
-                $modalInstance.close($scope.cfg_reference_text_templates);
+                $uibModalInstance.close($scope.cfg_reference_text_templates);
             };
 
             $scope.cancel = function () {
-                $modalInstance.dismiss('cancel');
+                $uibModalInstance.dismiss('cancel');
             };
         }]);

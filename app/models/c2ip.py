@@ -2,6 +2,9 @@ from app import db
 from app.routes import tags_mapping
 from app.models.comments import Comments
 
+import ipwhois
+import json
+
 class C2ip(db.Model):
     __tablename__ = "c2ip"
 
@@ -44,13 +47,14 @@ class C2ip(db.Model):
             date_modified=self.date_modified.isoformat(),
             ip=self.ip,
             asn=self.asn,
+            st=self.st,
             country=self.country,
             city=self.city,
             state=self.state,
             reference_link=self.reference_link,
             reference_text=self.reference_text,
             expiration_type=self.expiration_type,
-            expiration_timestamp=self.expiration_timestamp.isoformat(),
+            expiration_timestamp=self.expiration_timestamp.isoformat() if self.expiration_timestamp else None,
             id=self.id,
             tags=tags_mapping.get_tags_for_source(self.__tablename__, self.id),
             addedTags=[],
@@ -59,6 +63,26 @@ class C2ip(db.Model):
             modified_user=self.modified_user.to_dict(),
             comments=[comment.to_dict() for comment in self.comments]
         )
+
+    @classmethod
+    def get_c2ip_from_ip(cls, ip):
+        whois = ipwhois.IPWhois(ip).lookup_whois()
+
+        c2ip = C2ip()
+        c2ip.ip = ip
+        c2ip.asn = whois.get("asn_description", None)
+
+        net = {}
+        for range in whois.get("nets", []):
+            if range["cidr"] == whois["asn_cidr"]:
+                net = range
+                break
+
+        c2ip.country = net.get("country", None)
+        c2ip.city = net.get("city", None)
+        c2ip.state = net.get("state", None)
+        return c2ip
+
 
     def __repr__(self):
         return '<C2ip %r>' % (self.id)

@@ -3,7 +3,6 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.bcrypt import Bcrypt
 from flask.ext.login import LoginManager
 import logging
-import os
 
 app = Flask(__name__, static_url_path='')
 app.secret_key = "a" * 24  # os.urandom(24)
@@ -14,9 +13,12 @@ login_manager.init_app(app)
 
 bcrypt = Bcrypt(app)
 
+app.config["SQLALCHEMY_ECHO"] = True
+
 from app.models import authentication
 from app.models import c2ip
 from app.models import c2dns
+from app.models import cfg_settings
 from app.models import yara_rule
 from app.models import cfg_reference_text_templates
 from app.models import cfg_states
@@ -24,17 +26,27 @@ from app.models import comments
 from app.models import authentication
 from app.models import tags
 from app.models import tags_mapping
+from app.models import files
+from app.models import cfg_category_range_mapping
+from app.models import releases
 
 from app.routes import index
 from app.routes import authentication
 from app.routes import c2ips
 from app.routes import c2dns
+from app.routes import cfg_settings
 from app.routes import yara_rules
 from app.routes import cfg_reference_text_templates
 from app.routes import cfg_states
 from app.routes import comments
 from app.routes import tags
 from app.routes import tags_mapping
+from app.routes import files
+from app.routes import import_
+from app.routes import cfg_category_range_mapping
+from app.routes import test_yara_rule
+from app.routes import error_handling
+from app.routes import releases
 
 
 @app.before_first_request

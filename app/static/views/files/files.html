@@ -1,0 +1,62 @@
+<div>
+
+    <br>
+    <center>
+        <div class="form-group" style="width:700px;">
+            <div ngf-select="" ngf-drop="" ng-model="files" ngf-model-invalid="invalidFiles"
+                 ngf-change="upload(yara_rule.id, $files, $file, $newFiles, $duplicateFiles, $invalidFiles, $event)"
+                 ngf-model-options="modelOptionsObj" ngf-multiple="true" ngf-pattern="pattern"
+                 ngf-accept="acceptSelect" ngf-drag-over-class="dragover" ngf-validate="validateObj"
+                 ngf-allow-dir="true" class="drop-box" ngf-drop-available="dropAvailable">Select Files
+                <span ng-show="dropAvailable"> or Drop Files</span>
+            </div>
+            <div ngf-no-file-drop>File Drag/Drop is not supported for this browser</div>
+        </div>
+    </center>
+    <br>
+    <div class="container-fluid">
+
+        <div class="inner-addon left-addon col-md-4" style="padding-left:0px;">
+            <i class="glyphicon glyphicon-search"></i>
+            <input type="text" class="form-control" placeholder="Search" ng-model="search"/>
+        </div>
+        <a class="btn-link pull-right" style="color:inherit;" ng-click="create()" title="Upload Files">
+            <span class="glyphicon glyphicon-plus-sign"></span>
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Filename</th>
+
+                <th>Content Type</th>
+
+                <th>Modified Date</th>
+
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="f in files | orderBy:'-date_modified' | toArray:false | filter:search track by $index">
+                <td ng-if="f.filename">
+                    <a href="InquestKB/files/{{ f.entity_type == null ? 0 : f.entity_type }}/
+                            {{ f.entity_id == null ? 0 : f.entity_id}}/{{ f.id }}">{{ f.filename }}</a>
+                </td>
+
+                <td ng-if="f.content_type">{{ f.content_type }}</td>
+
+                <td ng-if="f.id">
+                    <small>{{ pretty_date(f.date_modified) }}</small>
+                </td>
+
+                <td ng-if="f.id" style="float:right">
+                    <button ng-click="delete(f.id)" class="btn btn-sm btn-danger">
+                        <small><span class="glyphicon glyphicon-remove-circle"></span></small>
+                    </button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

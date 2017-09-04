@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('InquestKB')
-    .controller('C2ipController', ['$scope', '$modal', 'resolvedC2ip', 'C2ip', 'Cfg_states',
-        function ($scope, $modal, resolvedC2ip, C2ip, Cfg_states) {
+    .controller('C2ipController', ['$scope', '$uibModal', 'resolvedC2ip', 'C2ip', 'Cfg_states', 'growl',
+        function ($scope, $uibModal, resolvedC2ip, C2ip, Cfg_states, growl) {
 
             $scope.c2ips = resolvedC2ip;
 
@@ -33,6 +33,8 @@ angular.module('InquestKB')
                     C2ip.save($scope.c2ip, function () {
                         $scope.c2ips = C2ip.query();
                         //$scope.clear();
+                    }, function (error) {
+                        growl.error(error.data, {ttl: -1});
                     });
                 }
             };
@@ -73,9 +75,10 @@ angular.module('InquestKB')
             };
 
             $scope.open = function (id) {
-                var c2ipSave = $modal.open({
+                var c2ipSave = $uibModal.open({
                     templateUrl: 'c2ip-save.html',
                     controller: 'C2ipSaveController',
+                    size: 'lg',
                     resolve: {
                         c2ip: function () {
                             return $scope.c2ip;
@@ -89,9 +92,9 @@ angular.module('InquestKB')
                 });
             };
         }])
-    .controller('C2ipSaveController', ['$scope', '$http', '$modalInstance', 'c2ip', 'Comments', 'Cfg_states',
-        function ($scope, $http, $modalInstance, c2ip, Comments, Cfg_states) {
-            $scope.c2ip = c2ip
+    .controller('C2ipSaveController', ['$scope', '$http', '$uibModalInstance', 'c2ip', 'Comments', 'Cfg_states',
+        function ($scope, $http, $uibModalInstance, c2ip, Comments, Cfg_states) {
+            $scope.c2ip = c2ip;
             $scope.c2ip.new_comment = "";
             $scope.Comments = Comments;
 
@@ -120,11 +123,11 @@ angular.module('InquestKB')
             };
 
             $scope.ok = function () {
-                $modalInstance.close($scope.c2ip);
+                $uibModalInstance.close($scope.c2ip);
             };
 
             $scope.cancel = function () {
-                $modalInstance.dismiss('cancel');
+                $uibModalInstance.dismiss('cancel');
             };
 
             $scope.addedTag = function ($tag) {
@@ -141,6 +144,8 @@ angular.module('InquestKB')
                     return tags.filter(function (tag) {
                         return tag.text.toLowerCase().indexOf(query.toLowerCase()) !== -1;
                     });
+                }, function (error) {
+                    growl.error(error.data, {ttl: -1});
                 });
             }
         }]);

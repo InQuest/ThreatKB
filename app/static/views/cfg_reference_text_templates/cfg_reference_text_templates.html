@@ -15,8 +15,8 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label>ID</label>
-                    <input type="text" class="form-control" name="id"
-                           ng-model="cfg_reference_text_templates.id" readonly>
+                    <label type="text" class="form-control" name="id"
+                           ng-model="cfg_reference_text_templates.id">{{ cfg_reference_text_templates.id }}</label>
                 </div>
 
 
@@ -63,6 +63,7 @@
 
                 <th>template_text</th>
 
+                <th style="width: 120px;">Actions</th>
             </tr>
             </thead>
             <tbody>
@@ -72,16 +73,18 @@
                 <td ng-if="cfg_reference_text_templates.template_text">{{ cfg_reference_text_templates.template_text }}</td>
 
                 <td ng-if="cfg_reference_text_templates.template_text">
-                    <button type="submit"
-                            ng-click="update(cfg_reference_text_templates.id)"
-                            class="btn">
-                        <span class="glyphicon glyphicon-pencil"></span> Edit
-                    </button>
-                    <button type="submit"
-                            ng-click="delete(cfg_reference_text_templates.id)"
-                            class="btn btn-danger">
-                        <span class="glyphicon glyphicon-remove-circle"></span> Delete
-                    </button>
+                    <center>
+                        <button type="submit"
+                                ng-click="update(cfg_reference_text_templates.id)"
+                                class="btn btn-sm">
+                            <small><span class="glyphicon glyphicon-pencil"></span></small>
+                        </button>
+                        <button type="submit"
+                                ng-click="delete(cfg_reference_text_templates.id)"
+                                class="btn btn-sm btn-danger">
+                            <small><span class="glyphicon glyphicon-remove-circle"></span></small>
+                        </button>
+                    </center>
                 </td>
             </tr>
             </tbody>
