@@ -1,8 +1,8 @@
 'use strict';
 
-angular.module('InquestKB')
+angular.module('ThreatKB')
     .factory('Users', ['$resource', function ($resource) {
-        return $resource('InquestKB/users/:id', {}, {
+        return $resource('/ThreatKB/users/:id', {}, {
             'query': {method: 'GET', isArray: true},
             'get': {method: 'GET'}
         });

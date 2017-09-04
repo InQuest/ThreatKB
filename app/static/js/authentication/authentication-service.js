@@ -15,10 +15,6 @@ angular.module('ThreatKB')
                 getUserStatus: getUserStatus
             });
 
-            function getUsers(){
-                return $http.get('/InquestKB/u')
-            };
-
             function isLoggedIn() {
                 return !!user;
             };
