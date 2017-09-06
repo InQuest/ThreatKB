@@ -9,6 +9,7 @@ angular.module('ThreatKB')
             // return available functions for use in controllers
             return ({
                 isLoggedIn: isLoggedIn,
+                isAdmin: isAdmin,
                 login: login,
                 logout: logout,
                 register: register,
@@ -17,7 +18,11 @@ angular.module('ThreatKB')
 
             function isLoggedIn() {
                 return !!user;
-            };
+            }
+
+            function isAdmin() {
+                return true;
+            }
 
             function login(email, password) {
                 // create a new instance of deferred

@@ -1,6 +1,6 @@
 from flask import abort, jsonify, request
 from flask.ext.login import login_required, current_user
-from app import app, db
+from app import app, db, admin_only
 from app.models import c2ip, c2dns, yara_rule, cfg_states, users, comments
 from app.utilities import extract_artifacts
 
@@ -82,6 +82,7 @@ def save_artifacts(artifacts, shared_reference=None, shared_state=None):
 
 @app.route('/ThreatKB/import', methods=['POST'])
 @login_required
+@admin_only()
 def import_artifacts():
     autocommit = request.json.get("autocommit", 0)
     import_text = request.json.get('import_text', None)
@@ -103,6 +104,7 @@ def import_artifacts():
 
 @app.route('/ThreatKB/import/commit', methods=['POST'])
 @login_required
+@admin_only()
 def commit_artifacts():
     artifacts = request.json.get("artifacts", None)
     shared_reference = request.json.get("shared_reference", None)

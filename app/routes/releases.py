@@ -1,6 +1,6 @@
 from flask import abort, jsonify, request, send_file, json, Response
 from flask.ext.login import login_required, current_user
-from app import app, db
+from app import app, db, admin_only
 from app.models import releases
 
 import tempfile
@@ -9,6 +9,7 @@ import uuid
 
 @app.route('/ThreatKB/releases', methods=['GET'])
 @login_required
+@admin_only()
 def get_all_releases():
     entities = releases.Release.query.filter_by().all()
     return json.dumps([entity.to_dict() for entity in entities])
@@ -16,6 +17,7 @@ def get_all_releases():
 
 @app.route('/ThreatKB/releases/<int:release_id>', methods=['GET'])
 @login_required
+@admin_only()
 def get_release(release_id):
     entity = releases.Release.query.get(release_id)
 
@@ -27,6 +29,7 @@ def get_release(release_id):
 
 @app.route('/ThreatKB/releases/<int:release_id>/release_notes', methods=['GET'])
 @login_required
+@admin_only()
 def generate_release_notes(release_id):
     entity = releases.Release.query.get(release_id)
 
@@ -44,6 +47,7 @@ def generate_release_notes(release_id):
 
 @app.route('/ThreatKB/releases/<int:release_id>/artifact_export', methods=['GET'])
 @login_required
+@admin_only
 def generate_artifact_export(release_id):
     entity = releases.Release.query.get(release_id)
 
@@ -62,6 +66,7 @@ def generate_artifact_export(release_id):
 
 @app.route('/ThreatKB/releases', methods=['POST'])
 @login_required
+@admin_only()
 def create_release():
     release = releases.Release(
         name=request.json.get("name", None),
@@ -80,6 +85,7 @@ def create_release():
 
 @app.route('/ThreatKB/releases/<int:release_id>', methods=['DELETE'])
 @login_required
+@admin_only()
 def delete_release(release_id):
     entity = releases.Release.query.get(release_id)
     if not entity:

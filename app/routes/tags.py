@@ -1,4 +1,4 @@
-from app import app, db
+from app import app, db, admin_only
 from app.models import tags
 from flask import abort, jsonify, request
 from flask.ext.login import login_required
@@ -39,6 +39,7 @@ def create_tag(tag_text):
 
 @app.route('/ThreatKB/tags/<int:id>', methods=['PUT'])
 @login_required
+@admin_only()
 def update_tags(id):
     entity = tags.Tags.query.get(id)
     if not entity:
@@ -54,6 +55,7 @@ def update_tags(id):
 
 @app.route('/ThreatKB/tags/<int:id>', methods=['DELETE'])
 @login_required
+@admin_only()
 def delete_tags(id):
     entity = tags.Tags.query.get(id)
     if not entity:

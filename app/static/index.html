@@ -47,38 +47,39 @@
                         <a href="#!/yara_rules">Signatures</a>
                     </li>
 
-                    <li>
+                    <li ng-if="isAdmin()">
                         <a href="#!/cfg_reference_text_templates">Cfg Reference Text</a>
                     </li>
 
-                    <li>
+                    <li ng-if="isAdmin()">
                         <a href="#!/cfg_states">Cfg States</a>
                     </li>
 
-                    <li>
+                    <li ng-if="isAdmin()">
                         <a href="#!/cfg_category_range_mapping">Cfg Categories</a>
                     </li>
 
-                    <li>
+                    <li ng-if="isAdmin()">
                         <a href="#!/tags">Tags</a>
                     </li>
 
-                    <li>
+                    <li ng-if="isAdmin()">
                         <a href="#!/import">Import</a>
                     </li>
 
-                    <li>
+                    <li ng-if="isAdmin()">
                         <a href="#!/cfg_settings">Settings</a>
                     </li>
 
-                    <li>
+                    <li ng-if="isAdmin()">
                         <a href="#!/files">Files</a>
                     </li>
 
-                    <li>
+                    <li ng-if="isAdmin()">
                         <a href="#!/users">Users</a>
-                  </li>
-                  <li>
+                    </li>
+
+                    <li ng-if="isAdmin()">
                         <a href="#!/releases">Releases</a>
                     </li>
                 </ul>

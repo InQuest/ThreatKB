@@ -1,4 +1,4 @@
-from app import app, db
+from app import app, db, admin_only
 from app.models import cfg_settings
 from flask import abort, jsonify, request
 from flask.ext.login import login_required, current_user
@@ -8,6 +8,7 @@ import json
 
 @app.route('/ThreatKB/cfg_settings', methods=['GET'])
 @login_required
+@admin_only()
 def get_all_cfg_settings():
     entities = cfg_settings.Cfg_settings.query.all()
     return json.dumps([entity.to_dict() for entity in entities])
@@ -23,6 +24,7 @@ def get_cfg_settings(key):
 
 @app.route('/ThreatKB/cfg_settings', methods=['POST'])
 @login_required
+@admin_only()
 def create_cfg_settings():
     entity = cfg_settings.Cfg_settings(
         key=request.json['key']
@@ -36,6 +38,7 @@ def create_cfg_settings():
 
 @app.route('/ThreatKB/cfg_settings/<key>', methods=['PUT'])
 @login_required
+@admin_only()
 def update_cfg_settings(key):
     entity = cfg_settings.Cfg_settings.query.get(key)
     if not entity:
@@ -53,6 +56,7 @@ def update_cfg_settings(key):
 
 @app.route('/ThreatKB/cfg_settings/<key>', methods=['DELETE'])
 @login_required
+@admin_only()
 def delete_cfg_settings(key):
     entity = cfg_settings.Cfg_settings.query.get(key)
 

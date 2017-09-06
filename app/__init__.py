@@ -1,10 +1,13 @@
-from flask import Flask
+import functools
+
+from flask import Flask, abort
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.bcrypt import Bcrypt
 from flask.ext.login import LoginManager
 from celery import Celery
 import logging
 
+from flask_login import current_user
 
 app = Flask(__name__, static_url_path='')
 app.secret_key = "a" * 24  # os.urandom(24)
@@ -28,6 +31,17 @@ def make_celery(flask_app):
     # celery_app.Task = ContextTask
 
     return celery_app
+
+
+def admin_only():
+    def wrapper(f):
+        @functools.wraps(f)
+        def wrapped(*args, **kwargs):
+            if not current_user.admin:
+                return abort(403)
+            return f(*args, **kwargs)
+        return wrapped
+    return wrapper
 
 
 db = SQLAlchemy(app)

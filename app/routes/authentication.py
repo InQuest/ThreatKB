@@ -1,4 +1,4 @@
-from app import app, db, bcrypt
+from app import app, db, bcrypt, admin_only
 from app.models.users import KBUser
 from app.models import yara_rule, c2dns, c2ip
 from flask import request, jsonify, session, json, abort
@@ -44,8 +44,9 @@ def get_all_users():
     return json.dumps(users)
 
 
-@login_required
 @app.route('/ThreatKB/users/<int:user_id>', methods=['GET'])
+@login_required
+@admin_only()
 def get_user(user_id):
     user = KBUser.query.get(user_id)
     if not user:
@@ -55,6 +56,7 @@ def get_user(user_id):
 
 @app.route('/ThreatKB/users', methods=['POST'])
 @login_required
+@admin_only()
 def create_user():
     user = KBUser(
         email=request.json['email'],
@@ -71,6 +73,7 @@ def create_user():
 
 @app.route('/ThreatKB/users/<int:user_id>', methods=['PUT'])
 @login_required
+@admin_only()
 def update_user(user_id):
     user = KBUser.query.get(user_id)
     if not user:

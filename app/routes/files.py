@@ -1,15 +1,17 @@
 import os
 
 import errno
+
+from app import app, db, admin_only
+from app.models import files
 from flask import abort, jsonify, request, send_file, json
 from flask.ext.login import login_required, current_user
 from werkzeug.utils import secure_filename
-from app import app, db
-from app.models import files
 
 
 @app.route('/ThreatKB/files', methods=['GET'])
 @login_required
+@admin_only()
 def get_all_files():
     entity_type = request.args.get("entity_type", None)
     entity_id = request.args.get("entity_id", None)
@@ -101,6 +103,7 @@ def get_file_for_entity(entity_type, entity_id, file_id):
 
 @app.route('/ThreatKB/files/<int:file_id>', methods=['DELETE'])
 @login_required
+@admin_only()
 def delete_file(file_id):
     entity = files.Files.query.get(file_id)
     if not entity:

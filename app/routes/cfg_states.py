@@ -1,4 +1,4 @@
-from app import app, db
+from app import app, db, admin_only
 from app.models import cfg_states
 from flask import abort, jsonify, request
 from flask.ext.login import login_required
@@ -14,6 +14,7 @@ def get_all_cfg_states():
 
 @app.route('/ThreatKB/cfg_states/<int:id>', methods=['GET'])
 @login_required
+@admin_only()
 def get_cfg_states(id):
     entity = cfg_states.Cfg_states.query.get(id)
     if not entity:
@@ -23,6 +24,7 @@ def get_cfg_states(id):
 
 @app.route('/ThreatKB/cfg_states', methods=['POST'])
 @login_required
+@admin_only()
 def create_cfg_states():
     entity = cfg_states.Cfg_states(
         state=request.json['state'],
@@ -35,6 +37,7 @@ def create_cfg_states():
 
 @app.route('/ThreatKB/cfg_states/<int:id>', methods=['PUT'])
 @login_required
+@admin_only()
 def update_cfg_states(id):
     entity = cfg_states.Cfg_states.query.get(id)
     if not entity:
@@ -51,6 +54,7 @@ def update_cfg_states(id):
 
 @app.route('/ThreatKB/cfg_states/<int:id>', methods=['DELETE'])
 @login_required
+@admin_only()
 def delete_cfg_states(id):
     entity = cfg_states.Cfg_states.query.get(id)
     if not entity:

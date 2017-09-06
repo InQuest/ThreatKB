@@ -6,21 +6,21 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
             .when('/', {
                 templateUrl: 'views/home.html',
                 //controller: 'HomeController',
-                access: {restricted: true}
+                access: {restricted: true, admin: false}
             })
             .when('/login', {
                 templateUrl: 'views/login.html',
                 controller: 'AuthController',
-                access: {restricted: false}
+                access: {restricted: false, admin: false}
             })
             .when('/logout', {
                 controller: 'AuthController',
-                access: {restricted: true}
+                access: {restricted: true, admin: false}
             })
             .when('/c2dns', {
                 templateUrl: 'views/c2dns/c2dns.html',
                 controller: 'C2dnsController',
-                access: {restricted: true},
+                access: {restricted: true, admin: false},
                 resolve: {
                     resolvedC2dns: ['C2dns', function (C2dns) {
                         return C2dns.query();
@@ -30,7 +30,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
             .when('/c2ips', {
                 templateUrl: 'views/c2ip/c2ips.html',
                 controller: 'C2ipController',
-                access: {restricted: true},
+                access: {restricted: true, admin: false},
                 resolve: {
                     resolvedC2ip: ['C2ip', function (C2ip) {
                         return C2ip.query();
@@ -40,7 +40,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
             .when('/cfg_reference_text_templates', {
                 templateUrl: 'views/cfg_reference_text_templates/cfg_reference_text_templates.html',
                 controller: 'Cfg_reference_text_templatesController',
-                access: {restricted: true},
+                access: {restricted: true, admin: true},
                 resolve: {
                     resolvedCfg_reference_text_templates: ['Cfg_reference_text_templates', function (Cfg_reference_text_templates) {
                         return Cfg_reference_text_templates.query();
@@ -50,7 +50,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
             .when('/cfg_category_range_mapping', {
                 templateUrl: 'views/cfg_category_range_mapping/cfg_category_range_mapping.html',
                 controller: 'CfgCategoryRangeMappingController',
-                access: {restricted: true},
+                access: {restricted: true, admin: true},
                 resolve: {
                     resolvedCfgCategoryRangeMapping: ['CfgCategoryRangeMapping', function (CfgCategoryRangeMapping) {
                         return CfgCategoryRangeMapping.query();
@@ -60,7 +60,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
             .when('/cfg_settings', {
                 templateUrl: 'views/cfg_settings/cfg_settings.html',
                 controller: 'Cfg_settingsController',
-                access: {restricted: true},
+                access: {restricted: true, admin: true},
                 resolve: {
                     resolvedCfg_settings: ['Cfg_settings', function (Cfg_settings) {
                         return Cfg_settings.query();
@@ -70,8 +70,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
             .when('/cfg_states', {
                 templateUrl: 'views/cfg_states/cfg_states.html',
                 controller: 'Cfg_statesController',
-
-                access: {restricted: true},
+                access: {restricted: true, admin: true},
                 resolve: {
                     resolvedCfg_states: ['Cfg_states', function (Cfg_states) {
                         return Cfg_states.query();
@@ -81,7 +80,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
             .when('/tags', {
                 templateUrl: 'views/tags/tags.html',
                 controller: 'TagsController',
-                access: {restricted: true},
+                access: {restricted: true, admin: true},
                 resolve: {
                     resolvedTags: ['Tags', function (Tags) {
                         return Tags.query();
@@ -91,7 +90,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
             .when('/yara_rules', {
                 templateUrl: 'views/yara_rule/yara_rules.html',
                 controller: 'Yara_ruleController',
-                access: {restricted: true},
+                access: {restricted: true, admin: false},
                 resolve: {
                     resolvedYara_rule: ['Yara_rule', function (Yara_rule) {
                         return Yara_rule.query();
@@ -101,7 +100,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
             .when('/files', {
                 templateUrl: 'views/files/files.html',
                 controller: 'FilesController',
-                access: {restricted: true},
+                access: {restricted: true, admin: true},
                 resolve: {
                     resolvedFiles: ['Files', function (Files) {
                         return Files.resource.query();
@@ -111,7 +110,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
             .when('/users', {
                 templateUrl: 'views/users/users.html',
                 controller: 'UsersController',
-                access: {restricted: true},
+                access: {restricted: true, admin: true},
                 resolve: {
                     resolvedUsers: ['UserService', function (UserService) {
                         return UserService.query({include_inactive: 1});
@@ -121,12 +120,12 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
             .when('/import', {
                 templateUrl: 'views/import/import.html',
                 controller: 'ImportController',
-                access: {restricted: true}
+                access: {restricted: true, admin: true}
             })
             .when('/releases', {
                 templateUrl: 'views/releases/releases.html',
                 controller: 'ReleaseController',
-                access: {restricted: true},
+                access: {restricted: true, admin: true},
                 resolve: {
                     resolvedRelease: ['Release', function (Release) {
                         return Release.resource.query();
