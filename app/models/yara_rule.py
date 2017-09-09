@@ -115,7 +115,7 @@ class Yara_rule(db.Model):
         yara_rule_text += "\tmeta:\n"
         for field in Yara_rule.metadata_fields:
             if yara_dict.get(field, None):
-                yara_rule_text += "\t%s = %s\n" % (field, yara_dict[field])
+                yara_rule_text += "\t%s = \"%s\"\n" % (field, yara_dict[field])
 
         if not "strings:" in yara_dict["strings"]:
             yara_rule_text += "\n\tstrings:\n\t\t%s" % (yara_dict["strings"])
