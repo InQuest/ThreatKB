@@ -8,19 +8,19 @@
                 <button type="button" class="close"
                         ng-click="cancel()">&times;
                 </button>
-                <h4 class="modal-title" id="myUsersLabel">{{ users.id ? 'Edit' : 'Create' }} a User</h4>
+                <h4 class="modal-title" id="myUsersLabel">{{ user.id ? 'Edit' : 'Create' }} a User</h4>
             </div>
             <div class="modal-body">
-                <div class="form-group" ng-if="users.id">
+                <div class="form-group" ng-if="user.id">
                     <label>ID</label>
-                    <label class="form-control" ng-model="users.id">{{ users.id }}</label>
+                    <label class="form-control" ng-model="user.id">{{ user.id }}</label>
                 </div>
 
                 <div class="form-group">
                     <label>Email:</label>
 
                     <input class="form-control" name="email"
-                           ng-model="users.email" ng-required="true"
+                           ng-model="user.email" ng-required="true"
                            ng-maxlength="255"/>
                     <span class="error" ng-show="form.text.$error.maxlength">Must be at most 255 characters.</span>
                 </div>
@@ -29,7 +29,7 @@
                     <fieldset>
                         <label for="password">New Password:</label>
                         <input class="form-control" type="password" id="password" name="password"
-                               ng-model="users.password" ng-required="!users.id"/>
+                               ng-model="user.password" ng-required="!user.id"/>
                         <div style="color: red; margin-bottom: 15px;">
                             <div ng-messages="form.password.$error"
                                  ng-if="form.$submitted || form.password.$dirty"
@@ -40,8 +40,8 @@
                         </div>
                         <label for="passwordConfirm">Re-Type New Password:</label>
                         <input class="form-control" type="password" id="passwordConfirm" name="passwordConfirm"
-                               ng-model="users.passwordConfirm" match-password="password"
-                               ng-required="!users.id"/>
+                               ng-model="user.passwordConfirm" match-password="password"
+                               ng-required="!user.id"/>
                         <div style="color: red;">
                             <div ng-messages="form.passwordConfirm.$error"
                                  ng-if="form.$submitted || form.passwordConfirm.$dirty"
@@ -59,13 +59,13 @@
                 <div class="form-group">
                     <label>Is Admin?</label><br/>
                     <div class="btn-group" data-toggle="buttons">
-                        <label class="btn {{ users.admin ? 'btn-primary' : 'btn-default' }}"
-                               ng-class="{active:users.admin==true}"
+                        <label class="btn {{ user.admin ? 'btn-primary' : 'btn-default' }}"
+                               ng-class="{active:user.admin==true}"
                                ng-click="setAdmin(true)">
                             <input type="radio">
                             Yes
                         </label>
-                        <label class="btn {{ users.admin ? 'btn-default' : 'btn-primary' }}"
+                        <label class="btn {{ user.admin ? 'btn-default' : 'btn-primary' }}"
                                ng-class="{active:users.admin==false}"
                                ng-click="setAdmin(false)">
                             <input type="radio">
@@ -77,14 +77,14 @@
                 <div class="form-group">
                     <label>Is Active?</label><br/>
                     <div class="btn-group" data-toggle="buttons">
-                        <label class="btn {{ users.active ? 'btn-primary' : 'btn-default' }}"
-                               ng-class="{active:users.active==true}"
+                        <label class="btn {{ user.active ? 'btn-primary' : 'btn-default' }}"
+                               ng-class="{active:user.active==true}"
                                ng-click="setActive(true)">
                             <input type="radio">
                             Yes
                         </label>
-                        <label class="btn {{ users.active ? 'btn-default' : 'btn-primary' }}"
-                               ng-class="{active:users.active==false}"
+                        <label class="btn {{ user.active ? 'btn-default' : 'btn-primary' }}"
+                               ng-class="{active:user.active==false}"
                                ng-click="setActive(false)">
                             <input type="radio">
                             No

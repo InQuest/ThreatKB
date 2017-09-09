@@ -36,7 +36,9 @@ angular.module('ThreatKB')
     .controller('UsersController', ['$scope', '$uibModal', 'resolvedUsers', 'UserService',
         function ($scope, $uibModal, resolvedUsers, UserService) {
             $scope.users = resolvedUsers;
-            $scope.users.passwordConfirm = "";
+            $scope.user = {}
+            $scope.user.passwordConfirm = "";
+
 
             $scope.create = function () {
                 $scope.clear();
@@ -44,24 +46,25 @@ angular.module('ThreatKB')
             };
 
             $scope.update = function (id) {
-                $scope.users = UserService.get({id: id});
+                $scope.user = UserService.get({id: id});
+                $scope.users = UserService.query({include_inactive: 1});
                 $scope.open(id);
             };
 
             $scope.save = function (id) {
                 if (id) {
-                    UserService.update({id: id}, $scope.users, function () {
-                        $scope.users = UserService.query();
+                    UserService.update({id: id}, $scope.user, function () {
+                        $scope.users = UserService.query({include_inactive: 1});
                     });
                 } else {
-                    UserService.save($scope.users, function () {
-                        $scope.users = UserService.query();
+                    UserService.save($scope.user, function () {
+                        $scope.users = UserService.query({include_inactive: 1});
                     });
                 }
             };
 
             $scope.clear = function () {
-                $scope.users = {
+                $scope.user = {
                     "email": "",
                     "password": "",
                     "passwordConfirm": "",
@@ -76,25 +79,25 @@ angular.module('ThreatKB')
                     templateUrl: 'users-save.html',
                     controller: 'UsersSaveController',
                     resolve: {
-                        users: function () {
-                            return $scope.users;
+                        user: function () {
+                            return $scope.user;
                         }
                     }
                 });
 
                 userSave.result.then(function (user) {
-                    $scope.users = user;
+                    $scope.user = user;
                     $scope.save(id);
                 });
             };
         }])
-    .controller('UsersSaveController', ['$scope', '$http', '$uibModalInstance', 'users',
-        function ($scope, $http, $uibModalInstance, users) {
-            $scope.users = users;
-            $scope.users.passwordConfirm = "";
+    .controller('UsersSaveController', ['$scope', '$http', '$uibModalInstance', 'user',
+        function ($scope, $http, $uibModalInstance, user) {
+            $scope.user = user;
+            $scope.user.passwordConfirm = "";
 
             $scope.ok = function () {
-                $uibModalInstance.close($scope.users);
+                $uibModalInstance.close($scope.user);
             };
 
             $scope.cancel = function () {
@@ -102,10 +105,10 @@ angular.module('ThreatKB')
             };
 
             $scope.setAdmin = function (val) {
-                $scope.users.admin = val;
+                $scope.user.admin = val;
             };
 
             $scope.setActive = function (val) {
-                $scope.users.active = val;
+                $scope.user.active = val;
             };
         }]);
