@@ -27,7 +27,7 @@ def get_c2dns(id):
     if not entity:
         abort(404)
     if not current_user.admin and entity.owner_user_id != current_user.id:
-        abort(401)
+        abort(403)
     return jsonify(entity.to_dict())
 
 
@@ -61,7 +61,7 @@ def update_c2dns(id):
     if not entity:
         abort(404)
     if not current_user.admin and entity.owner_user_id != current_user.id:
-        abort(401)
+        abort(403)
     entity = c2dns.C2dns(
         state=request.json['state']['state'] if request.json['state'] and 'state' in request.json['state'] else
         request.json['state'],
@@ -96,7 +96,7 @@ def delete_c2dns(id):
     if not entity:
         abort(404)
     if not current_user.admin and entity.owner_user_id != current_user.id:
-        abort(401)
+        abort(403)
     db.session.delete(entity)
     db.session.commit()
 

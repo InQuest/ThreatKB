@@ -28,7 +28,7 @@ def get_c2ip(id):
     if not entity:
         abort(404)
     if not current_user.admin and entity.owner_user_id != current_user.id:
-        abort(401)
+        abort(403)
     return jsonify(entity.to_dict())
 
 
@@ -65,7 +65,7 @@ def update_c2ip(id):
     if not entity:
         abort(404)
     if not current_user.admin and entity.owner_user_id != current_user.id:
-        abort(401)
+        abort(403)
     entity = c2ip.C2ip(
         ip=request.json['ip'],
         asn=request.json['asn'],
@@ -102,7 +102,7 @@ def delete_c2ip(id):
     if not entity:
         abort(404)
     if not current_user.admin and entity.owner_user_id != current_user.id:
-        abort(401)
+        abort(403)
     db.session.delete(entity)
     db.session.commit()
 
