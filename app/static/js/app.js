@@ -1,6 +1,6 @@
 // Declare app level module which depends on filters, and services
-angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize', 'ui.select', 'ngTagsInput', 'angular-growl', 'ngFileSaver', 'ngPassword', 'ngMessages',
-    'angular-toArrayFilter', 'ui.codemirror', 'ngFileUpload', 'ngFileSaver', 'ngPassword', 'ngMessages'])
+angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize', 'ui.select', 'ngTagsInput', 'angular-growl', 'ngFileSaver', 'ngPassword', 'ngMessages', 'blockUI',
+    'angular-toArrayFilter', 'ui.codemirror', 'ngFileUpload', 'ngFileSaver', 'ngPassword', 'ngMessages', 'blockUI'])
     .config(['$routeProvider', function ($routeProvider) {
         $routeProvider
             .when('/', {

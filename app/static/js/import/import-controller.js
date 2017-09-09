@@ -1,11 +1,13 @@
 'use strict';
 
 angular.module('ThreatKB').controller('ImportController',
-    ['$scope', '$location', 'Import', 'growl', 'Cfg_states',
-        function ($scope, $location, Import, growl, Cfg_states) {
+    ['$scope', '$location', 'Import', 'growl', 'Cfg_states', 'blockUI',
+        function ($scope, $location, Import, growl, Cfg_states, blockUI) {
 
             $scope.cfg_states = Cfg_states.query();
             $scope.shared_state = {};
+
+            $scope.block_message = "Committing Artifacts. This might take awhile, we're doing lots of advanced processing...";
 
             $scope.update_commit_counter = function (index) {
                 if ($scope.checked_indexes[index]) {
@@ -30,6 +32,7 @@ angular.module('ThreatKB').controller('ImportController',
             };
 
             $scope.commit_artifacts = function () {
+
                 var artifacts_to_commit = [];
                 for (var i = 0; i < $scope.artifacts.length; i++) {
                     if ($scope.checked_indexes[i]) {
@@ -37,7 +40,9 @@ angular.module('ThreatKB').controller('ImportController',
                     }
                 }
 
+                blockUI.start($scope.block_message);
                 Import.commit_artifacts(artifacts_to_commit, $scope.shared_reference, $scope.shared_state.state.state).then(function (data) {
+                    blockUI.stop();
                     var message = "";
                     if (data.committed) {
                         message = "Successfully committed " + data.committed.length + " artifacts.<BR><BR>";
@@ -62,8 +67,12 @@ angular.module('ThreatKB').controller('ImportController',
                     $scope.shared_state.state = {};
                 }
 
+                if ($scope.autocommit) {
+                    blockUI.start($scope.block_message);
+                }
                 Import.import_artifacts($scope.import_text, $scope.autocommit, $scope.shared_reference, $scope.shared_state.state.state).then(function (data) {
                         if ($scope.autocommit) {
+                            blockUI.stop();
                             var message = "";
                             if (data.committed) {
                                 message = "Successfully committed " + data.committed.length + " artifacts.<BR><BR>";
