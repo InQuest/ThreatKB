@@ -42,16 +42,16 @@ def generate_release_notes(release_id):
     return send_file(tfile, attachment_filename=filename, mimetype="text/plain", as_attachment=True)
 
 
-@app.route('/ThreatKB/releases/<int:release_id>/signature_export', methods=['GET'])
+@app.route('/ThreatKB/releases/<int:release_id>/artifact_export', methods=['GET'])
 @login_required
-def generate_signature_export(release_id):
+def generate_artifact_export(release_id):
     entity = releases.Release.query.get(release_id)
 
     if not entity:
         abort(404)
 
     filename = str(release_id) + "_release.zip"
-    content = entity.generate_signature_export()
+    content = entity.generate_artifact_export()
     content.seek(0)
 
     tfile = "%s/%s" % (tempfile.gettempdir(), str(uuid.uuid4()).replace("-", ""))

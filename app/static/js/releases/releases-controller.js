@@ -73,8 +73,8 @@ angular.module('ThreatKB')
                 });
             };
 
-            $scope.generate_signature_export = function (id) {
-                Release.generate_signature_export(id).then(function (response) {
+            $scope.generate_artifact_export = function (id) {
+                Release.generate_artifact_export(id).then(function (response) {
                     var header = response.headers()['content-disposition'];
                     var startIndex = header.indexOf('filename=');
                     var filename = header.slice(startIndex + 9);

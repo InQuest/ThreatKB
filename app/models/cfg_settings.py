@@ -19,4 +19,4 @@ class Cfg_settings(db.Model):
         )
 
     def __repr__(self):
-        return '<Cfg_settings %r>' % (self.id)
+        return '<Cfg_settings %s>' % (self.key)

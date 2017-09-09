@@ -54,7 +54,7 @@ class Release(db.Model):
                            "Removed": [], "Modified": []},
             "DNS": {"DNS": {entity.to_dict()["id"]: entity.to_dict() for entity in dns}, "Added": [], "Removed": [],
                     "Modified": []},
-            "IP": {"IP": {entity.to_dict()["id"]: entity.to_dict() for entity in dns}, "Added": [], "Removed": [],
+            "IP": {"IP": {entity.to_dict()["id"]: entity.to_dict() for entity in ip}, "Added": [], "Removed": [],
                    "Modified": []}}
 
         last_release = Release.query.filter(Release.is_test_release == 0).order_by(Release.id.desc()).first()
@@ -151,8 +151,15 @@ class Release(db.Model):
         stream.write(message)
         return stream
 
-    def generate_signature_export(self):
+    def generate_artifact_export(self):
         release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
+        ip_text_filename = cfg_settings.Cfg_settings.query.filter_by(key="EXPORT_FILENAME_IP").first()
+        ip_text_filename = ip_text_filename.value if ip_text_filename else "IPs.txt"
+        dns_text_filename = cfg_settings.Cfg_settings.query.filter_by(key="EXPORT_FILENAME_DNS").first()
+        dns_text_filename = dns_text_filename.value if dns_text_filename else "DNS.txt"
+        signature_directory = cfg_settings.Cfg_settings.query.filter_by(key="EXPORT_DIRECTORY_SIGNATURE").first()
+        signature_directory = signature_directory.value if signature_directory else "signatures"
+
         if not release_state:
             raise Exception("You need to specify a production release state first.")
 
@@ -160,14 +167,27 @@ class Release(db.Model):
         for signature in self.release_data_dict["Signatures"]["Signatures"].values():
             category = signature.get("category")
             if not signature["category"] in combined_rules:
-                combined_rules[category] = ""
+                combined_rules[category] = []
 
-            combined_rules[category] += yara_rule.Yara_rule.to_yara_rule_string(signature)
+            combined_rules[category].append(signature)
+
+        ips = [ip.get("ip") for ip in self.release_data_dict["IP"]["IP"].values()]
+        ips.sort()
+
+        dns = [dns.get("domain_name") for dns in self.release_data_dict["DNS"]["DNS"].values()]
+        dns.sort()
 
         memzip = StringIO.StringIO()
         z = zipfile.ZipFile(memzip, mode="w", compression=zipfile.ZIP_DEFLATED)
         for category, rules in combined_rules.iteritems():
-            z.writestr("%s.yar" % (category), rules)
+            rules = "\n\n".join([yara_rule.Yara_rule.to_yara_rule_string(signature) for signature in rules])
+            z.writestr("%s/%s.yar" % (signature_directory, category), rules)
+
+        if ips:
+            z.writestr(ip_text_filename, "\n".join(ips))
+
+        if dns:
+            z.writestr(dns_text_filename, "\n".join(dns))
 
         return memzip
 

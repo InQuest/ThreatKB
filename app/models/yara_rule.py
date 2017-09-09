@@ -112,14 +112,15 @@ class Yara_rule(db.Model):
     @staticmethod
     def to_yara_rule_string(yara_dict):
         yara_rule_text = "rule %s\n{\n\n" % (yara_dict.get("name"))
+        yara_rule_text += "\tmeta:\n"
         for field in Yara_rule.metadata_fields:
             if yara_dict.get(field, None):
-                yara_rule_text += "\t%s = %s" % (field, yara_dict[field])
+                yara_rule_text += "\t%s = %s\n" % (field, yara_dict[field])
 
         if not "strings:" in yara_dict["strings"]:
-            yara_rule_text += "\n\tstrings:\n\t%s" % (yara_dict["strings"])
+            yara_rule_text += "\n\tstrings:\n\t\t%s" % (yara_dict["strings"])
         else:
-            yara_rule_text += "\n\t\t%s" % (yara_dict["strings"])
+            yara_rule_text += "\n\t%s" % (yara_dict["strings"])
 
         if not "condition" in yara_dict["condition"]:
             yara_rule_text += "\n\tcondition:\n\t\t%s\n\n}" % (yara_dict["condition"])

@@ -16,8 +16,8 @@ angular.module('ThreatKB')
             })
         };
 
-        function generate_signature_export(id) {
-            return $http.get('/ThreatKB/releases/' + id + '/signature_export', {
+        function generate_artifact_export(id) {
+            return $http.get('/ThreatKB/releases/' + id + '/artifact_export', {
                 cache: false,
                 responseType: "arraybuffer"
             }).then(function (response) {
@@ -30,6 +30,6 @@ angular.module('ThreatKB')
         return {
             resource: release_resource,
             generate_release_notes: generate_release_notes,
-            generate_signature_export: generate_signature_export
+            generate_artifact_export: generate_artifact_export
         };
     }]);
