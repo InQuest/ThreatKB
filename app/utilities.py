@@ -35,7 +35,14 @@ def extract_dns(text):
 
 def extract_yara_rules(text):
     yara_rules = re.compile(r"^[\t\s]*rule[\t\s][^\r\n]+(?:\{|[\r\n][\r\n\s\t]*\{).*?\r?\n[\t\s]*\}[\s\t]*(?:$|\r?\n)", re.MULTILINE | re.DOTALL).findall(text)
-    return parse_yara_rules_text("\n".join(yara_rules)) if yara_rules else []
+    extracted = []
+    for yara_rule in yara_rules:
+        try:
+            extracted.append(parse_yara_rules_text(yara_rule)[0])
+        except:
+            pass
+
+    return extracted
 
 
 #####################################################################
