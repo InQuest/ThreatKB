@@ -85,3 +85,7 @@ span.glyphicon {
 .panel-title {
     font-size: 12px;
 }
+
+.table-responsive {
+    min-height: 1000px;
+}
