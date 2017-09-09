@@ -81,3 +81,7 @@ span.glyphicon {
 .growl-container.growl-fixed {
     max-width: 500px;
 }
+
+.panel-title {
+    font-size: 12px;
+}

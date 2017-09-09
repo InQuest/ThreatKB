@@ -96,6 +96,7 @@
 
                 <div class="form-group">
                     <label>State:</label>
+                    <span class="error text-danger">*</span>
                     <span class="error text-danger" ng-if="!yara_rule.state">*</span>
                     <ui-select ng-model="yara_rule.state">
                         <ui-select-match placeholder="Select a state..">
@@ -112,24 +113,17 @@
                     <label>Name:</label>
                     <span class="error" ng-show="form.name.$error.minlength">Must be at least  characters.</span>
                     <span class="error" ng-show="form.name.$error.maxlength">Must be at most 128 characters.</span>
-                    <span class="error text-danger" ng-if="!yara_rule.name">*</span>
+                    <span class="error text-danger">*</span>
                     <input type="text" class="form-control" name="name"
                            ng-model="yara_rule.name" ng-required="true"
                            ng-maxlength="128"/>
-                </div>
-
-                <div class="form-group" ng-if="yara_rule.test_status">
-                    <label>Test Status:</label>
-
-                    <label type="text" class="form-control" name="date_modified"
-                           ng-model="yara_rule.test_status">{{ yara_rule.test_status }}</label>
                 </div>
 
                 <div class="form-group">
                     <label>Confidence:</label>
                     <span class="error" ng-show="form.confidence.$error.min">Must be greater than or equal to 0.</span>
                     <span class="error" ng-show="form.confidence.$error.max">Must be less than or equal to 10.</span>
-                    <span class="error text-danger" ng-if="!yara_rule.confidence">*</span>
+                    <span class="error text-danger">*</span>
                     <input type="number" class="form-control" name="confidence"
                            ng-model="yara_rule.confidence" ng-required="true"
                            min=0 max=10/>
@@ -139,7 +133,7 @@
                     <label>Severity:</label>
                     <span class="error" ng-show="form.severity.$error.min">Must be greater than or equal to 0.</span>
                     <span class="error" ng-show="form.severity.$error.max">Must be less than or equal to 10.</span>
-                    <span class="error text-danger" ng-if="!yara_rule.severity">*</span>
+                    <span class="error text-danger">*</span>
                     <input type="number" class="form-control" name="severity"
                            ng-model="yara_rule.severity" ng-required="true"
                            min=0 max=10/>
@@ -150,7 +144,7 @@
                     <span class="error" ng-show="form.description.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
                           ng-show="form.description.$error.maxlength">Must be at most 4096 characters.</span>
-                    <span class="error text-danger" ng-if="!yara_rule.severity">*</span>
+                    <span class="error text-danger">*</span>
                     <input type="text" class="form-control" name="description"
                            ng-model="yara_rule.description" ng-required="true"
                            ng-maxlength="4096"/>
@@ -159,7 +153,7 @@
 
                 <div class="form-group">
                     <label>Category:</label>
-                    <span class="error text-danger" ng-if="!yara_rule.category">*</span>
+                    <span class="error text-danger">*</span>
                     <ui-select ng-model="yara_rule.category">
                         <ui-select-match placeholder="Select a Category ...">
                             <span ng-bind="$select.selected.category || yara_rule.category"></span>
@@ -169,17 +163,6 @@
                             <span ng-bind="category.category"></span>
                         </ui-select-choices>
                     </ui-select>
-                </div>
-
-                <div class="form-group">
-                    <label>File Type:</label>
-                    <span class="error" ng-show="form.file_type.$error.minlength">Must be at least  characters.</span>
-                    <span class="error" ng-show="form.file_type.$error.maxlength">Must be at most 32 characters.</span>
-                    <span class="error text-danger" ng-if="!yara_rule.file_type">*</span>
-                    <input type="text" class="form-control" name="file_type"
-                           ng-model="yara_rule.file_type" ng-required="true"
-                           ng-maxlength="32"/>
-
                 </div>
 
                 <div class="form-group">
@@ -219,19 +202,18 @@
 
                 <div class="form-group">
                     <label>Reference Link:</label>
-
-                    <input type="text" class="form-control" name="reference_link"
-                           ng-model="yara_rule.reference_link" ng-required="true"
-                           ng-maxlength="2048"/>
                     <span class="error"
                           ng-show="form.reference_link.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
                           ng-show="form.reference_link.$error.maxlength">Must be at most 2048 characters.</span>
+                    <span class="error text-danger">*</span>
+                    <input type="text" class="form-control" name="reference_link"
+                           ng-model="yara_rule.reference_link" ng-required="true"
+                           ng-maxlength="2048"/>
                 </div>
 
                 <div class="form-group">
                     <label>Reference Text:</label>
-                    <span class="error text-danger" ng-if="!yara_rule.reference_text">*</span>
                     <span class="error"
                           ng-show="form.reference_text.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
@@ -264,24 +246,13 @@
                                     ng-click="add_comment(yara_rule.id)">Post</button>
                         </span>
                     </div>
-                    <br/>
-                    <div>
+                    <div style="padding-top:3px;">
                         <ul class="list-group">
                             <li class="list-group-item justify-content-between"
                                 ng-repeat="comment in yara_rule.comments | orderBy:'-date_created'">{{ print_comment(comment) }}
                                 <span class="pull-right">{{ comment.user.email }}&nbsp;<small>{{ pretty_date(comment.date_created) }}</small></span>
                             </li>
                         </ul>
-                    </div>
-
-                    <div>
-                        <uib-accordion>
-                            <div uib-accordion-group class="panel-default"
-                                 heading="{{ revision.revision }} @ {{ revision.date_created }} by {{ revision.user.email }}"
-                                 ng-repeat="revision in yara_rule.revisions">
-                                <pre>{{ revision.rule_json | json:4}}</pre>
-                            </div>
-                        </uib-accordion>
                     </div>
 
                 </div>
@@ -296,8 +267,7 @@
                         <span ng-show="dropAvailable"> or Drop Files</span>
                     </div>
                     <div ngf-no-file-drop>File Drag/Drop is not supported for this browser</div>
-                    <br/>
-                    <div>
+                    <div style="padding-top:3px;">
                         <ul class="list-group">
                             <li class="list-group-item justify-content-between"
                                 ng-repeat="f in yara_rule.files | orderBy:'-date_modified'">
@@ -305,6 +275,19 @@
                                 <span class="pull-right">{{ f.user.email }}&nbsp;<small>{{ pretty_date(f.date_modified) }}</small></span>
                             </li>
                         </ul>
+                    </div>
+                </div>
+
+                <div>
+                    <label>Revisions</label>
+                    <div>
+                        <uib-accordion>
+                            <div uib-accordion-group class="panel-default"
+                                 heading="{{ revision.revision }} @ {{ revision.date_created }} by {{ revision.user.email }}"
+                                 ng-repeat="revision in yara_rule.revisions">
+                                <pre>{{ revision.rule_json | json:4}}</pre>
+                            </div>
+                        </uib-accordion>
                     </div>
                 </div>
             </div>

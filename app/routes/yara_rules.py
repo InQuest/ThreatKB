@@ -94,7 +94,7 @@ def update_yara_rule(id):
     entity = yara_rule.Yara_rule(
         state=request.json['state']['state'] if request.json['state'] and 'state' in request.json['state'] else request.json['state'],
         name=request.json['name'],
-        test_status=request.json['test_status'],
+        test_status=request.json.get('test_status', None),
         confidence=request.json['confidence'],
         severity=request.json['severity'],
         description=request.json['description'],
