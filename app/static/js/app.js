@@ -136,7 +136,9 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                 redirectTo: '/'
             });
     }])
-;
+    .config(['$qProvider', function ($qProvider) {
+        $qProvider.errorOnUnhandledRejections(false);
+    }]);
 
 angular.module('ThreatKB').run(function ($rootScope, $location, AuthService) {
 

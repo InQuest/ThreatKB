@@ -11,7 +11,13 @@ from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
 @app.route('/ThreatKB/c2ips', methods=['GET'])
 @login_required
 def get_all_c2ips():
-    entities = c2ip.C2ip.query.all()
+    entities = c2ip.C2ip.query
+
+    if not current_user.admin:
+        entities = entities.filter_by(owner_user_id=current_user.id)
+
+    entities = entities.all()
+
     return json.dumps([entity.to_dict() for entity in entities])
 
 
@@ -21,6 +27,8 @@ def get_c2ip(id):
     entity = c2ip.C2ip.query.get(id)
     if not entity:
         abort(404)
+    if not current_user.admin and entity.owner_user_id != current_user.id:
+        abort(401)
     return jsonify(entity.to_dict())
 
 
@@ -56,6 +64,8 @@ def update_c2ip(id):
     entity = c2ip.C2ip.query.get(id)
     if not entity:
         abort(404)
+    if not current_user.admin and entity.owner_user_id != current_user.id:
+        abort(401)
     entity = c2ip.C2ip(
         ip=request.json['ip'],
         asn=request.json['asn'],
@@ -91,6 +101,8 @@ def delete_c2ip(id):
 
     if not entity:
         abort(404)
+    if not current_user.admin and entity.owner_user_id != current_user.id:
+        abort(401)
     db.session.delete(entity)
     db.session.commit()
 

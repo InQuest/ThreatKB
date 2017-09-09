@@ -5,6 +5,7 @@ angular.module('ThreatKB')
         function ($q, $timeout, $http) {
             // create user variable
             var user = null;
+            var admin = null;
 
             // return available functions for use in controllers
             return ({
@@ -21,7 +22,7 @@ angular.module('ThreatKB')
             }
 
             function isAdmin() {
-                return true;
+                return !!admin;
             }
 
             function login(email, password) {
@@ -33,13 +34,20 @@ angular.module('ThreatKB')
                     .then(function (success) {
                         if (success.status === 200 && success.data.result) {
                             user = true;
+                            if (success.data.a) {
+                                admin = true;
+                            } else {
+                                admin = false;
+                            }
                             deferred.resolve();
                         } else {
                             user = false;
+                            admin = false;
                             deferred.reject();
                         }
                     }, function (error) {
                         user = false;
+                        admin = false;
                         deferred.reject();
                     });
 
@@ -56,9 +64,11 @@ angular.module('ThreatKB')
                 $http.get('/ThreatKB/logout')
                     .then(function (success) {
                         user = false;
+                        admin = false;
                         deferred.resolve();
                     }, function (error) {
                         user = false;
+                        admin = false;
                         deferred.reject();
                     });
 
@@ -91,8 +101,10 @@ angular.module('ThreatKB')
                 return $http.get('/ThreatKB/status')
                     .then(function (success) {
                         user = success.status === 200 && success.data.status;
+                        admin = success.data.a;
                     }, function (error) {
                         user = false;
+                        admin = false;
                     });
             }
 

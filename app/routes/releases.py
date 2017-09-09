@@ -47,7 +47,7 @@ def generate_release_notes(release_id):
 
 @app.route('/ThreatKB/releases/<int:release_id>/artifact_export', methods=['GET'])
 @login_required
-@admin_only
+@admin_only()
 def generate_artifact_export(release_id):
     entity = releases.Release.query.get(release_id)
 

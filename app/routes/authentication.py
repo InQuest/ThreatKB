@@ -14,11 +14,13 @@ def login():
     app.logger.info("user is '%s'" % user)
     if user and bcrypt.check_password_hash(user.password, json_data['password']):
         session['logged_in'] = True
-        status = True
+        s = True
         flask_login.login_user(user)
+        is_admin = user.admin
     else:
-        status = False
-    return jsonify({'result': status})
+        s = False
+        is_admin = False
+    return jsonify({'result': s, 'a': is_admin})
 
 
 @app.route('/ThreatKB/logout')
@@ -105,6 +107,6 @@ def status():
     app.logger.debug("status current_user is '%s'" % (str(current_user)))
     if session.get('logged_in'):
         if session['logged_in']:
-            return jsonify({'status': True})
+            return jsonify({'status': True, 'a': current_user.admin})
     else:
-        return jsonify({'status': False})
+        return jsonify({'status': False, 'a': False})

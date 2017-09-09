@@ -2,6 +2,7 @@ angular.module('ThreatKB')
     .controller('AuthController', ['$scope', '$location', 'AuthService',
         function ($scope, $location, AuthService) {
             $scope.isLoggedIn = AuthService.isLoggedIn;
+            $scope.isAdmin = AuthService.isAdmin;
 
             $scope.login = function () {
                 // initial values
@@ -70,7 +71,7 @@ angular.module('ThreatKB')
                     "passwordConfirm": "",
                     "admin": false,
                     "active": true,
-                    "registered_on": "",
+                    "registered_on": ""
                 };
             };
 

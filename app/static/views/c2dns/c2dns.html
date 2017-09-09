@@ -196,7 +196,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="c2dns in c2dns | filter:search track by $index" ng-if="c2dns.date_created">
+            <tr ng-repeat="c2dns in c2dns | toArray:false | filter:search track by $index" ng-if="c2dns.date_created">
 
                 <td>{{ c2dns.domain_name }}</td>
 
