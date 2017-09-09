@@ -168,6 +168,10 @@ angular.module('ThreatKB').run(function ($rootScope, $location, AuthService) {
                     $location.path('/login');
                     $route.reload();
                 }
+                if (next.access.admin && !AuthService.isAdmin()) {
+                    $location.path('/');
+                    $route.reload();
+                }
             }
         )
     });

@@ -34,11 +34,7 @@ angular.module('ThreatKB')
                     .then(function (success) {
                         if (success.status === 200 && success.data.result) {
                             user = true;
-                            if (success.data.a) {
-                                admin = true;
-                            } else {
-                                admin = false;
-                            }
+                            admin = !!success.data.a;
                             deferred.resolve();
                         } else {
                             user = false;
