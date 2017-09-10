@@ -12,13 +12,17 @@ import datetime
 @app.route('/ThreatKB/yara_rules', methods=['GET'])
 @login_required
 def get_all_yara_rules():
+    include_inactive = request.args.get("include_inactive", False)
+
     entities = yara_rule.Yara_rule.query
 
     if not current_user.admin:
         entities = entities.filter_by(owner_user_id=current_user.id)
 
+    if not include_inactive:
+        entity = entities.filter_by(active=True)
+       
     entities = entities.all()
-
     return json.dumps([entity.to_dict() for entity in entities])
 
 
@@ -143,15 +147,18 @@ def update_yara_rule(id):
 @login_required
 def delete_yara_rule(id):
     entity = yara_rule.Yara_rule.query.get(id)
-    tag_mapping_to_delete = entity.to_dict()['tags']
+    entity.active = False
+    # tag_mapping_to_delete = entity.to_dict()['tags']
 
     if not entity:
         abort(404)
+
     if not current_user.admin and entity.owner_user_id != current_user.id:
         abort(403)
-    db.session.delete(entity)
+        
+    db.session.merge(entity)
     db.session.commit()
 
-    delete_tags_mapping(entity.__tablename__, entity.id, tag_mapping_to_delete)
+    #delete_tags_mapping(entity.__tablename__, entity.id, tag_mapping_to_delete)
 
     return '', 204
