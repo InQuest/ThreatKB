@@ -132,6 +132,16 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                     }]
                 }
             })
+            .when('/tasks', {
+                templateUrl: 'views/tasks/tasks.html',
+                controller: 'TasksController',
+                access: {restricted: true, admin: false},
+                resolve: {
+                    resolvedTask: ['Task', function (Task) {
+                        return Task.query();
+                    }]
+                }
+            })
             .otherwise({
                 redirectTo: '/'
             });

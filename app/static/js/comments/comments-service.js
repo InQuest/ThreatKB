@@ -6,7 +6,7 @@ angular.module('ThreatKB')
                 'get': {method: 'GET'},
                 'update': {method: 'PUT'}
             }),
-            ENTITY_MAPPING: {IP: 3, DNS: 2, SIGNATURE: 1}
+            ENTITY_MAPPING: {IP: 3, DNS: 2, SIGNATURE: 1, TASK: 4}
         }
             ;
     }]);
