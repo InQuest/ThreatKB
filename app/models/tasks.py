@@ -16,18 +16,18 @@ class Tasks(db.Model):
 
     created_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
     created_user = db.relationship('KBUser', foreign_keys=created_user_id,
-                                   primaryjoin="KBUser.id==C2dns.created_user_id")
+                                   primaryjoin="KBUser.id==Tasks.created_user_id")
 
     modified_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
     modified_user = db.relationship('KBUser', foreign_keys=modified_user_id,
-                                    primaryjoin="KBUser.id==C2dns.modified_user_id")
+                                    primaryjoin="KBUser.id==Tasks.modified_user_id")
 
     owner_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=True)
     owner_user = db.relationship('KBUser', foreign_keys=owner_user_id,
-                                 primaryjoin="KBUser.id==C2dns.owner_user_id")
+                                 primaryjoin="KBUser.id==Tasks.owner_user_id")
 
     comments = db.relationship("Comments", foreign_keys=[id],
-                               primaryjoin="and_(Comments.entity_id==C2dns.id, Comments.entity_type=='%s')" % (
+                               primaryjoin="and_(Comments.entity_id==Tasks.id, Comments.entity_type=='%s')" % (
                                    Comments.ENTITY_MAPPING["DNS"]), lazy="dynamic")
 
     def to_dict(self):
@@ -38,7 +38,7 @@ class Tasks(db.Model):
             date_modified=self.date_modified.isoformat(),
             state=self.state,
             title=self.title,
-            description=self.match_type,
+            description=self.description,
             final_artifact=self.final_artifact,
             id=self.id,
             created_user=self.created_user.to_dict(),

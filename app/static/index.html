@@ -36,6 +36,10 @@
                 <ul class="nav navbar-nav" style="font-size: smaller" ng-if="isLoggedIn()">
 
                     <li>
+                        <a href="#!/tasks">Tasks</a>
+                    </li>
+
+                    <li>
                         <a href="#!/c2ips">C2 IP</a>
                     </li>
 
@@ -48,15 +52,15 @@
                     </li>
 
                     <li ng-if="isAdmin()">
-                        <a href="#!/cfg_reference_text_templates">Cfg Reference Text</a>
+                        <a href="#!/cfg_reference_text_templates">Reference Text</a>
                     </li>
 
                     <li ng-if="isAdmin()">
-                        <a href="#!/cfg_states">Cfg States</a>
+                        <a href="#!/cfg_states">States</a>
                     </li>
 
                     <li ng-if="isAdmin()">
-                        <a href="#!/cfg_category_range_mapping">Cfg Categories</a>
+                        <a href="#!/cfg_category_range_mapping">Categories</a>
                     </li>
 
                     <li ng-if="isAdmin()">
@@ -136,6 +140,7 @@
 <script src="js/authentication/authentication-controller.js"></script>
 <script src="js/import/import-controller.js"></script>
 <script src="js/releases/releases-controller.js"></script>
+<script src="js/tasks/tasks-controller.js"></script>
 <!-- /Controllers -->
 
 <!-- Services -->
@@ -154,6 +159,7 @@
 <script src="js/authentication/authentication-service.js"></script>
 <script src="js/releases/releases-service.js"></script>
 <script src="js/users/users-service.js"></script>
+<script src="js/tasks/tasks-service.js"></script>
 <!-- /Services -->
 
 </body>

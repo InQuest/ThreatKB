@@ -30,7 +30,7 @@ def create_tasks():
         title=request.json['title']
         , description=request.json['description']
         , final_artifact=request.json['final_artifact']
-        , state=request.json['state']['state']
+        , state=request.json['state']['state'] if 'state' in request.json['state'] else None
         , created_user_id=current_user.id
         , modified_user_id=current_user.id
     )
@@ -47,19 +47,19 @@ def update_tasks(id):
     if not entity:
         abort(404)
 
-    entity = tasks.Tasks(
-        title=request.json['title']
-        , description=request.json['description']
-        , final_artifact=request.json['final_artifact']
-        , state=request.json['state']['state']
-        , created_user_id=current_user.id
-        , modified_user_id=current_user.id
-    )
+    entity.title = request.json['title']
+    entity.description = request.json['description']
+    entity.final_artifact = request.json['final_artifact']
+    entity.state = request.json['state']['state'] if request.json['state'] and 'state' in request.json['state'] else \
+    request.json['state']
+    entity.created_user_id = current_user.id
+    entity.modified_user_id = current_user.id
+    entity.owner_user_id = request.json['owner_user']['id'] if request.json.get("owner_user", None) and request.json[
+        "owner_user"].get("id", None) else None,
 
-    db.session.merge(entity)
     db.session.commit()
 
-    entity = tasks.Tasks.query.get(entity.id)
+    entity = tasks.Tasks.query.filter(tasks.Tasks.id == entity.id).first()
     return jsonify(entity.to_dict()), 200
 
 
