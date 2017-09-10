@@ -6,8 +6,6 @@ from app.models.cfg_category_range_mapping import CfgCategoryRangeMapping
 from sqlalchemy.event import listens_for
 import json
 
-
-
 class Yara_rule(db.Model):
     metadata_fields = ["description, ""confidence", "test_status", "severity", "category", "file_type",
                        "subcategory1", "subcategory2", "subcategory3", "reference_text", "reference_link"]
@@ -34,6 +32,7 @@ class Yara_rule(db.Model):
     reference_text = db.Column(db.String(2048))
     condition = db.Column(db.String(2048))
     strings = db.Column(db.String(30000))
+    active = db.Column(db.Boolean, nullable=False, default=True)
     signature_id = db.Column(db.Integer(unsigned=True), index=True, nullable=False)
 
     tags = []
@@ -54,11 +53,19 @@ class Yara_rule(db.Model):
 
     comments = db.relationship("Comments", foreign_keys=[id],
                                primaryjoin="and_(Comments.entity_id==Yara_rule.id, Comments.entity_type=='%s')" % (
-                                   Comments.ENTITY_MAPPING["SIGNATURE"]), lazy="dynamic")
+                                   Comments.ENTITY_MAPPING["SIGNATURE"]), lazy="dynamic", cascade="all,delete")
 
     files = db.relationship("Files", foreign_keys=[id],
                             primaryjoin="and_(Files.entity_id==Yara_rule.id, Files.entity_type=='%s')" % (
-                                Files.ENTITY_MAPPING["SIGNATURE"]), lazy="dynamic")
+                                Files.ENTITY_MAPPING["SIGNATURE"]), lazy="dynamic", cascade="all,delete")
+
+    history = db.relationship("Yara_rule_history", foreign_keys=[id],
+                              primaryjoin="Yara_rule_history.yara_rule_id==Yara_rule.id", lazy="dynamic",
+                              cascade="all,delete")
+
+    test_history = db.relationship("Yara_testing_history", foreign_keys=[id],
+                                   primaryjoin="Yara_testing_history.yara_rule_id==Yara_rule.id", lazy="dynamic",
+                                   cascade="all,delete")
 
     def to_dict(self):
         revisions = Yara_rule_history.query.filter_by(yara_rule_id=self.id).all()
