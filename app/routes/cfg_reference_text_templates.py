@@ -1,4 +1,4 @@
-from app import app, db
+from app import app, db, admin_only
 from app.models import cfg_reference_text_templates
 from flask import abort, jsonify, request
 from flask.ext.login import login_required
@@ -14,6 +14,7 @@ def get_all_cfg_reference_text_templates():
 
 @app.route('/ThreatKB/cfg_reference_text_templates/<int:id>', methods=['GET'])
 @login_required
+@admin_only()
 def get_cfg_reference_text_templates(id):
     entity = cfg_reference_text_templates.Cfg_reference_text_templates.query.get(id)
     if not entity:
@@ -23,6 +24,7 @@ def get_cfg_reference_text_templates(id):
 
 @app.route('/ThreatKB/cfg_reference_text_templates', methods=['POST'])
 @login_required
+@admin_only()
 def create_cfg_reference_text_templates():
     entity = cfg_reference_text_templates.Cfg_reference_text_templates(
         template_text=request.json['template_text']
@@ -49,6 +51,7 @@ def update_cfg_reference_text_templates(id):
 
 @app.route('/ThreatKB/cfg_reference_text_templates/<int:id>', methods=['DELETE'])
 @login_required
+@admin_only()
 def delete_cfg_reference_text_templates(id):
     entity = cfg_reference_text_templates.Cfg_reference_text_templates.query.get(id)
     if not entity:

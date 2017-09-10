@@ -1,4 +1,4 @@
-from app import app, db
+from app import app, db, admin_only
 from app.models import comments
 from flask import abort, jsonify, request
 from flask.ext.login import login_required, current_user
@@ -46,6 +46,7 @@ def create_comments():
 
 @app.route('/ThreatKB/comments/<int:id>', methods=['DELETE'])
 @login_required
+@admin_only()
 def delete_comments(id):
     entity = comments.Comments.query.get(id)
     if not entity:

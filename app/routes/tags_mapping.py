@@ -1,4 +1,4 @@
-from app import app, db
+from app import app, db, admin_only
 from app.models import tags_mapping
 from flask import abort, jsonify, request
 from flask.ext.login import login_required
@@ -85,6 +85,7 @@ def delete_tags_mapping(table, s_id, deleted_tags):
 
 @app.route('/ThreatKB/tags_mapping/<int:id>', methods=['DELETE'])
 @login_required
+@admin_only()
 def delete_tags_mapping_by_id(id):
     entity = tags_mapping.Tags_mapping.query.get(id)
     if not entity:

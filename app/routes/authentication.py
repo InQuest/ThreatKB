@@ -1,4 +1,4 @@
-from app import app, db, bcrypt
+from app import app, db, bcrypt, admin_only
 from app.models.users import KBUser
 from app.models import yara_rule, c2dns, c2ip
 from flask import request, jsonify, session, json, abort
@@ -14,11 +14,13 @@ def login():
     app.logger.info("user is '%s'" % user)
     if user and bcrypt.check_password_hash(user.password, json_data['password']):
         session['logged_in'] = True
-        status = True
+        s = True
         flask_login.login_user(user)
+        is_admin = user.admin
     else:
-        status = False
-    return jsonify({'result': status})
+        s = False
+        is_admin = False
+    return jsonify({'result': s, 'a': is_admin})
 
 
 @app.route('/ThreatKB/logout')
@@ -44,8 +46,9 @@ def get_all_users():
     return json.dumps(users)
 
 
-@login_required
 @app.route('/ThreatKB/users/<int:user_id>', methods=['GET'])
+@login_required
+@admin_only()
 def get_user(user_id):
     user = KBUser.query.get(user_id)
     if not user:
@@ -55,6 +58,7 @@ def get_user(user_id):
 
 @app.route('/ThreatKB/users', methods=['POST'])
 @login_required
+@admin_only()
 def create_user():
     user = KBUser(
         email=request.json['email'],
@@ -71,6 +75,7 @@ def create_user():
 
 @app.route('/ThreatKB/users/<int:user_id>', methods=['PUT'])
 @login_required
+@admin_only()
 def update_user(user_id):
     user = KBUser.query.get(user_id)
     if not user:
@@ -102,6 +107,6 @@ def status():
     app.logger.debug("status current_user is '%s'" % (str(current_user)))
     if session.get('logged_in'):
         if session['logged_in']:
-            return jsonify({'status': True})
+            return jsonify({'status': True, 'a': current_user.admin})
     else:
-        return jsonify({'status': False})
+        return jsonify({'status': False, 'a': False})

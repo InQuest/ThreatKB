@@ -14,11 +14,15 @@ import datetime
 def get_all_yara_rules():
     include_inactive = request.args.get("include_inactive", False)
 
-    if include_inactive:
-        entities = yara_rule.Yara_rule.all()
-    else:
-        entities = yara_rule.Yara_rule.query.filter_by(active=True).all()
+    entities = yara_rule.Yara_rule.query
 
+    if not current_user.admin:
+        entities = entities.filter_by(owner_user_id=current_user.id)
+
+    if not include_inactive:
+        entity = entities.filter_by(active=True)
+       
+    entities = entities.all()
     return json.dumps([entity.to_dict() for entity in entities])
 
 
@@ -28,6 +32,8 @@ def get_yara_rule(id):
     entity = yara_rule.Yara_rule.query.get(id)
     if not entity:
         abort(404)
+    if not current_user.admin and entity.owner_user_id != current_user.id:
+        abort(403)
     return jsonify(entity.to_dict())
 
 
@@ -76,6 +82,8 @@ def update_yara_rule(id):
     entity = yara_rule.Yara_rule.query.get(id)
     if not entity:
         abort(404)
+    if not current_user.admin and entity.owner_user_id != current_user.id:
+        abort(403)
 
     if not do_not_bump_revision:
         db.session.add(yara_rule.Yara_rule_history(date_created=entity.date_created, revision=entity.revision,
@@ -144,6 +152,10 @@ def delete_yara_rule(id):
 
     if not entity:
         abort(404)
+
+    if not current_user.admin and entity.owner_user_id != current_user.id:
+        abort(403)
+        
     db.session.merge(entity)
     db.session.commit()
 

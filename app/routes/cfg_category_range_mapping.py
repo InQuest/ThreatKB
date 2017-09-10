@@ -1,4 +1,4 @@
-from app import app, db
+from app import app, db, admin_only
 from app.models import cfg_category_range_mapping
 from flask import abort, jsonify, request
 from flask.ext.login import login_required
@@ -14,6 +14,7 @@ def get_all_cfg_category_range_mappings():
 
 @app.route('/ThreatKB/cfg_category_range_mapping/<int:id>', methods=['GET'])
 @login_required
+@admin_only()
 def get_cfg_category_range_mapping(id):
     entity = cfg_category_range_mapping.CfgCategoryRangeMapping.query.get(id)
     if not entity:
@@ -23,6 +24,7 @@ def get_cfg_category_range_mapping(id):
 
 @app.route('/ThreatKB/cfg_category_range_mapping', methods=['POST'])
 @login_required
+@admin_only()
 def create_cfg_category_range_mapping():
     entity = cfg_category_range_mapping.CfgCategoryRangeMapping(
         category=request.json['category'],
@@ -36,6 +38,7 @@ def create_cfg_category_range_mapping():
 
 @app.route('/ThreatKB/cfg_category_range_mapping/<int:id>', methods=['PUT'])
 @login_required
+@admin_only()
 def update_cfg_category_range_mapping(id):
     entity = cfg_category_range_mapping.CfgCategoryRangeMapping.query.get(id)
     if not entity:
@@ -69,6 +72,7 @@ def update_cfg_category_range_mapping_current(id, current):
 
 @app.route('/ThreatKB/cfg_category_range_mapping/<int:id>', methods=['DELETE'])
 @login_required
+@admin_only()
 def delete_cfg_category_range_mapping(id):
     entity = cfg_category_range_mapping.CfgCategoryRangeMapping.query.get(id)
     if not entity:

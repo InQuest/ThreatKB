@@ -49,7 +49,8 @@
                 <div class="pull-right" ng-if="yara_rule.id"
                      style="margin: 0 35px 0 0; top: -30px; position: relative;">
                     <button type="button" class="btn btn-primary"
-                            ng-click="testSignature(yara_rule.id)">{{ testButtonText }}</button>
+                            ng-click="testSignature(yara_rule.id)">{{ testButtonText }}
+                    </button>
                 </div>
             </div>
             <div class="modal-body">
@@ -271,7 +272,7 @@
                         <ul class="list-group">
                             <li class="list-group-item justify-content-between"
                                 ng-repeat="f in yara_rule.files | orderBy:'-date_modified'">
-                                <a href="ThreatKB/files/{{ f.entity_type }}/{{ f.entity_id }}/{{ f.id }}">{{ f.filename }}</a>
+                                <a href="ThreatKB/files/{{ f.entity_type }}/{{ f.entity_id }}/{{ f.id }}">{{ f.filename}}</a>
                                 <span class="pull-right">{{ f.user.email }}&nbsp;<small>{{ pretty_date(f.date_modified) }}</small></span>
                             </li>
                         </ul>

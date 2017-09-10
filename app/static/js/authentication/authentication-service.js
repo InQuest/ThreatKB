@@ -5,10 +5,12 @@ angular.module('ThreatKB')
         function ($q, $timeout, $http) {
             // create user variable
             var user = null;
+            var admin = null;
 
             // return available functions for use in controllers
             return ({
                 isLoggedIn: isLoggedIn,
+                isAdmin: isAdmin,
                 login: login,
                 logout: logout,
                 register: register,
@@ -17,7 +19,11 @@ angular.module('ThreatKB')
 
             function isLoggedIn() {
                 return !!user;
-            };
+            }
+
+            function isAdmin() {
+                return !!admin;
+            }
 
             function login(email, password) {
                 // create a new instance of deferred
@@ -28,13 +34,16 @@ angular.module('ThreatKB')
                     .then(function (success) {
                         if (success.status === 200 && success.data.result) {
                             user = true;
+                            admin = !!success.data.a;
                             deferred.resolve();
                         } else {
                             user = false;
+                            admin = false;
                             deferred.reject();
                         }
                     }, function (error) {
                         user = false;
+                        admin = false;
                         deferred.reject();
                     });
 
@@ -51,9 +60,11 @@ angular.module('ThreatKB')
                 $http.get('/ThreatKB/logout')
                     .then(function (success) {
                         user = false;
+                        admin = false;
                         deferred.resolve();
                     }, function (error) {
                         user = false;
+                        admin = false;
                         deferred.reject();
                     });
 
@@ -86,8 +97,10 @@ angular.module('ThreatKB')
                 return $http.get('/ThreatKB/status')
                     .then(function (success) {
                         user = success.status === 200 && success.data.status;
+                        admin = success.data.a;
                     }, function (error) {
                         user = false;
+                        admin = false;
                     });
             }
 

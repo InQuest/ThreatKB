@@ -9,7 +9,7 @@ import yara
 from sqlalchemy import func
 from sqlalchemy.ext.serializer import loads, dumps
 
-from app import app, db, celery
+from app import app, db, celery, admin_only
 from app.models import yara_rule, files
 from flask import abort, jsonify, request, json
 from flask.ext.login import current_user, login_required
@@ -19,6 +19,7 @@ from app.models.yara_rule import Yara_testing_history
 
 @app.route('/ThreatKB/test_yara_rule', methods=['POST'])
 @login_required
+@admin_only()
 def clean_yara_test():
     pattern = request.values['pattern'] if 'pattern' in request.values else ".*"
     sig_ids = json.loads(request.values['sig_ids']) if 'sig_ids' in request.values else []
