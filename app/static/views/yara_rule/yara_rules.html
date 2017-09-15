@@ -250,7 +250,8 @@
                     <div style="padding-top:3px;">
                         <ul class="list-group">
                             <li class="list-group-item justify-content-between"
-                                ng-repeat="comment in yara_rule.comments | orderBy:'-date_created'">{{ print_comment(comment) }}
+                                ng-repeat="comment in yara_rule.comments | orderBy:'-date_created'">{{
+                                print_comment(comment) }}
                                 <span class="pull-right">{{ comment.user.email }}&nbsp;<small>{{ pretty_date(comment.date_created) }}</small></span>
                             </li>
                         </ul>
@@ -312,71 +313,74 @@
 
         <div class="inner-addon left-addon col-md-4" style="padding-left:0px;">
             <i class="glyphicon glyphicon-search"></i>
-            <input type="text" class="form-control" placeholder="Search" ng-model="search"/>
+            <input class="form-control" ng-change="refreshData()" placeholder="Search" ng-model="searchText"/>
         </div>
         <a class="btn-link pull-right" style="color:inherit;" ng-click="create()" title="Create Signatures">
             <span class="glyphicon glyphicon-plus-sign"></span>
         </a>
     </div>
 
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-            <tr>
+    <div ui-grid="gridOptions" ui-grid-edit ui-grid-row-edit ui-grid-cellnav= ui-grid-auto-resize
+         class="table-responsive" style="width: 100%; height: auto"></div>
 
-                <th style="width: 120px;">Signature ID</th>
+    <!--<div class="table-responsive">-->
+        <!--<table class="table table-striped">-->
+            <!--<thead>-->
+            <!--<tr>-->
 
-                <th>Name</th>
+                <!--<th style="width: 120px;">Signature ID</th>-->
 
-                <th style="width: 140px;">Category</th>
+                <!--<th>Name</th>-->
 
-                <th style="width: 100px;">State</th>
+                <!--<th style="width: 140px;">Category</th>-->
 
-                <th style="width: 260px;">Owner</th>
+                <!--<th style="width: 100px;">State</th>-->
 
-                <th style="width: 120px;">Actions</th>
+                <!--<th style="width: 260px;">Owner</th>-->
 
-            </tr>
-            </thead>
-            <tbody>
-            <tr ng-repeat="yara_rule in yara_rules | filter:search track by $index" ng-if="yara_rule.date_created">
+                <!--<th style="width: 120px;">Actions</th>-->
 
-                <td>{{ yara_rule.signature_id }}</td>
+            <!--</tr>-->
+            <!--</thead>-->
+            <!--<tbody>-->
+            <!--<tr ng-repeat="yara_rule in yara_rules | filter:search track by $index" ng-if="yara_rule.date_created">-->
 
-                <td>{{ yara_rule.name }}</td>
+                <!--<td>{{ yara_rule.signature_id }}</td>-->
 
-                <td>{{ yara_rule.category }}</td>
+                <!--<td>{{ yara_rule.name }}</td>-->
 
-                <td>{{ yara_rule.state }}</td>
+                <!--<td>{{ yara_rule.category }}</td>-->
 
-                <td>
-                    <ui-select ng-model="yara_rule.owner_user" on-select="save(yara_rule)">
-                        <ui-select-match placeholder="Select an owner ...">
-                            <small><span ng-bind="$select.selected.email || yara_rule.owner_user.email"></span></small>
-                        </ui-select-match>
-                        <ui-select-choices
-                                repeat="person in (users | filter: $select.search) track by person.id">
-                            <small><span ng-bind="person.email"></span></small>
-                        </ui-select-choices>
-                    </ui-select>
+                <!--<td>{{ yara_rule.state }}</td>-->
 
-                </td>
+                <!--<td>-->
+                    <!--<ui-select ng-model="yara_rule.owner_user" on-select="save(yara_rule)">-->
+                        <!--<ui-select-match placeholder="Select an owner ...">-->
+                            <!--<small><span ng-bind="$select.selected.email || yara_rule.owner_user.email"></span></small>-->
+                        <!--</ui-select-match>-->
+                        <!--<ui-select-choices-->
+                                <!--repeat="person in (users | filter: $select.search) track by person.id">-->
+                            <!--<small><span ng-bind="person.email"></span></small>-->
+                        <!--</ui-select-choices>-->
+                    <!--</ui-select>-->
 
-                <td>
-                    <button type="button"
-                            ng-click="update(yara_rule.id)"
-                            class="btn btn-sm">
-                        <small><span class="glyphicon glyphicon-pencil"></span></small>
-                    </button>
-                    <button type="submit"
-                            ng-click="delete(yara_rule.id)"
-                            ng-confirm-click="Are you sure you want to inactivate this signature?"
-                            class="btn btn-sm btn-danger">
-                        <small><span class="glyphicon glyphicon-remove-circle"></span></small>
-                    </button>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
+                <!--</td>-->
+
+                <!--<td>-->
+                    <!--<button type="button"-->
+                            <!--ng-click="update(yara_rule.id)"-->
+                            <!--class="btn btn-sm">-->
+                        <!--<small><span class="glyphicon glyphicon-pencil"></span></small>-->
+                    <!--</button>-->
+                    <!--<button type="submit"-->
+                            <!--ng-click="delete(yara_rule.id)"-->
+                            <!--ng-confirm-click="Are you sure you want to inactivate this signature?"-->
+                            <!--class="btn btn-sm btn-danger">-->
+                        <!--<small><span class="glyphicon glyphicon-remove-circle"></span></small>-->
+                    <!--</button>-->
+                <!--</td>-->
+            <!--</tr>-->
+            <!--</tbody>-->
+        <!--</table>-->
+    <!--</div>-->
 </div>

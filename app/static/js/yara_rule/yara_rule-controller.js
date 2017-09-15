@@ -1,12 +1,85 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('Yara_ruleController', ['$scope', '$uibModal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states', 'CfgCategoryRangeMapping', 'Users',
-        function ($scope, $uibModal, resolvedYara_rule, Yara_rule, Cfg_states, CfgCategoryRangeMapping, Users) {
+    .controller('Yara_ruleController', ['$scope', '$filter', '$http', '$uibModal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states', 'CfgCategoryRangeMapping', 'Users',
+        function ($scope, $filter, $http, $uibModal, resolvedYara_rule, Yara_rule, Cfg_states, CfgCategoryRangeMapping, Users) {
 
             $scope.yara_rules = resolvedYara_rule;
 
             $scope.users = Users.query();
+
+            $scope.filterOptions = {
+                filterText: ''
+            };
+
+            $scope.saveOwner = function (rowEntity) {
+                $scope.gridApi.rowEdit.setSavePromise(rowEntity, $scope.save);
+            };
+
+            $scope.gridOptions = {
+                enableFiltering: true,
+                onRegisterApi: function (gridApi) {
+                    $scope.gridApi = gridApi;
+                    gridApi.edit.on.afterCellEdit($scope, function (rowEntity, colDef, newValue, oldValue) {
+                        rowEntity.ownerEmails = $scope.users;
+                    });
+                    gridApi.rowEdit.on.saveRow($scope, $scope.save);
+                },
+                columnDefs:
+                    [
+                        {field: 'signature_id', enableCellEdit: false},
+                        {field: 'name', enableCellEdit: false},
+                        {field: 'category', enableCellEdit: false},
+                        {field: 'state', enableCellEdit: false},
+                        {
+                            field: 'owner_user.email',
+                            displayName: 'Owner',
+                            width: '20%',
+                            enableCellEdit: true,
+                            enableCellEditOnFocus: true,
+                            editableCellTemplate: 'ui-grid/dropdownEditor',
+                            editDropdownValueLabel: 'email',
+                            editDropdownRowEntityOptionsArrayPath: 'ownerEmails'
+                        },
+                        {
+                            name: 'Actions',
+                            enableCellEdit: false,
+                            enableFiltering: false,
+                            cellTemplate: '<div style="text-align: center;">\n'
+                            + '<button type="button" ng-click="grid.appScope.update(row.entity.id)"\n'
+                            + 'class="btn btn-sm">\n'
+                            + '<small><span class="glyphicon glyphicon-pencil"></span>\n'
+                            + '</small>\n'
+                            + '</button>\n'
+                            + '<button ng-click="grid.appScope.delete(row.entity.id)"\n'
+                            + 'ng-confirm-click="Are you sure you want to '
+                            + 'inactivate this signature?" class="btn btn-sm btn-danger">\n'
+                            + '<small>\n'
+                            + '<span class="glyphicon glyphicon-remove-circle"></span>\n'
+                            + '</small>\n'
+                            + '</button></div>'
+                        }
+                    ]
+            };
+
+            $scope.refreshData = function () {
+                $scope.gridOptions.data = $filter('filter')($scope.yara_rules, $scope.searchText, undefined);
+            };
+
+            $scope.clickHandler = {
+                update: function (id) {
+                    $scope.update(id);
+                },
+                delete: function (id) {
+                    $scope.delete(id)
+                }
+            };
+
+            $http.get('/ThreatKB/yara_rules')
+                .then(function (response) {
+                    $scope.gridOptions.data = response.data;
+                }, function (error) {
+                });
 
             $scope.create = function () {
                 $scope.clear();
