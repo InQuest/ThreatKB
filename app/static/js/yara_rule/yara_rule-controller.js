@@ -43,8 +43,9 @@ angular.module('ThreatKB')
                         },
                         {
                             name: 'Actions',
-                            enableCellEdit: false,
                             enableFiltering: false,
+                            enableColumnMenu: false,
+                            enableSorting: false,
                             cellTemplate: '<div style="text-align: center;">'
                             + '<button type="button" ng-click="grid.appScope.update(row.entity.id)"'
                             + ' class="btn btn-sm">'
