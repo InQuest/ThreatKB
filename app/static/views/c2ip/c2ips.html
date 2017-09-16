@@ -81,26 +81,6 @@
                 </div>
 
                 <div class="form-group">
-                    <label>City:</label>
-                    <span class="error" ng-show="form.city.$error.minlength">Must be at least  characters.</span>
-                    <span class="error" ng-show="form.city.$error.maxlength">Must be at most 64 characters.</span>
-
-                    <input type="text" class="form-control" name="city"
-                           ng-model="c2ip.city" ng-required="false"
-                           ng-maxlength="64"/>
-                </div>
-
-                <div class="form-group">
-                    <label>State:</label>
-                    <span class="error" ng-show="form.state.$error.minlength">Must be at least  characters.</span>
-                    <span class="error" ng-show="form.state.$error.maxlength">Must be at most 64 characters.</span>
-
-                    <input type="text" class="form-control" name="st"
-                           ng-model="c2ip.st" ng-required="false"
-                           ng-maxlength="64"/>
-                </div>
-
-                <div class="form-group">
                     <label>Reference Link:</label>
                     <span class="error"
                           ng-show="form.reference_link.$error.minlength">Must be at least  characters.</span>
@@ -212,10 +192,6 @@
 
                 <th>Country</th>
 
-                <th>City</th>
-
-                <th>State</th>
-
                 <th style="width: 260px;">Owner</th>
 
                 <th style="width: 120px;">Actions</th>
@@ -230,10 +206,6 @@
                 <td>{{ c2ip.asn }}</td>
 
                 <td>{{ c2ip.country }}</td>
-
-                <td>{{ c2ip.city }}</td>
-
-                <td>{{ c2ip.st }}</td>
 
                 <td>
                     <ui-select ng-model="c2ip.owner_user" on-select="save(c2ip)">

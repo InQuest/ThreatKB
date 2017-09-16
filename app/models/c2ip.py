@@ -15,8 +15,6 @@ class C2ip(db.Model):
     ip = db.Column(db.String(15), index=True)
     asn = db.Column(db.String(128))
     country = db.Column(db.String(64))
-    city = db.Column(db.String(64))
-    st = db.Column(db.String(32))
     state = db.Column(db.String(32), index=True)
     reference_link = db.Column(db.String(2048))
     reference_text = db.Column(db.String(2048))
@@ -51,9 +49,7 @@ class C2ip(db.Model):
             date_modified=self.date_modified.isoformat(),
             ip=self.ip,
             asn=self.asn,
-            st=self.st,
             country=self.country,
-            city=self.city,
             state=self.state,
             reference_link=self.reference_link,
             reference_text=self.reference_text,

@@ -61,10 +61,6 @@ angular.module('ThreatKB')
 
                     "country": "",
 
-                    "city": "",
-
-                    "state": "",
-
                     "reference_link": "",
 
                     "reference_text": "",

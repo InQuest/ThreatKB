@@ -39,8 +39,6 @@ def create_c2ip():
         ip=request.json['ip']
         , asn=request.json['asn']
         , country=request.json['country']
-        , city=request.json['city']
-        , st=request.json.get('st', None)
         , state=request.json['state']['state']
         , reference_link=request.json['reference_link']
         , reference_text=request.json['reference_text']
@@ -70,7 +68,6 @@ def update_c2ip(id):
         ip=request.json['ip'],
         asn=request.json['asn'],
         country=request.json['country'],
-        city=request.json['city'],
         state=request.json['state']['state'] if request.json['state'] and 'state' in request.json['state'] else
         request.json['state'],
         reference_link=request.json['reference_link'],
