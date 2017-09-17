@@ -8,8 +8,6 @@ angular.module('ThreatKB')
 
             $scope.users = Users.query();
 
-            $scope.cfg_states = Cfg_states.query();
-
             $scope.filterOptions = {
                 filterText: ''
             };
