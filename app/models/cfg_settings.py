@@ -7,7 +7,7 @@ class Cfg_settings(db.Model):
     date_created = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp())
     date_modified = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp(),
                               onupdate=db.func.current_timestamp())
-    public = db.Column(db.Boolean, index=True, default=False)
+    public = db.Column(db.Boolean, index=True, default=True)
     value = db.Column(db.String(2048))
 
     def to_dict(self):
