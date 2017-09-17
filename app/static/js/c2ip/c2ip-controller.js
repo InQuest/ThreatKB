@@ -1,12 +1,75 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('C2ipController', ['$scope', '$uibModal', 'resolvedC2ip', 'C2ip', 'Cfg_states', 'growl', 'Users',
-        function ($scope, $uibModal, resolvedC2ip, C2ip, Cfg_states, growl, Users) {
+    .controller('C2ipController', ['$scope', '$filter', '$http', '$uibModal', 'resolvedC2ip', 'C2ip', 'Cfg_states', 'growl', 'Users',
+        function ($scope, $filter, $http, $uibModal, resolvedC2ip, C2ip, Cfg_states, growl, Users) {
 
             $scope.c2ips = resolvedC2ip;
 
             $scope.users = Users.query();
+
+            $scope.filterOptions = {
+                filterText: ''
+            };
+
+            $scope.gridOptions = {
+                enableFiltering: true,
+                onRegisterApi: function (gridApi) {
+                    $scope.gridApi = gridApi;
+                },
+                columnDefs:
+                    [
+                        {field: 'ip', displayName: 'IP'},
+                        {field: 'state'},
+                        {field: 'asn', displayName: 'ASN'},
+                        {field: 'country'},
+                        {
+                            field: 'owner_user.email',
+                            displayName: 'Owner',
+                            width: '20%',
+                            cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.owner_user"'
+                            + ' on-select="grid.appScope.save(row.entity)">'
+                            + '<ui-select-match placeholder="Select an owner ...">'
+                            + '<small><span ng-bind="$select.selected.email || row.entity.owner_user.email"></span></small>'
+                            + '</ui-select-match>'
+                            + '<ui-select-choices'
+                            + ' repeat="person in (grid.appScope.users | filter: $select.search) track by person.id">'
+                            + '<small><span ng-bind="person.email"></span></small>'
+                            + '</ui-select-choices>'
+                            + '</ui-select>'
+                            + '</div>'
+                        },
+                        {
+                            name: 'Actions',
+                            enableFiltering: false,
+                            enableColumnMenu: false,
+                            enableSorting: false,
+                            cellTemplate: '<div style="text-align: center;">'
+                            + '<button type="button" ng-click="grid.appScope.update(row.entity.id)"'
+                            + ' class="btn btn-sm">'
+                            + '<small><span class="glyphicon glyphicon-pencil"></span>'
+                            + '</small>'
+                            + '</button>'
+                            + '<button ng-click="grid.appScope.delete(row.entity.id)"'
+                            + ' ng-confirm-click="Are you sure you want to '
+                            + 'delete this c2ip?" class="btn btn-sm btn-danger">'
+                            + '<small>'
+                            + '<span class="glyphicon glyphicon-remove-circle"></span>'
+                            + '</small>'
+                            + '</button></div>'
+                        }
+                    ]
+            };
+
+            $scope.refreshData = function () {
+                $scope.gridOptions.data = $filter('filter')($scope.c2ips, $scope.searchText, undefined);
+            };
+
+            $http.get('/ThreatKB/c2ips')
+                .then(function (response) {
+                    $scope.gridOptions.data = response.data;
+                }, function (error) {
+                });
 
             $scope.create = function () {
                 $scope.clear();
@@ -23,12 +86,13 @@ angular.module('ThreatKB')
             $scope.delete = function (id) {
                 C2ip.delete({id: id}, function () {
                     $scope.c2ips = C2ip.query();
+                    $scope.gridOptions.data = $scope.c2ips;
                 });
             };
 
             $scope.save = function (id_or_ip) {
                 var id = id_or_ip;
-                if (typeof(id_or_ip) == "object") {
+                if (typeof(id_or_ip) === "object") {
                     id = id_or_ip.id;
                     $scope.c2ip = id_or_ip;
                 }
@@ -36,6 +100,7 @@ angular.module('ThreatKB')
                 if (id) {
                     C2ip.update({id: id}, $scope.c2ip, function () {
                         $scope.c2ips = C2ip.query();
+                        $scope.gridOptions.data = $scope.c2ips;
                         //$scope.clear();
                     }, function (error) {
                         growl.error(error.data, {ttl: -1});
@@ -43,7 +108,7 @@ angular.module('ThreatKB')
                 } else {
                     C2ip.save($scope.c2ip, function () {
                         $scope.c2ips = C2ip.query();
-                        //$scope.clear();
+                        $scope.gridOptions.data = $scope.c2ips;
                     }, function (error) {
                         growl.error(error.data, {ttl: -1});
                     });
@@ -52,31 +117,18 @@ angular.module('ThreatKB')
 
             $scope.clear = function () {
                 $scope.c2ip = {
-
                     "date_created": "",
-
                     "date_modified": "",
-
                     "ip": "",
-
                     "asn": "",
-
                     "country": "",
-
                     "reference_link": "",
-
                     "reference_text": "",
-
                     "expiration_type": "",
-
                     "expiration_timestamp": "",
-
                     "id": "",
-
                     "tags": [],
-
                     "addedTags": [],
-
                     "removedTags": []
                 };
             };

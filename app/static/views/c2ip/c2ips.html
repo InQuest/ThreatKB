@@ -1,7 +1,7 @@
  <div>
 
     <script type="text/ng-template" id="c2ip-save.html">
-        <form name="form" role="form" novalidate
+        <form name="form" novalidate
               class="ng-scope ng-invalid ng-invalid-required ng-dirty"
               ng-submit="ok()">
 
@@ -9,8 +9,7 @@
                 <button type="button" class="close"
                         ng-click="cancel()">&times;
                 </button>
-                <h4 class="modal-title" id="myC2ipLabel" ng-if="!c2ip.id">Create IP Artifact</h4>
-                <h4 class="modal-title" id="myC2ipLabel" ng-if="c2ip.id">Edit IP Artifact</h4>
+                <h4 class="modal-title" id="myC2ipLabel">{{ c2ip.id ? 'Edit' : 'Create' }} IP Artifact</h4>
 
             </div>
             <div class="modal-body">
@@ -65,7 +64,7 @@
                     <label>ASN</label>
                     <span class="error" ng-show="form.asn.$error.minlength">Must be at least  characters.</span>
                     <span class="error" ng-show="form.asn.$error.maxlength">Must be at most 128 characters.</span>
-                    <input type="text" class="form-control" name="asn"
+                    <input class="form-control" name="asn"
                            ng-model="c2ip.asn" ng-required="false"
                            ng-maxlength="128"/>
                 </div>
@@ -75,7 +74,7 @@
                     <span class="error" ng-show="form.country.$error.minlength">Must be at least  characters.</span>
                     <span class="error" ng-show="form.country.$error.maxlength">Must be at most 64 characters.</span>
 
-                    <input type="text" class="form-control" name="country"
+                    <input class="form-control" name="country"
                            ng-model="c2ip.country" ng-required="false"
                            ng-maxlength="64"/>
                 </div>
@@ -87,7 +86,7 @@
                     <span class="error"
                           ng-show="form.reference_link.$error.maxlength">Must be at most 2048 characters.</span>
 
-                    <input type="text" class="form-control" name="reference_link"
+                    <input class="form-control" name="reference_link"
                            ng-model="c2ip.reference_link" ng-required="false"
                            ng-maxlength="2048"/>
                 </div>
@@ -100,7 +99,7 @@
                     <span class="error"
                           ng-show="form.reference_text.$error.maxlength">Must be at most 4096 characters.</span>
 
-                    <input type="text" class="form-control" name="reference_text"
+                    <input class="form-control" name="reference_text"
                            ng-model="c2ip.reference_text" ng-required="true"
                            ng-maxlength="4096"/>
                 </div>
@@ -112,7 +111,7 @@
                     <span class="error"
                           ng-show="form.expiration_type.$error.maxlength">Must be at most 32 characters.</span>
 
-                    <input type="text" class="form-control" name="expiration_type"
+                    <input class="form-control" name="expiration_type"
                            ng-model="c2ip.expiration_type" ng-required="false"
                            ng-maxlength="32"/>
                 </div>
@@ -120,7 +119,7 @@
                 <div class="form-group">
                     <label>Expiration Timestamp:</label>
 
-                    <input type="text" class="form-control" name="expiration_timestamp"
+                    <input class="form-control" name="expiration_timestamp"
                            ui-date="expiration_timestampDateOptions" ui-date-format="yy-mm-dd"
                            ng-model="c2ip.expiration_timestamp" ng-required="false"/>
                 </div>
@@ -161,82 +160,21 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" ng-click="cancel()">Cancel
                 </button>
-                <button type="submit" ng-disabled="form.$invalid" class="btn btn-primary">Save</button>
+                <button ng-disabled="form.$invalid" class="btn btn-primary">Save</button>
             </div>
         </form>
     </script>
-
     <br>
-
     <div class="container-fluid">
 
-        <div class="inner-addon left-addon col-md-4" style="padding-left:0px;">
+        <div class="inner-addon left-addon col-md-4" style="padding-left:0;">
             <i class="glyphicon glyphicon-search"></i>
-            <input type="text" class="form-control" placeholder="Search" ng-model="search"/>
+            <input class="form-control" ng-change="refreshData()" placeholder="Search" ng-model="searchText"/>
         </div>
         <a class="btn-link pull-right" style="color:inherit;" ng-click="create()">
             <span class="glyphicon glyphicon-plus-sign"></span>
         </a>
     </div>
-
-
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-            <tr>
-                <th>IP</th>
-
-                <th>State</th>
-
-                <th style="width:200px;">ASN</th>
-
-                <th>Country</th>
-
-                <th style="width: 260px;">Owner</th>
-
-                <th style="width: 120px;">Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr ng-repeat="c2ip in c2ips | filter:search track by $index" ng-if="c2ip.date_created">
-                <td>{{ c2ip.ip }}</td>
-
-                <td>{{ c2ip.state }}</td>
-
-                <td>{{ c2ip.asn }}</td>
-
-                <td>{{ c2ip.country }}</td>
-
-                <td>
-                    <ui-select ng-model="c2ip.owner_user" on-select="save(c2ip)">
-                        <ui-select-match placeholder="Select an owner ...">
-                            <small><span ng-bind="$select.selected.email || c2ip.owner_user.email"></span></small>
-                        </ui-select-match>
-                        <ui-select-choices
-                                repeat="person in (users | filter: $select.search) track by person.id">
-                            <small><span ng-bind="person.email"></span></small>
-                        </ui-select-choices>
-                    </ui-select>
-
-                </td>
-
-                <td>
-                    <center>
-                        <button type="submit"
-                                ng-click="update(c2ip.id)"
-                                class="btn btn-sm">
-                            <small><span class="glyphicon glyphicon-pencil"></span></small>
-                        </button>
-                        <button type="submit"
-                                ng-confirm-click="Are you sure you want to delete this c2ip?"
-                                ng-click="delete(c2ip.id)"
-                                class="btn btn-sm btn-danger">
-                            <small><span class="glyphicon glyphicon-remove-circle"></span></small>
-                        </button>
-                    </center>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
+    <br>
+    <div ui-grid="gridOptions"></div>
 </div>

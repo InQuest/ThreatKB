@@ -1,12 +1,75 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('Yara_ruleController', ['$scope', '$uibModal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states', 'CfgCategoryRangeMapping', 'Users',
-        function ($scope, $uibModal, resolvedYara_rule, Yara_rule, Cfg_states, CfgCategoryRangeMapping, Users) {
+    .controller('Yara_ruleController', ['$scope', '$filter', '$http', '$uibModal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states', 'CfgCategoryRangeMapping', 'Users', 'uiGridConstants',
+        function ($scope, $filter, $http, $uibModal, resolvedYara_rule, Yara_rule, Cfg_states, CfgCategoryRangeMapping, Users, uiGridConstants) {
 
             $scope.yara_rules = resolvedYara_rule;
 
             $scope.users = Users.query();
+
+            $scope.filterOptions = {
+                filterText: ''
+            };
+
+            $scope.gridOptions = {
+                enableFiltering: true,
+                onRegisterApi: function (gridApi) {
+                    $scope.gridApi = gridApi;
+                },
+                columnDefs:
+                    [
+                        {field: 'signature_id'},
+                        {field: 'name'},
+                        {field: 'category'},
+                        {field: 'state'},
+                        {
+                            field: 'owner_user.email',
+                            displayName: 'Owner',
+                            width: '20%',
+                            cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.owner_user"'
+                            + ' on-select="grid.appScope.save(row.entity)">'
+                            + '<ui-select-match placeholder="Select an owner ...">'
+                            + '<small><span ng-bind="$select.selected.email || row.entity.owner_user.email"></span></small>'
+                            + '</ui-select-match>'
+                            + '<ui-select-choices'
+                            + ' repeat="person in (grid.appScope.users | filter: $select.search) track by person.id">'
+                            + '<small><span ng-bind="person.email"></span></small>'
+                            + '</ui-select-choices>'
+                            + '</ui-select>'
+                            + '</div>'
+                        },
+                        {
+                            name: 'Actions',
+                            enableFiltering: false,
+                            enableColumnMenu: false,
+                            enableSorting: false,
+                            cellTemplate: '<div style="text-align: center;">'
+                            + '<button type="button" ng-click="grid.appScope.update(row.entity.id)"'
+                            + ' class="btn btn-sm">'
+                            + '<small><span class="glyphicon glyphicon-pencil"></span>'
+                            + '</small>'
+                            + '</button>'
+                            + '<button ng-click="grid.appScope.delete(row.entity.id)"'
+                            + ' ng-confirm-click="Are you sure you want to '
+                            + 'inactivate this signature?" class="btn btn-sm btn-danger">'
+                            + '<small>'
+                            + '<span class="glyphicon glyphicon-remove-circle"></span>'
+                            + '</small>'
+                            + '</button></div>'
+                        }
+                    ]
+            };
+
+            $scope.refreshData = function () {
+                $scope.gridOptions.data = $filter('filter')($scope.yara_rules, $scope.searchText, undefined);
+            };
+
+            $http.get('/ThreatKB/yara_rules')
+                .then(function (response) {
+                    $scope.gridOptions.data = response.data;
+                }, function (error) {
+                });
 
             $scope.create = function () {
                 $scope.clear();
@@ -24,12 +87,13 @@ angular.module('ThreatKB')
             $scope.delete = function (id) {
                 Yara_rule.delete({id: id}, function () {
                     $scope.yara_rules = Yara_rule.query();
+                    $scope.gridOptions.data = $scope.yara_rules
                 });
             };
 
             $scope.save = function (id_or_rule) {
                 var id = id_or_rule;
-                if (typeof(id_or_rule) == "object") {
+                if (typeof(id_or_rule) === "object") {
                     id = id_or_rule.id;
                     $scope.yara_rule = id_or_rule;
                 }
@@ -37,10 +101,12 @@ angular.module('ThreatKB')
                 if (id) {
                     Yara_rule.update({id: id}, $scope.yara_rule, function () {
                         $scope.yara_rules = Yara_rule.query();
+                        $scope.gridOptions.data = $scope.yara_rules
                     });
                 } else {
                     Yara_rule.save($scope.yara_rule, function () {
                         $scope.yara_rules = Yara_rule.query();
+                        $scope.gridOptions.data = $scope.yara_rules
                     });
                 }
             };
