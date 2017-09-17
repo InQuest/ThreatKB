@@ -7,7 +7,7 @@ class Cfg_settings(db.Model):
     date_created = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp())
     date_modified = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp(),
                               onupdate=db.func.current_timestamp())
-    public = db.Column(db.Boolean, index=True, default=False)
+    public = db.Column(db.Boolean, index=True, default=True)
     value = db.Column(db.String(2048))
 
     def to_dict(self):
@@ -20,3 +20,9 @@ class Cfg_settings(db.Model):
 
     def __repr__(self):
         return '<Cfg_settings %s>' % (self.key)
+
+    @staticmethod
+    def get_private_setting(key):
+        setting = db.session.query(Cfg_settings).filter(Cfg_settings.public == False).filter(
+            Cfg_settings.key == key).first()
+        return setting.value if setting else None
