@@ -28,7 +28,7 @@ def upgrade():
             {"key": "REDIS_BROKER_URL", "value": "redis://localhost:6379/0", "public": False},
             {"key": "REDIS_TASK_SERIALIZER", "value": "json", "public": False},
             {"key": "REDIS_RESULT_SERIALIZER", "value": "json", "public": False},
-            {"key": "REDIS_ACCEPT_CONTENT", "value": "['json']", "public": False},
+            {"key": "REDIS_ACCEPT_CONTENT", "value": "[\"json\"]", "public": False},
             {"key": "MAX_MILLIS_PER_FILE_THRESHOLD", "value": "redis://localhost:6379/0", "public": False}
         ]
     )
