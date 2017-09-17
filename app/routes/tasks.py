@@ -9,7 +9,7 @@ import json
 @app.route('/ThreatKB/tasks', methods=['GET'])
 @login_required
 def get_all_tasks():
-    entities = tasks.Tasks.query.all()
+    entities = tasks.Tasks.query.filter_by(active=True).all()
 
     return json.dumps([entity.to_dict() for entity in entities])
 
@@ -71,7 +71,9 @@ def delete_tasks(id):
     if not entity:
         abort(404)
 
-    db.session.delete(entity)
+    # db.session.delete(entity)
+    entity.active = False
+    db.session.add(entity)
     db.session.commit()
 
     return '', 204

@@ -10,6 +10,7 @@ class Tasks(db.Model):
     date_modified = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp(),
                               onupdate=db.func.current_timestamp())
     state = db.Column(db.String(32), index=True)
+    active = db.Column(db.Boolean, nullable=False, default=True)
     title = db.Column(db.String(256), index=True)
     description = db.Column(db.String(2048), index=True)
     final_artifact = db.Column(db.String(4096))

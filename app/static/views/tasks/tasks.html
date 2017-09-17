@@ -97,7 +97,7 @@
 
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary pull-left" ng-click="merge_artifact()">Merge Artifact
+                <button type="button" class="btn btn-primary pull-left" ng-click="extract_artifact()">Extract Artifact
                 </button>
                 <button type="button" class="btn btn-default" ng-click="cancel()">Cancel
                 </button>
@@ -161,7 +161,7 @@
                             <small><span class="glyphicon glyphicon-pencil"></span></small>
                         </button>
                         <button type="submit"
-                                ng-confirm-click="Are you sure you want to delete this task?"
+                                ng-confirm-click="Are you sure you want to inactivate this task?"
                                 ng-click="delete(task.id)"
                                 class="btn btn-sm btn-danger">
                             <small><span class="glyphicon glyphicon-remove-circle"></span></small>
