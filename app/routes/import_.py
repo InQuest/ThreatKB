@@ -7,7 +7,7 @@ from app.utilities import extract_artifacts
 
 #####################################################################
 
-def save_artifacts(artifacts, shared_reference=None, shared_state=None):
+def save_artifacts(artifacts, shared_reference=None, shared_state=None, shared_owner=None):
     default_state = "Imported"
     return_artifacts = []
     duplicate_artifacts = []
@@ -35,6 +35,9 @@ def save_artifacts(artifacts, shared_reference=None, shared_state=None):
                     if shared_reference:
                         ip.reference_link = shared_reference
 
+                    if shared_owner:
+                        ip.owner_user_id = shared_owner
+
                     db.session.add(ip)
                     return_artifacts.append(ip)
             elif artifact["type"].lower() == "dns":
@@ -55,6 +58,8 @@ def save_artifacts(artifacts, shared_reference=None, shared_state=None):
                         dns.reference_link = shared_reference
                     if shared_state:
                         dns.state = shared_state
+                    if shared_owner:
+                        dns.owner_user_id = shared_owner
 
                     db.session.add(dns)
                     return_artifacts.append(dns)
@@ -66,6 +71,8 @@ def save_artifacts(artifacts, shared_reference=None, shared_state=None):
                     yr.reference_link = shared_reference
                 if shared_state:
                     yr.state = shared_state
+                if shared_owner:
+                    yr.owner_user_id = shared_owner
 
                 db.session.add(yr)
                 return_artifacts.append(yr)
@@ -88,6 +95,10 @@ def import_artifacts():
     import_text = request.json.get('import_text', None)
     shared_state = request.json.get('shared_state', None)
     shared_reference = request.json.get("shared_reference", None)
+    shared_owner = request.json.get("shared_owner", None)
+
+    if shared_owner:
+        shared_owner = int(shared_owner)
 
     if not import_text:
         abort(404)
@@ -95,7 +106,8 @@ def import_artifacts():
     artifacts = extract_artifacts(import_text)
 
     if autocommit:
-        artifacts = save_artifacts(artifacts=artifacts, shared_reference=shared_reference, shared_state=shared_state)
+        artifacts = save_artifacts(artifacts=artifacts, shared_reference=shared_reference, shared_state=shared_state,
+                                   shared_owner=shared_owner)
 
     return jsonify({"artifacts": artifacts})
 

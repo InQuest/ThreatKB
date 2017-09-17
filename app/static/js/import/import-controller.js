@@ -1,11 +1,13 @@
 'use strict';
 
 angular.module('ThreatKB').controller('ImportController',
-    ['$scope', '$location', 'Import', 'growl', 'Cfg_states', 'blockUI',
-        function ($scope, $location, Import, growl, Cfg_states, blockUI) {
+    ['$scope', '$location', 'Import', 'growl', 'Cfg_states', 'blockUI', 'Users',
+        function ($scope, $location, Import, growl, Cfg_states, blockUI, Users) {
 
             $scope.cfg_states = Cfg_states.query();
             $scope.shared_state = {};
+            $scope.shared_owner = null;
+            $scope.users = Users.query();
 
             $scope.block_message = "Committing Artifacts. This might take awhile, we're doing lots of advanced processing...";
 
@@ -41,7 +43,7 @@ angular.module('ThreatKB').controller('ImportController',
                 }
 
                 blockUI.start($scope.block_message);
-                Import.commit_artifacts(artifacts_to_commit, $scope.shared_reference, $scope.shared_state.state.state).then(function (data) {
+                Import.commit_artifacts(artifacts_to_commit, $scope.shared_reference, $scope.shared_state.state.state, $scope.shared_owner).then(function (data) {
                     blockUI.stop();
                     var message = "";
                     if (data.committed) {
@@ -70,7 +72,7 @@ angular.module('ThreatKB').controller('ImportController',
                 if ($scope.autocommit) {
                     blockUI.start($scope.block_message);
                 }
-                Import.import_artifacts($scope.import_text, $scope.autocommit, $scope.shared_reference, $scope.shared_state.state.state).then(function (data) {
+                Import.import_artifacts($scope.import_text, $scope.autocommit, $scope.shared_reference, $scope.shared_state.state.state, $scope.shared_owner).then(function (data) {
                         if ($scope.autocommit) {
                             blockUI.stop();
                             var message = "";
@@ -114,6 +116,8 @@ angular.module('ThreatKB').controller('ImportController',
                 $scope.artifacts = null;
                 $scope.checked_indexes = [];
                 $scope.shared_reference = "";
+                $scope.shared_owner = "";
+                $scope.users = Users.query();
                 $scope.cfg_states = Cfg_states.query();
                 $scope.shared_state = {};
             };

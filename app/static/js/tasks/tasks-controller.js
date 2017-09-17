@@ -79,17 +79,18 @@ angular.module('ThreatKB')
                 });
             };
         }])
-    .controller('TaskSaveController', ['$scope', '$http', '$uibModalInstance', 'task', 'Comments', 'Cfg_states', 'Import', 'growl', 'blockUI',
-        function ($scope, $http, $uibModalInstance, task, Comments, Cfg_states, Import, growl, blockUI) {
+    .controller('TaskSaveController', ['$scope', '$http', '$uibModalInstance', 'task', 'Comments', 'Cfg_states', 'Import', 'growl', 'blockUI', 'AuthService',
+        function ($scope, $http, $uibModalInstance, task, Comments, Cfg_states, Import, growl, blockUI, AuthService) {
             $scope.task = task;
             $scope.task.new_comment = "";
             $scope.Comments = Comments;
+            $scope.current_user = AuthService.getUser();
 
             $scope.cfg_states = Cfg_states.query();
 
-            $scope.merge_artifact = function () {
-                blockUI.start("Merging artifact...");
-                Import.import_artifacts($scope.task.final_artifact, true, null, null).then(function (data) {
+            $scope.extract_artifact = function () {
+                blockUI.start("Extracting artifact...");
+                Import.import_artifacts($scope.task.final_artifact, true, null, null, $scope.current_user.id).then(function (data) {
                         blockUI.stop();
                         var message = "";
                         if (data.committed) {
