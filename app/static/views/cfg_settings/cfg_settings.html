@@ -71,7 +71,7 @@
             <tr ng-repeat="cfg_setting in cfg_settings | toArray:false | filter:search track by $index">
                 <td ng-if="cfg_setting.key">{{ cfg_setting.key }}</td>
 
-                <td>{{ cfg_setting.value }}</td>
+                <td ng-if="cfg_setting.key">{{ cfg_setting.value }}</td>
 
                 <td ng-if="cfg_setting.key" style="float:right">
                     <center>
