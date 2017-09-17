@@ -20,3 +20,9 @@ class Cfg_settings(db.Model):
 
     def __repr__(self):
         return '<Cfg_settings %s>' % (self.key)
+
+    @staticmethod
+    def get_private_setting(key):
+        setting = db.session.query(Cfg_settings).filter(Cfg_settings.public == False).filter(
+            Cfg_settings.key == key).first()
+        return setting.value if setting else None

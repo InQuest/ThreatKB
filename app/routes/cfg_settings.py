@@ -5,8 +5,6 @@ from flask.ext.login import login_required, current_user
 from dateutil import parser
 import json
 
-DEFAULTS = {"NAV_IMAGE": "inquest_logo.svg"}
-
 @app.route('/ThreatKB/cfg_settings', methods=['GET'])
 @login_required
 @admin_only()
@@ -18,8 +16,6 @@ def get_all_cfg_settings():
 @app.route('/ThreatKB/cfg_settings/<key>', methods=['GET'])
 def get_cfg_settings(key):
     entity = cfg_settings.Cfg_settings.query.get(key)
-    if not entity and key in DEFAULTS:
-        return jsonify({"value": DEFAULTS.get(key)})
 
     if not entity or not entity.public:
         abort(404)
@@ -55,6 +51,8 @@ def update_cfg_settings(key):
     )
     db.session.merge(entity)
     db.session.commit()
+
+    entity = cfg_settings.Cfg_settings.query.get(entity.id)
 
     return jsonify(entity.to_dict()), 200
 
