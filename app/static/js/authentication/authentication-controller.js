@@ -1,8 +1,9 @@
 angular.module('ThreatKB')
-    .controller('AuthController', ['$scope', '$location', 'AuthService',
-        function ($scope, $location, AuthService) {
+    .controller('AuthController', ['$scope', '$location', 'AuthService', 'Cfg_settings',
+        function ($scope, $location, AuthService, Cfg_settings) {
             $scope.isLoggedIn = AuthService.isLoggedIn;
             $scope.isAdmin = AuthService.isAdmin;
+            $scope.nav_image = Cfg_settings.get({key: "NAV_IMAGE"});
 
             $scope.login = function () {
                 // initial values
