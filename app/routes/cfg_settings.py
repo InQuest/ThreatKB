@@ -5,19 +5,19 @@ from flask.ext.login import login_required, current_user
 from dateutil import parser
 import json
 
-
 @app.route('/ThreatKB/cfg_settings', methods=['GET'])
 @login_required
 @admin_only()
 def get_all_cfg_settings():
-    entities = cfg_settings.Cfg_settings.query.all()
+    entities = cfg_settings.Cfg_settings.query.filter_by(public=True).all()
     return json.dumps([entity.to_dict() for entity in entities])
 
 
 @app.route('/ThreatKB/cfg_settings/<key>', methods=['GET'])
 def get_cfg_settings(key):
     entity = cfg_settings.Cfg_settings.query.get(key)
-    if not entity:
+
+    if not entity or not entity.public:
         abort(404)
     return jsonify(entity.to_dict())
 
@@ -29,6 +29,7 @@ def create_cfg_settings():
     entity = cfg_settings.Cfg_settings(
         key=request.json['key']
         , value=request.json['value']
+        , public=request.json.get('public', True),
     )
     db.session.add(entity)
     db.session.commit()
@@ -46,10 +47,12 @@ def update_cfg_settings(key):
     entity = cfg_settings.Cfg_settings(
         key=key,
         value=request.json['value'],
-        public=request.json.get('public', False),
+        public=request.json.get('public', True),
     )
     db.session.merge(entity)
     db.session.commit()
+
+    entity = cfg_settings.Cfg_settings.query.get(entity.id)
 
     return jsonify(entity.to_dict()), 200
 
@@ -60,7 +63,7 @@ def update_cfg_settings(key):
 def delete_cfg_settings(key):
     entity = cfg_settings.Cfg_settings.query.get(key)
 
-    if not entity:
+    if not entity or not entity.public:
         abort(404)
     db.session.delete(entity)
     db.session.commit()

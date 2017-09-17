@@ -20,7 +20,7 @@ def login():
     else:
         s = False
         is_admin = False
-    return jsonify({'result': s, 'a': is_admin})
+    return jsonify({'result': s, 'a': is_admin, 'user': user.to_dict()})
 
 
 @app.route('/ThreatKB/logout')
@@ -107,6 +107,6 @@ def status():
     app.logger.debug("status current_user is '%s'" % (str(current_user)))
     if session.get('logged_in'):
         if session['logged_in']:
-            return jsonify({'status': True, 'a': current_user.admin})
+            return jsonify({'status': True, 'a': current_user.admin, 'user': current_user.to_dict()})
     else:
-        return jsonify({'status': False, 'a': False})
+        return jsonify({'status': False, 'a': False, 'user': None})

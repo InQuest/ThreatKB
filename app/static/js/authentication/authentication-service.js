@@ -6,6 +6,7 @@ angular.module('ThreatKB')
             // create user variable
             var user = null;
             var admin = null;
+            var user_dict = null;
 
             // return available functions for use in controllers
             return ({
@@ -14,7 +15,8 @@ angular.module('ThreatKB')
                 login: login,
                 logout: logout,
                 register: register,
-                getUserStatus: getUserStatus
+                getUserStatus: getUserStatus,
+                getUser: getUser
             });
 
             function isLoggedIn() {
@@ -23,6 +25,10 @@ angular.module('ThreatKB')
 
             function isAdmin() {
                 return !!admin;
+            }
+
+            function getUser() {
+                return user_dict;
             }
 
             function login(email, password) {
@@ -35,15 +41,18 @@ angular.module('ThreatKB')
                         if (success.status === 200 && success.data.result) {
                             user = true;
                             admin = !!success.data.a;
+                            user_dict = success.data.user;
                             deferred.resolve();
                         } else {
                             user = false;
                             admin = false;
+                            user_dict = {};
                             deferred.reject();
                         }
                     }, function (error) {
                         user = false;
                         admin = false;
+                        user_dict = {};
                         deferred.reject();
                     });
 
@@ -61,10 +70,12 @@ angular.module('ThreatKB')
                     .then(function (success) {
                         user = false;
                         admin = false;
+                        user_dict = {};
                         deferred.resolve();
                     }, function (error) {
                         user = false;
                         admin = false;
+                        user_dict = {};
                         deferred.reject();
                     });
 
@@ -97,10 +108,12 @@ angular.module('ThreatKB')
                 return $http.get('/ThreatKB/status')
                     .then(function (success) {
                         user = success.status === 200 && success.data.status;
+                        user_dict = success.data.user;
                         admin = success.data.a;
                     }, function (error) {
                         user = false;
                         admin = false;
+                        user_dict = {};
                     });
             }
 

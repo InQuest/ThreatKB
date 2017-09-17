@@ -3,7 +3,6 @@ from app.routes import tags_mapping
 from app.models.comments import Comments
 
 import ipwhois
-import json
 
 class C2ip(db.Model):
     __tablename__ = "c2ip"
@@ -12,7 +11,7 @@ class C2ip(db.Model):
     date_created = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp())
     date_modified = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp(),
                               onupdate=db.func.current_timestamp())
-    ip = db.Column(db.String(15), index=True)
+    ip = db.Column(db.String(15), index=True, unique=True)
     asn = db.Column(db.String(128))
     country = db.Column(db.String(64))
     state = db.Column(db.String(32), index=True)
