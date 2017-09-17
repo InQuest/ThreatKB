@@ -1,6 +1,6 @@
 import functools
 
-from flask import Flask, abort
+from flask import Flask, abort, jsonify
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.bcrypt import Bcrypt
 from flask.ext.login import LoginManager
@@ -92,7 +92,6 @@ from app.routes import tasks
 def setup_logging():
     app.logger.addHandler(logging.StreamHandler())
     app.logger.setLevel(logging.DEBUG)
-
 
 @login_manager.user_loader
 def load_user(userid):

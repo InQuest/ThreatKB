@@ -24,7 +24,7 @@
                     <span class="error" ng-show="form.domain_name.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
                           ng-show="form.domain_name.$error.maxlength">Must be at most 2048 characters.</span>
-                    <span class="error text-danger" ng-if="!c2dns.domain_name">*</span>
+                    <span class="error text-danger">*</span>
                     <input type="text" class="form-control" name="domain_name"
                            ng-model="c2dns.domain_name" ng-required="true"
                            ng-maxlength="2048"/>
@@ -48,7 +48,7 @@
 
                 <div class="form-group">
                     <label>State:</label>
-                    <span class="error text-danger" ng-if="!c2dns.state">*</span>
+                    <span class="error text-danger">*</span>
 
                     <ui-select ng-model="c2dns.state">
                         <ui-select-match placeholder="Select a state..">
@@ -116,7 +116,7 @@
                           ng-show="form.reference_text.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
                           ng-show="form.reference_text.$error.maxlength">Must be at most 2048 characters.</span>
-                    <span class="error text-danger" ng-if="!c2dns.reference_text">*</span>
+                    <span class="error text-danger">*</span>
                     <input type="text" class="form-control" name="reference_text"
                            ng-model="c2dns.reference_text" ng-required="true"
                            ng-maxlength="2048"/>

@@ -10,7 +10,7 @@ class C2dns(db.Model):
     date_modified = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp(),
                               onupdate=db.func.current_timestamp())
     state = db.Column(db.String(32), index=True)
-    domain_name = db.Column(db.String(2048), index=True)
+    domain_name = db.Column(db.String(2048), index=True, unique=True)
     match_type = db.Column(db.Enum('exact', 'wildcard'))
     reference_link = db.Column(db.String(2048))
     reference_text = db.Column(db.String(2048))

@@ -3,6 +3,7 @@ from app.models import c2ip
 from flask import abort, jsonify, request
 from flask.ext.login import current_user, login_required
 from dateutil import parser
+from sqlalchemy import exc
 import json
 
 from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
@@ -49,10 +50,13 @@ def create_c2ip():
         , modified_user_id=current_user.id
     )
     db.session.add(entity)
-    db.session.commit()
+    try:
+        db.session.commit()
+    except exc.IntegrityError, e:
+        app.logger.error("Duplicate IP: '%s'" % (entity.ip))
+        abort(409, description="Duplicate IP: '%s'" % (entity.ip))
 
     entity.tags = create_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
-
     return jsonify(entity.to_dict()), 201
 
 
@@ -81,7 +85,12 @@ def update_c2ip(id):
         modified_user_id=current_user.id
     )
     db.session.merge(entity)
-    db.session.commit()
+
+    try:
+        db.session.commit()
+    except exc.IntegrityError:
+        app.logger.error("Duplicate IP: '%s'" % (entity.ip))
+        abort(409, description="Duplicate IP: '%s'" % (entity.ip))
 
     create_tags_mapping(entity.__tablename__, entity.id, request.json['addedTags'])
     delete_tags_mapping(entity.__tablename__, entity.id, request.json['removedTags'])

@@ -3,6 +3,7 @@ from app.models import c2dns
 from flask import abort, jsonify, request
 from flask.ext.login import login_required, current_user
 from dateutil import parser
+from sqlalchemy import exc
 import json
 
 from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
@@ -47,7 +48,12 @@ def create_c2dns():
         , modified_user_id=current_user.id
     )
     db.session.add(entity)
-    db.session.commit()
+
+    try:
+        db.session.commit()
+    except exc.IntegrityError:
+        app.logger.error("Duplicate DNS: '%s'" % (entity.domain_name))
+        abort(409)
 
     entity.tags = create_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
 
@@ -78,7 +84,12 @@ def update_c2dns(id):
         modified_user_id=current_user.id
     )
     db.session.merge(entity)
-    db.session.commit()
+
+    try:
+        db.session.commit()
+    except exc.IntegrityError:
+        app.logger.error("Duplicate DNS: '%s'" % (entity.domain_name))
+        abort(409)
 
     create_tags_mapping(entity.__tablename__, entity.id, request.json['addedTags'])
     delete_tags_mapping(entity.__tablename__, entity.id, request.json['removedTags'])

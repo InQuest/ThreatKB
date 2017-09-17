@@ -37,6 +37,8 @@ angular.module('ThreatKB')
                     C2dns.update({id: id}, $scope.c2dns, function () {
                         $scope.c2dns = C2dns.query();
                         //$scope.clear();
+                    }, function (error) {
+                        growl.error(error.data, {ttl: -1});
                     });
                 } else {
                     C2dns.save($scope.c2dns, function () {

@@ -1,7 +1,12 @@
 from app import app
+from flask import jsonify
 import traceback
 import re
 
+
+@app.errorhandler(409)
+def handle_409(err):
+    return str(err.description), 409
 
 @app.errorhandler(500)
 def handle_500(error):
