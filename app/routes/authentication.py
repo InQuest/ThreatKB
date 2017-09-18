@@ -1,4 +1,4 @@
-from app import app, db, bcrypt, admin_only
+from app import app, db, bcrypt, admin_only, auto
 from app.models.users import KBUser
 from app.models import yara_rule, c2dns, c2ip
 from flask import request, jsonify, session, json, abort
@@ -7,7 +7,10 @@ import flask_login
 
 
 @app.route('/ThreatKB/login', methods=['POST'])
+@auto.doc()
 def login():
+    """Log a user into ThreatKB.
+    Return: user dictionary"""
     app.logger.info("login called with payload: '%s'" % request.data)
     json_data = request.json
     user = KBUser.query.filter_by(email=json_data.get('email', None), active=True).first()
@@ -24,16 +27,23 @@ def login():
 
 
 @app.route('/ThreatKB/logout')
+@auto.doc()
 @login_required
 def logout():
+    """Log a user out of ThreatKB.
+    Return: result dictionary"""
     session.pop('logged_in', None)
     flask_login.logout_user()
     return jsonify({'result': 'success'})
 
 
 @app.route('/ThreatKB/users', methods=['GET'])
+@auto.doc()
 @login_required
 def get_all_users():
+    """Return all users.
+    Optional Arguments: include_inactive
+    Return: list of user dictionaries"""
     include_inactive = request.args.get("include_inactive", False)
 
     if not include_inactive:
@@ -47,9 +57,12 @@ def get_all_users():
 
 
 @app.route('/ThreatKB/users/<int:user_id>', methods=['GET'])
+@auto.doc()
 @login_required
 @admin_only()
 def get_user(user_id):
+    """Return the user associated with the given user id.
+    Return: user dictionary"""
     user = KBUser.query.get(user_id)
     if not user:
         abort(404)
@@ -57,9 +70,13 @@ def get_user(user_id):
 
 
 @app.route('/ThreatKB/users', methods=['POST'])
+@auto.doc()
 @login_required
 @admin_only()
 def create_user():
+    """Create a user.
+    From Data: email (str), admin (bool), password (str), active (bool)
+    Return: user dictionary"""
     user = KBUser(
         email=request.json['email'],
         admin=request.json['admin'],
@@ -74,9 +91,13 @@ def create_user():
 
 
 @app.route('/ThreatKB/users/<int:user_id>', methods=['PUT'])
+@auto.doc()
 @login_required
 @admin_only()
 def update_user(user_id):
+    """Update the user associated with the given user_id
+    From Data: email (str), admin (bool), password (str), active (bool)
+    Return: user dictionary"""
     user = KBUser.query.get(user_id)
     if not user:
         abort(404)
@@ -103,7 +124,10 @@ def update_user(user_id):
 
 
 @app.route('/ThreatKB/status')
+@auto.doc()
 def status():
+    """Get the login status of the current user session.
+    Return: status dictionary"""
     app.logger.debug("status current_user is '%s'" % (str(current_user)))
     if session.get('logged_in'):
         if session['logged_in']:

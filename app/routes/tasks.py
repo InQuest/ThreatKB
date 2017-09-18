@@ -1,4 +1,4 @@
-from app import app, db
+from app import app, db, auto
 from app.models import tasks
 from flask import abort, jsonify, request
 from flask.ext.login import login_required, current_user
@@ -7,15 +7,21 @@ import json
 
 
 @app.route('/ThreatKB/tasks', methods=['GET'])
+@auto.doc()
 @login_required
 def get_all_tasks():
+    """Return all active tasks
+    Return: list of task dictionaries"""
     entities = tasks.Tasks.query.filter_by(active=True).all()
 
     return json.dumps([entity.to_dict() for entity in entities])
 
 
 @app.route('/ThreatKB/tasks/<int:id>', methods=['GET'])
+@auto.doc()
 def get_tasks(id):
+    """Return task associated with given id
+    Return: task dictionary"""
     entity = tasks.Tasks.query.get(id)
     if not entity:
         abort(404)
@@ -24,8 +30,12 @@ def get_tasks(id):
 
 
 @app.route('/ThreatKB/tasks', methods=['POST'])
+@auto.doc()
 @login_required
 def create_tasks():
+    """Create new task
+    From Data: title (str), description (str), final_artifact(str), state (str)
+    Return: task dictionary"""
     entity = tasks.Tasks(
         title=request.json['title']
         , description=request.json['description']
@@ -41,8 +51,12 @@ def create_tasks():
 
 
 @app.route('/ThreatKB/tasks/<int:id>', methods=['PUT'])
+@auto.doc()
 @login_required
 def update_tasks(id):
+    """Update task associated with given id
+    From Data: title (str), description (str), final_artifact(str), state (str)
+    Return: task dictionary"""
     entity = tasks.Tasks.query.get(id)
     if not entity:
         abort(404)
@@ -64,8 +78,11 @@ def update_tasks(id):
 
 
 @app.route('/ThreatKB/tasks/<int:id>', methods=['DELETE'])
+@auto.doc()
 @login_required
 def delete_tasks(id):
+    """Delete task associated with the given id
+    Return: None"""
     entity = tasks.Tasks.query.get(id)
 
     if not entity:

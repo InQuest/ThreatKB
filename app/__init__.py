@@ -5,13 +5,23 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.bcrypt import Bcrypt
 from flask.ext.login import LoginManager
 from celery import Celery
+from flask_login import current_user
+from flask.ext.autodoc import Autodoc
 import logging
 
-from flask_login import current_user
 
 app = Flask(__name__, static_url_path='')
 app.secret_key = "a" * 24  # os.urandom(24)
 app.config.from_object("config")
+
+auto = Autodoc(app)
+
+db = SQLAlchemy(app)
+login_manager = LoginManager()
+login_manager.init_app(app)
+bcrypt = Bcrypt(app)
+
+app.config["SQLALCHEMY_ECHO"] = True
 
 def admin_only():
     def wrapper(f):
@@ -23,11 +33,6 @@ def admin_only():
         return wrapped
     return wrapper
 
-
-db = SQLAlchemy(app)
-login_manager = LoginManager()
-login_manager.init_app(app)
-bcrypt = Bcrypt(app)
 
 from app.models import users
 from app.models import c2ip
@@ -78,9 +83,6 @@ def make_celery(flask_app):
 
 celery = make_celery(app)
 
-app.config["SQLALCHEMY_ECHO"] = True
-
-
 from app.routes import index
 from app.routes import authentication
 from app.routes import c2ips
@@ -99,6 +101,7 @@ from app.routes import test_yara_rule
 from app.routes import error_handling
 from app.routes import releases
 from app.routes import tasks
+from app.routes import documentation
 
 
 @app.before_first_request
