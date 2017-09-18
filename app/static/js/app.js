@@ -143,6 +143,16 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                     }]
                 }
             })
+            .when('/access_keys', {
+                templateUrl: 'views/access_keys/access_keys.html',
+                controller: 'AccessKeysController',
+                access: {restricted: true, admin: false},
+                resolve: {
+                    resolvedAccessKeys: ['AccessKeys', function (AccessKeys) {
+                        return AccessKeys.query();
+                    }]
+                }
+            })
             .otherwise({
                 redirectTo: '/'
             });

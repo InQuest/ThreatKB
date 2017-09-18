@@ -49,6 +49,7 @@ from app.models import files
 from app.models import cfg_category_range_mapping
 from app.models import releases
 from app.models import tasks
+from app.models import access_keys
 
 app.config["BROKER_URL"] = cfg_settings.Cfg_settings.get_private_setting("REDIS_BROKER_URL")
 app.config["TASK_SERIALIZER"] = cfg_settings.Cfg_settings.get_private_setting("REDIS_TASK_SERIALIZER")
@@ -102,12 +103,14 @@ from app.routes import error_handling
 from app.routes import releases
 from app.routes import tasks
 from app.routes import documentation
+from app.routes import access_keys
 
 
 @app.before_first_request
 def setup_logging():
     app.logger.addHandler(logging.StreamHandler())
     app.logger.setLevel(logging.DEBUG)
+
 
 @login_manager.user_loader
 def load_user(userid):

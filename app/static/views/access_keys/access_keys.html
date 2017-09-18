@@ -1,0 +1,62 @@
+<div>
+    <div class="container-fluid">
+        <a class="btn-link pull-right" style="color:inherit;" ng-click="create()" title="Create Access Key">
+            <span class="glyphicon glyphicon-plus-sign"></span>
+        </a>
+    </div>
+    <br>
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th style="width: 75px;">Created</th>
+
+                <th style="width: 75px;">Deleted</th>
+
+                <th style="width: 250px;">Token</th>
+
+                <th style="width: 100px;">Status</th>
+
+                <th style="width: 120px; text-align: center;">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="key in access_keys | toArray:false | filter:search track by $index">
+                <td ng-if="key.id">{{key.created | date:'yyyy-MM-dd'}}</td>
+
+                <td ng-if="key.id">{{key.deleted | date:'yyyy-MM-dd'}}</td>
+
+                <td ng-if="key.id">{{ key.token }}</td>
+
+                <td ng-if="key.id">
+                    <div ng-if="key.status != 'deleted'" class="form-group">
+                        <div class="btn-group" data-toggle="buttons">
+                            <label class="btn {{ key.status == 'active' ? 'btn-primary' : 'btn-default' }}"
+                                   ng-class="{active:key.status=='active'}"
+                                   ng-click="update(key.id, true)">
+                                <input type="radio">
+                                Active
+                            </label>
+                            <label class="btn {{ key.status == 'active' ? 'btn-default' : 'btn-primary' }}"
+                                   ng-class="{active:key.status=='inactive'}"
+                                   ng-click="update(key.id, false)">
+                                <input type="radio">
+                                Inactive
+                            </label>
+                        </div>
+                    </div>
+                    <span ng-if="key.status == 'deleted'">Deleted</span>
+                </td>
+                <td ng-if="key.id" style="text-align: center;">
+                    <button ng-if="key.status != 'deleted'"
+                            confirmed-click="delete(key.id)"
+                            ng-confirm-click="Are you sure you want to delete the access key?"
+                            class="btn btn-sm btn-danger">
+                        <small><span class="glyphicon glyphicon-remove-circle"></span></small>
+                    </button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
