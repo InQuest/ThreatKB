@@ -1,4 +1,4 @@
-from app import app, db
+from app import app, db, auto
 from app.models import c2dns
 from flask import abort, jsonify, request
 from flask.ext.login import login_required, current_user
@@ -10,8 +10,11 @@ from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
 
 
 @app.route('/ThreatKB/c2dns', methods=['GET'])
+@auto.doc()
 @login_required
 def get_all_c2dns():
+    """Return a list of all c2dns artifacts.
+    Return: list of c2dns artifact dictionaries"""
     entities = c2dns.C2dns.query
 
     if not current_user.admin:
@@ -23,7 +26,10 @@ def get_all_c2dns():
 
 
 @app.route('/ThreatKB/c2dns/<int:id>', methods=['GET'])
+@auto.doc()
 def get_c2dns(id):
+    """Return c2dns artifact associated with the given id
+    Return: c2dns artifact dictionary"""
     entity = c2dns.C2dns.query.get(id)
     if not entity:
         abort(404)
@@ -33,8 +39,12 @@ def get_c2dns(id):
 
 
 @app.route('/ThreatKB/c2dns', methods=['POST'])
+@auto.doc()
 @login_required
 def create_c2dns():
+    """Create c2dns artifact
+    From Data: domain_name (str), match_type (str), reference_link (str), reference_text (str), expiration_type (str), expiration_timestamp (date), state(str)
+    Return: c2dns artifact dictionary"""
     entity = c2dns.C2dns(
         domain_name=request.json['domain_name']
         , match_type=request.json['match_type']
@@ -61,8 +71,12 @@ def create_c2dns():
 
 
 @app.route('/ThreatKB/c2dns/<int:id>', methods=['PUT'])
+@auto.doc()
 @login_required
 def update_c2dns(id):
+    """Update c2dns artfifact
+    From Data: domain_name (str), match_type (str), reference_link (str), reference_text (str), expiration_type (str), expiration_timestamp (date), state(str)
+    Return: c2dns artifact dictionary"""
     entity = c2dns.C2dns.query.get(id)
     if not entity:
         abort(404)
@@ -99,8 +113,11 @@ def update_c2dns(id):
 
 
 @app.route('/ThreatKB/c2dns/<int:id>', methods=['DELETE'])
+@auto.doc()
 @login_required
 def delete_c2dns(id):
+    """Delete c2dns artifact associated with id
+    Return: None"""
     entity = c2dns.C2dns.query.get(id)
     tag_mapping_to_delete = entity.to_dict()['tags']
 

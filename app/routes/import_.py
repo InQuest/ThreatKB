@@ -1,6 +1,6 @@
 from flask import abort, jsonify, request
 from flask.ext.login import login_required, current_user
-from app import app, db, admin_only
+from app import app, db, admin_only, auto
 from app.models import c2ip, c2dns, yara_rule, cfg_states, users, comments
 from app.utilities import extract_artifacts
 
@@ -88,9 +88,14 @@ def save_artifacts(artifacts, shared_reference=None, shared_state=None, shared_o
 #####################################################################
 
 @app.route('/ThreatKB/import', methods=['POST'])
+@auto.doc()
 @login_required
 @admin_only()
 def import_artifacts():
+    """Import data into ThreatKB as a 2-step process. The first is extraction and the second is committing. These phases can be completed by one single call to this endpoints or by calling this endpoint for extraction and /ThreatKB/import/commit for committing.
+    From Data: import_text (str),
+    Optional Arguments: autocommit (int), shared_state (str), shared_reference (str), shared_owner (int)
+    Return: list of artifact dictionaries [{"type":"IP": "artifact": {}}, {"type":"DNS": "artifact": {}}, ...]"""
     autocommit = request.json.get("autocommit", 0)
     import_text = request.json.get('import_text', None)
     shared_state = request.json.get('shared_state', None)
@@ -118,6 +123,10 @@ def import_artifacts():
 @login_required
 @admin_only()
 def commit_artifacts():
+    """Commit previously extracted artifacts. The artifact dictionary
+    From Data: artifacts (list of dicts)
+    Optional Arguments: shared_reference (str), shared_state (str)
+    Return: dictionary of committed and duplicate artifacts {"committed": [{"type":"IP": "artifact": {}}, {"type":"DNS": "artifact": {}, ...], "duplicates": [{"type":"IP": "artifact": {}}, ...]}"""
     artifacts = request.json.get("artifacts", None)
     shared_reference = request.json.get("shared_reference", None)
     shared_state = request.json.get('shared_state', None)

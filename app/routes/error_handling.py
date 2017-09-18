@@ -1,5 +1,4 @@
-from app import app
-from flask import jsonify
+from app import app, auto
 import traceback
 import re
 
@@ -23,10 +22,14 @@ def handle_exception(exception):
 
 
 @app.route('/ThreatKB/error', methods=["GET"])
+@auto.doc()
 def do_error():
+    """Generate a fake HTTP 500 error"""
     return "Generic 500 error", 500
 
 
 @app.route("/ThreatKB/exception", methods=["GET"])
+@auto.doc()
 def do_exception():
+    """Generate a fake exception"""
     raise Exception("Generic 500 exception")

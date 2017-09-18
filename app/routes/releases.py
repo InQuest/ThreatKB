@@ -1,24 +1,29 @@
-from flask import abort, jsonify, request, send_file, json, Response
+from flask import abort, jsonify, request, send_file, json
 from flask.ext.login import login_required, current_user
-from app import app, db, admin_only
+from app import app, db, admin_only, auto
 from app.models import releases
-
 import tempfile
 import uuid
 
 
 @app.route('/ThreatKB/releases', methods=['GET'])
+@auto.doc()
 @login_required
 @admin_only()
 def get_all_releases():
+    """Return all releases in ThreatKB
+    Return: list of release dictionaries"""
     entities = releases.Release.query.filter_by().all()
     return json.dumps([entity.to_dict() for entity in entities])
 
 
 @app.route('/ThreatKB/releases/<int:release_id>', methods=['GET'])
+@auto.doc()
 @login_required
 @admin_only()
 def get_release(release_id):
+    """Return release associated with release_id
+    Return: release dictionary"""
     entity = releases.Release.query.get(release_id)
 
     if not entity:
@@ -28,9 +33,12 @@ def get_release(release_id):
 
 
 @app.route('/ThreatKB/releases/<int:release_id>/release_notes', methods=['GET'])
+@auto.doc()
 @login_required
 @admin_only()
 def generate_release_notes(release_id):
+    """Generate and return release notes for release associated with release_id
+    Return: release text file"""
     entity = releases.Release.query.get(release_id)
 
     if not entity:
@@ -46,9 +54,12 @@ def generate_release_notes(release_id):
 
 
 @app.route('/ThreatKB/releases/<int:release_id>/artifact_export', methods=['GET'])
+@auto.doc()
 @login_required
 @admin_only()
 def generate_artifact_export(release_id):
+    """Generate and return artifact export zip file for the release associated with release_id
+    Return: release zip file with a single file for all IPs, single file for all DNS, and consolidated category yara files"""
     entity = releases.Release.query.get(release_id)
 
     if not entity:
@@ -65,9 +76,13 @@ def generate_artifact_export(release_id):
 
 
 @app.route('/ThreatKB/releases', methods=['POST'])
+@auto.doc()
 @login_required
 @admin_only()
 def create_release():
+    """Create new release
+    From Data: name (str), is_test_release (bool)
+    Return: release dictionary"""
     release = releases.Release(
         name=request.json.get("name", None),
         is_test_release=request.json.get("is_test_release", 0),
@@ -84,9 +99,12 @@ def create_release():
 
 
 @app.route('/ThreatKB/releases/<int:release_id>', methods=['DELETE'])
+@auto.doc()
 @login_required
 @admin_only()
 def delete_release(release_id):
+    """Delete release associated with release_id
+    Return: None"""
     entity = releases.Release.query.get(release_id)
     if not entity:
         abort(404)

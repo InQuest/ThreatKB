@@ -1,4 +1,4 @@
-from app import app, db
+from app import app, db, auto
 from app.models import c2ip
 from flask import abort, jsonify, request
 from flask.ext.login import current_user, login_required
@@ -10,8 +10,11 @@ from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
 
 
 @app.route('/ThreatKB/c2ips', methods=['GET'])
+@auto.doc()
 @login_required
 def get_all_c2ips():
+    """Return a list of all c2ip artifacts.
+    Return: list of c2ip artifact dictionaries"""
     entities = c2ip.C2ip.query
 
     if not current_user.admin:
@@ -23,8 +26,11 @@ def get_all_c2ips():
 
 
 @app.route('/ThreatKB/c2ips/<int:id>', methods=['GET'])
+@auto.doc()
 @login_required
 def get_c2ip(id):
+    """Return c2ip artifact associated with the given id
+    Return: c2ip artifact dictionary"""
     entity = c2ip.C2ip.query.get(id)
     if not entity:
         abort(404)
@@ -34,8 +40,12 @@ def get_c2ip(id):
 
 
 @app.route('/ThreatKB/c2ips', methods=['POST'])
+@auto.doc()
 @login_required
 def create_c2ip():
+    """Create c2ip artifact
+    From Data: ip (str), asn (str), country (str), reference_link (str), reference_text (str), expiration_type (str), expiration_timestamp (date), state(str)
+    Return: c2dns artifact dictionary"""
     entity = c2ip.C2ip(
         ip=request.json['ip']
         , asn=request.json['asn']
@@ -61,8 +71,12 @@ def create_c2ip():
 
 
 @app.route('/ThreatKB/c2ips/<int:id>', methods=['PUT'])
+@auto.doc()
 @login_required
 def update_c2ip(id):
+    """Update c2ip artifact
+    From Data: ip (str), asn (str), country (str), reference_link (str), reference_text (str), expiration_type (str), expiration_timestamp (date), state(str)
+    Return: c2dns artifact dictionary"""
     entity = c2ip.C2ip.query.get(id)
     if not entity:
         abort(404)
@@ -100,8 +114,11 @@ def update_c2ip(id):
 
 
 @app.route('/ThreatKB/c2ips/<int:id>', methods=['DELETE'])
+@auto.doc()
 @login_required
 def delete_c2ip(id):
+    """Delete c2ip artifact associated with id
+    Return: None"""
     entity = c2ip.C2ip.query.get(id)
     tag_mapping_to_delete = entity.to_dict()['tags']
 

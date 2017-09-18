@@ -1,4 +1,4 @@
-from app import app, db, admin_only
+from app import app, db, admin_only, auto
 from app.models import cfg_settings
 from flask import abort, jsonify, request
 from flask.ext.login import login_required, current_user
@@ -6,15 +6,21 @@ from dateutil import parser
 import json
 
 @app.route('/ThreatKB/cfg_settings', methods=['GET'])
+@auto.doc()
 @login_required
 @admin_only()
 def get_all_cfg_settings():
+    """Return all public config settings
+    Return: list of config settings dictionaries"""
     entities = cfg_settings.Cfg_settings.query.filter_by(public=True).all()
     return json.dumps([entity.to_dict() for entity in entities])
 
 
 @app.route('/ThreatKB/cfg_settings/<key>', methods=['GET'])
+@auto.doc()
 def get_cfg_settings(key):
+    """Return config settings associated with key if it is public
+    Return: config settings dictionary"""
     entity = cfg_settings.Cfg_settings.query.get(key)
 
     if not entity or not entity.public:
@@ -23,9 +29,13 @@ def get_cfg_settings(key):
 
 
 @app.route('/ThreatKB/cfg_settings', methods=['POST'])
+@auto.doc()
 @login_required
 @admin_only()
 def create_cfg_settings():
+    """Create config settings
+    From Data: key (str), value (str), public (bool)
+    Return: config setting dictionary"""
     entity = cfg_settings.Cfg_settings(
         key=request.json['key']
         , value=request.json['value']
@@ -38,9 +48,13 @@ def create_cfg_settings():
 
 
 @app.route('/ThreatKB/cfg_settings/<key>', methods=['PUT'])
+@auto.doc()
 @login_required
 @admin_only()
 def update_cfg_settings(key):
+    """Update config setting associated with key
+    From Data: key (str), value (str), public (bool)
+    Return: config setting dictionary"""
     entity = cfg_settings.Cfg_settings.query.get(key)
     if not entity:
         abort(404)
@@ -58,9 +72,12 @@ def update_cfg_settings(key):
 
 
 @app.route('/ThreatKB/cfg_settings/<key>', methods=['DELETE'])
+@auto.doc()
 @login_required
 @admin_only()
 def delete_cfg_settings(key):
+    """Delete config setting associated with key
+    Return: None"""
     entity = cfg_settings.Cfg_settings.query.get(key)
 
     if not entity or not entity.public:

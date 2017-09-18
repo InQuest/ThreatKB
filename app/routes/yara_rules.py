@@ -1,4 +1,4 @@
-from app import app, db
+from app import app, db, auto
 from app.models import yara_rule
 from flask import abort, jsonify, request
 from flask.ext.login import current_user, login_required
@@ -10,8 +10,11 @@ import datetime
 
 
 @app.route('/ThreatKB/yara_rules', methods=['GET'])
+@auto.doc()
 @login_required
 def get_all_yara_rules():
+    """Return a list of all yara_rule artifacts.
+    Return: list of yara_rule artifact dictionaries"""
     include_inactive = request.args.get("include_inactive", False)
 
     entities = yara_rule.Yara_rule.query
@@ -21,14 +24,17 @@ def get_all_yara_rules():
 
     if not include_inactive:
         entity = entities.filter_by(active=True)
-       
+
     entities = entities.all()
     return json.dumps([entity.to_dict() for entity in entities])
 
 
 @app.route('/ThreatKB/yara_rules/<int:id>', methods=['GET'])
+@auto.doc()
 @login_required
 def get_yara_rule(id):
+    """Return yara_rule artifact associated with the given id
+    Return: yara_rule artifact dictionary"""
     entity = yara_rule.Yara_rule.query.get(id)
     if not entity:
         abort(404)
@@ -38,8 +44,12 @@ def get_yara_rule(id):
 
 
 @app.route('/ThreatKB/yara_rules', methods=['POST'])
+@auto.doc()
 @login_required
 def create_yara_rule():
+    """Create yara_rule artifact
+    From Data: name (str), test_status (str), confidence (int), severity (int), description (str), state(str), category (str), file_type (str), subcategory1 (str), subcategory2 (str), subcategory3 (str), reference_link (str), reference_text (str), condition (str), strings (str)
+    Return: yara_rule artifact dictionary"""
     new_sig_id = 0
     if request.json['category'] and 'category' in request.json['category']:
         new_sig_id = request.json['category']['current'] + 1
@@ -75,8 +85,12 @@ def create_yara_rule():
 
 
 @app.route('/ThreatKB/yara_rules/<int:id>', methods=['PUT'])
+@auto.doc()
 @login_required
 def update_yara_rule(id):
+    """Update yara_rule artifact
+    From Data: name (str), test_status (str), confidence (int), severity (int), description (str), state(str), category (str), file_type (str), subcategory1 (str), subcategory2 (str), subcategory3 (str), reference_link (str), reference_text (str), condition (str), strings (str)
+    Return: yara_rule artifact dictionary"""
     do_not_bump_revision = request.json.get("do_not_bump_revision", False)
 
     entity = yara_rule.Yara_rule.query.get(id)
@@ -144,8 +158,11 @@ def update_yara_rule(id):
 
 
 @app.route('/ThreatKB/yara_rules/<int:id>', methods=['DELETE'])
+@auto.doc()
 @login_required
 def delete_yara_rule(id):
+    """INACTIVATE yara_rule artifact associated with id
+    Return: None"""
     entity = yara_rule.Yara_rule.query.get(id)
     entity.active = False
     # tag_mapping_to_delete = entity.to_dict()['tags']
@@ -155,7 +172,7 @@ def delete_yara_rule(id):
 
     if not current_user.admin and entity.owner_user_id != current_user.id:
         abort(403)
-        
+
     db.session.merge(entity)
     db.session.commit()
 

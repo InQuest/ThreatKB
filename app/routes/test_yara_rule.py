@@ -9,7 +9,7 @@ import yara
 from sqlalchemy import func
 from sqlalchemy.ext.serializer import loads, dumps
 
-from app import app, db, celery, admin_only
+from app import app, db, celery, admin_only, auto
 from app.models import yara_rule, files
 from flask import abort, jsonify, request, json
 from flask.ext.login import current_user, login_required
@@ -18,9 +18,13 @@ from app.models.yara_rule import Yara_testing_history
 
 
 @app.route('/ThreatKB/test_yara_rule', methods=['POST'])
+@auto.doc()
 @login_required
 @admin_only()
 def clean_yara_test():
+    """Create asynchronous testing tasks for sig_ids against all files matching pattern
+     From Data: sig_ids (list of ints), pattern (str)
+     Return: list of result dictionaries"""
     pattern = request.values['pattern'] if 'pattern' in request.values else ".*"
     sig_ids = json.loads(request.values['sig_ids']) if 'sig_ids' in request.values else []
 
@@ -45,8 +49,11 @@ def clean_yara_test():
 
 
 @app.route('/ThreatKB/test_yara_rule/<int:rule_id>', methods=['GET'])
+@auto.doc()
 @login_required
 def test_yara_rule_rest(rule_id):
+    """Synchronously test yara rule associated with rule_id against all files attached to it
+    Return: results dictionary"""
     yara_rule_entity = yara_rule.Yara_rule.query.get(rule_id)
     if not yara_rule_entity:
         abort(500)

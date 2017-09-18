@@ -1,18 +1,19 @@
-import os
-
-import errno
-
-from app import app, db, admin_only
+from app import app, db, admin_only, auto
 from app.models import files
 from flask import abort, jsonify, request, send_file, json
 from flask.ext.login import login_required, current_user
 from werkzeug.utils import secure_filename
+import os
+import errno
 
 
 @app.route('/ThreatKB/files', methods=['GET'])
+@auto.doc()
 @login_required
 @admin_only()
 def get_all_files():
+    """Return list of a files
+    Return: list of file dictionary"""
     entity_type = request.args.get("entity_type", None)
     entity_id = request.args.get("entity_id", None)
 
@@ -22,8 +23,12 @@ def get_all_files():
 
 
 @app.route('/ThreatKB/file_upload', methods=['POST'])
+@auto.doc()
 @login_required
 def upload_file():
+    """Upload and create a file
+    From Data: file (multi-part file), entity_type (int) {"SIGNATURE": 1, "DNS": 2, "IP": 3, "TASK": 4}, entity_id (int)
+    Return: file status dictionary"""
     if 'file' not in request.files:
         return jsonify(fileStatus=False)
 
@@ -82,8 +87,11 @@ def upload_file():
 
 
 @app.route('/ThreatKB/files/<string:entity_type>/<int:entity_id>/<int:file_id>', methods=['GET'])
+@auto.doc()
 @login_required
 def get_file_for_entity(entity_type, entity_id, file_id):
+    """Return file associated with file_id, entity_id, and entity_type
+    Return: file (streamed for downloading)"""
     file_entity = files.Files.query.get(file_id)
 
     if not file_entity:
@@ -102,9 +110,12 @@ def get_file_for_entity(entity_type, entity_id, file_id):
 
 
 @app.route('/ThreatKB/files/<int:file_id>', methods=['DELETE'])
+@auto.doc()
 @login_required
 @admin_only()
 def delete_file(file_id):
+    """Delete file associated with given file_id
+    Return: None"""
     entity = files.Files.query.get(file_id)
     if not entity:
         abort(404)
