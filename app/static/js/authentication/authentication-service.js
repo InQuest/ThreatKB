@@ -1,25 +1,34 @@
-angular.module('InquestKB').factory('AuthService',
-    ['$q', '$timeout', '$http',
-        function ($q, $timeout, $http) {
+'use strict';
 
+angular.module('ThreatKB')
+    .factory('AuthService', ['$q', '$timeout', '$http',
+        function ($q, $timeout, $http) {
             // create user variable
             var user = null;
+            var admin = null;
+            var user_dict = null;
 
             // return available functions for use in controllers
             return ({
                 isLoggedIn: isLoggedIn,
+                isAdmin: isAdmin,
                 login: login,
                 logout: logout,
                 register: register,
-                getUserStatus: getUserStatus
+                getUserStatus: getUserStatus,
+                getUser: getUser
             });
 
             function isLoggedIn() {
-                if (user) {
-                    return true;
-                } else {
-                    return false;
-                }
+                return !!user;
+            }
+
+            function isAdmin() {
+                return !!admin;
+            }
+
+            function getUser() {
+                return user_dict;
             }
 
             function login(email, password) {
@@ -27,17 +36,23 @@ angular.module('InquestKB').factory('AuthService',
                 var deferred = $q.defer();
 
                 // send a post request to the server
-                $http.post('/InquestKB/login', {email: email, password: password})
-                    .then(function(success) {
+                $http.post('/ThreatKB/login', {email: email, password: password})
+                    .then(function (success) {
                         if (success.status === 200 && success.data.result) {
                             user = true;
+                            admin = !!success.data.a;
+                            user_dict = success.data.user;
                             deferred.resolve();
                         } else {
                             user = false;
+                            admin = false;
+                            user_dict = {};
                             deferred.reject();
                         }
-                    },function(error) {
+                    }, function (error) {
                         user = false;
+                        admin = false;
+                        user_dict = {};
                         deferred.reject();
                     });
 
@@ -47,20 +62,20 @@ angular.module('InquestKB').factory('AuthService',
             }
 
             function logout() {
-
                 // create a new instance of deferred
                 var deferred = $q.defer();
 
                 // send a get request to the server
-                $http.get('/InquestKB/logout')
-                    // handle success
-                    .then(function(success) {
+                $http.get('/ThreatKB/logout')
+                    .then(function (success) {
                         user = false;
+                        admin = false;
+                        user_dict = {};
                         deferred.resolve();
-                    },
-                    // handle error
-                    function(error) {
+                    }, function (error) {
                         user = false;
+                        admin = false;
+                        user_dict = {};
                         deferred.reject();
                     });
 
@@ -74,17 +89,14 @@ angular.module('InquestKB').factory('AuthService',
                 var deferred = $q.defer();
 
                 // send a post request to the server
-                $http.post('/InquestKB/register', {email: email, password: password})
-                    // handle success
-                    .then(function(success) {
+                $http.post('/ThreatKB/register', {email: email, password: password})
+                    .then(function (success) {
                         if (success.status === 200 && success.data.result) {
                             deferred.resolve();
                         } else {
                             deferred.reject();
                         }
-                    },
-                    // handle error
-                    function(error) {
+                    }, function (error) {
                         deferred.reject();
                     });
 
@@ -93,19 +105,23 @@ angular.module('InquestKB').factory('AuthService',
             }
 
             function getUserStatus() {
-                return $http.get('/InquestKB/status')
-                    // handle success
-                    .then(function(success) {
-                            if (success.status == 200 && success.data.status) {
-                            user = true;
-                        } else {
-                            user = false;
-                        }
-                    },
-                    // handle error
-                    function(error) {
+                return $http.get('/ThreatKB/status')
+                    .then(function (success) {
+                        user = success.status === 200 && success.data.status;
+                        user_dict = success.data.user;
+                        admin = success.data.a;
+                    }, function (error) {
                         user = false;
+                        admin = false;
+                        user_dict = {};
                     });
             }
 
-        }]);
+        }])
+    .factory('UserService', ['$resource', function ($resource) {
+        return $resource('ThreatKB/users/:id', {}, {
+            'query': {method: 'GET', isArray: true},
+            'get': {method: 'GET'},
+            'update': {method: 'PUT'}
+        });
+    }]);

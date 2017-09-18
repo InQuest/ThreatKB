@@ -1,0 +1,154 @@
+<div>
+    <script type="text/ng-template" id="users-save.html">
+        <form name="form" novalidate
+              class="ng-scope ng-invalid ng-invalid-required ng-dirty"
+              ng-submit="ok()">
+
+            <div class="modal-header">
+                <button type="button" class="close"
+                        ng-click="cancel()">&times;
+                </button>
+                <h4 class="modal-title" id="myUsersLabel">{{ user.id ? 'Edit' : 'Create' }} a User</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" ng-if="user.id">
+                    <label>ID</label>
+                    <label class="form-control" ng-model="user.id">{{ user.id }}</label>
+                </div>
+
+                <div class="form-group">
+                    <label>Email:</label>
+
+                    <input class="form-control" name="email"
+                           ng-model="user.email" ng-required="true"
+                           ng-maxlength="255"/>
+                    <span class="error" ng-show="form.text.$error.maxlength">Must be at most 255 characters.</span>
+                </div>
+
+                <div class="form-group">
+                    <fieldset>
+                        <label for="password">New Password:</label>
+                        <input class="form-control" type="password" id="password" name="password"
+                               ng-model="user.password" ng-required="!user.id"/>
+                        <div style="color: red; margin-bottom: 15px;">
+                            <div ng-messages="form.password.$error"
+                                 ng-if="form.$submitted || form.password.$dirty"
+                                 ng-messages-multiple="ng-messages-multiple" class="error-messages slide-right">
+                                <div ng-message="required" class="message slide-left">You did not enter a password
+                                </div>
+                            </div>
+                        </div>
+                        <label for="passwordConfirm">Re-Type New Password:</label>
+                        <input class="form-control" type="password" id="passwordConfirm" name="passwordConfirm"
+                               ng-model="user.passwordConfirm" match-password="password"
+                               ng-required="!user.id"/>
+                        <div style="color: red;">
+                            <div ng-messages="form.passwordConfirm.$error"
+                                 ng-if="form.$submitted || form.passwordConfirm.$dirty"
+                                 ng-messages-multiple="ng-messages-multiple" class="error-messages slide-right">
+                                <div ng-message="required" class="message slide-left">You did not confirm password
+                                </div>
+                                <div ng-message="passwordMatch" class="message slide-left">Your passwords did not
+                                    match
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div class="form-group">
+                    <label>Is Admin?</label><br/>
+                    <div class="btn-group" data-toggle="buttons">
+                        <label class="btn {{ user.admin ? 'btn-primary' : 'btn-default' }}"
+                               ng-class="{active:user.admin==true}"
+                               ng-click="setAdmin(true)">
+                            <input type="radio">
+                            Yes
+                        </label>
+                        <label class="btn {{ user.admin ? 'btn-default' : 'btn-primary' }}"
+                               ng-class="{active:users.admin==false}"
+                               ng-click="setAdmin(false)">
+                            <input type="radio">
+                            No
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Is Active?</label><br/>
+                    <div class="btn-group" data-toggle="buttons">
+                        <label class="btn {{ user.active ? 'btn-primary' : 'btn-default' }}"
+                               ng-class="{active:user.active==true}"
+                               ng-click="setActive(true)">
+                            <input type="radio">
+                            Yes
+                        </label>
+                        <label class="btn {{ user.active ? 'btn-default' : 'btn-primary' }}"
+                               ng-class="{active:user.active==false}"
+                               ng-click="setActive(false)">
+                            <input type="radio">
+                            No
+                        </label>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" ng-click="cancel()">Cancel
+                </button>
+                <button ng-disabled="form.$invalid" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </script>
+
+    <br>
+    <div class="container-fluid">
+
+        <div class="inner-addon left-addon col-md-4" style="padding-left:0px;">
+            <i class="glyphicon glyphicon-search"></i>
+            <input type="text" class="form-control" placeholder="Search" ng-model="search"/>
+        </div>
+        <a class="btn-link pull-right" style="color:inherit;" ng-click="create()">
+            <span class="glyphicon glyphicon-plus-sign"></span>
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>ID</th>
+
+                <th>Email</th>
+
+                <th>Admin</th>
+
+                <th>Active</th>
+
+                <th>Registered On</th>
+
+                <th style="width: 120px;">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="user in users | toArray:false | filter:search track by $index">
+                <td ng-if="user.id">{{ user.id }}</td>
+
+                <td ng-if="user.id">{{ user.email }}</td>
+
+                <td ng-if="user.id">{{ user.admin }}</td>
+
+                <td ng-if="user.id">{{ user.active }}</td>
+
+                <td ng-if="user.id">{{user.registered_on | date:'yyyy-MM-dd'}}</td>
+
+                <td ng-if="user.id">
+                    <button ng-click="update(user.id)" class="btn btn-sm" style="float: left;">
+                        <small><span class="glyphicon glyphicon-pencil"></span></small>
+                    </button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

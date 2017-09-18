@@ -12,21 +12,20 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label>ID</label>
-                    <input type="text" class="form-control" name="id"
-                           ng-model="tags.id" readonly>
+                    <label type="text" class="form-control" name="id" ng-model="tags.id">{{ tags.id }}</label>
                 </div>
 
-                
+
                 <div class="form-group">
                     <label>text:</label>
-                    
+
                     <input type="text" class="form-control" name="text"
                            ng-model="tags.text" ng-required="true"
                            ng-maxlength="256"/>
                     <span class="error" ng-show="form.text.$error.minlength">Must be at least  characters.</span>
                     <span class="error" ng-show="form.text.$error.maxlength">Must be at most 256 characters.</span>
                 </div>
-                
+
 
             </div>
             <div class="modal-footer">
@@ -54,28 +53,31 @@
             <thead>
             <tr>
                 <th>ID</th>
-                
+
                 <th>text</th>
-                
+
+                <th style="width: 120px;">Actions</th>
             </tr>
             </thead>
             <tbody>
             <tr ng-repeat="tag in tags | toArray:false | filter:search track by $index">
                 <td ng-if="tag.id">{{tag.id}}</td>
-                
+
                 <td ng-if="tag.text">{{tag.text }}</td>
-                
+
                 <td ng-if="tag.id" style="float:right">
-                    <button type="submit"
-                            ng-click="update(tag.id)"
-                            class="btn">
-                        <span class="glyphicon glyphicon-pencil"></span> Edit
-                    </button>
-                    <button type="submit"
-                            ng-click="delete(tag.id)"
-                            class="btn btn-danger">
-                        <span class="glyphicon glyphicon-remove-circle"></span> Delete
-                    </button>
+                    <center>
+                        <button type="submit"
+                                ng-click="update(tag.id)"
+                                class="btn btn-sm">
+                            <small><span class="glyphicon glyphicon-pencil"></span></small>
+                        </button>
+                        <button type="submit"
+                                ng-click="delete(tag.id)"
+                                class="btn btn-sm btn-danger">
+                            <small><span class="glyphicon glyphicon-remove-circle"></span></small>
+                        </button>
+                    </center>
                 </td>
             </tr>
             </tbody>

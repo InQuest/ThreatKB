@@ -1,5 +1,5 @@
 {
-    "baseName": "InquestKB",
+    "baseName": "ThreatKB",
     "entities": [
         {
             "name": "c2ip",

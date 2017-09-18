@@ -1,0 +1,175 @@
+<div>
+
+    <script type="text/ng-template" id="task-save.html">
+        <form name="form" role="form" novalidate
+              class="ng-scope ng-invalid ng-invalid-required ng-dirty"
+              ng-submit="ok()">
+
+            <div class="modal-header">
+                <button type="button" class="close"
+                        ng-click="cancel()">&times;
+                </button>
+                <h4 class="modal-title" id="myTasksLabel" ng-if="!task.id">Create Task</h4>
+                <h4 class="modal-title" id="myTasksLabel" ng-if="task.id">Edit Task</h4>
+
+            </div>
+            <div class="modal-body">
+                <div class="form-group" ng-if="task.id">
+                    <label>ID</label>
+                    <label type="text" class="form-control" name="id" ng-model="task.id">{{ task.id }}</label>
+                </div>
+
+                <div class="form-group">
+                    <label>Title:</label>
+                    <span class="error text-danger">*</span>
+                    <input type="text" class="form-control" name="title"
+                           ng-model="task.title" ng-required="true"
+                           ng-maxlength="256"/>
+                </div>
+
+
+                <div class="form-group" ng-if="task.date_created">
+                    <label>Date Created:</label>
+
+                    <label type="text" class="form-control" name="date_created"
+                           ng-model="task.date_created">{{ task.date_created }}</label>
+                </div>
+
+                <div class="form-group" ng-if="task.date_modified">
+                    <label>Date Modified:</label>
+
+                    <label type="text" class="form-control" name="date_modified"
+                           ng-model="task.date_modified">{{ task.date_modified }}</label>
+                </div>
+
+
+                <div class="form-group">
+                    <label>State:</label>
+                    <span class="error text-danger" ng-if="!task.state">*</span>
+
+                    <ui-select ng-model="task.state">
+                        <ui-select-match placeholder="Select a state..">
+                            <span ng-bind="$select.selected.state || task.state"></span>
+                        </ui-select-match>
+                        <ui-select-choices repeat="state in (cfg_states | filter: $select.search) track by state.id">
+                            <span ng-bind="state.state"></span>
+                        </ui-select-choices>
+                    </ui-select>
+
+                </div>
+
+                <div class="form-group">
+                    <label>Description:</label>
+                    <span class="error text-danger">*</span>
+                    <textarea class="form-control" placeholder="Enter description..." rows="6"
+                              ng-model="task.description" ng-required="true"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Final Artifact:</label>
+                    <textarea class="form-control" placeholder="Enter final artifact..." rows="6"
+                              ng-model="task.final_artifact"></textarea>
+                </div>
+
+                <div class="form-group" ng-if="task.id">
+                    <label>Comments</label>
+
+
+                    <div class="input-group">
+                        <textarea class="form-control" placeholder="Enter a comment..." rows="1"
+                                  ng-model="task.new_comment"></textarea>
+
+                        <span class="input-group-btn">
+                            <button class="btn btn-secondary" type="button"
+                                    ng-click="add_comment(task.id)">Post</button>
+                        </span>
+                    </div>
+                    <BR>
+                    <div>
+                        <ul class="list-group">
+                            <li class="list-group-item justify-content-between"
+                                ng-repeat="comment in task.comments | orderBy:'-date_created'">{{ print_comment(comment) }}
+                                <span class="pull-right">{{ comment.user.email }}&nbsp;<small>{{ pretty_date(comment.date_created) }}</small></span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary pull-left" ng-click="extract_artifact()">Extract Artifact
+                </button>
+                <button type="button" class="btn btn-default" ng-click="cancel()">Cancel
+                </button>
+                <button type="submit" ng-disabled="form.$invalid" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </script>
+
+
+    <br>
+    <div class="container-fluid">
+
+        <div class="inner-addon left-addon col-md-4" style="padding-left: 0px; padding-right:0px;">
+            <i class="glyphicon glyphicon-search"></i>
+            <input type="text" class="form-control" placeholder="Search" ng-model="search"/>
+        </div>
+        <a class="btn-link pull-right" style="color:inherit;" ng-click="create()">
+            <span class="glyphicon glyphicon-plus-sign"></span>
+        </a>
+    </div>
+
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Title</th>
+
+                <th>State</th>
+
+                <th style="width: 260px;">Owner</th>
+
+                <th style="width: 120px;">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="task in tasks | toArray:false | filter:search track by $index" ng-if="task.date_created">
+
+                <td>{{ task.title }}</td>
+
+                <td>{{ task.state }}</td>
+
+                <td>
+                    <ui-select ng-model="task.owner_user" on-select="save(task)">
+                        <ui-select-match placeholder="Select an owner ...">
+                            <small><span ng-bind="$select.selected.email || task.owner_user.email"></span></small>
+                        </ui-select-match>
+                        <ui-select-choices
+                                repeat="person in (users | filter: $select.search) track by person.id">
+                            <small><span ng-bind="person.email"></span></small>
+                        </ui-select-choices>
+                    </ui-select>
+
+                </td>
+
+                <td>
+                    <center>
+                        <button type="submit"
+                                ng-click="update(task.id)"
+                                class="btn btn-sm">
+                            <small><span class="glyphicon glyphicon-pencil"></span></small>
+                        </button>
+                        <button type="submit"
+                                ng-confirm-click="Are you sure you want to inactivate this task?"
+                                ng-click="delete(task.id)"
+                                class="btn btn-sm btn-danger">
+                            <small><span class="glyphicon glyphicon-remove-circle"></span></small>
+                        </button>
+                    </center>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

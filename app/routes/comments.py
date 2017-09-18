@@ -1,12 +1,17 @@
-from app import app, db
+from app import app, db, admin_only, auto
 from app.models import comments
 from flask import abort, jsonify, request
 from flask.ext.login import login_required, current_user
 import json
 
-@app.route('/InquestKB/comments', methods=['GET'])
+
+@app.route('/ThreatKB/comments', methods=['GET'])
+@auto.doc()
 @login_required
 def get_all_comments():
+    """Return all comments
+    Optional Arguments: entity_type (int) {"SIGNATURE": 1, "DNS": 2, "IP": 3, "TASK": 4}, entity_id (int)
+    Return: list of comment dictionaries"""
     app.logger.debug("args are: '%s'" % (request.args))
     entity_type = request.args.get("entity_type", None)
     entity_id = request.args.get("entity_id", None)
@@ -20,18 +25,25 @@ def get_all_comments():
     return json.dumps([entity.to_dict() for entity in entities])
 
 
-@app.route('/InquestKB/comments/<int:id>', methods=['GET'])
+@app.route('/ThreatKB/comments/<int:id>', methods=['GET'])
+@auto.doc()
 @login_required
 def get_comments(id):
+    """Return comment associated with the given id
+    Return: comment dictionary"""
     entity = comments.Comments.query.get(id)
     if not entity:
         abort(404)
     return jsonify(entity.to_dict())
 
 
-@app.route('/InquestKB/comments', methods=['POST'])
+@app.route('/ThreatKB/comments', methods=['POST'])
+@auto.doc()
 @login_required
 def create_comments():
+    """Create comment
+    From Data: comment (str), entity_type (int) {"SIGNATURE": 1, "DNS": 2, "IP": 3, "TASK": 4}, entity_id
+    Return: comment dictionary"""
     entity = comments.Comments(
         comment=request.json['comment']
         , entity_type=request.json['entity_type']
@@ -43,9 +55,13 @@ def create_comments():
     return jsonify(entity.to_dict()), 201
 
 
-@app.route('/InquestKB/comments/<int:id>', methods=['DELETE'])
+@app.route('/ThreatKB/comments/<int:id>', methods=['DELETE'])
+@auto.doc()
 @login_required
+@admin_only()
 def delete_comments(id):
+    """Delete comment associated with the given id
+    Return: None"""
     entity = comments.Comments.query.get(id)
     if not entity:
         abort(404)

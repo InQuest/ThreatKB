@@ -1,0 +1,94 @@
+<div>
+
+    <script type="text/ng-template" id="cfg_settings-save.html">
+        <form name="form" role="form" novalidate
+              class="ng-scope ng-invalid ng-invalid-required ng-dirty"
+              ng-submit="ok()">
+
+            <div class="modal-header">
+                <button type="button" class="close"
+                        ng-click="cancel()">&times;
+                </button>
+                <h4 class="modal-title" id="myC2ipLabel" ng-if="!cfg_settings.id">Create Config Setting Artifact</h4>
+                <h4 class="modal-title" id="myC2ipLabel" ng-if="cfg_settings.id">Edit Config Artifact</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Key</label>
+                    <input type="text" class="form-control" name="key"
+                           ng-model="cfg_settings.key" ng-required="true"
+                           ng-maxlength="256" value="{{ cfg_settings.key }}" />
+                    <span class="error" ng-show="form.value.$error.minlength">Must be at least 1 character.</span>
+                    <span class="error" ng-show="form.value.$error.maxlength">Must be at most 256 characters.</span>
+                </div>
+
+
+                <div class="form-group">
+                    <label>Value</label>
+
+                    <input type="text" class="form-control" name="value"
+                           ng-model="cfg_settings.value" ng-required="true"
+                           ng-maxlength="2048"/>
+                    <span class="error" ng-show="form.value.$error.minlength">Must be at least 1 character.</span>
+                    <span class="error" ng-show="form.value.$error.maxlength">Must be at most 2048 characters.</span>
+                </div>
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" ng-click="cancel()">Cancel
+                </button>
+                <button type="submit" ng-disabled="form.$invalid" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </script>
+
+    <br>
+    <div class="container-fluid">
+
+        <div class="inner-addon left-addon col-md-4" style="padding-left:0px;">
+            <i class="glyphicon glyphicon-search"></i>
+            <input type="text" class="form-control" placeholder="Search" ng-model="search"/>
+        </div>
+        <a class="btn-link pull-right" style="color:inherit;" ng-click="create()">
+            <span class="glyphicon glyphicon-plus-sign"></span>
+        </a>
+    </div>
+
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Key</th>
+
+                <th>Value</th>
+
+                <th style="width: 120px;">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="cfg_setting in cfg_settings | toArray:false | filter:search track by $index">
+                <td ng-if="cfg_setting.key">{{ cfg_setting.key }}</td>
+
+                <td ng-if="cfg_setting.key">{{ cfg_setting.value }}</td>
+
+                <td ng-if="cfg_setting.key" style="float:right">
+                    <center>
+                        <button type="submit"
+                                ng-click="update(cfg_setting.key)"
+                                class="btn btn-sm">
+                            <small><span class="glyphicon glyphicon-pencil"></span></small>
+                        </button>
+                        <button type="submit"
+                                ng-click="delete(cfg_setting.key)"
+                                class="btn btn-sm btn-danger">
+                            <small><span class="glyphicon glyphicon-remove-circle"></span></small>
+                        </button>
+                    </center>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -15,35 +15,36 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label>ID</label>
-                    <input type="text" class="form-control" name="id"
-                           ng-model="comments.id" readonly>
+                    <label type="text" class="form-control" name="id" ng-model="comments.id">{{ comments.id }}</label>
                 </div>
 
-                
+
                 <div class="form-group">
                     <label>date_created:</label>
-                    
-                    <input type="text" class="form-control" name="date_created" ui-date="date_createdDateOptions" ui-date-format="yy-mm-dd" 
+
+                    <input type="text" class="form-control" name="date_created" ui-date="date_createdDateOptions"
+                           ui-date-format="yy-mm-dd"
                            ng-model="comments.date_created" ng-required="false"/>
                 </div>
-                
+
                 <div class="form-group">
                     <label>date_modified:</label>
-                    
-                    <input type="text" class="form-control" name="date_modified" ui-date="date_modifiedDateOptions" ui-date-format="yy-mm-dd" 
+
+                    <input type="text" class="form-control" name="date_modified" ui-date="date_modifiedDateOptions"
+                           ui-date-format="yy-mm-dd"
                            ng-model="comments.date_modified" ng-required="false"/>
                 </div>
-                
+
                 <div class="form-group">
                     <label>comment:</label>
-                    
+
                     <input type="text" class="form-control" name="comment"
                            ng-model="comments.comment" ng-required="true"
                            />
                     <span class="error" ng-show="form.comment.$error.minlength">Must be at least  characters.</span>
                     <span class="error" ng-show="form.comment.$error.maxlength">Must be at most  characters.</span>
                 </div>
-                
+
 
             </div>
             <div class="modal-footer">
@@ -63,36 +64,39 @@
             <thead>
             <tr>
                 <th>ID</th>
-                
+
                 <th>date_created</th>
-                
+
                 <th>date_modified</th>
-                
+
                 <th>comment</th>
-                
+
+                <th style="width: 120px;">Actions</th>
             </tr>
             </thead>
             <tbody>
             <tr ng-repeat="comments in comments">
                 <td>{{comments.id}}</td>
-                
+
                 <td>{{comments.date_created  | date:'yyyy-MM-dd'}}</td>
-                
+
                 <td>{{comments.date_modified  | date:'yyyy-MM-dd'}}</td>
-                
+
                 <td>{{comments.comment }}</td>
-                
+
                 <td>
-                    <button type="submit"
-                            ng-click="update(comments.id)"
-                            class="btn">
-                        <span class="glyphicon glyphicon-pencil"></span> Edit
-                    </button>
-                    <button type="submit"
-                            ng-click="delete(comments.id)"
-                            class="btn btn-danger">
-                        <span class="glyphicon glyphicon-remove-circle"></span> Delete
-                    </button>
+                    <center>
+                        <button type="submit"
+                                ng-click="update(comments.id)"
+                                class="btn btn-sm">
+                            <small><span class="glyphicon glyphicon-pencil"></span></small>
+                        </button>
+                        <button type="submit"
+                                ng-click="delete(comments.id)"
+                                class="btn btn-sm btn-danger">
+                            <small><span class="glyphicon glyphicon-remove-circle"></span></small>
+                        </button>
+                    </center>
                 </td>
             </tr>
             </tbody>

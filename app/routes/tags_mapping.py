@@ -1,28 +1,41 @@
-from app import app, db
+from app import app, db, admin_only, auto
 from app.models import tags_mapping
 from flask import abort, jsonify, request
+from flask.ext.login import login_required
 import json
 
 from app.routes import tags
 from app.routes.tags import create_tag
 
 
-@app.route('/InquestKB/tags_mapping', methods=['GET'])
+@app.route('/ThreatKB/tags_mapping', methods=['GET'])
+@auto.doc()
+@login_required
 def get_all_tags_mapping():
+    """Return all tag mappings
+    Return: list of tag mapping dictionaries"""
     entities = tags_mapping.Tags_mapping.query.all()
     return json.dumps([entity.to_dict() for entity in entities])
 
 
-@app.route('/InquestKB/tags_mapping/<int:id>', methods=['GET'])
+@app.route('/ThreatKB/tags_mapping/<int:id>', methods=['GET'])
+@auto.doc()
+@login_required
 def get_tags_mapping(id):
+    """Return tag mapping associated with the given id
+    Return: tag mapping dictionary"""
     entity = tags_mapping.Tags_mapping.query.get(id)
     if not entity:
         abort(404)
     return jsonify(entity.to_dict())
 
 
-@app.route('/InquestKB/tags_mapping/<string:source_table>/<int:source_id>', methods=['GET'])
+@app.route('/ThreatKB/tags_mapping/<string:source_table>/<int:source_id>', methods=['GET'])
+@auto.doc()
+@login_required
 def get_tags_for_source(source_table, source_id):
+    """Return tag mapping associated with the given source_table and source_id
+    Return: list of entity dictionaries associated with the tag"""
     entities = tags_mapping.Tags_mapping.query.filter_by(source_table=source_table, source_id=source_id).all()
 
     list_of_tags = []
@@ -37,7 +50,9 @@ def get_tags_for_source(source_table, source_id):
     return list_of_tags
 
 
-@app.route('/InquestKB/tags_mapping', methods=['POST'])
+@app.route('/ThreatKB/tags_mapping', methods=['POST'])
+@auto.doc()
+@login_required
 def create_tags_mapping_rest():
     create_tags_mapping(request.json['source'], request.json['source_id'], request.json['tags'])
 
@@ -78,7 +93,9 @@ def delete_tags_mapping(table, s_id, deleted_tags):
     return
 
 
-@app.route('/InquestKB/tags_mapping/<int:id>', methods=['DELETE'])
+@app.route('/ThreatKB/tags_mapping/<int:id>', methods=['DELETE'])
+@login_required
+@admin_only()
 def delete_tags_mapping_by_id(id):
     entity = tags_mapping.Tags_mapping.query.get(id)
     if not entity:

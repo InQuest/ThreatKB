@@ -1,7 +1,7 @@
-<div>
+ <div>
 
     <script type="text/ng-template" id="c2ip-save.html">
-        <form name="form" role="form" novalidate
+        <form name="form" novalidate
               class="ng-scope ng-invalid ng-invalid-required ng-dirty"
               ng-submit="ok()">
 
@@ -9,39 +9,47 @@
                 <button type="button" class="close"
                         ng-click="cancel()">&times;
                 </button>
-                <h4 class="modal-title" id="myC2ipLabel" ng-if="!c2ip.id">Create IP Artifact</h4>
-                <h4 class="modal-title" id="myC2ipLabel" ng-if="c2ip.id">Edit IP Artifact</h4>
+                <h4 class="modal-title" id="myC2ipLabel">{{ c2ip.id ? 'Edit' : 'Create' }} IP Artifact</h4>
 
             </div>
             <div class="modal-body">
                 <div class="form-group" ng-if="c2ip.id">
                     <label>ID</label>
-                    <input type="text" class="form-control" name="id"
-                           ng-model="c2ip.id" readonly>
+                    <label type="text" class="form-control" name="id" ng-model="c2ip.id">{{ c2ip.id }}</label>
                 </div>
 
+                <div class="form-group">
+                    <label>IP</label>
+                    <span class="error text-danger"
+                          ng-show="form.ip.$error.minlength">Must be at least  characters.</span>
+                    <span class="error text-danger"
+                          ng-show="form.ip.$error.maxlength">Must be at most 15 characters.</span>
+                    <span class="error text-danger">*</span>
+                    <input type="text" class="form-control" name="ip"
+                           ng-model="c2ip.ip" ng-required="true"
+                           ng-maxlength="15"/>
+                </div>
 
                 <div class="form-group" ng-if="c2ip.date_created">
-                    <label>date_created:</label>
+                    <label>Date Created</label>
 
-                    <input type="text" class="form-control" name="date_created" ui-date="date_createdDateOptions"
-                           ui-date-format="yy-mm-dd"
-                           ng-model="c2ip.date_created" ng-required="true"/>
+                    <label type="text" class="form-control" name="date_created"
+                           ng-model="c2ip.date_created">{{ c2ip.date_created }}</label>
                 </div>
 
                 <div class="form-group" ng-if="c2ip.date_modified">
-                    <label>date_modified:</label>
+                    <label>Date Modified</label>
 
-                    <input type="text" class="form-control" name="date_modified" ui-date="date_modifiedDateOptions"
-                           ui-date-format="yy-mm-dd"
-                           ng-model="c2ip.date_modified" ng-required="true"/>
+                    <label type="text" class="form-control" name="date_modified"
+                           ng-model="c2ip.date_modified">{{ c2ip.date_modified }}</label>
                 </div>
 
 
                 <div class="form-group">
-                    <label>state:</label>
+                    <label>State</label>
+                    <span class="error text-danger">*</span>
 
-                    <ui-select ng-model="c2ip.state">
+                    <ui-select ng-model="c2ip.state" name="state">
                         <ui-select-match placeholder="Select a state..">
                             <span ng-bind="$select.selected.state || c2ip.state"></span>
                         </ui-select-match>
@@ -52,110 +60,80 @@
 
                 </div>
 
-
                 <div class="form-group">
-                    <label>ip:</label>
-
-                    <input type="text" class="form-control" name="ip"
-                           ng-model="c2ip.ip" ng-required="true"
-                           ng-maxlength="15"/>
-                    <span class="error" ng-show="form.ip.$error.minlength">Must be at least  characters.</span>
-                    <span class="error" ng-show="form.ip.$error.maxlength">Must be at most 15 characters.</span>
-                </div>
-
-                <div class="form-group">
-                    <label>asn:</label>
-
-                    <input type="text" class="form-control" name="asn"
-                           ng-model="c2ip.asn" ng-required="true"
-                           ng-maxlength="128"/>
+                    <label>ASN</label>
                     <span class="error" ng-show="form.asn.$error.minlength">Must be at least  characters.</span>
                     <span class="error" ng-show="form.asn.$error.maxlength">Must be at most 128 characters.</span>
+                    <input class="form-control" name="asn"
+                           ng-model="c2ip.asn" ng-required="false"
+                           ng-maxlength="128"/>
                 </div>
 
                 <div class="form-group">
-                    <label>country:</label>
-
-                    <input type="text" class="form-control" name="country"
-                           ng-model="c2ip.country" ng-required="false"
-                           ng-maxlength="64"/>
+                    <label>Country:</label>
                     <span class="error" ng-show="form.country.$error.minlength">Must be at least  characters.</span>
                     <span class="error" ng-show="form.country.$error.maxlength">Must be at most 64 characters.</span>
-                </div>
 
-                <div class="form-group">
-                    <label>city:</label>
-
-                    <input type="text" class="form-control" name="city"
-                           ng-model="c2ip.city" ng-required="false"
+                    <input class="form-control" name="country"
+                           ng-model="c2ip.country" ng-required="false"
                            ng-maxlength="64"/>
-                    <span class="error" ng-show="form.city.$error.minlength">Must be at least  characters.</span>
-                    <span class="error" ng-show="form.city.$error.maxlength">Must be at most 64 characters.</span>
                 </div>
 
                 <div class="form-group">
-                    <label>state:</label>
-
-                    <input type="text" class="form-control" name="state"
-                           ng-model="c2ip.st" ng-required="false"
-                           ng-maxlength=64/>
-                    <span class="error" ng-show="form.state.$error.minlength">Must be at least  characters.</span>
-                    <span class="error" ng-show="form.state.$error.maxlength">Must be at most 64 characters.</span>
-                </div>
-
-                <div class="form-group">
-                    <label>reference_link:</label>
-
-                    <input type="text" class="form-control" name="reference_link"
-                           ng-model="c2ip.reference_link" ng-required="true"
-                           ng-maxlength="2048"/>
+                    <label>Reference Link:</label>
                     <span class="error"
                           ng-show="form.reference_link.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
                           ng-show="form.reference_link.$error.maxlength">Must be at most 2048 characters.</span>
+
+                    <input class="form-control" name="reference_link"
+                           ng-model="c2ip.reference_link" ng-required="false"
+                           ng-maxlength="2048"/>
                 </div>
 
                 <div class="form-group">
-                    <label>reference_text:</label>
-
-                    <input type="text" class="form-control" name="reference_text"
-                           ng-model="c2ip.reference_text" ng-required="false"
-                           ng-maxlength="4096"/>
+                    <label>Reference Text:</label>
+                    <span class="error text-danger">*</span>
                     <span class="error"
                           ng-show="form.reference_text.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
                           ng-show="form.reference_text.$error.maxlength">Must be at most 4096 characters.</span>
+
+                    <input class="form-control" name="reference_text"
+                           ng-model="c2ip.reference_text" ng-required="true"
+                           ng-maxlength="4096"/>
                 </div>
 
                 <div class="form-group">
-                    <label>expiration_type:</label>
-
-                    <input type="text" class="form-control" name="expiration_type"
-                           ng-model="c2ip.expiration_type" ng-required="true"
-                           ng-maxlength="32"/>
+                    <label>Expiration Type:</label>
                     <span class="error"
                           ng-show="form.expiration_type.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
                           ng-show="form.expiration_type.$error.maxlength">Must be at most 32 characters.</span>
+
+                    <input class="form-control" name="expiration_type"
+                           ng-model="c2ip.expiration_type" ng-required="false"
+                           ng-maxlength="32"/>
                 </div>
 
                 <div class="form-group">
-                    <label>expiration_timestamp:</label>
+                    <label>Expiration Timestamp:</label>
 
-                    <input type="text" class="form-control" name="expiration_timestamp"
+                    <input class="form-control" name="expiration_timestamp"
                            ui-date="expiration_timestampDateOptions" ui-date-format="yy-mm-dd"
                            ng-model="c2ip.expiration_timestamp" ng-required="false"/>
                 </div>
 
                 <div class="form-group">
-                    <label>tags:</label>
+                    <label>Tags:</label>
 
                     <tags-input ng-model="c2ip.tags" on-tag-added="addedTag($tag)" on-tag-removed="removedTag($tag)">
-                        <auto-complete minlength="2" source="loadTags($query)"></auto-complete>
+                        <auto-complete minlength="2" source="loadTags($query)" load-on-focus="true"
+                                       load-on-empty="true"></auto-complete>
                     </tags-input>
                 </div>
 
-                <div class="form-group" ng-if="c2ip">
+                <div class="form-group" ng-if="c2ip.id">
                     <label>Comments</label>
 
                     <div class="input-group">
@@ -182,95 +160,21 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" ng-click="cancel()">Cancel
                 </button>
-                <button type="submit" ng-disabled="form.$invalid" class="btn btn-primary">Save</button>
+                <button ng-disabled="form.$invalid" class="btn btn-primary">Save</button>
             </div>
         </form>
     </script>
-
     <br>
-
     <div class="container-fluid">
 
-        <div class="inner-addon left-addon col-md-4" style="padding-left:0px;">
+        <div class="inner-addon left-addon col-md-4" style="padding-left:0;">
             <i class="glyphicon glyphicon-search"></i>
-            <input type="text" class="form-control" placeholder="Search" ng-model="search"/>
+            <input class="form-control" ng-change="refreshData()" placeholder="Search" ng-model="searchText"/>
         </div>
         <a class="btn-link pull-right" style="color:inherit;" ng-click="create()">
             <span class="glyphicon glyphicon-plus-sign"></span>
         </a>
     </div>
-
-
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-            <tr>
-                <th>ID</th>
-
-                <th>date_created</th>
-
-                <th>date_modified</th>
-
-                <th>ip</th>
-
-                <th>asn</th>
-
-                <th>country</th>
-
-                <th>city</th>
-
-                <th>state</th>
-
-                <th>reference_link</th>
-
-                <th>reference_text</th>
-
-                <th>expiration_type</th>
-
-                <th>expiration_timestamp</th>
-
-            </tr>
-            </thead>
-            <tbody>
-            <tr ng-repeat="c2ip in c2ips | toArray:false | filter:ip_filter track by $index" ng-if="c2ip.date_created">
-                <td>{{ c2ip.id }}</td>
-
-                <td>{{ c2ip.date_created  | date:'yyyy-MM-dd'}}</td>
-
-                <td>{{ c2ip.date_modified  | date:'yyyy-MM-dd'}}</td>
-
-                <td>{{ c2ip.ip }}</td>
-
-                <td>{{ c2ip.asn }}</td>
-
-                <td>{{ c2ip.country }}</td>
-
-                <td>{{ c2ip.city }}</td>
-
-                <td>{{ c2ip.state }}</td>
-
-                <td>{{ c2ip.reference_link }}</td>
-
-                <td>{{ c2ip.reference_text }}</td>
-
-                <td>{{ c2ip.expiration_type }}</td>
-
-                <td>{{ c2ip.expiration_timestamp  | date:'yyyy-MM-dd'}}</td>
-
-                <td>
-                    <button type="submit"
-                            ng-click="update(c2ip.id)"
-                            class="btn">
-                        <span class="glyphicon glyphicon-pencil"></span> Edit
-                    </button>
-                    <button type="submit"
-                            ng-click="delete(c2ip.id)"
-                            class="btn btn-danger">
-                        <span class="glyphicon glyphicon-remove-circle"></span> Delete
-                    </button>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
+    <br>
+    <div ui-grid="gridOptions"></div>
 </div>

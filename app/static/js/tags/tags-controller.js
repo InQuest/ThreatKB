@@ -1,8 +1,8 @@
 'use strict';
 
-angular.module('InquestKB')
-  .controller('TagsController', ['$scope', '$modal', 'resolvedTags', 'Tags',
-    function ($scope, $modal, resolvedTags, Tags) {
+angular.module('ThreatKB')
+  .controller('TagsController', ['$scope', '$uibModal', 'resolvedTags', 'Tags',
+    function ($scope, $uibModal, resolvedTags, Tags) {
 
       $scope.tags = resolvedTags;
 
@@ -41,15 +41,15 @@ angular.module('InquestKB')
 
       $scope.clear = function () {
         $scope.tags = {
-          
+
           "text": "",
-          
-          "id": ""
+
+            "id": ""
         };
       };
 
       $scope.open = function (id) {
-        var tagsSave = $modal.open({
+        var tagsSave = $uibModal.open({
           templateUrl: 'tags-save.html',
           controller: 'TagsSaveController',
           resolve: {
@@ -65,17 +65,16 @@ angular.module('InquestKB')
         });
       };
     }])
-  .controller('TagsSaveController', ['$scope', '$modalInstance', 'tags',
-    function ($scope, $modalInstance, tags) {
+  .controller('TagsSaveController', ['$scope', '$uibModalInstance', 'tags',
+    function ($scope, $uibModalInstance, tags) {
       $scope.tags = tags;
 
-      
 
-      $scope.ok = function () {
-        $modalInstance.close($scope.tags);
+        $scope.ok = function () {
+        $uibModalInstance.close($scope.tags);
       };
 
       $scope.cancel = function () {
-        $modalInstance.dismiss('cancel');
+        $uibModalInstance.dismiss('cancel');
       };
     }]);

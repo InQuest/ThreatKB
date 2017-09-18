@@ -2,7 +2,7 @@ from app import db
 
 
 class Comments(db.Model):
-    ENTITY_MAPPING = {"SIGNATURE": 1, "DNS": 2, "IP": 3}
+    ENTITY_MAPPING = {"SIGNATURE": 1, "DNS": 2, "IP": 3, "TASK": 4}
 
     id = db.Column(db.Integer, primary_key=True)
     date_created = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp())

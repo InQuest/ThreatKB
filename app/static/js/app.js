@@ -1,25 +1,27 @@
 // Declare app level module which depends on filters, and services
-angular.module('InquestKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize', 'ui.select', 'ngTagsInput', 'angular-toArrayFilter'])
+angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize', 'ui.select', 'ngTagsInput',
+    'angular-growl', 'angular-toArrayFilter', 'ui.codemirror', 'ngFileUpload', 'ngFileSaver', 'ngPassword',
+    'ngMessages', 'blockUI', 'ui.grid'])
     .config(['$routeProvider', function ($routeProvider) {
         $routeProvider
             .when('/', {
                 templateUrl: 'views/home.html',
                 //controller: 'HomeController',
-                access: {restricted: true}
+                access: {restricted: true, admin: false}
             })
             .when('/login', {
                 templateUrl: 'views/login.html',
                 controller: 'AuthController',
-                access: {restricted: false}
+                access: {restricted: false, admin: false}
             })
             .when('/logout', {
                 controller: 'AuthController',
-                access: {restricted: true}
+                access: {restricted: true, admin: false}
             })
             .when('/c2dns', {
                 templateUrl: 'views/c2dns/c2dns.html',
                 controller: 'C2dnsController',
-                access: {restricted: true},
+                access: {restricted: true, admin: false},
                 resolve: {
                     resolvedC2dns: ['C2dns', function (C2dns) {
                         return C2dns.query();
@@ -29,7 +31,7 @@ angular.module('InquestKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitiz
             .when('/c2ips', {
                 templateUrl: 'views/c2ip/c2ips.html',
                 controller: 'C2ipController',
-                access: {restricted: true},
+                access: {restricted: true, admin: false},
                 resolve: {
                     resolvedC2ip: ['C2ip', function (C2ip) {
                         return C2ip.query();
@@ -39,18 +41,37 @@ angular.module('InquestKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitiz
             .when('/cfg_reference_text_templates', {
                 templateUrl: 'views/cfg_reference_text_templates/cfg_reference_text_templates.html',
                 controller: 'Cfg_reference_text_templatesController',
-                access: {restricted: true},
+                access: {restricted: true, admin: true},
                 resolve: {
                     resolvedCfg_reference_text_templates: ['Cfg_reference_text_templates', function (Cfg_reference_text_templates) {
                         return Cfg_reference_text_templates.query();
                     }]
                 }
             })
+            .when('/cfg_category_range_mapping', {
+                templateUrl: 'views/cfg_category_range_mapping/cfg_category_range_mapping.html',
+                controller: 'CfgCategoryRangeMappingController',
+                access: {restricted: true, admin: true},
+                resolve: {
+                    resolvedCfgCategoryRangeMapping: ['CfgCategoryRangeMapping', function (CfgCategoryRangeMapping) {
+                        return CfgCategoryRangeMapping.query();
+                    }]
+                }
+            })
+            .when('/cfg_settings', {
+                templateUrl: 'views/cfg_settings/cfg_settings.html',
+                controller: 'Cfg_settingsController',
+                access: {restricted: true, admin: true},
+                resolve: {
+                    resolvedCfg_settings: ['Cfg_settings', function (Cfg_settings) {
+                        return Cfg_settings.query();
+                    }]
+                }
+            })
             .when('/cfg_states', {
                 templateUrl: 'views/cfg_states/cfg_states.html',
                 controller: 'Cfg_statesController',
-
-                access: {restricted: true},
+                access: {restricted: true, admin: true},
                 resolve: {
                     resolvedCfg_states: ['Cfg_states', function (Cfg_states) {
                         return Cfg_states.query();
@@ -60,39 +81,77 @@ angular.module('InquestKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitiz
             .when('/tags', {
                 templateUrl: 'views/tags/tags.html',
                 controller: 'TagsController',
-                access: {restricted: true},
-                resolve:{
+                access: {restricted: true, admin: true},
+                resolve: {
                     resolvedTags: ['Tags', function (Tags) {
                         return Tags.query();
                     }]
                 }
             })
-            // .when('/tags_mapping', {
-            //     templateUrl: 'views/tags_mapping/tags_mapping.html',
-            //     controller: 'Tags_mappingController',
-            //     access: {restricted: true},
-            //     resolve:{
-            //         resolvedTags_mapping: ['Tags_mapping', function (Tags_mapping) {
-            //             return Tags_mapping.query();
-            //         }]
-            //     }
-            // })
             .when('/yara_rules', {
                 templateUrl: 'views/yara_rule/yara_rules.html',
                 controller: 'Yara_ruleController',
-                access: {restricted: true},
+                access: {restricted: true, admin: false},
                 resolve: {
                     resolvedYara_rule: ['Yara_rule', function (Yara_rule) {
                         return Yara_rule.query();
                     }]
                 }
-            }).otherwise({
-            redirectTo: '/'
-        });
-
+            })
+            .when('/files', {
+                templateUrl: 'views/files/files.html',
+                controller: 'FilesController',
+                access: {restricted: true, admin: true},
+                resolve: {
+                    resolvedFiles: ['Files', function (Files) {
+                        return Files.resource.query();
+                    }]
+                }
+            })
+            .when('/users', {
+                templateUrl: 'views/users/users.html',
+                controller: 'UsersController',
+                access: {restricted: true, admin: true},
+                resolve: {
+                    resolvedUsers: ['UserService', function (UserService) {
+                        return UserService.query({include_inactive: 1});
+                    }]
+                }
+            })
+            .when('/import', {
+                templateUrl: 'views/import/import.html',
+                controller: 'ImportController',
+                access: {restricted: true, admin: true}
+            })
+            .when('/releases', {
+                templateUrl: 'views/releases/releases.html',
+                controller: 'ReleaseController',
+                access: {restricted: true, admin: true},
+                resolve: {
+                    resolvedRelease: ['Release', function (Release) {
+                        return Release.resource.query();
+                    }]
+                }
+            })
+            .when('/tasks', {
+                templateUrl: 'views/tasks/tasks.html',
+                controller: 'TasksController',
+                access: {restricted: true, admin: false},
+                resolve: {
+                    resolvedTask: ['Task', function (Task) {
+                        return Task.query();
+                    }]
+                }
+            })
+            .otherwise({
+                redirectTo: '/'
+            });
+    }])
+    .config(['$qProvider', function ($qProvider) {
+        $qProvider.errorOnUnhandledRejections(false);
     }]);
 
-angular.module('InquestKB').run(function ($rootScope, $location, AuthService) {
+angular.module('ThreatKB').run(function ($rootScope, $location, AuthService) {
 
     $rootScope.pretty_date = function prettyDate(time) {
         var date = new Date((time || "").replace(/-/g, "/").replace(/[TZ]/g, " ")),
@@ -120,8 +179,27 @@ angular.module('InquestKB').run(function ($rootScope, $location, AuthService) {
                     $location.path('/login');
                     $route.reload();
                 }
+                if (next.access.admin && !AuthService.isAdmin()) {
+                    $location.path('/');
+                    $route.reload();
+                }
             }
         )
     });
 
 });
+
+angular.module('ThreatKB').directive('ngConfirmClick', [
+    function () {
+        return {
+            link: function (scope, element, attr) {
+                var msg = attr.ngConfirmClick || "Are you sure?";
+                var clickAction = attr.confirmedClick;
+                element.bind('click', function (event) {
+                    if (window.confirm(msg)) {
+                        scope.$eval(clickAction)
+                    }
+                });
+            }
+        };
+    }])
