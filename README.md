@@ -1,13 +1,9 @@
-
-This project uses Yeoman for scaffolding. Specifically, we are using the angular-flask generator. More information on that found here.
-
-https://github.com/rayokota/generator-angular-flask
-
 ## Pre-requisites
+# Instructions in Ubuntu Linux
+
 1. Python 2.7
     ```
-    # Using Homebrew on Mac
-    $ brew install python
+    $ apt-get install python2.7
     ```
 1. Virtualenv
     ```
@@ -15,31 +11,43 @@ https://github.com/rayokota/generator-angular-flask
     ```
 1. Install NPM
     ```
-    # Using Homebrew on Mac
-    $ brew install node
+    $ apt-get install nodejs
     ```
 1. Install Bower
     ```
     $ npm install -g bower
     ```
+1. Install Redis
+    ```
+    $ apt-get install redis-server
+    ```
+1. Install MySQL
+    ```
+    $ apt-get install mysql-server
+    ```
 
 ## Installation
 ```
-~ $ mkdir -p InQuest/
-~ $ cd InQuest
-InQuest $ git clone -b staging git@github.com:InQuest/ThreatKB.git
+~ $ INQUEST_HOME='/opt/WhereverYouWantToPutIt'
+~ $ mkdir -p ${INQUEST_HOME}
+~ $ cd ${INQUEST_HOME}
+InQuest $ git clone -b master git@github.com:InQuest/ThreatKB.git
 InQuest $ cd ThreatKB
-ThreatKB (staging) $ ./install.sh
-ThreatKB (staging) $ flask/bin/pip install -r requirements.txt
-ThreatKB (staging) $ npm install -g yo generator-angular-flask
-ThreatKB (staging) $ bower install
-ThreatKB (staging) $ grunt server
+ThreatKB (master) $ mysql -u root -p{YOURPASS} create database threatkb;
+
+Edit config.py with the appropriate SQLALCHEMY_DATABASE_URI
+
+ThreatKB (master) $ ./install.sh
 ```
 
 ## Run
 ```
-ThreatKB (staging) $ flask/bin/python run.py
-ThreatKB (staging) $ grunt server
+Edit run.py with 'app.run(host="0.0.0.0",debug=True)' if you want to listen on all interfaces. Listens on port 5000 by default.
+
+ThreatKB (master) $ screen -t INQUEST_APP
+ThreatKB (master) $ flask/bin/python run.py
+
+Ctrl+A, Ctrl+D to dettach screen
 ```
 
 ## Databases
@@ -54,43 +62,9 @@ ThreatKB (staging) $ source flask/bin/activate
 (flask) ThreatKB (staging) $ celery -A app.celery worker -E
 ```
 
-### redis
-#### Install
-```
-# Using Homebrew on Mac
-$ brew install redis
-```
-
-#### Launch on startup
-```
-# To launch redis-server on computer start (Mac)
-$ ln -sfv /usr/local/opt/redis/*.plist ~/Library/LaunchAgents
-$ launchctl load ~/Library/LaunchAgents/homebrew.mxcl.redis.plist
-
-# To unload from startup
-$ launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.redis.plist
-```
-
-#### Start
-```
-$ redis-server /usr/local/etc/redis.conf
-```
-
-#### Test
-```
-$ redis-cli ping
-PONG
-```
-
-#### Monitor
-```
-$ redis-cli monitor
-OK
-```
-
 ### Hashing password for insert in kb_users table
 ```
-(flask) ThreatKB (staging) $ ./hash_pass.py abc123
+(flask) ThreatKB (master) $ flask/bin/python hash_pass.py abc123
 $2b$12$Kfana8UbHxYwrksmXS5NiudRTG/m0hRloUwN/hc1mxl/dx5fPTwMC
 ```
 
