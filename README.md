@@ -26,6 +26,11 @@
     $ apt-get install mysql-server
     ```
 
+# Additional Dependencies for CentOS
+```
+yum install MySQL-python libffi-devel mysql mysql-devel mysql-lib
+```
+
 ## Installation
 ```
 ~ $ INQUEST_HOME='/opt/WhereverYouWantToPutIt'
