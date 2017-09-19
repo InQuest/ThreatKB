@@ -4,7 +4,6 @@ from flask import Flask, abort, jsonify
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.bcrypt import Bcrypt
 from flask.ext.login import LoginManager
-from celery import Celery
 from flask_login import current_user
 from flask.ext.autodoc import Autodoc
 import logging
@@ -20,6 +19,7 @@ db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 bcrypt = Bcrypt(app)
+celery = None
 
 app.config["SQLALCHEMY_ECHO"] = True
 
@@ -33,7 +33,9 @@ def admin_only():
         return wrapped
     return wrapper
 
+
 def run(debug=False):
+    global celery
     from app.models import users
     from app.models import c2ip
     from app.models import c2dns
@@ -42,7 +44,6 @@ def run(debug=False):
     from app.models import cfg_reference_text_templates
     from app.models import cfg_states
     from app.models import comments
-    from app.models import users
     from app.models import tags
     from app.models import tags_mapping
     from app.models import files
@@ -63,25 +64,7 @@ def run(debug=False):
         app.config["MAX_MILLIS_PER_FILE_THRESHOLD"] = float(app.config["MAX_MILLIS_PER_FILE_THRESHOLD"])
 
 
-    def make_celery(flask_app):
-        celery_app = Celery(flask_app.import_name,
-                            backend=flask_app.config['BROKER_URL'],
-                            broker=flask_app.config['BROKER_URL'])
-        celery_app.conf.update(flask_app.config)
-        # task_base = celery_app.Task
-        #
-        # class ContextTask(task_base):
-        #     abstract = True
-        #
-        #     def __call__(self, *args, **kwargs):
-        #         with flask_app.app_context():
-        #             return task_base.__call__(self, *args, **kwargs)
-        #
-        # celery_app.Task = ContextTask
-
-        return celery_app
-
-
+    from app.celeryapp import make_celery
     celery = make_celery(app)
 
     from app.routes import index
@@ -115,6 +98,7 @@ def setup_logging():
 @login_manager.user_loader
 def load_user(userid):
     app.logger.debug("load_user called with user_id: '%s'" % (str(userid)))
+    from app.models import users
     return users.KBUser.query.get(int(userid))
 
 if __name__ == '__main__':

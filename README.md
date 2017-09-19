@@ -64,7 +64,7 @@ Please see ThreatKB/migrations/README.
 Requires running inside virtualenv. Needs to be running in order for testing Clean Corpus of files.
 ```
 ThreatKB (staging) $ source flask/bin/activate
-(flask) ThreatKB (staging) $ celery -A app.celery worker -E
+(flask) ThreatKB (staging) $ celery -A app.celeryapp.celery worker -E
 ```
 
 ### Hashing password for insert in kb_users table
