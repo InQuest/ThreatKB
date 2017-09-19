@@ -34,7 +34,7 @@ def admin_only():
     return wrapper
 
 
-def run(debug=False):
+def run(debug=False, port=5000, host='127.0.0.1'):
     global celery
     from app.models import users
     from app.models import c2ip
@@ -87,7 +87,8 @@ def run(debug=False):
     from app.routes import tasks
     from app.routes import documentation
 
-    app.run(debug=debug)
+    from app import app as APP
+    APP.run(debug=debug, port=port, host=host)
 
 
 @app.before_first_request
@@ -102,4 +103,4 @@ def load_user(userid):
     return users.KBUser.query.get(int(userid))
 
 if __name__ == '__main__':
-    run()
+    run(port=8888, host='0.0.0.0')
