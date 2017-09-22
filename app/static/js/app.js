@@ -149,7 +149,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                 access: {restricted: true, admin: false},
                 resolve: {
                     resolvedAccessKeys: ['AccessKeys', function (AccessKeys) {
-                        return AccessKeys.query();
+                        return AccessKeys.resource.query();
                     }]
                 }
             })

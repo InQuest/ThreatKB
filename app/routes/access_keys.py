@@ -1,15 +1,13 @@
-import uuid
-
 import time
 
 import datetime
 
 from app import app, db
-from app import app, db, bcrypt, admin_only
 from app.models.access_keys import AccessKeys
-from app.models.users import KBUser
-from flask import request, jsonify, session, json, abort
+from flask import request, jsonify, json, abort
 from flask.ext.login import current_user, login_required
+
+from app.models.users import KBUser
 
 
 @app.route('/ThreatKB/access_keys', methods=['GET'])
@@ -22,6 +20,23 @@ def get_all_user_access_keys():
         keys = AccessKeys.query.filter(AccessKeys.user_id == current_user.id).all()
 
     return json.dumps([key.to_dict() for key in keys])
+
+
+@app.route('/ThreatKB/access_keys/count', methods=['GET'])
+@login_required
+def get_active_inactive_key_count():
+    keys = []
+    if not current_user:
+        abort(403)
+    else:
+        keys = AccessKeys.query.filter(AccessKeys.user_id == current_user.id).all()
+
+    count = 0
+    for key in keys:
+        if key.status == 'active' or key.status == 'inactive':
+            count += 1
+
+    return jsonify({'activeInactiveCount': count})
 
 
 @app.route('/ThreatKB/access_keys/<int:key_id>', methods=['GET'])
@@ -38,9 +53,15 @@ def get_access_key(key_id):
 @app.route('/ThreatKB/access_keys', methods=['POST'])
 @login_required
 def create_access_key():
+    user = KBUser.query.get(current_user.id)
+    if not user:
+        abort(403)
+
+    token = user.generate_auth_token()
+
     key = AccessKeys(
         user_id=current_user.id,
-        token=str(uuid.uuid4())
+        token=token
     )
 
     db.session.add(key)

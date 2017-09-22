@@ -1,9 +1,11 @@
 <div>
     <div class="container-fluid">
-        <a class="btn-link pull-right" style="color:inherit;" ng-click="create()" title="Create Access Key">
+        <a ng-if="activeInactiveCount < 2" class="btn-link pull-right" style="color:inherit;" ng-click="create()" title="Create Access Key">
             <span class="glyphicon glyphicon-plus-sign"></span>
         </a>
     </div>
+    <br>
+    <div>Note: You can have a maximum of two access keys (active or inactive) at a time.</div>
     <br>
     <div class="table-responsive">
         <table class="table table-striped">
@@ -21,7 +23,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="key in access_keys | toArray:false | filter:search track by $index">
+            <tr ng-repeat="key in access_keys">
                 <td ng-if="key.id">{{key.created | date:'yyyy-MM-dd'}}</td>
 
                 <td ng-if="key.id">{{key.deleted | date:'yyyy-MM-dd'}}</td>
