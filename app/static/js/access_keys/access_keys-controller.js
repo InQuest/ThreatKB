@@ -56,11 +56,14 @@ angular.module('ThreatKB')
                 });
             };
         }])
-    .controller('AccessKeysGeneratedController', ['$scope', '$http', '$uibModalInstance', 'access_keys', 'AccessKeys',
-        function ($scope, $http, $uibModalInstance, access_keys, AccessKeys) {
+    .controller('AccessKeysGeneratedController', ['$scope', '$http', '$uibModalInstance', 'access_keys', 'AccessKeys', 'FileSaver', 'Blob',
+        function ($scope, $http, $uibModalInstance, access_keys, AccessKeys, FileSaver, Blob) {
             $scope.access_keys = access_keys;
 
-            $scope.key_csv = [];
+            $scope.downloadKey = function () {
+                var string_csv = "Token," + $scope.access_key.token + "\nSecretKey," + $scope.access_key.s_key;
+                FileSaver.saveAs(new Blob([string_csv], {type: "text/csv"}), 'access_key.csv');
+            };
 
             AccessKeys.resource.save(function (response) {
                 $scope.access_key = response;

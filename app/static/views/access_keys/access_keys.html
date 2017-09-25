@@ -25,8 +25,7 @@ Secret Key: {{access_key.s_key}}</pre>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" ng-click="close()">Close</button>
-                <button ng-csv="key_csv" filename="access_key.csv"
-                        class="btn btn-primary">Download Access Key
+                <button ng-click="downloadKey()" class="btn btn-primary">Download Access Key
                 </button>
             </div>
         </div>
