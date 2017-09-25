@@ -2,6 +2,8 @@ import time
 
 import datetime
 
+import os
+
 from app import app, db
 from app.models.access_keys import AccessKeys
 from flask import request, jsonify, json, abort
@@ -56,18 +58,37 @@ def create_access_key():
     user = KBUser.query.get(current_user.id)
     if not user:
         abort(403)
+    active_inactive_count = json.loads(get_active_inactive_key_count().data)
 
-    token = user.generate_auth_token()
+    if active_inactive_count and active_inactive_count['activeInactiveCount'] < 2:
+        s_key = os.urandom(24).encode('hex')
+        token = user.generate_auth_token(s_key)
 
-    key = AccessKeys(
-        user_id=current_user.id,
-        token=token
-    )
+        key = AccessKeys(
+            user_id=current_user.id,
+            token=token
+        )
 
-    db.session.add(key)
-    db.session.commit()
+        db.session.add(key)
+        db.session.commit()
 
-    return jsonify(key.to_dict()), 201
+        gen_key = key.to_dict()
+        gen_key['s_key'] = s_key
+
+        return jsonify(gen_key), 201
+    else:
+        return abort(403)
+
+
+def is_token_active(token):
+    key = AccessKeys.query.filter_by(token=token).first()
+    if not key:
+        abort(403)
+
+    if key.status == 'active':
+        return True
+    else:
+        return False
 
 
 @app.route('/ThreatKB/access_keys/<int:key_id>', methods=['PUT'])

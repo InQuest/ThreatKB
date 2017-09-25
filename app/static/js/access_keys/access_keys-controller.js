@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('AccessKeysController', ['$scope', '$http', 'resolvedAccessKeys', 'AccessKeys',
-        function ($scope, $http, resolvedAccessKeys, AccessKeys) {
+    .controller('AccessKeysController', ['$scope', '$http', '$uibModal', 'resolvedAccessKeys', 'AccessKeys',
+        function ($scope, $http, $uibModal, resolvedAccessKeys, AccessKeys) {
 
             $scope.access_keys = resolvedAccessKeys;
 
@@ -13,13 +13,6 @@ angular.module('ThreatKB')
                 });
             };
             $scope.getActiveInactiveCount();
-
-            $scope.create = function () {
-                AccessKeys.resource.save(function () {
-                    $scope.access_keys = AccessKeys.resource.query();
-                    $scope.getActiveInactiveCount();
-                });
-            };
 
             $scope.update = function (id, status) {
                 $scope.access_key = AccessKeys.resource.get({id: id});
@@ -41,4 +34,42 @@ angular.module('ThreatKB')
                     });
             };
 
+            $scope.refresh = function () {
+                $scope.access_keys = AccessKeys.resource.query();
+                $scope.getActiveInactiveCount();
+            };
+
+            $scope.open = function () {
+                var keyGen = $uibModal.open({
+                    templateUrl: 'access_keys-generated.html',
+                    controller: 'AccessKeysGeneratedController',
+                    resolve: {
+                        access_keys: function () {
+                            return $scope.access_keys;
+                        }
+                    }
+                });
+
+                keyGen.result.then(function (keys) {
+                    $scope.access_keys = keys;
+                    $scope.refresh();
+                });
+            };
+        }])
+    .controller('AccessKeysGeneratedController', ['$scope', '$http', '$uibModalInstance', 'access_keys', 'AccessKeys',
+        function ($scope, $http, $uibModalInstance, access_keys, AccessKeys) {
+            $scope.access_keys = access_keys;
+
+            $scope.key_csv = [];
+
+            AccessKeys.resource.save(function (response) {
+                $scope.access_key = response;
+
+                $scope.key_csv.push("Token=" + $scope.access_key.token);
+                $scope.key_csv.push("SecretKey=" + $scope.access_key.s_key);
+            });
+
+            $scope.close = function () {
+                $uibModalInstance.close($scope.access_keys);
+            };
         }]);

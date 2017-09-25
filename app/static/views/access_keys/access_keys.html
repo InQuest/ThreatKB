@@ -1,6 +1,39 @@
 <div>
+    <script type="text/ng-template" id="access_keys-generated.html">
+        <div>
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="close()">&times;
+                </button>
+                <h4 class="modal-title">Create Access Key</h4>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: small">
+                <span>
+                    Your access key (token and secret key) has been created successfully.
+                </span>
+                    <br><br>
+                    <strong>
+                        Download your key file now, which contains your new token and secret key.
+                        If you do not download the key file now, you will not be able to retrieve your secret key again.
+                    </strong>
+                    <br><br>
+                    To help protect your security, store your secret key securely and do not share it.
+                    <br><br>
+                <pre ng-model="access_key">Token: {{access_key.token}}
+Secret Key: {{access_key.s_key}}</pre>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" ng-click="close()">Close</button>
+                <button ng-csv="key_csv" filename="access_key.csv"
+                        class="btn btn-primary">Download Access Key
+                </button>
+            </div>
+        </div>
+    </script>
     <div class="container-fluid">
-        <a ng-if="activeInactiveCount < 2" class="btn-link pull-right" style="color:inherit;" ng-click="create()" title="Create Access Key">
+        <a ng-if="activeInactiveCount < 2" class="btn-link pull-right" style="color:inherit;" ng-click="open()"
+           title="Create Access Key">
             <span class="glyphicon glyphicon-plus-sign"></span>
         </a>
     </div>
@@ -28,7 +61,7 @@
 
                 <td ng-if="key.id">{{key.deleted | date:'yyyy-MM-dd'}}</td>
 
-                <td ng-if="key.id">{{ key.token }}</td>
+                <td ng-if="key.id" style="font-size: smaller;">{{ key.token }}</td>
 
                 <td ng-if="key.id">
                     <div ng-if="key.status != 'deleted'" class="form-group">

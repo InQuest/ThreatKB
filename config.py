@@ -8,7 +8,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 # SQLALCHEMY_DATABASE_URI = "mysql://username:password@host/db_name?use_unicode=1&charset=utf8"
 SQLALCHEMY_DATABASE_URI = "mysql://root:dc145236@localhost/inquestkb?use_unicode=1&charset=utf8"
 SQLALCHEMY_TRACK_MODIFICATIONS = False
-SECRET_KEY = os.getenv('SECRET_KEY', 'ub3Rs3cR3tKeY!')
+
 
 try:
     SQLALCHEMY_DATABASE_URI
