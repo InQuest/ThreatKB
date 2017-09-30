@@ -1,4 +1,5 @@
 from app import db
+import yara_rule
 
 
 class CfgCategoryRangeMapping(db.Model):
@@ -41,6 +42,10 @@ class CfgCategoryRangeMapping(db.Model):
                 else:
                     category = CfgCategoryRangeMapping.COMMITTED_DEFAULT
             eventid = category.current + 1
+
+            ## Make sure its not already taken by an imported signature
+            while yara_rule.Yara_rule.query.filter_by(eventid=eventid).first():
+                eventid = eventid + 1
             category.current = eventid
         else:
             category = CfgCategoryRangeMapping.query.filter(CfgCategoryRangeMapping.category == category).first()

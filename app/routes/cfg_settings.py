@@ -66,7 +66,7 @@ def update_cfg_settings(key):
     db.session.merge(entity)
     db.session.commit()
 
-    entity = cfg_settings.Cfg_settings.query.get(entity.id)
+    entity = cfg_settings.Cfg_settings.query.get(entity.key)
 
     return jsonify(entity.to_dict()), 200
 

@@ -7,7 +7,7 @@ from sqlalchemy.event import listens_for
 import json
 
 class Yara_rule(db.Model):
-    metadata_fields = ["description, ""confidence", "test_status", "severity", "category", "file_type",
+    metadata_fields = ["description", "confidence", "test_status", "severity", "category", "file_type",
                        "subcategory1", "subcategory2", "subcategory3", "reference_text", "reference_link",
                        "eventid"]
 
@@ -148,9 +148,16 @@ class Yara_rule(db.Model):
         yara_rule = Yara_rule()
         yara_rule.name = yara_dict["rule_name"]
 
+        yara_metadata = {key.lower(): val.strip().strip("\"") for key, val in yara_dict["metadata"].iteritems()}
         for possible_field in Yara_rule.metadata_fields:
-            if possible_field.lower() in yara_dict["metadata"].keys():
-                setattr(yara_rule, possible_field, yara_dict["metadata"][possible_field])
+            if possible_field in yara_metadata.keys():
+                field = yara_metadata[possible_field] if not possible_field in ["confidence", "severity",
+                                                                                "eventid"] else int(
+                    yara_metadata[possible_field])
+                ## If the eventid already exists. Skip it.
+                if possible_field == "eventid" and Yara_rule.query.filter_by(eventid=field).first():
+                    continue
+                setattr(yara_rule, possible_field, field)
 
         yara_rule.condition = " ".join(yara_dict["condition_terms"])
         yara_rule.strings = "\n".join(
@@ -163,7 +170,8 @@ class Yara_rule(db.Model):
 
 @listens_for(Yara_rule, "before_insert")
 def generate_eventid(mapper, connect, target):
-    target.eventid = CfgCategoryRangeMapping.get_next_category_eventid(target.category)
+    if not target.eventid:
+        target.eventid = CfgCategoryRangeMapping.get_next_category_eventid(target.category)
 
 class Yara_rule_history(db.Model):
     __tablename__ = "yara_rules_history"
