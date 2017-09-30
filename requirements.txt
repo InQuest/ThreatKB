@@ -21,6 +21,7 @@ Flask-Script==2.0.5
 Flask-SQLAlchemy==0.16
 Flask-WhooshAlchemy==0.54a0
 Flask-WTF==0.8.4
+Flask-Autodoc==0.1.2
 flup==1.0.2
 ipaddr==2.1.11
 ipwhois==1.0.0
@@ -49,5 +50,5 @@ vine==1.1.4
 Werkzeug==0.12.2
 Whoosh==2.7.4
 WTForms==2.1
-yara-python==3.4.0.0
+yara-python==3.6.3
 Flask-Autodoc==0.1.2

@@ -28,6 +28,15 @@ local.properties
 .settings/
 .loadpath
 app/static/lib
+.env*
+
+# Python artifact files
+build/
+dist/
+*.egg-info/
+
+# Redis local output
+dump.rdb
 
 # Eclipse Core
 .project

@@ -9,7 +9,8 @@ import yara
 from sqlalchemy import func
 from sqlalchemy.ext.serializer import loads, dumps
 
-from app import app, db, celery, admin_only, auto
+from app import app, db, admin_only, auto
+from app.celeryapp import celery
 from app.models import yara_rule, files
 from flask import abort, jsonify, request, json
 from flask.ext.login import current_user, login_required
