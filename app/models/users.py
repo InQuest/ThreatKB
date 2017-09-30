@@ -1,4 +1,7 @@
-from app import db, bcrypt
+from itsdangerous import (TimedJSONWebSignatureSerializer
+                          as Serializer, BadSignature)
+
+from app import db, app
 
 
 class KBUser(db.Model):
@@ -37,3 +40,17 @@ class KBUser(db.Model):
             active=self.active,
             id=self.id
         )
+
+    def generate_auth_token(self, s_key):
+        s = Serializer(s_key)
+        return s.dumps({'id': self.id})
+
+    @staticmethod
+    def verify_auth_token(token, s_key):
+        s = Serializer(s_key)
+        try:
+            data = s.loads(token)
+        except BadSignature:
+            return None  # invalid token
+        user = KBUser.query.get(data['id'])
+        return user

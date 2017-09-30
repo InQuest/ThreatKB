@@ -1,0 +1,96 @@
+<div>
+    <script type="text/ng-template" id="access_keys-generated.html">
+        <div>
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="close()">&times;
+                </button>
+                <h4 class="modal-title">Create Access Key</h4>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: small">
+                <span>
+                    Your access key (token and secret key) has been created successfully.
+                </span>
+                    <br><br>
+                    <strong>
+                        Download your key file now, which contains your new token and secret key.
+                        If you do not download the key file now, you will not be able to retrieve your secret key again.
+                    </strong>
+                    <br><br>
+                    To help protect your security, store your secret key securely and do not share it.
+                    <br><br>
+                <pre ng-model="access_key">Token: {{access_key.token}}
+Secret Key: {{access_key.s_key}}</pre>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" ng-click="close()">Close</button>
+                <button ng-click="downloadKey()" class="btn btn-primary">Download Access Key
+                </button>
+            </div>
+        </div>
+    </script>
+    <div class="container-fluid">
+        <a ng-if="activeInactiveCount < 2" class="btn-link pull-right" style="color:inherit;" ng-click="open()"
+           title="Create Access Key">
+            <span class="glyphicon glyphicon-plus-sign"></span>
+        </a>
+    </div>
+    <br>
+    <div>Note: You can have a maximum of two access keys (active or inactive) at a time.</div>
+    <br>
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th style="width: 75px;">Created</th>
+
+                <th style="width: 75px;">Deleted</th>
+
+                <th style="width: 250px;">Token</th>
+
+                <th style="width: 100px;">Status</th>
+
+                <th style="width: 120px; text-align: center;">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="key in access_keys">
+                <td ng-if="key.id">{{key.created | date:'yyyy-MM-dd'}}</td>
+
+                <td ng-if="key.id">{{key.deleted | date:'yyyy-MM-dd'}}</td>
+
+                <td ng-if="key.id" style="font-size: smaller;">{{ key.token }}</td>
+
+                <td ng-if="key.id">
+                    <div ng-if="key.status != 'deleted'" class="form-group">
+                        <div class="btn-group" data-toggle="buttons">
+                            <label class="btn {{ key.status == 'active' ? 'btn-primary' : 'btn-default' }}"
+                                   ng-class="{active:key.status=='active'}"
+                                   ng-click="update(key.id, true)">
+                                <input type="radio">
+                                Active
+                            </label>
+                            <label class="btn {{ key.status == 'active' ? 'btn-default' : 'btn-primary' }}"
+                                   ng-class="{active:key.status=='inactive'}"
+                                   ng-click="update(key.id, false)">
+                                <input type="radio">
+                                Inactive
+                            </label>
+                        </div>
+                    </div>
+                    <span ng-if="key.status == 'deleted'">Deleted</span>
+                </td>
+                <td ng-if="key.id" style="text-align: center;">
+                    <button ng-if="key.status != 'deleted'"
+                            confirmed-click="delete(key.id)"
+                            ng-confirm-click="Are you sure you want to delete the access key?"
+                            class="btn btn-sm btn-danger">
+                        <small><span class="glyphicon glyphicon-remove-circle"></span></small>
+                    </button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

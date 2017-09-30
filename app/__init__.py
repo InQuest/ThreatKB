@@ -9,7 +9,6 @@ from flask_login import current_user
 from flask.ext.autodoc import Autodoc
 import logging
 
-
 app = Flask(__name__, static_url_path='')
 app.secret_key = "a" * 24  # os.urandom(24)
 app.config.from_object("config")
@@ -49,6 +48,7 @@ from app.models import files
 from app.models import cfg_category_range_mapping
 from app.models import releases
 from app.models import tasks
+from app.models import access_keys
 
 app.config["BROKER_URL"] = cfg_settings.Cfg_settings.get_private_setting("REDIS_BROKER_URL")
 app.config["TASK_SERIALIZER"] = cfg_settings.Cfg_settings.get_private_setting("REDIS_TASK_SERIALIZER")
@@ -102,6 +102,10 @@ from app.routes import error_handling
 from app.routes import releases
 from app.routes import tasks
 from app.routes import documentation
+from app.routes import access_keys
+
+from app.models.users import KBUser
+from app.routes.access_keys import is_token_active
 
 
 @app.before_first_request
@@ -109,7 +113,26 @@ def setup_logging():
     app.logger.addHandler(logging.StreamHandler())
     app.logger.setLevel(logging.DEBUG)
 
+
 @login_manager.user_loader
 def load_user(userid):
     app.logger.debug("load_user called with user_id: '%s'" % (str(userid)))
     return users.KBUser.query.get(int(userid))
+
+
+@login_manager.request_loader
+def load_user_from_request(request):
+    token = request.args.get('token')
+    s_key = request.args.get('secret_key')
+    if token and s_key:
+        valid_token = is_token_active(token)
+        if valid_token:
+            user = KBUser.verify_auth_token(str(token), s_key)
+            if user:
+                return user
+            else:
+                abort(403)
+        else:
+            abort(403)
+
+    return None
