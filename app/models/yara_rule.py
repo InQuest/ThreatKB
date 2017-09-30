@@ -8,7 +8,8 @@ import json
 
 class Yara_rule(db.Model):
     metadata_fields = ["description, ""confidence", "test_status", "severity", "category", "file_type",
-                       "subcategory1", "subcategory2", "subcategory3", "reference_text", "reference_link"]
+                       "subcategory1", "subcategory2", "subcategory3", "reference_text", "reference_link",
+                       "eventid"]
 
     __tablename__ = "yara_rules"
 
@@ -33,7 +34,7 @@ class Yara_rule(db.Model):
     condition = db.Column(db.String(2048))
     strings = db.Column(db.String(30000))
     active = db.Column(db.Boolean, nullable=False, default=True)
-    signature_id = db.Column(db.Integer(unsigned=True), index=True, nullable=False)
+    eventid = db.Column(db.Integer(unsigned=True), index=True, nullable=False)
 
     tags = []
     addedTags = []
@@ -90,7 +91,7 @@ class Yara_rule(db.Model):
             reference_text=self.reference_text,
             condition="condition:\n\t%s" % self.condition,
             strings="strings:\n\t%s" % self.strings,
-            signature_id=self.signature_id,
+            event_id=self.eventid,
             id=self.id,
             tags=tags_mapping.get_tags_for_source(self.__tablename__, self.id),
             addedTags=[],
@@ -148,7 +149,7 @@ class Yara_rule(db.Model):
         yara_rule.name = yara_dict["rule_name"]
 
         for possible_field in Yara_rule.metadata_fields:
-            if possible_field in yara_dict["metadata"].keys():
+            if possible_field.lower() in yara_dict["metadata"].keys():
                 setattr(yara_rule, possible_field, yara_dict["metadata"][possible_field])
 
         yara_rule.condition = " ".join(yara_dict["condition_terms"])
@@ -161,8 +162,8 @@ class Yara_rule(db.Model):
 
 
 @listens_for(Yara_rule, "before_insert")
-def generate_signature_id(mapper, connect, target):
-    target.signature_id = CfgCategoryRangeMapping.get_next_category_signature_id(target.category)
+def generate_eventid(mapper, connect, target):
+    target.eventid = CfgCategoryRangeMapping.get_next_category_eventid(target.category)
 
 class Yara_rule_history(db.Model):
     __tablename__ = "yara_rules_history"

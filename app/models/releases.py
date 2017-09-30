@@ -68,18 +68,18 @@ class Release(db.Model):
         last_release = last_release.release_data_dict
 
         ##### SIGNATURES #######
-        release_signature_ids = release_data["Signatures"]["Signatures"].keys()
-        last_release_signature_ids = [long(release_id) for release_id in
+        release_eventids = release_data["Signatures"]["Signatures"].keys()
+        last_release_eventids = [long(release_id) for release_id in
                                       last_release["Signatures"]["Signatures"].keys()]
 
         for signature in release_data["Signatures"]["Signatures"].values():
-            signature_id = signature["id"]
-            if not signature_id in last_release_signature_ids:
+            eventid = signature["id"]
+            if not eventid in last_release_eventids:
                 release_data["Signatures"]["Added"].append(signature)
             else:
                 if parser.parse(signature["date_modified"]) > datetime.datetime.now():
                     release_data["Signatures"]["Modified"].append(signature)
-                del last_release["Signatures"]["Signatures"][str(signature_id)]
+                del last_release["Signatures"]["Signatures"][str(eventid)]
 
         for signature in last_release["Signatures"]["Signatures"].values():
             release_data["Signatures"]["Removed"].append(signature)
@@ -127,18 +127,18 @@ class Release(db.Model):
         message = prepend_text.value if prepend_text else ""
         message += "New Signatures\n%s\n" % ("-" * 10)
         message += "\n\n".join(["EventID: %s\nName: %s\nCategory: %s\nConfidence: %s\nSeverity: %s\nDescription: %s" % (
-        entity["signature_id"], entity["name"], entity["category"], entity["confidence"], entity["severity"],
-        entity["description"]) for entity in self.release_data_dict["Signatures"]["Added"]]) if \
+            entity["eventid"], entity["name"], entity["category"], entity["confidence"], entity["severity"],
+            entity["description"]) for entity in self.release_data_dict["Signatures"]["Added"]]) if \
             len(self.release_data_dict["Signatures"]["Added"]) > 0 else "NA"
         message += "\n\nRemoved Signatures\n%s\n" % ("-" * 10)
         message += "\n\n".join(["EventID: %s\nName: %s\nCategory: %s\nConfidence: %s\nSeverity: %s\nDescription: %s" % (
-        entity["signature_id"], entity["name"], entity["category"], entity["confidence"], entity["severity"],
-        entity["description"]) for entity in self.release_data_dict["Signatures"]["Removed"]]) if \
+            entity["eventid"], entity["name"], entity["category"], entity["confidence"], entity["severity"],
+            entity["description"]) for entity in self.release_data_dict["Signatures"]["Removed"]]) if \
             len(self.release_data_dict["Signatures"]["Removed"]) > 0 else "NA"
         message += "\n\nModified Signatures\n%s\n" % ("-" * 10)
         message += "\n\n".join(["EventID: %s\nName: %s\nCategory: %s\nConfidence: %s\nSeverity: %s\nDescription: %s" % (
-        entity["signature_id"], entity["name"], entity["category"], entity["confidence"], entity["severity"],
-        entity["description"]) for entity in self.release_data_dict["Signatures"]["Modified"]]) if \
+            entity["eventid"], entity["name"], entity["category"], entity["confidence"], entity["severity"],
+            entity["description"]) for entity in self.release_data_dict["Signatures"]["Modified"]]) if \
             len(self.release_data_dict["Signatures"]["Modified"]) > 0 else "NA"
 
         message += "\n\nFeed Content\n%s\n" % ("-" * 10)
