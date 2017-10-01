@@ -43,6 +43,8 @@ def upgrade():
             {"key": "REDIS_ACCEPT_CONTENT", "value": "[\"json\"]", "public": False, "date_created": date_created,
              "date_modified": date_modified},
             {"key": "MAX_MILLIS_PER_FILE_THRESHOLD", "value": "3.0", "public": False, "date_created": date_created,
+             "date_modified": date_modified},
+            {"key": "FILE_STORE_PATH", "value": "/usr/local/ThreatKB/", "public": False, "date_created": date_created,
              "date_modified": date_modified}
         ]
     )
