@@ -8,7 +8,6 @@ from flask_login import current_user
 from flask.ext.autodoc import Autodoc
 import logging
 
-
 app = Flask(__name__, static_url_path='')
 app.secret_key = "a" * 24  # os.urandom(24)
 app.config.from_object("config")
@@ -32,7 +31,6 @@ def admin_only():
             return f(*args, **kwargs)
         return wrapped
     return wrapper
-
 
 def run(debug=False, port=5000, host='127.0.0.1'):
     global celery
@@ -96,11 +94,19 @@ def setup_logging():
     app.logger.addHandler(logging.StreamHandler())
     app.logger.setLevel(logging.DEBUG)
 
-@login_manager.user_loader
-def load_user(userid):
-    app.logger.debug("load_user called with user_id: '%s'" % (str(userid)))
-    from app.models import users
-    return users.KBUser.query.get(int(userid))
+@login_manager.request_loader
+def load_user_from_request(request):
+    token = request.args.get('token')
+    s_key = request.args.get('secret_key')
+    if token and s_key:
+        valid_token = is_token_active(token)
+        if valid_token:
+            user = KBUser.verify_auth_token(str(token), s_key)
+            if user:
+                return user
+            else:
+                abort(403)
+        else:
+            abort(403)
 
-if __name__ == '__main__':
-    run(port=8888, host='0.0.0.0')
+    return None

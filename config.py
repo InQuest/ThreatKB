@@ -2,6 +2,7 @@ import os
 import sys
 
 basedir = os.path.abspath(os.path.dirname(__file__))
+
 SQL_PROTOCOL = os.getenv('SQL_PROTOCOL', 'mysql')
 SQL_HOST = os.getenv('SQL_HOST', '127.0.0.1')
 SQL_PORT = os.getenv('SQL_PORT', '3306')
@@ -18,6 +19,7 @@ SQLALCHEMY_DATABASE_URI = '{protocol}://{username}:{password}@{hostname}:{port}/
 )
 #SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'app.db')
 SQLALCHEMY_TRACK_MODIFICATIONS = False
+
 
 try:
     SQLALCHEMY_DATABASE_URI

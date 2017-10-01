@@ -33,7 +33,7 @@
             </div>
 
             <div class="collapse navbar-collapse navbar-ex1-collapse">
-                <ul class="nav navbar-nav" style="font-size: smaller" ng-if="isLoggedIn()">
+                <ul class="nav navbar-nav" style="font-size: 8pt" ng-if="isLoggedIn()">
 
                     <li>
                         <a href="#!/tasks">Tasks</a>
@@ -85,6 +85,10 @@
 
                     <li ng-if="isAdmin()">
                         <a href="#!/releases">Releases</a>
+                    </li>
+
+                    <li>
+                        <a href="#!/access_keys">Keys</a>
                     </li>
                 </ul>
                 <ul class="nav navbar-nav pull-right" ng-show="isLoggedIn()">
@@ -142,6 +146,7 @@
 <script src="js/import/import-controller.js"></script>
 <script src="js/releases/releases-controller.js"></script>
 <script src="js/tasks/tasks-controller.js"></script>
+<script src="js/access_keys/access_keys-controller.js"></script>
 <!-- /Controllers -->
 
 <!-- Services -->
@@ -161,6 +166,7 @@
 <script src="js/releases/releases-service.js"></script>
 <script src="js/users/users-service.js"></script>
 <script src="js/tasks/tasks-service.js"></script>
+<script src="js/access_keys/access_keys-service.js"></script>
 <!-- /Services -->
 
 </body>

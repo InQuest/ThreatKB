@@ -1,8 +1,9 @@
 from flask import abort, jsonify, request
 from flask.ext.login import login_required, current_user
 from app import app, db, admin_only, auto
-from app.models import c2ip, c2dns, yara_rule, cfg_states, users, comments
+from app.models import c2ip, c2dns, yara_rule, cfg_states, cfg_settings, comments
 from app.utilities import extract_artifacts
+import json
 
 
 #####################################################################
@@ -11,6 +12,12 @@ def save_artifacts(artifacts, shared_reference=None, shared_state=None, shared_o
     default_state = "Imported"
     return_artifacts = []
     duplicate_artifacts = []
+
+    preserve_event_id = cfg_settings.Cfg_settings.get_setting(key="PRESERVE_EVENT_ID_ON_IMPORT")
+    try:
+        preserve_event_id = json.loads(preserve_event_id)
+    except:
+        pass
 
     if not cfg_states.Cfg_states.query.filter_by(state=default_state).first():
         db.session.add(cfg_states.Cfg_states(state=default_state))
@@ -61,6 +68,7 @@ def save_artifacts(artifacts, shared_reference=None, shared_state=None, shared_o
                     if shared_owner:
                         dns.owner_user_id = shared_owner
 
+
                     db.session.add(dns)
                     return_artifacts.append(dns)
             elif artifact["type"].lower() == "yara_rule":
@@ -73,6 +81,8 @@ def save_artifacts(artifacts, shared_reference=None, shared_state=None, shared_o
                     yr.state = shared_state
                 if shared_owner:
                     yr.owner_user_id = shared_owner
+                if not preserve_event_id:
+                    yr.eventid = None
 
                 db.session.add(yr)
                 return_artifacts.append(yr)

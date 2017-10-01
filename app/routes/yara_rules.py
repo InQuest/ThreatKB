@@ -70,7 +70,7 @@ def create_yara_rule():
         , reference_text=request.json['reference_text']
         , condition=yara_rule.Yara_rule.make_yara_sane(request.json['condition'], "condition:")
         , strings=yara_rule.Yara_rule.make_yara_sane(request.json['strings'], "strings:")
-        , signature_id=new_sig_id
+        , eventid=new_sig_id
         , created_user_id=current_user.id
         , modified_user_id=current_user.id
     )
@@ -108,7 +108,7 @@ def update_yara_rule(id):
     if not entity.revision:
         entity.revision = 1
 
-    temp_sig_id = entity.signature_id
+    temp_sig_id = entity.eventid
     get_new_sig_id = False
     if request.json['category'] and 'category' in request.json['category'] and not entity.category == request.json['category']['category']:
         get_new_sig_id = True
@@ -135,7 +135,7 @@ def update_yara_rule(id):
         reference_text=request.json['reference_text'],
         condition=yara_rule.Yara_rule.make_yara_sane(request.json["condition"], "condition:"),
         strings=yara_rule.Yara_rule.make_yara_sane(request.json["strings"], "strings:"),
-        signature_id=temp_sig_id,
+        eventid=temp_sig_id,
         id=id,
         modified_user_id=current_user.id,
         owner_user_id=request.json['owner_user']['id'] if request.json.get("owner_user", None) and request.json[

@@ -59,9 +59,9 @@
                     <label type="text" class="form-control">{{ yara_rule.id }}</label>
                 </div>
 
-                <div class="form-group" ng-if="yara_rule.signature_id">
+                <div class="form-group" ng-if="yara_rule.eventid">
                     <label>Signature ID</label>
-                    <label type="text" class="form-control">{{ yara_rule.signature_id }}</label>
+                    <label type="text" class="form-control">{{ yara_rule.eventid }}</label>
                 </div>
 
                 <div class="form-group" ng-if="yara_rule.id">
@@ -316,5 +316,5 @@
         </a>
     </div>
     <br>
-    <div ui-grid="gridOptions"></div>
+    <div ui-grid="gridOptions" ui-grid-auto-resize></div>
 </div>

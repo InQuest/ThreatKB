@@ -1,7 +1,7 @@
 // Declare app level module which depends on filters, and services
 angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize', 'ui.select', 'ngTagsInput',
     'angular-growl', 'angular-toArrayFilter', 'ui.codemirror', 'ngFileUpload', 'ngFileSaver', 'ngPassword',
-    'ngMessages', 'blockUI', 'ui.grid'])
+    'ngMessages', 'blockUI', 'ui.grid', 'ui.grid.autoResize'])
     .config(['$routeProvider', function ($routeProvider) {
         $routeProvider
             .when('/', {
@@ -143,6 +143,16 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                     }]
                 }
             })
+            .when('/access_keys', {
+                templateUrl: 'views/access_keys/access_keys.html',
+                controller: 'AccessKeysController',
+                access: {restricted: true, admin: false},
+                resolve: {
+                    resolvedAccessKeys: ['AccessKeys', function (AccessKeys) {
+                        return AccessKeys.resource.query();
+                    }]
+                }
+            })
             .otherwise({
                 redirectTo: '/'
             });
@@ -202,4 +212,4 @@ angular.module('ThreatKB').directive('ngConfirmClick', [
                 });
             }
         };
-    }])
+    }]);

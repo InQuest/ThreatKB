@@ -1,4 +1,5 @@
 from app import db
+import yara_rule
 
 
 class CfgCategoryRangeMapping(db.Model):
@@ -23,7 +24,7 @@ class CfgCategoryRangeMapping(db.Model):
         )
 
     @staticmethod
-    def get_next_category_signature_id(category=None):
+    def get_next_category_eventid(category=None):
         default_category_min = 10000
         default_category_max = 20000
 
@@ -40,14 +41,18 @@ class CfgCategoryRangeMapping(db.Model):
                     CfgCategoryRangeMapping.COMMITTED_DEFAULT = category
                 else:
                     category = CfgCategoryRangeMapping.COMMITTED_DEFAULT
-            signature_id = category.current + 1
-            category.current = signature_id
+            eventid = category.current + 1
+
+            ## Make sure its not already taken by an imported signature
+            while yara_rule.Yara_rule.query.filter_by(eventid=eventid).first():
+                eventid = eventid + 1
+            category.current = eventid
         else:
             category = CfgCategoryRangeMapping.query.filter(CfgCategoryRangeMapping.category == category).first()
-            signature_id = category.current + 1
-            category.current = signature_id
+            eventid = category.current + 1
+            category.current = eventid
 
-        return signature_id
+        return eventid
 
 
     def __repr__(self):
