@@ -79,7 +79,7 @@ def upgrade():
     sa.Column('date_created', sa.DateTime(timezone=True), nullable=True),
     sa.Column('date_modified', sa.DateTime(timezone=True), nullable=True),
     sa.Column('state', sa.String(length=32), nullable=True),
-    sa.Column('domain_name', sa.String(length=2048), nullable=True),
+    sa.Column('domain_name', sa.String(length=255), nullable=True),
     sa.Column('match_type', sa.Enum('exact', 'wildcard'), nullable=True),
     sa.Column('reference_link', sa.String(length=2048), nullable=True),
     sa.Column('reference_text', sa.String(length=2048), nullable=True),
