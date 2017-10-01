@@ -153,6 +153,16 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                     }]
                 }
             })
+            .when('/whitelist', {
+                templateUrl: 'views/whitelist/whitelist.html',
+                controller: 'WhitelistController',
+                access: {restricted: true, admin: false},
+                resolve: {
+                    resolvedWhitelist: ['Whitelist', function (Whitelist) {
+                        return Whitelist.resource.query();
+                    }]
+                }
+            })
             .otherwise({
                 redirectTo: '/'
             });

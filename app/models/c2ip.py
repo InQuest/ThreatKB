@@ -1,3 +1,5 @@
+from sqlalchemy.event import listens_for
+
 from app import db
 from app.routes import tags_mapping
 from app.models.comments import Comments
@@ -86,3 +88,8 @@ class C2ip(db.Model):
 
     def __repr__(self):
         return '<C2ip %r>' % (self.id)
+
+
+@listens_for(C2ip, "before_insert")
+def run_against_whitelist(mapper, connect, target):
+    print('hello')
