@@ -19,7 +19,7 @@ angular.module('ThreatKB')
                 },
                 columnDefs:
                     [
-                        {field: 'signature_id'},
+                        {field: 'eventid'},
                         {field: 'name'},
                         {field: 'category'},
                         {field: 'state'},
@@ -130,7 +130,7 @@ angular.module('ThreatKB')
                     "reference_text": "",
                     "condition": "",
                     "strings": "",
-                    "signature_id": "",
+                    "eventid": "",
                     "id": "",
                     "tags": [],
                     "addedTags": [],

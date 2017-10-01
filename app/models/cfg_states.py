@@ -21,12 +21,12 @@ class Cfg_states(db.Model):
 
 
 @listens_for(Cfg_states, "before_insert")
-def generate_signature_id(mapper, connect, target):
+def generate_eventid(mapper, connect, target):
     if target.is_release_state > 0:
         Cfg_states.query.update(dict(is_release_state=0))
 
 
 @listens_for(Cfg_states, "before_update")
-def generate_signature_id(mapper, connect, target):
+def generate_eventid(mapper, connect, target):
     if target.is_release_state > 0:
         Cfg_states.query.filter(Cfg_states.id != target.id).update(dict(is_release_state=0))
