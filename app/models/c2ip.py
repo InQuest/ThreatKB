@@ -6,6 +6,7 @@ from app.models.comments import Comments
 
 import ipwhois
 
+
 class C2ip(db.Model):
     __tablename__ = "c2ip"
 

@@ -4,13 +4,6 @@ from app import db
 class Whitelist(db.Model):
     __tablename__ = "whitelist"
 
-    # created_time
-    # modified_time
-    # created_by_user
-    # modified_by_user
-    # whitelist_artifact
-    # notes
-
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     whitelist_artifact = db.Column(db.String(2048))
     notes = db.Column(db.String(2048))

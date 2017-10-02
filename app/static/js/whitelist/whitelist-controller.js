@@ -1,10 +1,10 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('WhitelistController', ['$scope', '$uibModal', 'resolvedWhitelist', 'Whitelist',
-        function ($scope, $uibModal, resolvedWhitelist, Whitelist) {
-
-            $scope.whitelist = resolvedWhitelist;
+    .controller('WhitelistController', ['$scope', '$uibModal', 'resolvedWhitelists', 'Whitelist',
+        function ($scope, $uibModal, resolvedWhitelists, Whitelist) {
+            $scope.whitelists = resolvedWhitelists;
+            $scope.whitelist = {};
 
             $scope.create = function () {
                 $scope.clear();
@@ -13,12 +13,14 @@ angular.module('ThreatKB')
 
             $scope.update = function (id) {
                 $scope.whitelist = Whitelist.get({id: id});
+                $scope.whitelists = Whitelist.query();
                 $scope.open(id);
             };
 
             $scope.delete = function (id) {
                 Whitelist.delete({id: id}, function () {
-                    $scope.whitelist = Whitelist.query();
+                    $scope.whitelist = {};
+                    $scope.whitelists = Whitelist.query();
                 });
             };
 
@@ -26,12 +28,12 @@ angular.module('ThreatKB')
                 if (id) {
                     Whitelist.update({id: id}, $scope.whitelist,
                         function () {
-                            $scope.whitelist = Whitelist.query();
+                            $scope.whitelists = Whitelist.query();
                         });
                 } else {
                     Whitelist.save($scope.whitelist,
                         function () {
-                            $scope.whitelist = Whitelist.query();
+                            $scope.whitelists = Whitelist.query();
                         });
                 }
             };
@@ -49,7 +51,7 @@ angular.module('ThreatKB')
 
             $scope.open = function (id) {
                 var whitelistSave = $uibModal.open({
-                    templateUrl: 'white.ist-save.html',
+                    templateUrl: 'whitelist-save.html',
                     controller: 'WhitelistSaveController',
                     resolve: {
                         whitelist: function () {
@@ -58,8 +60,8 @@ angular.module('ThreatKB')
                     }
                 });
 
-                whitelistSave.result.then(function (entity) {
-                    $scope.whitelist = entity;
+                whitelistSave.result.then(function (whitelist) {
+                    $scope.whitelist = whitelist;
                     $scope.save(id);
                 });
             };

@@ -158,8 +158,8 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                 controller: 'WhitelistController',
                 access: {restricted: true, admin: false},
                 resolve: {
-                    resolvedWhitelist: ['Whitelist', function (Whitelist) {
-                        return Whitelist.resource.query();
+                    resolvedWhitelists: ['Whitelist', function (Whitelist) {
+                        return Whitelist.query();
                     }]
                 }
             })

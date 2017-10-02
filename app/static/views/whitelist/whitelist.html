@@ -21,8 +21,8 @@
 
                     <input class="form-control" name="whitelist_artifact"
                            ng-model="whitelist.whitelist_artifact" ng-required="true"
-                           ng-maxlength="255"/>
-                    <span class="error" ng-show="form.text.$error.maxlength">Must be at most 255 characters.</span>
+                           ng-maxlength="2048"/>
+                    <span class="error" ng-show="form.text.$error.maxlength">Must be at most 2048 characters.</span>
                 </div>
 
                 <div class="form-group">
@@ -30,8 +30,8 @@
 
                     <input class="form-control" name="notes"
                            ng-model="whitelist.notes" ng-required="true"
-                           ng-maxlength="255"/>
-                    <span class="error" ng-show="form.text.$error.maxlength">Must be at most 255 characters.</span>
+                           ng-maxlength="2048"/>
+                    <span class="error" ng-show="form.text.$error.maxlength">Must be at most 2048 characters.</span>
                 </div>
 
             </div>
@@ -61,34 +61,34 @@
             <tr>
                 <th>ID</th>
 
-                <th>Email</th>
+                <th>Whitelist Artifact</th>
 
-                <th>Admin</th>
+                <th>Notes</th>
 
-                <th>Active</th>
+                <th>Created</th>
 
-                <th>Registered On</th>
+                <th>Modified</th>
 
                 <th style="width: 120px;">Actions</th>
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="wl in whitelist | toArray:false | filter:search track by $index">
-                <td ng-if="wl.id">{{ wl.id }}</td>
+            <tr ng-repeat="whitelist in whitelists | toArray:false | filter:search track by $index">
+                <td ng-if="whitelist.id">{{ whitelist.id }}</td>
 
-                <td ng-if="wl.id">{{ wl.whitelist_artifact }}</td>
+                <td ng-if="whitelist.id">{{ whitelist.whitelist_artifact }}</td>
 
-                <td ng-if="wl.id">{{ wl.notes }}</td>
+                <td ng-if="whitelist.id">{{ whitelist.notes }}</td>
 
-                <td ng-if="wl.id">{{wl.created_time | date:'yyyy-MM-dd'}}</td>
+                <td ng-if="whitelist.id">{{whitelist.created_time | date:'yyyy-MM-dd'}}</td>
 
-                <td ng-if="wl.id">{{wl.modified_time | date:'yyyy-MM-dd'}}</td>
+                <td ng-if="whitelist.id">{{whitelist.modified_time | date:'yyyy-MM-dd'}}</td>
 
-                <td ng-if="wl.id">
-                    <button ng-click="update(wl.id)" class="btn btn-sm" style="float: left;">
+                <td ng-if="whitelist.id">
+                    <button ng-click="update(whitelist.id)" class="btn btn-sm" style="float: left;">
                         <small><span class="glyphicon glyphicon-pencil"></span></small>
                     </button>
-                    <button type="submit" ng-click="delete(wl.id)" class="btn btn-sm btn-danger"
+                    <button type="submit" ng-click="delete(whitelist.id)" class="btn btn-sm btn-danger"
                             ng-confirm-click="Are you sure you want to delete this whitelist?">
                         <small><span class="glyphicon glyphicon-remove-circle"></span></small>
                     </button>

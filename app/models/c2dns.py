@@ -1,8 +1,13 @@
+import re
+
+from ipaddr import IPAddress, IPNetwork
 from sqlalchemy.event import listens_for
 
 from app import db
+from app.models.whitelist import Whitelist
 from app.routes import tags_mapping
 from app.models.comments import Comments
+
 
 class C2dns(db.Model):
     __tablename__ = "c2dns"
@@ -76,4 +81,31 @@ class C2dns(db.Model):
 
 @listens_for(C2dns, "before_insert")
 def run_against_whitelist(mapper, connect, target):
-    print('hello')
+    domain_name = target.domain_name
+
+    abort_import = False
+
+    whitelists = Whitelist.query.all()
+    for whitelist in whitelists:
+        wa = str(whitelist.whitelist_artifact)
+
+        try:
+            ip = IPAddress(wa)
+            continue
+        except ValueError:
+            pass
+
+        try:
+            cidr = IPNetwork(wa)
+            continue
+        except ValueError:
+            pass
+
+        regex = re.compile(wa)
+        result = regex.match(domain_name)
+        if not result:
+            abort_import = True
+            break
+
+    if abort_import:
+        print("abort the import")

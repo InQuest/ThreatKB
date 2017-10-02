@@ -66,6 +66,8 @@ def update_whitelist(id):
     )
     db.session.merge(entity)
     db.session.commit()
+
+    entity = whitelist.Whitelist.query.get(id)
     return jsonify(entity.to_dict()), 200
 
 
