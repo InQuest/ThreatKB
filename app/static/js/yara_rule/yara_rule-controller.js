@@ -19,7 +19,7 @@ angular.module('ThreatKB')
                 },
                 columnDefs:
                     [
-                        {field: 'eventid'},
+                        {field: 'event_id', displayName: "Event ID"},
                         {field: 'name'},
                         {field: 'category'},
                         {field: 'state'},
