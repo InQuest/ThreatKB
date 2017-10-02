@@ -91,7 +91,7 @@ class Yara_rule(db.Model):
             reference_text=self.reference_text,
             condition="condition:\n\t%s" % self.condition,
             strings="strings:\n\t%s" % self.strings,
-            event_id=self.eventid,
+            eventid=self.eventid,
             id=self.id,
             tags=tags_mapping.get_tags_for_source(self.__tablename__, self.id),
             addedTags=[],
