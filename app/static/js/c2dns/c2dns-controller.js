@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('C2dnsController', ['$scope', '$filter', '$http', '$uibModal', 'resolvedC2dns', 'C2dns', 'Cfg_states', 'Users',
-        function ($scope, $filter, $http, $uibModal, resolvedC2dns, C2dns, Cfg_states, Users) {
+    .controller('C2dnsController', ['$scope', '$filter', '$http', '$uibModal', 'resolvedC2dns', 'C2dns', 'Cfg_states', 'growl', 'Users',
+        function ($scope, $filter, $http, $uibModal, resolvedC2dns, C2dns, Cfg_states, growl, Users) {
 
             $scope.c2dns = resolvedC2dns;
 
@@ -101,7 +101,6 @@ angular.module('ThreatKB')
                     C2dns.update({id: id}, $scope.c2dns, function () {
                         $scope.c2dns = C2dns.query();
                         $scope.gridOptions.data = $scope.c2dns;
-                        //$scope.clear();
                     }, function (error) {
                         growl.error(error.data, {ttl: -1});
                     });

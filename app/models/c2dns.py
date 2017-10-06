@@ -103,9 +103,9 @@ def run_against_whitelist(mapper, connect, target):
 
         regex = re.compile(wa)
         result = regex.match(domain_name)
-        if not result:
+        if result:
             abort_import = True
             break
 
     if abort_import:
-        print("abort the import")
+        raise Exception('Failed Whitelist Validation')

@@ -62,9 +62,12 @@ def create_c2ip():
     db.session.add(entity)
     try:
         db.session.commit()
-    except exc.IntegrityError, e:
-        app.logger.error("Duplicate IP: '%s'" % (entity.ip))
-        abort(409, description="Duplicate IP: '%s'" % (entity.ip))
+    except exc.IntegrityError:
+        app.logger.error("Duplicate IP: '%s'" % entity.ip)
+        abort(409, description="Duplicate IP: '%s'" % entity.ip)
+    except Exception:
+        app.logger.error("Whitelist validation failed.")
+        abort(412, description="Whitelist validation failed.")
 
     entity.tags = create_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
     return jsonify(entity.to_dict()), 201
