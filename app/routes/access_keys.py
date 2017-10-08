@@ -11,10 +11,18 @@ from flask.ext.login import current_user, login_required
 
 from app.models.users import KBUser
 
+"""
+Token and Secret key may be passed as GET params to any API requests
+
+i.e. /ThreatKB/access_keys?token=<token>&secret_key=<secret_key>
+"""
+
 
 @app.route('/ThreatKB/access_keys', methods=['GET'])
 @login_required
 def get_all_user_access_keys():
+    """Return all user access keys
+    Return: list of user access keys dictionaries"""
     keys = []
     if not current_user:
         abort(403)
@@ -27,6 +35,8 @@ def get_all_user_access_keys():
 @app.route('/ThreatKB/access_keys/count', methods=['GET'])
 @login_required
 def get_active_inactive_key_count():
+    """Return user's total count between active and inactive access keys
+    Return: activeInactiveCount in json dictionary"""
     keys = []
     if not current_user:
         abort(403)
@@ -44,6 +54,8 @@ def get_active_inactive_key_count():
 @app.route('/ThreatKB/access_keys/<int:key_id>', methods=['GET'])
 @login_required
 def get_access_key(key_id):
+    """Return access key associated with given key_id
+    Return: access key dictionary"""
     key = AccessKeys.query.get(key_id)
     if not key:
         abort(404)
@@ -55,6 +67,10 @@ def get_access_key(key_id):
 @app.route('/ThreatKB/access_keys', methods=['POST'])
 @login_required
 def create_access_key():
+    """Create new access key if user has less than two active/inactive access keys.
+    Secret key is generated, token is serialized with secret key and contains id of current user.
+    Secret key (s_key) is included in return dictionary.
+    Return: access key dictionary"""
     user = KBUser.query.get(current_user.id)
     if not user:
         abort(403)
@@ -81,6 +97,8 @@ def create_access_key():
 
 
 def is_token_active(token):
+    """Is given token Active
+    Return: True if token active, False otherwise"""
     key = AccessKeys.query.filter_by(token=token).first()
     if not key:
         abort(403)
@@ -94,6 +112,11 @@ def is_token_active(token):
 @app.route('/ThreatKB/access_keys/<int:key_id>', methods=['PUT'])
 @login_required
 def update_key(key_id):
+    """Update access key associated with given id.
+    Only the status of a key can be updated. Able to toggle between Active/Inactive.
+    Able to soft delete, but can't make active/inactive after status is Deleted.
+    From Data: status(str)
+    Return: access key dictionary"""
     key = AccessKeys.query.get(key_id)
     if not key:
         abort(404)

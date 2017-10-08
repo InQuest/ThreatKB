@@ -38,7 +38,7 @@ angular.module('ThreatKB')
     .controller('UsersController', ['$scope', '$uibModal', 'resolvedUsers', 'UserService',
         function ($scope, $uibModal, resolvedUsers, UserService) {
             $scope.users = resolvedUsers;
-            $scope.user = {}
+            $scope.user = {};
             $scope.user.passwordConfirm = "";
 
 

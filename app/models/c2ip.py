@@ -1,8 +1,15 @@
+import re
+
+from ipaddr import IPAddress, IPNetwork
+from sqlalchemy.event import listens_for
+
 from app import db
+from app.models.whitelist import Whitelist
 from app.routes import tags_mapping
 from app.models.comments import Comments
 
 import ipwhois
+
 
 class C2ip(db.Model):
     __tablename__ = "c2ip"
@@ -86,3 +93,37 @@ class C2ip(db.Model):
 
     def __repr__(self):
         return '<C2ip %r>' % (self.id)
+
+
+@listens_for(C2ip, "before_insert")
+def run_against_whitelist(mapper, connect, target):
+    new_ip = target.ip
+
+    abort_import = False
+
+    whitelists = Whitelist.query.all()
+    for whitelist in whitelists:
+        wa = str(whitelist.whitelist_artifact)
+
+        try:
+            if str(IPAddress(new_ip)) == str(IPAddress(wa)):
+                abort_import = True
+                break
+        except ValueError:
+            pass
+
+        try:
+            if IPAddress(new_ip) in IPNetwork(wa):
+                abort_import = True
+                break
+        except ValueError:
+            pass
+
+        regex = re.compile(wa)
+        result = regex.match(new_ip)
+        if result:
+            abort_import = True
+            break
+
+    if abort_import:
+        raise Exception('Failed Whitelist Validation')

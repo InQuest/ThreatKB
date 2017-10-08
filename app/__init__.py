@@ -22,6 +22,7 @@ celery = None
 
 app.config["SQLALCHEMY_ECHO"] = True
 
+
 def admin_only():
     def wrapper(f):
         @functools.wraps(f)
@@ -31,6 +32,7 @@ def admin_only():
             return f(*args, **kwargs)
         return wrapped
     return wrapper
+
 
 def run(debug=False, port=5000, host='127.0.0.1'):
     global celery
@@ -50,6 +52,7 @@ def run(debug=False, port=5000, host='127.0.0.1'):
     from app.models import tasks
     from app.models import access_keys
     from app.models import users
+    from app.models import whitelist
 
     app.config["BROKER_URL"] = cfg_settings.Cfg_settings.get_private_setting("REDIS_BROKER_URL")
     app.config["TASK_SERIALIZER"] = cfg_settings.Cfg_settings.get_private_setting("REDIS_TASK_SERIALIZER")
@@ -61,7 +64,6 @@ def run(debug=False, port=5000, host='127.0.0.1'):
 
     if app.config["MAX_MILLIS_PER_FILE_THRESHOLD"]:
         app.config["MAX_MILLIS_PER_FILE_THRESHOLD"] = float(app.config["MAX_MILLIS_PER_FILE_THRESHOLD"])
-
 
     from app.celeryapp import make_celery
     celery = make_celery(app)
@@ -86,6 +88,7 @@ def run(debug=False, port=5000, host='127.0.0.1'):
     from app.routes import tasks
     from app.routes import documentation
     from app.routes import access_keys
+    from app.routes import whitelist
 
     @app.before_first_request
     def setup_logging():
@@ -116,5 +119,3 @@ def run(debug=False, port=5000, host='127.0.0.1'):
 
     from app import app as APP
     APP.run(debug=debug, port=port, host=host)
-
-

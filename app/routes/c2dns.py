@@ -62,8 +62,11 @@ def create_c2dns():
     try:
         db.session.commit()
     except exc.IntegrityError:
-        app.logger.error("Duplicate DNS: '%s'" % (entity.domain_name))
+        app.logger.error("Duplicate DNS: '%s'" % entity.domain_name)
         abort(409)
+    except Exception:
+        app.logger.error("Whitelist validation failed.")
+        abort(412, description="Whitelist validation failed.")
 
     entity.tags = create_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
 
