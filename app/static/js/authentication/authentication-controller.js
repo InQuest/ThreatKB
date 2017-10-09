@@ -3,6 +3,7 @@ angular.module('ThreatKB')
         function ($scope, $location, AuthService, Cfg_settings) {
             $scope.isLoggedIn = AuthService.isLoggedIn;
             $scope.isAdmin = AuthService.isAdmin;
+            $scope.user = AuthService.user;
             $scope.nav_image = Cfg_settings.get({key: "NAV_IMAGE"});
 
             $scope.login = function () {

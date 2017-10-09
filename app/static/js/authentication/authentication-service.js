@@ -16,7 +16,8 @@ angular.module('ThreatKB')
                 logout: logout,
                 register: register,
                 getUserStatus: getUserStatus,
-                getUser: getUser
+                getUser: getUser,
+                user: getUser
             });
 
             function isLoggedIn() {
