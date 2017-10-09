@@ -45,8 +45,6 @@ Secret Key: {{access_key.s_key}}</pre>
             <tr>
                 <th style="width: 75px;">Created</th>
 
-                <th style="width: 75px;">Deleted</th>
-
                 <th style="width: 250px;">Token</th>
 
                 <th style="width: 100px;">Status</th>
@@ -57,8 +55,6 @@ Secret Key: {{access_key.s_key}}</pre>
             <tbody>
             <tr ng-repeat="key in access_keys">
                 <td ng-if="key.id">{{key.created | date:'yyyy-MM-dd'}}</td>
-
-                <td ng-if="key.id">{{key.deleted | date:'yyyy-MM-dd'}}</td>
 
                 <td ng-if="key.id" style="font-size: smaller;">{{ key.token }}</td>
 

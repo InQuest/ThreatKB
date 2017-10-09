@@ -27,7 +27,7 @@ def get_all_user_access_keys():
     if not current_user:
         abort(403)
     else:
-        keys = AccessKeys.query.filter(AccessKeys.user_id == current_user.id).all()
+        keys = AccessKeys.query.filter(AccessKeys.user_id == current_user.id).filter(AccessKeys.deleted == None).all()
 
     return json.dumps([key.to_dict() for key in keys])
 
