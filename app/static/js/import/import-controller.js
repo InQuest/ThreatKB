@@ -43,7 +43,7 @@ angular.module('ThreatKB').controller('ImportController',
                 }
 
                 blockUI.start($scope.block_message);
-                Import.commit_artifacts(artifacts_to_commit, $scope.shared_reference, $scope.shared_state.state.state, $scope.shared_owner).then(function (data) {
+                Import.commit_artifacts(artifacts_to_commit, $scope.shared_reference, $scope.shared_state.state.state, $scope.shared_owner, $scope.extract_ip, $scope.extract_dns, $scope.extract_signature).then(function (data) {
                     blockUI.stop();
                     var message = "";
                     if (data.committed) {
@@ -72,7 +72,7 @@ angular.module('ThreatKB').controller('ImportController',
                 if ($scope.autocommit) {
                     blockUI.start($scope.block_message);
                 }
-                Import.import_artifacts($scope.import_text, $scope.autocommit, $scope.shared_reference, $scope.shared_state.state.state, $scope.shared_owner).then(function (data) {
+                Import.import_artifacts($scope.import_text, $scope.autocommit, $scope.shared_reference, $scope.shared_state.state.state, $scope.shared_owner, $scope.extract_ip, $scope.extract_dns, $scope.extract_signature).then(function (data) {
                         if ($scope.autocommit) {
                             blockUI.stop();
                             var message = "";
@@ -120,7 +120,12 @@ angular.module('ThreatKB').controller('ImportController',
                 $scope.users = Users.query();
                 $scope.cfg_states = Cfg_states.query();
                 $scope.shared_state = {};
+                $scope.extract_ip = true;
+                $scope.extract_dns = true;
+                $scope.extract_signature = true;
             };
+
+            $scope.clear();
 
         }]);
 

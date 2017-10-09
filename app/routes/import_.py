@@ -8,7 +8,8 @@ import json
 
 #####################################################################
 
-def save_artifacts(artifacts, shared_reference=None, shared_state=None, shared_owner=None):
+def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared_reference=None, shared_state=None,
+                   shared_owner=None):
     default_state = "Imported"
     return_artifacts = []
     duplicate_artifacts = []
@@ -25,7 +26,7 @@ def save_artifacts(artifacts, shared_reference=None, shared_state=None, shared_o
 
     for artifact in artifacts:
         try:
-            if artifact["type"].lower() == "ip":
+            if artifact["type"].lower() == "ip" and extract_ip:
                 old_ip = c2ip.C2ip.query.filter(c2ip.C2ip.ip == artifact["artifact"]).first()
                 if old_ip:
                     message = "System comment: duplicate IP '%s' found at '%s' by '%s'" % (
@@ -47,7 +48,7 @@ def save_artifacts(artifacts, shared_reference=None, shared_state=None, shared_o
 
                     db.session.add(ip)
                     return_artifacts.append(ip)
-            elif artifact["type"].lower() == "dns":
+            elif artifact["type"].lower() == "dns" and extract_dns:
                 old_dns = c2dns.C2dns.query.filter(c2dns.C2dns.domain_name == artifact["artifact"]).first()
                 if old_dns:
                     message = "System comment: duplicate DNS '%s' found at '%s' by '%s'" % (
@@ -71,7 +72,7 @@ def save_artifacts(artifacts, shared_reference=None, shared_state=None, shared_o
 
                     db.session.add(dns)
                     return_artifacts.append(dns)
-            elif artifact["type"].lower() == "yara_rule":
+            elif artifact["type"].lower() == "yara_rule" and extract_signature:
                 yr = yara_rule.Yara_rule.get_yara_rule_from_yara_dict(artifact["rule"])
                 yr.created_user_id, yr.modified_user_id = current_user.id, current_user.id
                 yr.state = default_state if not shared_state else shared_state
@@ -111,6 +112,9 @@ def import_artifacts():
     shared_state = request.json.get('shared_state', None)
     shared_reference = request.json.get("shared_reference", None)
     shared_owner = request.json.get("shared_owner", None)
+    extract_ip = request.json.get('extract_ip', True)
+    extract_dns = request.json.get('extract_dns', True)
+    extract_signature = request.json.get('extract_signature', True)
 
     if shared_owner:
         shared_owner = int(shared_owner)
@@ -118,10 +122,12 @@ def import_artifacts():
     if not import_text:
         abort(404)
 
-    artifacts = extract_artifacts(import_text)
+    artifacts = extract_artifacts(do_extract_ip=extract_ip, do_extract_dns=extract_dns,
+                                  do_extract_signature=extract_signature, text=import_text)
 
     if autocommit:
-        artifacts = save_artifacts(artifacts=artifacts, shared_reference=shared_reference, shared_state=shared_state,
+        artifacts = save_artifacts(extract_ip=extract_ip, extract_dns=extract_dns, extract_signature=extract_signature,
+                                   artifacts=artifacts, shared_reference=shared_reference, shared_state=shared_state,
                                    shared_owner=shared_owner)
 
     return jsonify({"artifacts": artifacts})
@@ -140,9 +146,13 @@ def commit_artifacts():
     artifacts = request.json.get("artifacts", None)
     shared_reference = request.json.get("shared_reference", None)
     shared_state = request.json.get('shared_state', None)
+    extract_ip = request.json.get('extract_ip', True)
+    extract_dns = request.json.get('extract_dns', True)
+    extract_signature = request.json.get('extract_signature', True)
 
     if not artifacts:
         abort(404)
 
-    artifacts = save_artifacts(artifacts=artifacts, shared_reference=shared_reference, shared_state=shared_state)
+    artifacts = save_artifacts(extract_ip=extract_ip, extract_dns=extract_dns, extract_signature=extract_signature,
+                               artifacts=artifacts, shared_reference=shared_reference, shared_state=shared_state)
     return jsonify({"artifacts": artifacts}), 201

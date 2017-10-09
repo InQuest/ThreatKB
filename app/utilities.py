@@ -47,18 +47,22 @@ def extract_yara_rules(text):
 
 #####################################################################
 
-def extract_artifacts(text):
+def extract_artifacts(do_extract_ip, do_extract_dns, do_extract_signature, text):
     ips = extract_ips(text)
     dns = extract_dns(text)
     yara_rules = extract_yara_rules(text)
     temp = []
+    output = []
 
-    output = [{"type": "IP", "artifact": ip} for ip in list(unique_everseen(ips))]
-    output.extend([{"type": "DNS", "artifact": hostname} for hostname in list(unique_everseen(dns))])
-    for yara_rule in yara_rules:
-        if not yara_rule["rule_name"] in temp:
-            temp.append(yara_rule["rule_name"])
-            output.append({"type": "YARA_RULE", "artifact": yara_rule["rule_name"], "rule": yara_rule})
+    if do_extract_ip:
+        output.extend([{"type": "IP", "artifact": ip} for ip in list(unique_everseen(ips))])
+    if do_extract_dns:
+        output.extend([{"type": "DNS", "artifact": hostname} for hostname in list(unique_everseen(dns))])
+    if do_extract_signature:
+        for yara_rule in yara_rules:
+            if not yara_rule["rule_name"] in temp:
+                temp.append(yara_rule["rule_name"])
+                output.append({"type": "YARA_RULE", "artifact": yara_rule["rule_name"], "rule": yara_rule})
     return output
 
 
