@@ -6,6 +6,7 @@ from app.models.cfg_category_range_mapping import CfgCategoryRangeMapping
 from sqlalchemy.event import listens_for
 import json
 
+
 class Yara_rule(db.Model):
     metadata_fields = [{"description": "description"},
                        {"confidence": "confidence"},
@@ -61,7 +62,7 @@ class Yara_rule(db.Model):
 
     owner_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=True)
     owner_user = db.relationship('KBUser', foreign_keys=owner_user_id,
-                                    primaryjoin="KBUser.id==Yara_rule.owner_user_id")
+                                 primaryjoin="KBUser.id==Yara_rule.owner_user_id")
 
     comments = db.relationship("Comments", foreign_keys=[id],
                                primaryjoin="and_(Comments.entity_id==Yara_rule.id, Comments.entity_type=='%s')" % (
@@ -148,7 +149,6 @@ class Yara_rule(db.Model):
 
         return yara_rule_text
 
-
     @staticmethod
     def make_yara_sane(text, type_):
         type_ = "%s:" if not type_.endswith(":") else type_
@@ -183,6 +183,7 @@ class Yara_rule(db.Model):
 def generate_eventid(mapper, connect, target):
     if not target.eventid:
         target.eventid = CfgCategoryRangeMapping.get_next_category_eventid(target.category)
+
 
 class Yara_rule_history(db.Model):
     __tablename__ = "yara_rules_history"
