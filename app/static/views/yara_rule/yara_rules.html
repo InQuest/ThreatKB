@@ -64,6 +64,17 @@
                     <label type="text" class="form-control">{{ yara_rule.eventid }}</label>
                 </div>
 
+
+                <div class="form-group">
+                    <label>Name:</label>
+                    <span class="error" ng-show="form.name.$error.minlength">Must be at least  characters.</span>
+                    <span class="error" ng-show="form.name.$error.maxlength">Must be at most 128 characters.</span>
+                    <span class="error text-danger" ng-if="!yara_rule.name">*</span>
+                    <input class="form-control" name="name"
+                           ng-model="yara_rule.name" ng-required="true"
+                           ng-maxlength="128"/>
+                </div>
+
                 <div class="form-group" ng-if="yara_rule.id">
                     <label>Revision</label>
                     <label type="text" class="form-control">{{ yara_rule.revision }} - {{ yara_rule.date_modified }}
@@ -106,16 +117,6 @@
                         </ui-select-choices>
                     </ui-select>
 
-                </div>
-
-                <div class="form-group">
-                    <label>Name:</label>
-                    <span class="error" ng-show="form.name.$error.minlength">Must be at least  characters.</span>
-                    <span class="error" ng-show="form.name.$error.maxlength">Must be at most 128 characters.</span>
-                    <span class="error text-danger" ng-if="!yara_rule.name">*</span>
-                    <input class="form-control" name="name"
-                           ng-model="yara_rule.name" ng-required="true"
-                           ng-maxlength="128"/>
                 </div>
 
                 <div class="form-group">
