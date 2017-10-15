@@ -37,7 +37,8 @@ def create_cfg_category_range_mapping():
     entity = cfg_category_range_mapping.CfgCategoryRangeMapping(
         category=request.json['category'],
         range_min=request.json['range_min'],
-        range_max=request.json['range_max']
+        range_max=request.json['range_max'],
+        current=request.json['range_min']
     )
     db.session.add(entity)
     db.session.commit()

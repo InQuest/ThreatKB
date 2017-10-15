@@ -12,7 +12,7 @@ angular.module('ThreatKB')
             };
 
             $scope.update = function (id) {
-                $scope.cfg_states = Cfg_states.get({id: id});
+                $scope.cfg_state = Cfg_states.get({id: id});
                 $scope.open(id);
             };
 
@@ -40,7 +40,7 @@ angular.module('ThreatKB')
             };
 
             $scope.clear = function () {
-                $scope.cfg_states = {
+                $scope.cfg_state = {
 
                     "state": "",
 
@@ -54,7 +54,7 @@ angular.module('ThreatKB')
                     controller: 'Cfg_statesSaveController',
                     resolve: {
                         cfg_states: function () {
-                            return $scope.cfg_states;
+                            return $scope.cfg_state;
                         }
                     }
                 });
