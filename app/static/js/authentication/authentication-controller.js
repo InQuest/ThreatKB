@@ -1,6 +1,6 @@
 angular.module('ThreatKB')
-    .controller('AuthController', ['$scope', '$location', 'AuthService', 'Cfg_settings',
-        function ($scope, $location, AuthService, Cfg_settings) {
+    .controller('AuthController', ['$scope', '$location', 'AuthService', 'Cfg_settings', '$uibModal',
+        function ($scope, $location, AuthService, Cfg_settings, $uibModal) {
             $scope.isLoggedIn = AuthService.isLoggedIn;
             $scope.isAdmin = AuthService.isAdmin;
             $scope.user = AuthService.user;

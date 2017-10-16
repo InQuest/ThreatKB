@@ -153,6 +153,11 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                     }]
                 }
             })
+            .when('/profile', {
+                templateUrl: 'views/profile/profile.html',
+                controller: 'ProfileController',
+                access: {restricted: false, admin: false}
+            })
             .when('/whitelist', {
                 templateUrl: 'views/whitelist/whitelist.html',
                 controller: 'WhitelistController',

@@ -87,11 +87,62 @@ def get_user_me():
 @app.route('/ThreatKB/users/me/picture', methods=['GET'])
 @auto.doc()
 @login_required
-@admin_only()
 def get_user_me_picture():
     """Return the user associated with the given user id.
     Return: user dictionary"""
     return get_user_picture_by_id(current_user.id)
+
+
+@app.route('/ThreatKB/users/me/picture', methods=['POST'])
+@auto.doc()
+@login_required
+def update_user_me_picture():
+    """Return the user associated with the given user id.
+    Return: user dictionary"""
+    if 'file' not in request.files:
+        return jsonify(fileStatus=False)
+
+    f = request.files['file']
+
+    if f.filename == '':
+        return jsonify(fileStatus=False)
+
+    picture = f.stream.read()
+    current_user.picture = picture
+    db.session.add(current_user)
+    db.session.commit()
+    # db.engine.execute("UPDATE kb_users SET picture=:picture WHERE kb_users.id=:id", {"picture": picture, "id": current_user.id})
+
+    return get_user_picture_by_id(current_user.id)
+
+
+@app.route('/ThreatKB/users/me/password', methods=['PUT'])
+@auto.doc()
+@login_required
+def update_my_password():
+    """Update the user's password associated with the given user_id
+    From Data: email (str), admin (bool), password (str), active (bool)
+    Return: user dictionary"""
+
+    old_password = request.json.get("old_password", None)
+    new_password1 = request.json.get("new_password1", None)
+    new_password2 = request.json.get("new_password2", None)
+
+    if not old_password or not new_password1 or not new_password2:
+        abort(404)
+
+    if not bcrypt.check_password_hash(current_user.password, old_password):
+        abort(401)
+
+    if not new_password1 == new_password2:
+        abort(400, description="New passwords not identical.")
+
+    current_user.password = bcrypt.generate_password_hash(new_password1)
+    db.session.add(current_user)
+    db.session.commit()
+
+    return jsonify(current_user.to_dict()), 200
+
 
 @app.route('/ThreatKB/users/<int:user_id>/picture', methods=['GET'])
 @auto.doc()
@@ -149,6 +200,8 @@ def update_user(user_id):
         if 'password' in request.json else user.password,
         admin=request.json['admin'],
         active=request.json['active'],
+        first_name=request.json['first_name'],
+        last_name=request.json['last_name'],
         id=user.id
     )
 

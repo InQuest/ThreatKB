@@ -1,0 +1,70 @@
+<div>
+    <div>
+        <form name="profile_form" novalidate
+              class="ng-scope ng-invalid ng-invalid-required ng-dirty"
+              ng-submit="ok()">
+
+            <div class="form-group">
+                <center>
+                    <img ng-src="/ThreatKB/users/me/picture" style="height:200px;">
+                </center>
+            </div>
+            <div>
+                <center>
+                    <button type="file" ngf-select="uploadFiles($file, $invalidFiles)" accept="image/*">
+                        Change Picture
+                    </button>
+                </center>
+            </div>
+            <BR>
+
+            <div class="form-group">
+                First Name<span class="error text-danger">*</span>
+                <input type="text" class="form-control" ng-model="current_user.first_name" ng-required="true"/>
+            </div>
+
+            <div class="form-group">
+                Last Name<span class="error text-danger">*</span>
+                <input type="text" class="form-control" ng-model="current_user.last_name" ng-required="true"/>
+            </div>
+
+            <div class="form-group">
+                Email<span class="error text-danger">*</span>
+                <input type="text" class="form-control" ng-model="current_user.email" ng-required="true"/>
+            </div>
+
+            <div>
+                <button ng-disabled="profile_form.$invalid" class="btn btn-primary pull-right"
+                        ng-click="update_profile()">Update Profile
+                </button>
+            </div>
+        </form>
+    </div>
+    <br><br>
+
+    <div>
+        <form name="password_form" novalidate
+              class="ng-scope ng-invalid ng-invalid-required ng-dirty"
+              ng-submit="ok()">
+
+            <div class="form-group">
+                Old Password<span class="error text-danger">*</span>
+                <input type="password" class="form-control" ng-model="old_password" ng-required="true"/>
+            </div>
+            <div class="form-group">
+                New Password<span class="error text-danger">*</span>
+                <input type="password" class="form-control" ng-model="new_password1" ng-required="true"/>
+            </div>
+            <div class="form-group">
+                New Password (Repeat)<span class="error text-danger">*</span>
+                <input type="password" class="form-control" ng-model="new_password2" ng-required="true"/>
+            </div>
+            <div class="form-group">
+                <button ng-disabled="!password_form_invalid()" class="btn btn-primary pull-right"
+                        ng-click="update_password()">Update
+                    Password
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

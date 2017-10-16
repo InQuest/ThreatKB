@@ -55,8 +55,9 @@
             <div class="modal-body">
 
                 <div class="form-group" ng-if="yara_rule.id">
-                    <label>ID</label>
-                    <label type="text" class="form-control">{{ yara_rule.id }}</label>
+                    <label>Revision</label>
+                    <label type="text" class="form-control">{{ yara_rule.revision }} M{{ yara_rule.date_modified }}
+                        by {{ yara_rule.modified_user.email }}</label>
                 </div>
 
                 <div class="form-group" ng-if="yara_rule.eventid">
@@ -75,11 +76,6 @@
                            ng-maxlength="128"/>
                 </div>
 
-                <div class="form-group" ng-if="yara_rule.id">
-                    <label>Revision</label>
-                    <label type="text" class="form-control">{{ yara_rule.revision }} - {{ yara_rule.date_modified }}
-                        by {{ yara_rule.modified_user.email }}</label>
-                </div>
 
                 <label>Strings Editor</label>
                 <span class="error text-danger" ng-if="!yara_rule.strings">*</span>
@@ -90,20 +86,6 @@
                 <span class="error text-danger" ng-if="!yara_rule.condition">*</span>
                 <ui-codemirror ui-codemirror-opts="editor_options" ng-model="yara_rule.condition"></ui-codemirror>
                 <BR>
-
-                <div class="form-group" ng-if="yara_rule.date_created">
-                    <label>Date Created:</label>
-
-                    <label type="text" class="form-control" name="date_created"
-                           ng-model="yara_rule.date_created">{{ yara_rule.date_created }}</label>
-                </div>
-
-                <div class="form-group" ng-if="yara_rule.date_modified">
-                    <label>Date Modified:</label>
-
-                    <label type="text" class="form-control" name="date_modified"
-                           ng-model="yara_rule.date_modified">{{ yara_rule.date_modified }}</label>
-                </div>
 
                 <div class="form-group">
                     <label>State:</label>
@@ -228,7 +210,7 @@
                     <label>Tags:</label>
 
                     <tags-input ng-model="yara_rule.tags" on-tag-added="addedTag($tag)"
-                                on-tag-removed="removedTag($tag)">
+                                on-tag-removed="removedTag($tag)" add-on-paste="true">
                         <auto-complete minlength="2" source="loadTags($query)" load-on-focus="true"
                                        load-on-empty="true"></auto-complete>
                     </tags-input>

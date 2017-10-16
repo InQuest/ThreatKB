@@ -15,7 +15,7 @@ class KBUser(db.Model):
     active = db.Column(db.Boolean, nullable=False, default=True)
     first_name = db.Column(db.String(255), nullable=True)
     last_name = db.Column(db.String(255), nullable=True)
-    picture = db.Column(db.BLOB, nullable=True)
+    picture = db.Column(db.LargeBinary, nullable=True)
 
     def is_authenticated(self):
         return True
