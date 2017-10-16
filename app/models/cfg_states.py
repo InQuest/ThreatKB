@@ -1,4 +1,5 @@
 from app import db
+from app.models import yara_rule, c2dns, c2ip, tasks
 from sqlalchemy.event import listens_for
 
 class Cfg_states(db.Model):
@@ -13,7 +14,11 @@ class Cfg_states(db.Model):
         return dict(
             state=self.state,
             id=self.id,
-            is_release_state=self.is_release_state
+            is_release_state=self.is_release_state,
+            sig_count=db.session.query(yara_rule.Yara_rule).filter(yara_rule.Yara_rule.state == self.state).count(),
+            dns_count=db.session.query(c2dns.C2dns).filter(c2dns.C2dns.state == self.state).count(),
+            ip_count=db.session.query(c2ip.C2ip).filter(c2ip.C2ip.state == self.state).count(),
+            task_count=db.session.query(tasks.Tasks).filter(tasks.Tasks.state == self.state).count(),
         )
 
     def __repr__(self):

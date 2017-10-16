@@ -69,6 +69,14 @@
 
                 <th>Release State</th>
 
+                <th>Signature Count</th>
+
+                <th>DNS Count</th>
+
+                <th>IP Count</th>
+
+                <th>Task Count</th>
+
                 <th style="width: 120px;">Actions</th>
             </tr>
             </thead>
@@ -80,6 +88,11 @@
 
                 <td ng-if="cfg_state.is_release_state && cfg_state.id">Yes</td>
                 <td ng-if="!cfg_state.is_release_state && cfg_state.id">No</td>
+
+                <td ng-if="cfg_state.id">{{ cfg_state.sig_count }}</td>
+                <td ng-if="cfg_state.id">{{ cfg_state.dns_count }}</td>
+                <td ng-if="cfg_state.id">{{ cfg_state.ip_count }}</td>
+                <td ng-if="cfg_state.id">{{ cfg_state.task_count }}</td>
 
                 <td ng-if="cfg_state.id" style="float:right">
                     <button type="submit"

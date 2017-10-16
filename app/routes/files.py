@@ -1,5 +1,5 @@
 from app import app, db, admin_only, auto
-from app.models import files
+from app.models import files, cfg_settings
 from flask import abort, jsonify, request, send_file, json
 from flask.ext.login import login_required, current_user
 from werkzeug.utils import secure_filename
@@ -38,8 +38,9 @@ def upload_file():
         return jsonify(fileStatus=False)
 
     if f:
+        file_store_path_root = cfg_settings.Cfg_settings.get_setting("FILE_STORE_PATH") or "/tmp"
         filename = secure_filename(f.filename)
-        full_path = os.path.join(app.config['FILE_STORE_PATH'],
+        full_path = os.path.join(file_store_path_root,
                                  request.values['entity_type'] if 'entity_type' in request.values else "",
                                  request.values['entity_id'] if 'entity_id' in request.values else "",
                                  filename)

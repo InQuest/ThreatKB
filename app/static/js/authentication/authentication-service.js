@@ -16,7 +16,10 @@ angular.module('ThreatKB')
                 logout: logout,
                 register: register,
                 getUserStatus: getUserStatus,
-                getUser: getUser
+                getUser: getUser,
+                user: getUser,
+                getMe: getMe,
+                changePassword: changePassword
             });
 
             function isLoggedIn() {
@@ -29,6 +32,39 @@ angular.module('ThreatKB')
 
             function getUser() {
                 return user_dict;
+            }
+
+            function changePassword(old_password, new_password1, new_password2) {
+                return $http.put('/ThreatKB/users/me/password', {
+                    old_password: old_password,
+                    new_password1: new_password1,
+                    new_password2: new_password2
+                })
+                    .then(function (success) {
+                            if (success.status === 200 && success.data) {
+                                return success.data;
+                            } else {
+                                return "error";
+                            }
+                        },
+                        function (error) {
+                            return $q.reject(error.data);
+                        }
+                    )
+            }
+
+            function getMe() {
+                return $http.get('/ThreatKB/users/me')
+                    .then(function (success) {
+                            if (success.status === 200 && success.data) {
+                                return success.data;
+                            } else {
+                                //TODO
+                            }
+                        }, function (error) {
+                            return $q.reject(error.data);
+                        }
+                    );
             }
 
             function login(email, password) {
@@ -116,6 +152,7 @@ angular.module('ThreatKB')
                         user_dict = {};
                     });
             }
+
 
         }])
     .factory('UserService', ['$resource', function ($resource) {

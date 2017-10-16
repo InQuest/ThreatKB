@@ -6,10 +6,22 @@ from app.models.cfg_category_range_mapping import CfgCategoryRangeMapping
 from sqlalchemy.event import listens_for
 import json
 
+
 class Yara_rule(db.Model):
-    metadata_fields = ["description", "confidence", "test_status", "severity", "category", "file_type",
-                       "subcategory1", "subcategory2", "subcategory3", "reference_text", "reference_link",
-                       "eventid"]
+    metadata_fields = [{"description": "description"},
+                       {"confidence": "confidence"},
+                       {"test_status": "test_status"},
+                       {"severity": "severity"},
+                       {"category": "category"},
+                       {"file_type": "file_type"},
+                       {"subcategory1": "subcategory1"},
+                       {"subcategory2": "subcategory2"},
+                       {"subcategory3": "subcategory3"},
+                       {"reference_text": "reference_text"},
+                       {"reference_link": "reference_link"},
+                       {"eventid": "eventid"},
+                       {"revision": "revision"},
+                       {"last_revision_date": "date_modified"}]
 
     __tablename__ = "yara_rules"
 
@@ -50,7 +62,7 @@ class Yara_rule(db.Model):
 
     owner_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=True)
     owner_user = db.relationship('KBUser', foreign_keys=owner_user_id,
-                                    primaryjoin="KBUser.id==Yara_rule.owner_user_id")
+                                 primaryjoin="KBUser.id==Yara_rule.owner_user_id")
 
     comments = db.relationship("Comments", foreign_keys=[id],
                                primaryjoin="and_(Comments.entity_id==Yara_rule.id, Comments.entity_type=='%s')" % (
@@ -121,7 +133,7 @@ class Yara_rule(db.Model):
     def to_yara_rule_string(yara_dict):
         yara_rule_text = "rule %s\n{\n\n" % (yara_dict.get("name"))
         yara_rule_text += "\tmeta:\n"
-        for field in Yara_rule.metadata_fields:
+        for field in Yara_rule.metadata_fields.keys():
             if yara_dict.get(field, None):
                 yara_rule_text += "\t%s = \"%s\"\n" % (field, yara_dict[field])
 
@@ -137,7 +149,6 @@ class Yara_rule(db.Model):
 
         return yara_rule_text
 
-
     @staticmethod
     def make_yara_sane(text, type_):
         type_ = "%s:" if not type_.endswith(":") else type_
@@ -149,7 +160,7 @@ class Yara_rule(db.Model):
         yara_rule.name = yara_dict["rule_name"]
 
         yara_metadata = {key.lower(): val.strip().strip("\"") for key, val in yara_dict["metadata"].iteritems()}
-        for possible_field in Yara_rule.metadata_fields:
+        for possible_field in Yara_rule.metadata_fields.keys():
             if possible_field in yara_metadata.keys():
                 field = yara_metadata[possible_field] if not possible_field in ["confidence", "severity",
                                                                                 "eventid"] else int(
@@ -157,7 +168,7 @@ class Yara_rule(db.Model):
                 ## If the eventid already exists. Skip it.
                 if possible_field == "eventid" and Yara_rule.query.filter_by(eventid=field).first():
                     continue
-                setattr(yara_rule, possible_field, field)
+                setattr(yara_rule, Yara_rule.metadata_fields[possible_field], field)
 
         yara_rule.condition = " ".join(yara_dict["condition_terms"])
         yara_rule.strings = "\n".join(
@@ -172,6 +183,7 @@ class Yara_rule(db.Model):
 def generate_eventid(mapper, connect, target):
     if not target.eventid:
         target.eventid = CfgCategoryRangeMapping.get_next_category_eventid(target.category)
+
 
 class Yara_rule_history(db.Model):
     __tablename__ = "yara_rules_history"

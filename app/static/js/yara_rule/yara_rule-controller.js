@@ -52,7 +52,7 @@ angular.module('ThreatKB')
                             + '</button>'
                             + '<button ng-click="grid.appScope.delete(row.entity.id)"'
                             + ' ng-confirm-click="Are you sure you want to '
-                            + 'inactivate this signature?" class="btn btn-sm btn-danger">'
+                            + 'inactivate this signature ({{ row.entity.name }})?" class="btn btn-sm btn-danger">'
                             + '<small>'
                             + '<span class="glyphicon glyphicon-remove-circle"></span>'
                             + '</small>'

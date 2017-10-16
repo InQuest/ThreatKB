@@ -20,7 +20,9 @@ class CfgCategoryRangeMapping(db.Model):
             category=self.category,
             range_min=self.range_min,
             range_max=self.range_max,
-            current=self.current
+            current=self.current,
+            sig_count=db.session.query(yara_rule.Yara_rule).filter(yara_rule.Yara_rule.eventid >= self.range_min,
+                                                                   yara_rule.Yara_rule.eventid <= self.range_max).count()
         )
 
     @staticmethod

@@ -109,7 +109,7 @@ class Release(db.Model):
             if not dns_id in last_release_dns:
                 release_data["DNS"]["Added"].append(dns)
             else:
-                if parser.parse(ip["date_modified"]) > datetime.datetime.now():
+                if parser.parse(dns["date_modified"]) > datetime.datetime.now():
                     release_data["DNS"]["Modified"].append(dns)
                 del last_release["DNS"]["DNS"][str(dns_id)]
 
