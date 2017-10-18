@@ -1,3 +1,5 @@
+# NOTE: THIS REPO IS IN A PRE-RELEASE STATE
+
 ## Pre-requisites
 # Instructions in Ubuntu Linux
 
