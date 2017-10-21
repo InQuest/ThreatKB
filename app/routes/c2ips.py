@@ -44,7 +44,7 @@ def get_c2ip(id):
 @login_required
 def create_c2ip():
     """Create c2ip artifact
-    From Data: ip (str), asn (str), country (str), reference_link (str), reference_text (str), expiration_type (str), expiration_timestamp (date), state(str)
+    From Data: ip (str), asn (str), country (str), reference_link (str), expiration_type (str), expiration_timestamp (date), state(str)
     Return: c2dns artifact dictionary"""
     entity = c2ip.C2ip(
         ip=request.json['ip']
@@ -52,7 +52,6 @@ def create_c2ip():
         , country=request.json['country']
         , state=request.json['state']['state']
         , reference_link=request.json['reference_link']
-        , reference_text=request.json['reference_text']
         , expiration_type=request.json['expiration_type']
         , expiration_timestamp=parser.parse(request.json['expiration_timestamp']) if request.json.get("expiration_type",
                                                                                                       None) else None
@@ -92,7 +91,6 @@ def update_c2ip(id):
         state=request.json['state']['state'] if request.json['state'] and 'state' in request.json['state'] else
         request.json['state'],
         reference_link=request.json['reference_link'],
-        reference_text=request.json['reference_text'],
         expiration_type=request.json['expiration_type'],
         expiration_timestamp=parser.parse(request.json['expiration_timestamp']) if request.json.get(
             "expiration_timestamp", None) else None,

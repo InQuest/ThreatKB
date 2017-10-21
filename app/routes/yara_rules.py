@@ -48,7 +48,7 @@ def get_yara_rule(id):
 @login_required
 def create_yara_rule():
     """Create yara_rule artifact
-    From Data: name (str), test_status (str), confidence (int), severity (int), description (str), state(str), category (str), file_type (str), subcategory1 (str), subcategory2 (str), subcategory3 (str), reference_link (str), reference_text (str), condition (str), strings (str)
+    From Data: name (str), test_status (str), confidence (int), severity (int), description (str), state(str), category (str), file_type (str), subcategory1 (str), subcategory2 (str), subcategory3 (str), reference_link (str) (str), condition (str), strings (str)
     Return: yara_rule artifact dictionary"""
     new_sig_id = 0
     if request.json['category'] and 'category' in request.json['category']:
@@ -67,7 +67,6 @@ def create_yara_rule():
         , subcategory2=request.json['subcategory2']
         , subcategory3=request.json['subcategory3']
         , reference_link=request.json['reference_link']
-        , reference_text=request.json['reference_text']
         , condition=yara_rule.Yara_rule.make_yara_sane(request.json['condition'], "condition:")
         , strings=yara_rule.Yara_rule.make_yara_sane(request.json['strings'], "strings:")
         , eventid=new_sig_id
@@ -132,7 +131,6 @@ def update_yara_rule(id):
         subcategory2=request.json['subcategory2'],
         subcategory3=request.json['subcategory3'],
         reference_link=request.json['reference_link'],
-        reference_text=request.json['reference_text'],
         condition=yara_rule.Yara_rule.make_yara_sane(request.json["condition"], "condition:"),
         strings=yara_rule.Yara_rule.make_yara_sane(request.json["strings"], "strings:"),
         eventid=temp_sig_id,

@@ -8,7 +8,7 @@ import json
 
 class Yara_rule(db.Model):
     metadata_fields = ["description", "confidence", "test_status", "severity", "category", "file_type",
-                       "subcategory1", "subcategory2", "subcategory3", "reference_text", "reference_link",
+                       "subcategory1", "subcategory2", "subcategory3", "reference_link",
                        "eventid"]
 
     __tablename__ = "yara_rules"
@@ -30,7 +30,6 @@ class Yara_rule(db.Model):
     subcategory2 = db.Column(db.String(32))
     subcategory3 = db.Column(db.String(32))
     reference_link = db.Column(db.String(2048))
-    reference_text = db.Column(db.String(2048))
     condition = db.Column(db.String(2048))
     strings = db.Column(db.String(30000))
     active = db.Column(db.Boolean, nullable=False, default=True)
@@ -88,7 +87,6 @@ class Yara_rule(db.Model):
             subcategory2=self.subcategory2,
             subcategory3=self.subcategory3,
             reference_link=self.reference_link,
-            reference_text=self.reference_text,
             condition="condition:\n\t%s" % self.condition,
             strings="strings:\n\t%s" % self.strings,
             eventid=self.eventid,

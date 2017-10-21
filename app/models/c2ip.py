@@ -23,7 +23,6 @@ class C2ip(db.Model):
     country = db.Column(db.String(64))
     state = db.Column(db.String(32), index=True)
     reference_link = db.Column(db.String(2048))
-    reference_text = db.Column(db.String(2048))
     expiration_type = db.Column(db.String(32))
     expiration_timestamp = db.Column(db.DateTime(timezone=True))
 
@@ -58,7 +57,6 @@ class C2ip(db.Model):
             country=self.country,
             state=self.state,
             reference_link=self.reference_link,
-            reference_text=self.reference_text,
             expiration_type=self.expiration_type,
             expiration_timestamp=self.expiration_timestamp.isoformat() if self.expiration_timestamp else None,
             id=self.id,

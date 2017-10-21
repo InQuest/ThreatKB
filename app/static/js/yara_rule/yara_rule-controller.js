@@ -127,7 +127,6 @@ angular.module('ThreatKB')
                     "subcategory2": "",
                     "subcategory3": "",
                     "reference_link": "",
-                    "reference_text": "",
                     "condition": "",
                     "strings": "",
                     "eventid": "",
