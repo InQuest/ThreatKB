@@ -50,25 +50,16 @@
                     <li>
                         <a href="#!/yara_rules">Signatures</a>
                     </li>
+                    <li>
+                        <a href="#!/import" title="Import"><span class="glyphicon glyphicon-import"></span></a></li>
+                    </li>
+                    <li>
+                        <a href="#!/releases" title="Releases"><span class="glyphicon glyphicon-export"></span></a></li>
+                    </li>
+                    <li>
                 </ul>
-                <div class="btn-group" uib-dropdown ng-show="isLoggedIn() && isAdmin()">
-                    <button id="btn-append-to-single-button" type="button" class="btn btn-sm navbar-inverse"
-                            style="padding-top:15px; border:0px; font-size: 14px;" uib-dropdown-toggle>
-                        <span style="color:#9d9d9d">Administration</span>&nbsp;&nbsp;<span class="caret"
-                                                                                           style="color:#9d9d9d"></span>
-                    </button>
-                    <ul class="dropdown-menu" uib-dropdown-menu role="menu" style="background-color: #ECF0F1;"
-                        aria-labelledby="btn-append-to-single-button">
-                        <li role="menuitem"><a href="#!/import">Import Artifacts</a></li>
-                        <li role="menuitem"><a href="#!/users">Manage Users</a></li>
-                        <li role="menuitem"><a href="#!/whitelist">Manage Whitelist</a></li>
-                        <li role="menuitem"><a href="#!/releases">Manage Releases</a></li>
-                        <li role="menuitem"><a href="#!/tags">Manage Tags</a></li>
-                        <li role="menuitem"><a href="#!/cfg_states">Manage States</a></li>
-                        <li role="menuitem"><a href="#!/cfg_category_range_mapping">Manage Categories</a></li>
-                        <li role="menuitem"><a href="#!/cfg_settings">Manage UI Settings</a></li>
-                    </ul>
-                </div>
+
+
                 <div class="btn-group pull-right" uib-dropdown ng-show="isLoggedIn()">
                     <button id="btn-append-to-single-button" type="button" class="btn btn-sm navbar-inverse"
                             style="padding-top:15px; border:0px;" uib-dropdown-toggle>
@@ -80,6 +71,24 @@
                         <li role="menuitem"><a href="#!/profile">Edit Profile</a></li>
                         <li role="menuitem"><a href="#!/access_keys">My API Keys</a></li>
                         <li role="menuitem"><a ng-click="logout()">Sign out</a></li>
+                    </ul>
+                </div>
+
+                <div class="btn-group pull-right" style="position:relative" uib-dropdown
+                     ng-show="isLoggedIn() && isAdmin()" style="box-shadow: -14px 0 0 -13px #9d9d9d">
+                    <button id="btn-append-to-single-button" type="button" class="btn btn-sm navbar-inverse"
+                            style="padding-top:17px; border:0px; font-size: 14px;" uib-dropdown-toggle>
+                        <span class="glyphicon glyphicon-cog" style="color:#9d9d9d"></span>&nbsp;<span class="caret"
+                                                                                                       style="color:#9d9d9d"></span>
+                    </button>
+                    <ul class="dropdown-menu" uib-dropdown-menu role="menu" style="background-color: #ECF0F1;"
+                        aria-labelledby="btn-append-to-single-button">
+                        <li role="menuitem"><a href="#!/users">Manage Users</a></li>
+                        <li role="menuitem"><a href="#!/whitelist">Manage Whitelist</a></li>
+                        <li role="menuitem"><a href="#!/tags">Manage Tags</a></li>
+                        <li role="menuitem"><a href="#!/cfg_states">Manage States</a></li>
+                        <li role="menuitem"><a href="#!/cfg_category_range_mapping">Manage Categories</a></li>
+                        <li role="menuitem"><a href="#!/cfg_settings">Manage UI Settings</a></li>
                     </ul>
                 </div>
 
