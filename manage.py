@@ -19,7 +19,6 @@ if __name__ == '__main__':
     from app.models import c2dns
     from app.models import cfg_settings
     from app.models import yara_rule
-    from app.models import cfg_reference_text_templates
     from app.models import cfg_states
     from app.models import comments
     from app.models import tags

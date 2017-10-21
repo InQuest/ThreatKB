@@ -43,13 +43,12 @@ def get_c2dns(id):
 @login_required
 def create_c2dns():
     """Create c2dns artifact
-    From Data: domain_name (str), match_type (str), reference_link (str), reference_text (str), expiration_type (str), expiration_timestamp (date), state(str)
+    From Data: domain_name (str), match_type (str), reference_link (str), expiration_type (str), expiration_timestamp (date), state(str)
     Return: c2dns artifact dictionary"""
     entity = c2dns.C2dns(
         domain_name=request.json['domain_name']
         , match_type=request.json['match_type']
         , reference_link=request.json['reference_link']
-        , reference_text=request.json['reference_text']
         , expiration_type=request.json['expiration_type']
         , expiration_timestamp=parser.parse(request.json['expiration_timestamp']) if request.json.get("expiration_type",
                                                                                                       None) else None
@@ -91,7 +90,6 @@ def update_c2dns(id):
         domain_name=request.json['domain_name'],
         match_type=request.json['match_type'],
         reference_link=request.json['reference_link'],
-        reference_text=request.json['reference_text'],
         expiration_type=request.json['expiration_type'],
         expiration_timestamp=parser.parse(request.json['expiration_timestamp']) if request.json.get(
             "expiration_timestamp", None) else None,

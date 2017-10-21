@@ -42,7 +42,6 @@ ThreatKB (staging) $ source flask/bin/activate
 (flask) ThreatKB (staging) $ python manage.py db migrate -m "initial migration"
 INFO  [alembic.runtime.migration] Context impl MySQLImpl.
 INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
-INFO  [alembic.autogenerate.compare] Detected added table 'cfg_reference_text_templates'
 INFO  [alembic.autogenerate.compare] Detected added table 'cfg_states'
 INFO  [alembic.autogenerate.compare] Detected added table 'kb_users'
 INFO  [alembic.autogenerate.compare] Detected added table 'tags'

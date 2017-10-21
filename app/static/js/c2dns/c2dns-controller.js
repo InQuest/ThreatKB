@@ -122,7 +122,6 @@ angular.module('ThreatKB')
                     "domain_name": "",
                     "match_type": "",
                     "reference_link": "",
-                    "reference_text": "",
                     "expiration_type": "",
                     "expiration_timestamp": "",
                     "id": "",

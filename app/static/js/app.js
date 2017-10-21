@@ -38,16 +38,6 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                     }]
                 }
             })
-            .when('/cfg_reference_text_templates', {
-                templateUrl: 'views/cfg_reference_text_templates/cfg_reference_text_templates.html',
-                controller: 'Cfg_reference_text_templatesController',
-                access: {restricted: true, admin: true},
-                resolve: {
-                    resolvedCfg_reference_text_templates: ['Cfg_reference_text_templates', function (Cfg_reference_text_templates) {
-                        return Cfg_reference_text_templates.query();
-                    }]
-                }
-            })
             .when('/cfg_category_range_mapping', {
                 templateUrl: 'views/cfg_category_range_mapping/cfg_category_range_mapping.html',
                 controller: 'CfgCategoryRangeMappingController',

@@ -20,7 +20,6 @@ class C2dns(db.Model):
     domain_name = db.Column(db.String(2048), index=True, unique=True)
     match_type = db.Column(db.Enum('exact', 'wildcard'))
     reference_link = db.Column(db.String(2048))
-    reference_text = db.Column(db.String(2048))
     expiration_type = db.Column(db.String(32))
     expiration_timestamp = db.Column(db.DateTime(timezone=True))
 
@@ -56,7 +55,6 @@ class C2dns(db.Model):
             domain_name=self.domain_name,
             match_type=self.match_type,
             reference_link=self.reference_link,
-            reference_text=self.reference_text,
             expiration_type=self.expiration_type,
             expiration_timestamp=self.expiration_timestamp.isoformat() if self.expiration_timestamp else None,
             id=self.id,
