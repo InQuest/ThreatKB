@@ -41,7 +41,6 @@ class Yara_rule(db.Model):
     subcategory2 = db.Column(db.String(32))
     subcategory3 = db.Column(db.String(32))
     reference_link = db.Column(db.String(2048))
-    reference_text = db.Column(db.String(2048))
     condition = db.Column(db.String(2048))
     strings = db.Column(db.String(30000))
     active = db.Column(db.Boolean, nullable=False, default=True)
