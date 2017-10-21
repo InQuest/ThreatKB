@@ -58,7 +58,11 @@ def test_yara_rule_rest(rule_id):
     yara_rule_entity = yara_rule.Yara_rule.query.get(rule_id)
     if not yara_rule_entity:
         abort(500)
-    return jsonify(test_yara_rule(yara_rule_entity, yara_rule_entity.files, current_user.id)), 200
+
+    try:
+        return jsonify(test_yara_rule(yara_rule_entity, yara_rule_entity.files, current_user.id)), 200
+    except Exception, e:
+        return e.message, 500
 
 
 @celery.task()
@@ -81,11 +85,16 @@ def test_yara_rule(yara_rule_entity, files_to_test, user, is_async=False):
 
     total_file_count, count_of_files_matched, tests_terminated, total_file_time = 0, 0, 0, 0
     threshold = app.config['MAX_MILLIS_PER_FILE_THRESHOLD']
+    if not threshold:
+        threshold = 3.0
     processes = []
     manager_dicts = []
     for f in files_to_test:
         total_file_count += 1
-        file_path = os.path.join(app.config['FILE_STORE_PATH'],
+        file_store_path = app.config['FILE_STORE_PATH']
+        if not file_store_path:
+            raise Exception('File Store Path configuration setting not set.')
+        file_path = os.path.join(file_store_path,
                                  str(f.entity_type) if f.entity_type is not None else "",
                                  str(f.entity_id) if f.entity_id is not None else "",
                                  str(f.filename))

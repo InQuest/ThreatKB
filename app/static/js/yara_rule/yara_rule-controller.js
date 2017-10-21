@@ -158,8 +158,8 @@ angular.module('ThreatKB')
                 });
             };
         }])
-    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', 'yara_rule', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users',
-        function ($scope, $http, $uibModalInstance, yara_rule, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users) {
+    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', 'yara_rule', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags',
+        function ($scope, $http, $uibModalInstance, yara_rule, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags) {
             $scope.yara_rule = yara_rule;
             $scope.yara_rule.new_comment = "";
             $scope.Comments = Comments;
@@ -248,14 +248,7 @@ angular.module('ThreatKB')
             };
 
             $scope.loadTags = function (query) {
-                return $http.get('/ThreatKB/tags', {cache: false}).then(function (response) {
-                    var tags = response.data;
-                    return tags.filter(function (tag) {
-                        return tag.text.toLowerCase().indexOf(query.toLowerCase()) !== -1;
-                    }, function (error) {
-                        growl.error(error.data, {ttl: -1});
-                    });
-                });
+                return Tags.loadTags(query);
             };
 
             $scope.$watch('testing', function () {
@@ -276,7 +269,8 @@ angular.module('ThreatKB')
                         $scope.testing = false;
                         return true;
                     }, function (error) {
-                        growl.error(error.data, {ttl: -1});
+                        growl.error(error.data, {ttl: 3000});
+                        $scope.testing = false;
                     });
                 }
             }

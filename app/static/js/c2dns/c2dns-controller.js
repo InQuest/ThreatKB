@@ -150,8 +150,8 @@ angular.module('ThreatKB')
                 });
             };
         }])
-    .controller('C2dnsSaveController', ['$scope', '$http', '$uibModalInstance', 'c2dns', 'Cfg_states', 'Comments',
-        function ($scope, $http, $uibModalInstance, c2dns, Cfg_states, Comments) {
+    .controller('C2dnsSaveController', ['$scope', '$http', '$uibModalInstance', 'c2dns', 'Cfg_states', 'Comments', 'Tags',
+        function ($scope, $http, $uibModalInstance, c2dns, Cfg_states, Comments, Tags) {
             $scope.c2dns = c2dns;
             $scope.c2dns.new_comment = "";
             $scope.Comments = Comments;
@@ -203,13 +203,6 @@ angular.module('ThreatKB')
             };
 
             $scope.loadTags = function (query) {
-                return $http.get('/ThreatKB/tags', {cache: false}).then(function (response) {
-                    var tags = response.data;
-                    return tags.filter(function (tag) {
-                        return tag.text.toLowerCase().indexOf(query.toLowerCase()) !== -1;
-                    });
-                }, function (error) {
-                    growl.error(error.data, {ttl: -1});
-                });
-            }
+                return Tags.loadTags(query);
+            };
         }]);

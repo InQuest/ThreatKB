@@ -1,4 +1,4 @@
- <div>
+<div>
 
     <script type="text/ng-template" id="c2ip-save.html">
         <form name="form" novalidate
@@ -128,8 +128,11 @@
                     <label>Tags:</label>
 
                     <tags-input ng-model="c2ip.tags" on-tag-added="addedTag($tag)" on-tag-removed="removedTag($tag)">
-                        <auto-complete minlength="2" source="loadTags($query)" load-on-focus="true"
-                                       load-on-empty="true"></auto-complete>
+                        <auto-complete source="loadTags($query)"
+                                       min-length="0"
+                                       load-on-focus="true"
+                                       load-on-empty="true">
+                        </auto-complete>
                     </tags-input>
                 </div>
 
@@ -149,7 +152,8 @@
                     <div>
                         <ul class="list-group">
                             <li class="list-group-item justify-content-between"
-                                ng-repeat="comment in c2ip.comments | orderBy:'-date_created'">{{ print_comment(comment) }}
+                                ng-repeat="comment in c2ip.comments | orderBy:'-date_created'">{{ print_comment(comment)
+                                }}
                                 <span class="pull-right">{{ comment.user.email }}&nbsp;<small>{{ pretty_date(comment.date_created) }}</small></span>
                             </li>
                         </ul>
