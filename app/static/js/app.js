@@ -1,7 +1,7 @@
 // Declare app level module which depends on filters, and services
 angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize', 'ui.select', 'ngTagsInput',
     'angular-growl', 'angular-toArrayFilter', 'ui.codemirror', 'ngFileUpload', 'ngFileSaver', 'ngPassword',
-    'ngMessages', 'blockUI', 'ui.grid', 'ui.grid.autoResize'])
+    'ngMessages', 'blockUI', 'ui.grid', 'ui.grid.saveState', 'ui.grid.autoResize'])
     .config(['$routeProvider', function ($routeProvider) {
         $routeProvider
             .when('/', {
@@ -35,16 +35,6 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                 resolve: {
                     resolvedC2ip: ['C2ip', function (C2ip) {
                         return C2ip.query();
-                    }]
-                }
-            })
-            .when('/cfg_reference_text_templates', {
-                templateUrl: 'views/cfg_reference_text_templates/cfg_reference_text_templates.html',
-                controller: 'Cfg_reference_text_templatesController',
-                access: {restricted: true, admin: true},
-                resolve: {
-                    resolvedCfg_reference_text_templates: ['Cfg_reference_text_templates', function (Cfg_reference_text_templates) {
-                        return Cfg_reference_text_templates.query();
                     }]
                 }
             })

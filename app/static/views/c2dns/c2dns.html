@@ -108,18 +108,6 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Reference Text:</label>
-                    <span class="error"
-                          ng-show="form.reference_text.$error.minlength">Must be at least  characters.</span>
-                    <span class="error"
-                          ng-show="form.reference_text.$error.maxlength">Must be at most 2048 characters.</span>
-                    <span class="error text-danger">*</span>
-                    <input type="text" class="form-control" name="reference_text"
-                           ng-model="c2dns.reference_text" ng-required="true"
-                           ng-maxlength="2048"/>
-                </div>
-
-                <div class="form-group">
                     <label>Tags:</label>
 
                     <tags-input ng-model="c2dns.tags" on-tag-added="addedTag($tag)" on-tag-removed="removedTag($tag)">
@@ -136,12 +124,13 @@
 
 
                     <div class="input-group">
-                        <textarea class="form-control" placeholder="Enter a comment..." rows="1"
+                        <textarea class="form-control" placeholder="Enter a comment..." rows="8"
                                   ng-model="c2dns.new_comment"></textarea>
 
-                        <span class="input-group-btn">
+                        <span class="input-group-btn" style="height:10px;">
                             <button class="btn btn-secondary" type="button"
-                                    ng-click="add_comment(c2dns.id)">Post</button>
+                                    ng-click="add_comment(c2dns.id)" style="height:100%;"><span
+                                    class="glyphicon glyphicon-plus"></span></button>
                         </span>
                     </div>
                     <br>

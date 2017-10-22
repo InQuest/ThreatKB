@@ -41,7 +41,6 @@ def run(debug=False, port=5000, host='127.0.0.1'):
     from app.models import c2dns
     from app.models import cfg_settings
     from app.models import yara_rule
-    from app.models import cfg_reference_text_templates
     from app.models import cfg_states
     from app.models import comments
     from app.models import tags
@@ -74,7 +73,6 @@ def run(debug=False, port=5000, host='127.0.0.1'):
     from app.routes import c2dns
     from app.routes import cfg_settings
     from app.routes import yara_rules
-    from app.routes import cfg_reference_text_templates
     from app.routes import cfg_states
     from app.routes import comments
     from app.routes import tags

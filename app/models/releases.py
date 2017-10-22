@@ -77,7 +77,7 @@ class Release(db.Model):
             if not eventid in last_release_eventids:
                 release_data["Signatures"]["Added"].append(signature)
             else:
-                if parser.parse(signature["date_modified"]) > datetime.datetime.now():
+                if parser.parse(signature["last_revision_date"]) > datetime.datetime.now():
                     release_data["Signatures"]["Modified"].append(signature)
                 del last_release["Signatures"]["Signatures"][str(eventid)]
 

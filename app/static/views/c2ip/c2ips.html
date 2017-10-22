@@ -92,19 +92,6 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Reference Text:</label>
-                    <span class="error text-danger">*</span>
-                    <span class="error"
-                          ng-show="form.reference_text.$error.minlength">Must be at least  characters.</span>
-                    <span class="error"
-                          ng-show="form.reference_text.$error.maxlength">Must be at most 4096 characters.</span>
-
-                    <input class="form-control" name="reference_text"
-                           ng-model="c2ip.reference_text" ng-required="true"
-                           ng-maxlength="4096"/>
-                </div>
-
-                <div class="form-group">
                     <label>Expiration Type:</label>
                     <span class="error"
                           ng-show="form.expiration_type.$error.minlength">Must be at least  characters.</span>
@@ -140,12 +127,13 @@
                     <label>Comments</label>
 
                     <div class="input-group">
-                        <textarea class="form-control" placeholder="Enter a comment..." rows="1"
+                        <textarea class="form-control" placeholder="Enter a comment..." rows="8"
                                   ng-model="c2ip.new_comment"></textarea>
 
-                        <span class="input-group-btn">
+                        <span class="input-group-btn" style="height:10px;">
                             <button class="btn btn-secondary" type="button"
-                                    ng-click="add_comment(c2ip.id)">Post</button>
+                                    ng-click="add_comment(c2ip.id)" style="height:100%;"><span
+                                    class="glyphicon glyphicon-plus"></span></button>
                         </span>
                     </div>
                     <BR>

@@ -56,7 +56,7 @@
 
                 <div class="form-group" ng-if="yara_rule.id">
                     <label>Revision</label>
-                    <label type="text" class="form-control">{{ yara_rule.revision }} M{{ yara_rule.date_modified }}
+                    <label type="text" class="form-control">{{ yara_rule.revision }} M{{ yara_rule.last_revision_date }}
                         by {{ yara_rule.modified_user.email }}</label>
                 </div>
 
@@ -195,18 +195,6 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Reference Text:</label>
-                    <span class="error"
-                          ng-show="form.reference_text.$error.minlength">Must be at least  characters.</span>
-                    <span class="error"
-                          ng-show="form.reference_text.$error.maxlength">Must be at most 2048 characters.</span>
-
-                    <input class="form-control" name="reference_text"
-                           ng-model="yara_rule.reference_text" ng-required="false"
-                           ng-maxlength="2048"/>
-                </div>
-
-                <div class="form-group">
                     <label>Tags:</label>
 
                     <tags-input ng-model="yara_rule.tags" on-tag-added="addedTag($tag)"
@@ -223,12 +211,13 @@
                     <label>Comments</label>
 
                     <div class="input-group">
-                        <textarea class="form-control" placeholder="Enter a comment..." rows="1"
+                        <textarea class="form-control" placeholder="Enter a comment..." rows="8"
                                   ng-model="yara_rule.new_comment"></textarea>
 
-                        <span class="input-group-btn">
+                        <span class="input-group-btn" style="height:10px;">
                             <button class="btn btn-secondary" type="button"
-                                    ng-click="add_comment(yara_rule.id)">Post</button>
+                                    ng-click="add_comment(yara_rule.id)" style="height:100%;"><span
+                                    class="glyphicon glyphicon-plus"></span></button>
                         </span>
                     </div>
                     <div style="padding-top:3px;">
@@ -256,9 +245,9 @@
                     <div style="padding-top:3px;">
                         <ul class="list-group">
                             <li class="list-group-item justify-content-between"
-                                ng-repeat="f in yara_rule.files | orderBy:'-date_modified'">
+                                ng-repeat="f in yara_rule.files | orderBy:'-last_revision_date'">
                                 <a href="ThreatKB/files/{{ f.entity_type }}/{{ f.entity_id }}/{{ f.id }}">{{ f.filename}}</a>
-                                <span class="pull-right">{{ f.user.email }}&nbsp;<small>{{ pretty_date(f.date_modified) }}</small></span>
+                                <span class="pull-right">{{ f.user.email }}&nbsp;<small>{{ pretty_date(f.last_revision_date) }}</small></span>
                             </li>
                         </ul>
                     </div>
