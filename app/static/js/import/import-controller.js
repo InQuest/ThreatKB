@@ -8,6 +8,21 @@ angular.module('ThreatKB').controller('ImportController',
             $scope.shared_state = {};
             $scope.shared_owner = null;
             $scope.users = Users.query();
+            $scope.metadata_field_mapping = JSON.stringify({
+                "description": "description",
+                "confidence": "confidence",
+                "test_status": "test_status",
+                "severity": "severity",
+                "category": "category",
+                "file_type": "file_type",
+                "subcategory1": "subcategory1",
+                "subcategory2": "subcategory2",
+                "subcategory3": "subcategory3",
+                "reference_link": "reference_link",
+                "eventid": "eventid",
+                "revision": "revision",
+                "last_revision_date": "last_revision_date"
+            }, null, '\t');
 
             $scope.block_message = "Committing Artifacts. This might take awhile, we're doing lots of advanced processing...";
 
@@ -43,7 +58,9 @@ angular.module('ThreatKB').controller('ImportController',
                 }
 
                 blockUI.start($scope.block_message);
-                Import.commit_artifacts(artifacts_to_commit, $scope.shared_reference, $scope.shared_state.state.state, $scope.shared_owner, $scope.extract_ip, $scope.extract_dns, $scope.extract_signature).then(function (data) {
+
+                var field_mapping = JSON.parse($scope.metadata_field_mapping);
+                Import.commit_artifacts(artifacts_to_commit, $scope.shared_reference, $scope.shared_state.state.state, $scope.shared_owner, $scope.extract_ip, $scope.extract_dns, $scope.extract_signature, field_mapping).then(function (data) {
                     blockUI.stop();
                     var message = "";
                     if (data.committed) {
@@ -72,7 +89,9 @@ angular.module('ThreatKB').controller('ImportController',
                 if ($scope.autocommit) {
                     blockUI.start($scope.block_message);
                 }
-                Import.import_artifacts($scope.import_text, $scope.autocommit, $scope.shared_reference, $scope.shared_state.state.state, $scope.shared_owner, $scope.extract_ip, $scope.extract_dns, $scope.extract_signature).then(function (data) {
+
+                var field_mapping = JSON.parse($scope.metadata_field_mapping);
+                Import.import_artifacts($scope.import_text, $scope.autocommit, $scope.shared_reference, $scope.shared_state.state.state, $scope.shared_owner, $scope.extract_ip, $scope.extract_dns, $scope.extract_signature, field_mapping).then(function (data) {
                         if ($scope.autocommit) {
                             blockUI.stop();
                             var message = "";
