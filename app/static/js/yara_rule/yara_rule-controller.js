@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('Yara_ruleController', ['$scope', '$filter', '$http', '$uibModal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states', 'CfgCategoryRangeMapping', 'Users',
-        function ($scope, $filter, $http, $uibModal, resolvedYara_rule, Yara_rule, Cfg_states, CfgCategoryRangeMapping, Users) {
+    .controller('Yara_ruleController', ['$scope', '$filter', '$http', '$uibModal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states', 'CfgCategoryRangeMapping', 'Users', 'growl',
+        function ($scope, $filter, $http, $uibModal, resolvedYara_rule, Yara_rule, Cfg_states, CfgCategoryRangeMapping, Users, growl) {
 
             $scope.yara_rules = resolvedYara_rule;
 
@@ -81,7 +81,7 @@ angular.module('ThreatKB')
             };
 
             $scope.update = function (id) {
-                $scope.yara_rule = Yara_rule.get({id: id});
+                $scope.yara_rule = Yara_rule.resource.get({id: id});
                 $scope.cfg_states = Cfg_states.query();
                 $scope.users = Users.query();
                 $scope.cfg_category_range_mapping = CfgCategoryRangeMapping.query();
@@ -89,8 +89,8 @@ angular.module('ThreatKB')
             };
 
             $scope.delete = function (id) {
-                Yara_rule.delete({id: id}, function () {
-                    $scope.yara_rules = Yara_rule.query();
+                Yara_rule.resource.delete({id: id}, function () {
+                    $scope.yara_rules = Yara_rule.resource.query();
                     $scope.gridOptions.data = $scope.yara_rules
                 });
             };
@@ -98,18 +98,26 @@ angular.module('ThreatKB')
             $scope.save = function (id_or_rule) {
                 var id = id_or_rule;
                 if (typeof(id_or_rule) === "object") {
-                    id = id_or_rule.id;
-                    $scope.yara_rule = id_or_rule;
+                    if (id_or_rule.merge) {
+                        Yara_rule.merge_signature($scope.yara_rule.id, id_or_rule.id).then(function (data) {
+                            growl.info("Successfully merged '" + $scope.yara_rule.name + "' into '" + id_or_rule.name + "'", {ttl: 3000});
+                        }, function (error) {
+                            growl.error(error, {ttl: -1})
+                        })
+                    } else {
+                        id = id_or_rule.id;
+                        $scope.yara_rule = id_or_rule;
+                    }
                 }
 
-                if (id) {
-                    Yara_rule.update({id: id}, $scope.yara_rule, function () {
-                        $scope.yara_rules = Yara_rule.query();
+                if (typeof(id) === "number") {
+                    Yara_rule.resource.update({id: id}, $scope.yara_rule, function () {
+                        $scope.yara_rules = Yara_rule.resource.query();
                         $scope.gridOptions.data = $scope.yara_rules
                     });
                 } else {
-                    Yara_rule.save($scope.yara_rule, function () {
-                        $scope.yara_rules = Yara_rule.query();
+                    Yara_rule.resource.save($scope.yara_rule, function () {
+                        $scope.yara_rules = Yara_rule.resource.query();
                         $scope.gridOptions.data = $scope.yara_rules
                     });
                 }
@@ -151,22 +159,31 @@ angular.module('ThreatKB')
                     resolve: {
                         yara_rule: function () {
                             return $scope.yara_rule;
+                        },
+                        yara_rules: function () {
+                            return $scope.yara_rules;
                         }
                     }
                 });
 
                 yara_ruleSave.result.then(function (entity) {
-                    $scope.yara_rule = entity;
-                    $scope.save(id);
+                    if (entity.merge) {
+                        $scope.save(entity);
+                    } else {
+                        $scope.yara_rule = entity;
+                        $scope.save(id);
+                    }
                 });
             };
         }])
-    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', 'yara_rule', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags',
-        function ($scope, $http, $uibModalInstance, yara_rule, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags) {
+    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', 'yara_rule', 'yara_rules', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags', 'Yara_rule',
+        function ($scope, $http, $uibModalInstance, yara_rule, yara_rules, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags, Yara_rule) {
             $scope.yara_rule = yara_rule;
+            $scope.yara_rules = yara_rules;
             $scope.yara_rule.new_comment = "";
             $scope.Comments = Comments;
             $scope.Files = Files;
+            $scope.selected_signature = null;
 
             $scope.cfg_states = Cfg_states.query();
             $scope.cfg_category_range_mapping = CfgCategoryRangeMapping.query();
@@ -183,6 +200,10 @@ angular.module('ThreatKB')
                 lineWrapping: false,
                 lineNumbers: true,
                 mode: 'yara'
+            };
+
+            $scope.update_selected_signature = function (yara_rule) {
+                $scope.selected_signature = yara_rule;
             };
 
             $scope.add_comment = function (id) {
@@ -202,9 +223,11 @@ angular.module('ThreatKB')
                     })
                 });
             };
+
             $scope.$watch('files', function () {
                 $scope.upload($scope.files);
             });
+
             $scope.upload = function (id, files) {
                 if (files && files.length) {
                     for (var i = 0; i < files.length; i++) {
@@ -234,6 +257,7 @@ angular.module('ThreatKB')
                     }
                 }
             };
+
             $scope.ok = function () {
                 $uibModalInstance.close($scope.yara_rule);
             };
@@ -276,5 +300,15 @@ angular.module('ThreatKB')
                         $scope.testing = false;
                     });
                 }
-            }
+            };
+
+            $scope.merge_signature = function () {
+                if (!$scope.selected_signature) {
+                    return;
+                }
+
+                $scope.selected_signature.merge = true;
+                $uibModalInstance.close($scope.selected_signature);
+            };
+
         }]);

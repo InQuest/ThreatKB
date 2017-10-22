@@ -223,8 +223,7 @@
                     <div style="padding-top:3px;">
                         <ul class="list-group">
                             <li class="list-group-item justify-content-between"
-                                ng-repeat="comment in yara_rule.comments | orderBy:'-date_created'">{{
-                                print_comment(comment) }}
+                                ng-repeat="comment in yara_rule.comments | orderBy:'-date_created'">{{ print_comment(comment) }}
                                 <span class="pull-right">{{ comment.user.email }}&nbsp;<small>{{ pretty_date(comment.date_created) }}</small></span>
                             </li>
                         </ul>
@@ -246,7 +245,7 @@
                         <ul class="list-group">
                             <li class="list-group-item justify-content-between"
                                 ng-repeat="f in yara_rule.files | orderBy:'-last_revision_date'">
-                                <a href="ThreatKB/files/{{ f.entity_type }}/{{ f.entity_id }}/{{ f.id }}">{{ f.filename}}</a>
+                                <a href="ThreatKB/files/{{ f.entity_type }}/{{ f.entity_id }}/{{ f.id }}">{{ f.filename }}</a>
                                 <span class="pull-right">{{ f.user.email }}&nbsp;<small>{{ pretty_date(f.last_revision_date) }}</small></span>
                             </li>
                         </ul>
@@ -268,14 +267,30 @@
             </div>
 
             <div class="modal-footer">
-                <div class="pull-left" style="padding: 5px 0 0 5px;">
+                <div class="pull-left" style="width:250px; padding-right:4px;">
+                    <ui-select ng-model="selected_signature"
+                               on-select="update_selected_signature($select.selected)">
+                        <ui-select-match placeholder="Select a signature ...">
+                            <small><span ng-bind="$select.selected.name || row.entity.name"></span></small>
+                        </ui-select-match>
+                        <ui-select-choices
+                                repeat="yr in (yara_rules | filter: $select.search) track by yr.id">
+                            <small><span>{{ yr.eventid }} - {{ yr.name }}</span></small>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+
+                <button type="button" class="btn btn-danger pull-left" ng-click="merge_signature()">Merge</button>
+                <div class="pull-right">
+                    <button type="button" class="btn btn-default" ng-click="cancel()">Cancel
+                    </button>
+                    <button ng-disabled="form.$invalid || form.$pristine" class="btn btn-primary">Save
+                    </button>
+                </div>
+                <div class="pull-right" style="padding: 5px 10px 0 5px;">
                     <input type="checkbox" class="pull-left" ng-model="yara_rule.do_not_bump_revision">
                     &nbsp;Do not bump revision
                 </div>
-                <button type="button" class="btn btn-default" ng-click="cancel()">Cancel
-                </button>
-                <button ng-disabled="form.$invalid || form.$pristine" class="btn btn-primary">Save
-                </button>
             </div>
         </form>
     </script>

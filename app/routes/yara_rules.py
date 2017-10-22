@@ -1,13 +1,50 @@
 from app import app, db, auto
-from app.models import yara_rule
+from app.models import yara_rule, cfg_states, comments
 from flask import abort, jsonify, request
 from flask.ext.login import current_user, login_required
 
 from app.routes.cfg_category_range_mapping import update_cfg_category_range_mapping_current
 from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
 import json
-import datetime
 
+
+@app.route('/ThreatKB/yara_rules/merge_signatures', methods=['POST'])
+@auto.doc()
+@login_required
+def merge_signatures():
+    """Merge a signature into another
+    From Data: merge_from_id (int), merge_to_id (int)
+    Return: merged yara_rule artifact dictionary"""
+    merge_from_id = request.json.get("merge_from_id", None)
+    merge_to_id = request.json.get("merge_to_id", None)
+
+    if not merge_from_id or not merge_to_id:
+        abort(412, description="Not enough info provided")
+
+    merge_from_yr = yara_rule.Yara_rule.query.filter_by(id=merge_from_id).first()
+    merge_to_yr = yara_rule.Yara_rule.query.filter_by(id=merge_to_id).first()
+
+    merged_state = "Merged"
+    if not cfg_states.Cfg_states.query.filter_by(state=merged_state).first():
+        db.session.add(cfg_states.Cfg_states(state=merged_state))
+        db.session.commit()
+
+    merge_from_yr.state = merged_state
+    db.session.add(merge_from_yr)
+    merged_into_comment = "This yara rule was merged into signature '%s' with event id '%s' by '%s'" % (
+    merge_to_yr.name, merge_to_yr.eventid, current_user.email)
+    db.session.add(
+        comments.Comments(comment=merged_into_comment, entity_type=comments.Comments.ENTITY_MAPPING["SIGNATURE"],
+                          entity_id=merge_from_yr.id, user_id=current_user.id))
+
+    merged_from_comment = "The yara rule '%s' with event id '%s' was merged into this yara rule by '%s'" % (
+    merge_from_yr.name, merge_from_yr.eventid, current_user.email)
+    db.session.add(
+        comments.Comments(comment=merged_from_comment, entity_type=comments.Comments.ENTITY_MAPPING["SIGNATURE"],
+                          entity_id=merge_to_yr.id, user_id=current_user.id))
+    db.session.commit()
+
+    return get_yara_rule(merge_to_yr.id)
 
 @app.route('/ThreatKB/yara_rules', methods=['GET'])
 @auto.doc()
@@ -16,6 +53,7 @@ def get_all_yara_rules():
     """Return a list of all yara_rule artifacts.
     Return: list of yara_rule artifact dictionaries"""
     include_inactive = request.args.get("include_inactive", False)
+    include_merged = request.args.get('include_merged', False)
 
     entities = yara_rule.Yara_rule.query
 
@@ -23,7 +61,10 @@ def get_all_yara_rules():
         entities = entities.filter_by(owner_user_id=current_user.id)
 
     if not include_inactive:
-        entity = entities.filter_by(active=True)
+        entities = entities.filter_by(active=True)
+
+    if not include_merged:
+        entities = entities.filter(yara_rule.Yara_rule.state != 'Merged')
 
     entities = entities.all()
     return json.dumps([entity.to_dict() for entity in entities])

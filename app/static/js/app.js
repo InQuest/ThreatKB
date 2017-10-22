@@ -84,7 +84,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                 access: {restricted: true, admin: false},
                 resolve: {
                     resolvedYara_rule: ['Yara_rule', function (Yara_rule) {
-                        return Yara_rule.query();
+                        return Yara_rule.resource.query();
                     }]
                 }
             })
