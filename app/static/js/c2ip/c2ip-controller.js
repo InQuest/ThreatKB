@@ -51,6 +51,7 @@ angular.module('ThreatKB')
                             + '<small><span class="glyphicon glyphicon-pencil"></span>'
                             + '</small>'
                             + '</button>'
+                            + '&nbsp;'
                             + '<button ng-click="grid.appScope.delete(row.entity.id)"'
                             + ' ng-confirm-click="Are you sure you want to '
                             + 'delete this c2ip?" class="btn btn-sm btn-danger">'
