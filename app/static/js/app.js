@@ -84,7 +84,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                 access: {restricted: true, admin: true},
                 resolve: {
                     resolvedTags: ['Tags', function (Tags) {
-                        return Tags.query();
+                        return Tags.resource.query();
                     }]
                 }
             })
@@ -228,3 +228,13 @@ angular.module('ThreatKB').directive('ngConfirmClick', [
             }
         };
     }]);
+
+angular.module('ThreatKB').config(function (blockUIConfig) {
+    // Tell the blockUI service to ignore certain requests
+    blockUIConfig.requestFilter = function (config) {
+        // If the request starts with '/ThreatKB/tags' ...
+        if (config.url.match(/^\/ThreatKB\/tags($|\/).*/)) {
+            return false; // ... don't block it.
+        }
+    };
+});
