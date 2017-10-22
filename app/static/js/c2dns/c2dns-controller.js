@@ -17,6 +17,7 @@ angular.module('ThreatKB')
                 onRegisterApi: function (gridApi) {
                     $scope.gridApi = gridApi;
                 },
+                rowHeight: 35,
                 columnDefs:
                     [
                         {field: 'domain_name'},

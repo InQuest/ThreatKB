@@ -17,6 +17,7 @@ angular.module('ThreatKB')
                 onRegisterApi: function (gridApi) {
                     $scope.gridApi = gridApi;
                 },
+                rowHeight: 35,
                 columnDefs:
                     [
                         {field: 'eventid', displayName: "Event ID"},
@@ -60,6 +61,8 @@ angular.module('ThreatKB')
                         }
                     ]
             };
+
+            $scope.state = {};
 
             $scope.refreshData = function () {
                 $scope.gridOptions.data = $filter('filter')($scope.yara_rules, $scope.searchText, undefined);
@@ -113,8 +116,8 @@ angular.module('ThreatKB')
 
             $scope.clear = function () {
                 $scope.yara_rule = {
-                    "date_created": "",
-                    "date_modified": "",
+                    "creation_date": "",
+                    "last_revision_date": "",
                     "state": "",
                     "name": "",
                     "test_status": "",

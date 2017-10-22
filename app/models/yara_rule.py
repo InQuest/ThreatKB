@@ -25,8 +25,8 @@ class Yara_rule(db.Model):
     __tablename__ = "yara_rules"
 
     id = db.Column(db.Integer, primary_key=True)
-    date_created = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp())
-    date_modified = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp(),
+    creation_date = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp())
+    last_revision_date = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp(),
                               onupdate=db.func.current_timestamp())
     state = db.Column(db.String(32), index=True)
     revision = db.Column(db.Integer(unsigned=True), default=1)
@@ -84,8 +84,8 @@ class Yara_rule(db.Model):
             entity_type=Comments.ENTITY_MAPPING["SIGNATURE"]).all()
         files = Files.query.filter_by(entity_id=self.id).filter_by(entity_type=Files.ENTITY_MAPPING["SIGNATURE"]).all()
         return dict(
-            date_created=self.date_created.isoformat(),
-            date_modified=self.date_modified.isoformat(),
+            creationed_date=self.creation_date.isoformat(),
+            last_revision_date=self.last_revision_date.isoformat(),
             state=self.state,
             name=self.name,
             test_status=self.test_status,

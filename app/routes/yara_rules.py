@@ -99,7 +99,7 @@ def update_yara_rule(id):
         abort(403)
 
     if not do_not_bump_revision:
-        db.session.add(yara_rule.Yara_rule_history(date_created=entity.date_created, revision=entity.revision,
+        db.session.add(yara_rule.Yara_rule_history(date_created=entity.creation_date, revision=entity.revision,
                                                    rule_json=json.dumps(entity.to_revision_dict()),
                                                    user_id=current_user.id,
                                                    yara_rule_id=entity.id))

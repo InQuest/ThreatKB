@@ -56,7 +56,7 @@
 
                 <div class="form-group" ng-if="yara_rule.id">
                     <label>Revision</label>
-                    <label type="text" class="form-control">{{ yara_rule.revision }} M{{ yara_rule.date_modified }}
+                    <label type="text" class="form-control">{{ yara_rule.revision }} M{{ yara_rule.last_revision_date }}
                         by {{ yara_rule.modified_user.email }}</label>
                 </div>
 
@@ -242,9 +242,9 @@
                     <div style="padding-top:3px;">
                         <ul class="list-group">
                             <li class="list-group-item justify-content-between"
-                                ng-repeat="f in yara_rule.files | orderBy:'-date_modified'">
+                                ng-repeat="f in yara_rule.files | orderBy:'-last_revision_date'">
                                 <a href="ThreatKB/files/{{ f.entity_type }}/{{ f.entity_id }}/{{ f.id }}">{{ f.filename}}</a>
-                                <span class="pull-right">{{ f.user.email }}&nbsp;<small>{{ pretty_date(f.date_modified) }}</small></span>
+                                <span class="pull-right">{{ f.user.email }}&nbsp;<small>{{ pretty_date(f.last_revision_date) }}</small></span>
                             </li>
                         </ul>
                     </div>
