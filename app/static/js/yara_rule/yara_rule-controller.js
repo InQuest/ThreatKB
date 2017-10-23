@@ -91,7 +91,8 @@ angular.module('ThreatKB')
             $scope.delete = function (id) {
                 Yara_rule.resource.delete({id: id}, function () {
                     $scope.yara_rules = Yara_rule.resource.query();
-                    $scope.gridOptions.data = $scope.yara_rules
+                    $scope.gridOptions.data = $scope.yara_rules;
+                    $scope.refreshData();
                 });
             };
 
@@ -113,12 +114,14 @@ angular.module('ThreatKB')
                 if (typeof(id) === "number") {
                     Yara_rule.resource.update({id: id}, $scope.yara_rule, function () {
                         $scope.yara_rules = Yara_rule.resource.query();
-                        $scope.gridOptions.data = $scope.yara_rules
+                        $scope.gridOptions.data = $scope.yara_rules;
+                        $scope.refreshData();
                     });
                 } else {
                     Yara_rule.resource.save($scope.yara_rule, function () {
                         $scope.yara_rules = Yara_rule.resource.query();
-                        $scope.gridOptions.data = $scope.yara_rules
+                        $scope.gridOptions.data = $scope.yara_rules;
+                        $scope.refreshData();
                     });
                 }
             };
