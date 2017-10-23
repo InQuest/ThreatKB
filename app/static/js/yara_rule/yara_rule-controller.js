@@ -190,7 +190,8 @@ angular.module('ThreatKB')
             $scope.do_not_bump_revision = false;
 
             $scope.just_opened = true;
-            $scope.testing = false;
+            $scope.testingPos = false;
+            $scope.testingNeg = false;
 
             $scope.print_comment = function (comment) {
                 return comment.comment.replace(/(?:\r\n|\r|\n)/g, "<BR>");
@@ -278,27 +279,72 @@ angular.module('ThreatKB')
                 return Tags.loadTags(query);
             };
 
-            $scope.$watch('testing', function () {
-                $scope.testButtonText = $scope.testing ? 'Testing...' : 'Test Signature Now';
+            $scope.$watch('testingPos', function () {
+                $scope.testButtonTextPos = $scope.testingPos ? 'Testing...' : 'Test Signature Now';
+            });
+
+            $scope.$watch('testingNeg', function () {
+                $scope.testButtonTextNeg = $scope.testingNeg ? 'Negative Testing...' : 'Negative Test Signature Now';
             });
 
             $scope.testSignature = function (id) {
-                if (!$scope.testing) {
-                    $scope.testing = true;
+                if (!$scope.testingPos) {
+                    $scope.testingPos = true;
                     return $http.get('/ThreatKB/test_yara_rule/' + id, {cache: false}).then(function (response) {
                         var testResponse = response.data;
-                        growl.info("Success!<br />"
+                        var growlMsg = "Test Summary<br />"
                             + "---------------------<br/>"
+                            + "Total Time: " + testResponse['duration'] + " ms<br/>"
                             + "Total Files: " + testResponse['files_tested'] + "<br/>"
                             + "Matches Found: " + testResponse['files_matched'] + "<br/>"
-                            + "Tests Killed: " + testResponse['tests_terminated'],
-                            {ttl: 3000});
-                        $scope.testing = false;
+                            + "Tests Killed: " + testResponse['tests_terminated'] + "<br/>"
+                            + "Errors Encountered: " + testResponse['errors_encountered'];
+                        if (testResponse['errors_encountered'] > 0) {
+                            growlMsg += "<br/><br/>"
+                                + "Errors:<br/>"
+                                + "---------------------<br/>";
+                            for (var i = 0; i < testResponse['error_msgs'].length; i++) {
+                                growlMsg += testResponse['error_msgs'][i] + "<br/>";
+                            }
+                        }
+                        growl.info(growlMsg, {ttl: 5000});
+                        $scope.testingPos = false;
                         return true;
                     }, function (error) {
                         growl.error(error.data, {ttl: 3000});
-                        $scope.testing = false;
+                        $scope.testingPos = false;
                     });
+                }
+            };
+
+            $scope.negTestSignature = function (id) {
+                if (!$scope.testingNeg) {
+                    $scope.testingNeg = true;
+                    return $http.get('/ThreatKB/test_yara_rule/' + id + '?negative=1', {cache: false})
+                        .then(function (response) {
+                            var testResponse = response.data;
+                            var growlMsg = "Negative Test Summary<br />"
+                                + "---------------------<br/>"
+                                + "Total Time: " + testResponse['duration'] + " ms<br/>"
+                                + "Total Files: " + testResponse['files_tested'] + "<br/>"
+                                + "Matches Found: " + testResponse['files_matched'] + "<br/>"
+                                + "Tests Killed: " + testResponse['tests_terminated'] + "<br/>"
+                                + "Errors Encountered: " + testResponse['errors_encountered'];
+                            if (testResponse['errors_encountered'] > 0) {
+                                growlMsg += "<br/><br/>"
+                                    + "Errors:<br/>"
+                                    + "---------------------<br/>";
+                                for (var i = 0; i < testResponse['error_msgs'].length; i++) {
+                                    growlMsg += testResponse['error_msgs'][i] + "<br/>";
+                                }
+                            }
+                            growl.info(growlMsg, {ttl: 5000});
+                            $scope.testingNeg = false;
+                            return true;
+                        }, function (error) {
+                            growl.error(error.data, {ttl: 3000});
+                            $scope.testingNeg = false;
+                        });
                 }
             };
 

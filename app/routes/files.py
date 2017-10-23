@@ -38,10 +38,14 @@ def upload_file():
         return jsonify(fileStatus=False)
 
     if f:
-        file_store_path_root = cfg_settings.Cfg_settings.get_setting("FILE_STORE_PATH") or "/tmp"
+        if request.values['entity_type'] == files.Files.ENTITY_MAPPING["CLEAN"]:
+            file_store_path_root = cfg_settings.Cfg_settings.get_setting("CLEAN_FILES_CORPUS_DIRECTORY") or "/tmp"
+        else:
+            file_store_path_root = cfg_settings.Cfg_settings.get_setting("FILE_STORE_PATH") or "/tmp"
         filename = secure_filename(f.filename)
         full_path = os.path.join(file_store_path_root,
-                                 request.values['entity_type'] if 'entity_type' in request.values else "",
+                                 request.values['entity_type']
+                                 if request.values['entity_type'] != files.Files.ENTITY_MAPPING["CLEAN"] else "",
                                  request.values['entity_id'] if 'entity_id' in request.values else "",
                                  filename)
         if not os.path.exists(os.path.dirname(full_path)):
@@ -98,8 +102,12 @@ def get_file_for_entity(entity_type, entity_id, file_id):
     if not file_entity:
         abort(404)
 
-    full_path = os.path.join(app.config['FILE_STORE_PATH'],
-                             str(files.Files.ENTITY_MAPPING[entity_type]) if entity_type != "0" else "",
+    if entity_type == "CLEAN":
+        file_store_path = cfg_settings.Cfg_settings.get_setting("CLEAN_FILES_CORPUS_DIRECTORY") or "/tmp"
+    else:
+        file_store_path = cfg_settings.Cfg_settings.get_setting("FILE_STORE_PATH") or "/tmp"
+    full_path = os.path.join(file_store_path,
+                             str(files.Files.ENTITY_MAPPING[entity_type]) if entity_type != "CLEAN" else "",
                              str(entity_id) if entity_id != 0 else "",
                              secure_filename(file_entity.filename))
     if not os.path.exists(full_path):

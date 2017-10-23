@@ -44,11 +44,14 @@
             <div class="modal-header">
                 <button type="button" class="close" ng-click="cancel()">&times;</button>
 
-                <h4 class="modal-title" id="myC2ipLabel">{{ yara_rule.id ? 'Edit' : 'Create' }} Signature Artifact</h4>
+                <h4 class="modal-title" id="myC2ipLabel" style="float: left">{{ yara_rule.id ? 'Edit' : 'Create' }} Signature Artifact</h4>
                 <div class="pull-right" ng-if="yara_rule.id"
-                     style="margin: 0 35px 0 0; top: -30px; position: relative;">
+                     style="margin: 0 35px 0 0;">
                     <button type="button" class="btn btn-primary"
-                            ng-click="testSignature(yara_rule.id)">{{ testButtonText }}
+                            ng-click="negTestSignature(yara_rule.id)">{{ testButtonTextNeg }}
+                    </button>
+                    <button type="button" class="btn btn-primary"
+                            ng-click="testSignature(yara_rule.id)">{{ testButtonTextPos }}
                     </button>
                 </div>
             </div>

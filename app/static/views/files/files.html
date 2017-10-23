@@ -35,7 +35,7 @@
             <tbody>
             <tr ng-repeat="f in files | orderBy:'-last_revision_date' | toArray:false | filter:search track by $index">
                 <td ng-if="f.filename">
-                    <a href="ThreatKB/files/{{ f.entity_type == null ? 0 : f.entity_type }}/{{ f.entity_id == null ? 0 : f.entity_id}}/{{ f.id }}">
+                    <a href="ThreatKB/files/{{ f.entity_type == null ? 'CLEAN' : f.entity_type }}/{{ f.entity_id == null ? 0 : f.entity_id}}/{{ f.id }}">
                         {{ f.filename }}</a>
                 </td>
 
