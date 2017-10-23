@@ -8,26 +8,13 @@ import json
 
 
 class Yara_rule(db.Model):
-    metadata_fields = [{"description": "description"},
-                       {"confidence": "confidence"},
-                       {"test_status": "test_status"},
-                       {"severity": "severity"},
-                       {"category": "category"},
-                       {"file_type": "file_type"},
-                       {"subcategory1": "subcategory1"},
-                       {"subcategory2": "subcategory2"},
-                       {"subcategory3": "subcategory3"},
-                       {"reference_link": "reference_link"},
-                       {"eventid": "eventid"},
-                       {"revision": "revision"},
-                       {"last_revision_date": "date_modified"}]
 
     __tablename__ = "yara_rules"
 
     id = db.Column(db.Integer, primary_key=True)
     creation_date = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp())
     last_revision_date = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp(),
-                              onupdate=db.func.current_timestamp())
+                                   onupdate=db.func.current_timestamp())
     state = db.Column(db.String(32), index=True)
     revision = db.Column(db.Integer(unsigned=True), default=1)
     name = db.Column(db.String(128), index=True)
@@ -128,9 +115,13 @@ class Yara_rule(db.Model):
 
     @staticmethod
     def to_yara_rule_string(yara_dict):
+        yr = Yara_rule()
+        metadata_field_mapping = [attr for attr in dir(yr) if
+                                  not callable(getattr(yr, attr)) and not attr.startswith("__")]
+
         yara_rule_text = "rule %s\n{\n\n" % (yara_dict.get("name"))
         yara_rule_text += "\tmeta:\n"
-        for field in Yara_rule.metadata_fields.keys():
+        for field in metadata_field_mapping.keys():
             if yara_dict.get(field, None):
                 yara_rule_text += "\t%s = \"%s\"\n" % (field, yara_dict[field])
 
@@ -152,12 +143,12 @@ class Yara_rule(db.Model):
         return "\n\t".join([string.strip().strip("\t") for string in text.split("\n") if type_ not in string]).strip()
 
     @staticmethod
-    def get_yara_rule_from_yara_dict(yara_dict):
+    def get_yara_rule_from_yara_dict(yara_dict, metadata_field_mapping={}):
         yara_rule = Yara_rule()
         yara_rule.name = yara_dict["rule_name"]
 
         yara_metadata = {key.lower(): val.strip().strip("\"") for key, val in yara_dict["metadata"].iteritems()}
-        for possible_field in Yara_rule.metadata_fields.keys():
+        for possible_field in metadata_field_mapping.keys():
             if possible_field in yara_metadata.keys():
                 field = yara_metadata[possible_field] if not possible_field in ["confidence", "severity",
                                                                                 "eventid"] else int(
@@ -165,7 +156,7 @@ class Yara_rule(db.Model):
                 ## If the eventid already exists. Skip it.
                 if possible_field == "eventid" and Yara_rule.query.filter_by(eventid=field).first():
                     continue
-                setattr(yara_rule, Yara_rule.metadata_fields[possible_field], field)
+                setattr(yara_rule, metadata_field_mapping[possible_field], field)
 
         yara_rule.condition = " ".join(yara_dict["condition_terms"])
         yara_rule.strings = "\n".join(

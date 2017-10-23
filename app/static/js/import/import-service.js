@@ -9,7 +9,7 @@ angular.module('ThreatKB').factory('Import',
                 commit_artifacts: commit_artifacts
             });
 
-            function import_artifacts(import_text, autocommit, shared_reference, shared_state, shared_owner, extract_ip, extract_dns, extract_signature) {
+            function import_artifacts(import_text, autocommit, shared_reference, shared_state, shared_owner, extract_ip, extract_dns, extract_signature, metadata_field_mapping) {
                 // send a post request to the server
                 return $http.post('/ThreatKB/import', {
                     import_text: import_text,
@@ -19,7 +19,8 @@ angular.module('ThreatKB').factory('Import',
                     shared_owner: shared_owner,
                     extract_ip: extract_ip,
                     extract_dns: extract_dns,
-                    extract_signature: extract_signature
+                    extract_signature: extract_signature,
+                    metadata_field_mapping: metadata_field_mapping
                 })
                     .then(function (success) {
                             if (success.status === 200 && success.data.artifacts) {
@@ -34,7 +35,7 @@ angular.module('ThreatKB').factory('Import',
 
             }
 
-            function commit_artifacts(artifacts, shared_reference, shared_state, shared_owner, extract_ip, extract_dns, extract_signature) {
+            function commit_artifacts(artifacts, shared_reference, shared_state, shared_owner, extract_ip, extract_dns, extract_signature, metadata_field_mapping) {
                 // send a post request to the server
                 return $http.post('/ThreatKB/import/commit', {
                     artifacts: artifacts,
@@ -43,7 +44,8 @@ angular.module('ThreatKB').factory('Import',
                     shared_owner: shared_owner,
                     extract_ip: extract_ip,
                     extract_dns: extract_dns,
-                    extract_signature: extract_signature
+                    extract_signature: extract_signature,
+                    metadata_field_mapping: metadata_field_mapping
                 })
                     .then(function (success) {
                         if (success.status === 201 && success.data.artifacts) {

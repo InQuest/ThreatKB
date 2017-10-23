@@ -9,7 +9,7 @@ import json
 #####################################################################
 
 def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared_reference=None, shared_state=None,
-                   shared_owner=None):
+                   shared_owner=None, metadata_field_mapping={}):
     default_state = "Imported"
     return_artifacts = []
     duplicate_artifacts = []
@@ -73,7 +73,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                     db.session.add(dns)
                     return_artifacts.append(dns)
             elif artifact["type"].lower() == "yara_rule" and extract_signature:
-                yr = yara_rule.Yara_rule.get_yara_rule_from_yara_dict(artifact["rule"])
+                yr = yara_rule.Yara_rule.get_yara_rule_from_yara_dict(artifact["rule"], metadata_field_mapping)
                 yr.created_user_id, yr.modified_user_id = current_user.id, current_user.id
                 yr.state = default_state if not shared_state else shared_state
                 if shared_reference:
@@ -115,6 +115,7 @@ def import_artifacts():
     extract_ip = request.json.get('extract_ip', True)
     extract_dns = request.json.get('extract_dns', True)
     extract_signature = request.json.get('extract_signature', True)
+    metadata_field_mapping = request.json.get('metadata_field_mapping', {})
 
     if shared_owner:
         shared_owner = int(shared_owner)
@@ -128,7 +129,7 @@ def import_artifacts():
     if autocommit:
         artifacts = save_artifacts(extract_ip=extract_ip, extract_dns=extract_dns, extract_signature=extract_signature,
                                    artifacts=artifacts, shared_reference=shared_reference, shared_state=shared_state,
-                                   shared_owner=shared_owner)
+                                   shared_owner=shared_owner, metadata_field_mapping=metadata_field_mapping)
 
     return jsonify({"artifacts": artifacts})
 
@@ -149,10 +150,12 @@ def commit_artifacts():
     extract_ip = request.json.get('extract_ip', True)
     extract_dns = request.json.get('extract_dns', True)
     extract_signature = request.json.get('extract_signature', True)
+    metadata_field_mapping = request.json.get('metadata_field_mapping', {})
 
     if not artifacts:
         abort(404)
 
     artifacts = save_artifacts(extract_ip=extract_ip, extract_dns=extract_dns, extract_signature=extract_signature,
-                               artifacts=artifacts, shared_reference=shared_reference, shared_state=shared_state)
+                               artifacts=artifacts, shared_reference=shared_reference, shared_state=shared_state,
+                               metadata_field_mapping=metadata_field_mapping)
     return jsonify({"artifacts": artifacts}), 201
