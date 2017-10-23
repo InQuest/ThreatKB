@@ -46,6 +46,7 @@ def merge_signatures():
 
     return get_yara_rule(merge_to_yr.id)
 
+
 @app.route('/ThreatKB/yara_rules', methods=['GET'])
 @auto.doc()
 @login_required
