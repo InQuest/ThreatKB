@@ -4,7 +4,7 @@ from app import db
 class Files(db.Model):
     __tablename__ = "files"
 
-    ENTITY_MAPPING = {"CLEAN": 0, "SIGNATURE": 1}
+    ENTITY_MAPPING = {"SIGNATURE": 1}
 
     id = db.Column(db.Integer, primary_key=True)
     date_created = db.Column(db.DateTime(timezone=True),

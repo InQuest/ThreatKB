@@ -8,12 +8,12 @@ angular.module('ThreatKB')
 
             $scope.delete = function (id) {
                 Files.resource.delete({id: id}, function () {
-                    $scope.files = Files.resource.query({entity_type: Files.ENTITY_MAPPING.CLEAN});
+                    $scope.files = Files.resource.query();
                 });
             };
 
             $scope.refresh = function () {
-                $scope.files = Files.resource.query({entity_type: Files.ENTITY_MAPPING.CLEAN});
+                $scope.files = Files.resource.query();
             };
 
             $scope.$watch('files', function () {
@@ -29,8 +29,7 @@ angular.module('ThreatKB')
                                 url: '/ThreatKB/file_upload',
                                 method: 'POST',
                                 data: {
-                                    file: file,
-                                    entity_type: Files.ENTITY_MAPPING.CLEAN
+                                    file: file
                                 }
                             }).then(function (resp) {
                                 growl.info('Success ' + resp.config.data.file.name + ' uploaded.', {ttl: 3000});

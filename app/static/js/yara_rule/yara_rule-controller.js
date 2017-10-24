@@ -179,8 +179,8 @@ angular.module('ThreatKB')
                 });
             };
         }])
-    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', 'yara_rule', 'yara_rules', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags', 'Yara_rule',
-        function ($scope, $http, $uibModalInstance, yara_rule, yara_rules, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags, Yara_rule) {
+    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', 'yara_rule', 'yara_rules', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags', 'Yara_rule', 'Cfg_settings',
+        function ($scope, $http, $uibModalInstance, yara_rule, yara_rules, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags, Yara_rule, Cfg_settings) {
             $scope.yara_rule = yara_rule;
             $scope.yara_rules = yara_rules;
             $scope.yara_rule.new_comment = "";
@@ -193,6 +193,7 @@ angular.module('ThreatKB')
             $scope.do_not_bump_revision = false;
 
             $scope.just_opened = true;
+            $scope.negTestDir = Cfg_settings.get({key: "NEGATIVE_TESTING_FILE_DIRECTORY"});
             $scope.testingPos = false;
             $scope.testingNeg = false;
 

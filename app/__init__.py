@@ -101,7 +101,7 @@ def run(debug=False, port=5000, host='127.0.0.1'):
     @login_manager.request_loader
     def load_user_from_request(request):
         token = request.args.get('token')
-        s_key = request.args.get('secret_key')
+        s_key = str(request.args.get('secret_key'))
         if token and s_key:
             valid_token = access_keys.is_token_active(token)
             if valid_token:
