@@ -1,4 +1,4 @@
-from flask import abort, jsonify, request, send_file, json
+from flask import abort, jsonify, request, send_file, json, Response
 from flask.ext.login import login_required, current_user
 from app import app, db, admin_only, auto
 from app.models import releases
@@ -14,7 +14,7 @@ def get_all_releases():
     """Return all releases in ThreatKB
     Return: list of release dictionaries"""
     entities = releases.Release.query.filter_by().all()
-    return json.dumps([entity.to_dict() for entity in entities])
+    return Response(json.dumps([entity.to_dict() for entity in entities]), mimetype="application/json")
 
 
 @app.route('/ThreatKB/releases/<int:release_id>', methods=['GET'])
@@ -29,7 +29,7 @@ def get_release(release_id):
     if not entity:
         abort(404)
 
-    return json.dumps(entity)
+    return Response(json.dumps(entity), mimetype="application/json")
 
 
 @app.route('/ThreatKB/releases/<int:release_id>/release_notes', methods=['GET'])
@@ -111,4 +111,4 @@ def delete_release(release_id):
 
     db.session.delete(entity)
     db.session.commit()
-    return '', 204
+    return jsonify(''), 204

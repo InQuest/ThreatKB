@@ -12,7 +12,7 @@ from sqlalchemy.ext.serializer import loads, dumps
 from app import app, db, admin_only, auto
 from app.celeryapp import celery
 from app.models import yara_rule, files
-from flask import abort, jsonify, request, json
+from flask import abort, jsonify, request, json, Response
 from flask.ext.login import current_user, login_required
 
 from app.models.cfg_settings import Cfg_settings
@@ -47,7 +47,7 @@ def clean_yara_test():
 
             test_yara_rule_task.delay(yara_rule_entity.id, dumps(file_entities), current_user.id, True)
 
-    return json.dumps(results), 200
+    return Response(json.dumps(results), mimetype='application/json')
 
 
 @app.route('/ThreatKB/test_yara_rule/<int:rule_id>', methods=['GET'])

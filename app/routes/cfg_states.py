@@ -1,6 +1,6 @@
 from app import app, db, admin_only, auto
 from app.models import cfg_states
-from flask import abort, jsonify, request
+from flask import abort, jsonify, request, Response
 from flask.ext.login import login_required
 import json
 
@@ -12,7 +12,7 @@ def get_all_cfg_states():
     """Return all config states
     Return: list of config state dictionaries"""
     entities = cfg_states.Cfg_states.query.all()
-    return json.dumps([entity.to_dict() for entity in entities])
+    return Response(json.dumps([entity.to_dict() for entity in entities]), mimetype='application/json')
 
 
 @app.route('/ThreatKB/cfg_states/<int:id>', methods=['GET'])
@@ -79,4 +79,4 @@ def delete_cfg_states(id):
         abort(404)
     db.session.delete(entity)
     db.session.commit()
-    return '', 204
+    return jsonify(''), 204

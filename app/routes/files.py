@@ -1,6 +1,6 @@
 from app import app, db, admin_only, auto
 from app.models import files, cfg_settings
-from flask import abort, jsonify, request, send_file, json
+from flask import abort, jsonify, request, send_file, json, Response
 from flask.ext.login import login_required, current_user
 from werkzeug.utils import secure_filename
 import os
@@ -19,7 +19,7 @@ def get_all_files():
 
     entities = files.Files.query.filter_by(entity_type=entity_type,
                                            entity_id=entity_id).all()
-    return json.dumps([entity.to_dict() for entity in entities])
+    return Response(json.dumps([entity.to_dict() for entity in entities]), mimetype="application/json")
 
 
 @app.route('/ThreatKB/file_upload', methods=['POST'])

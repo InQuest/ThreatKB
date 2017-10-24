@@ -1,12 +1,10 @@
 import time
-
 import datetime
-
 import os
 
 from app import app, db
 from app.models.access_keys import AccessKeys
-from flask import request, jsonify, json, abort
+from flask import request, jsonify, json, abort, Response
 from flask.ext.login import current_user, login_required
 
 from app.models.users import KBUser
@@ -29,7 +27,7 @@ def get_all_user_access_keys():
     else:
         keys = AccessKeys.query.filter(AccessKeys.user_id == current_user.id).filter(AccessKeys.deleted == None).all()
 
-    return json.dumps([key.to_dict() for key in keys])
+    return Response(json.dumps([key.to_dict() for key in keys]), mimetype='application/json')
 
 
 @app.route('/ThreatKB/access_keys/count', methods=['GET'])

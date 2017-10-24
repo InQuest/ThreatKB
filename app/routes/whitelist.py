@@ -2,7 +2,7 @@ from flask_login import current_user
 
 from app import app, db, admin_only, auto
 from app.models import whitelist
-from flask import abort, jsonify, request
+from flask import abort, jsonify, request, Response
 from flask.ext.login import login_required
 import json
 
@@ -14,7 +14,7 @@ def get_all_whitelist():
     """Return all whitelist
     Return: list of whitelist dictionaries"""
     entities = whitelist.Whitelist.query.all()
-    return json.dumps([entity.to_dict() for entity in entities])
+    return Response(json.dumps([entity.to_dict() for entity in entities]), mimetype='application/json')
 
 
 @app.route('/ThreatKB/whitelist/<int:id>', methods=['GET'])
@@ -82,4 +82,4 @@ def delete_whitelist(id):
         abort(404)
     db.session.delete(entity)
     db.session.commit()
-    return '', 204
+    return jsonify(''), 204

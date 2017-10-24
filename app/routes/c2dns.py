@@ -1,6 +1,6 @@
 from app import app, db, auto
 from app.models import c2dns
-from flask import abort, jsonify, request
+from flask import abort, jsonify, request, Response
 from flask.ext.login import login_required, current_user
 from dateutil import parser
 from sqlalchemy import exc
@@ -22,7 +22,7 @@ def get_all_c2dns():
 
     entities = entities.all()
 
-    return json.dumps([entity.to_dict() for entity in entities])
+    return Response(json.dumps([entity.to_dict() for entity in entities]), mimetype='application/json')
 
 
 @app.route('/ThreatKB/c2dns/<int:id>', methods=['GET'])
@@ -131,4 +131,4 @@ def delete_c2dns(id):
 
     delete_tags_mapping(entity.__tablename__, entity.id, tag_mapping_to_delete)
 
-    return '', 204
+    return jsonify(''), 204

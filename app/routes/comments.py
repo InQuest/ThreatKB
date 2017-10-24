@@ -1,6 +1,6 @@
 from app import app, db, admin_only, auto
 from app.models import comments
-from flask import abort, jsonify, request
+from flask import abort, jsonify, request, Response
 from flask.ext.login import login_required, current_user
 import json
 
@@ -22,7 +22,7 @@ def get_all_comments():
         entities = entities.filter_by(entity_id=entity_id)
 
     entities = entities.all()
-    return json.dumps([entity.to_dict() for entity in entities])
+    return Response(json.dumps([entity.to_dict() for entity in entities]), mimetype='application/json')
 
 
 @app.route('/ThreatKB/comments/<int:id>', methods=['GET'])
@@ -67,4 +67,4 @@ def delete_comments(id):
         abort(404)
     db.session.delete(entity)
     db.session.commit()
-    return '', 204
+    return jsonify(''), 204

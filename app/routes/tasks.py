@@ -1,6 +1,6 @@
 from app import app, db, auto
 from app.models import tasks
-from flask import abort, jsonify, request
+from flask import abort, jsonify, request, Response
 from flask.ext.login import login_required, current_user
 from dateutil import parser
 import json
@@ -14,7 +14,7 @@ def get_all_tasks():
     Return: list of task dictionaries"""
     entities = tasks.Tasks.query.filter_by(active=True).all()
 
-    return json.dumps([entity.to_dict() for entity in entities])
+    return Response(json.dumps([entity.to_dict() for entity in entities]), mimetype='application/json')
 
 
 @app.route('/ThreatKB/tasks/<int:id>', methods=['GET'])
@@ -93,4 +93,4 @@ def delete_tasks(id):
     db.session.add(entity)
     db.session.commit()
 
-    return '', 204
+    return jsonify(''), 204

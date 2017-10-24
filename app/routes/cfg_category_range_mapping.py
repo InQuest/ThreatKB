@@ -1,6 +1,6 @@
 from app import app, db, admin_only, auto
 from app.models import cfg_category_range_mapping
-from flask import abort, jsonify, request
+from flask import abort, jsonify, request, Response
 from flask.ext.login import login_required
 import json
 
@@ -12,7 +12,7 @@ def get_all_cfg_category_range_mappings():
     """Return list of all category range mappings
     Return: list of category range mapping dictionaries"""
     entities = cfg_category_range_mapping.CfgCategoryRangeMapping.query.all()
-    return json.dumps([entity.to_dict() for entity in entities])
+    return Response(json.dumps([entity.to_dict() for entity in entities]), mimetype='application/json')
 
 
 @app.route('/ThreatKB/cfg_category_range_mapping/<int:id>', methods=['GET'])
@@ -95,4 +95,4 @@ def delete_cfg_category_range_mapping(id):
         abort(404)
     db.session.delete(entity)
     db.session.commit()
-    return '', 204
+    return jsonify(''), 204

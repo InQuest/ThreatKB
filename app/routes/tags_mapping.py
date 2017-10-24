@@ -1,6 +1,6 @@
 from app import app, db, admin_only, auto
 from app.models import tags_mapping
-from flask import abort, jsonify, request
+from flask import abort, jsonify, request, Response
 from flask.ext.login import login_required
 import json
 
@@ -15,7 +15,7 @@ def get_all_tags_mapping():
     """Return all tag mappings
     Return: list of tag mapping dictionaries"""
     entities = tags_mapping.Tags_mapping.query.all()
-    return json.dumps([entity.to_dict() for entity in entities])
+    return Response(json.dumps([entity.to_dict() for entity in entities]), mimetype='application/json')
 
 
 @app.route('/ThreatKB/tags_mapping/<int:id>', methods=['GET'])
@@ -47,7 +47,7 @@ def get_tags_for_source(source_table, source_id):
             if entity.status_code == 200:
                 list_of_tags.append(json.loads(entity.data))
 
-    return list_of_tags
+    return Reponse(list_of_tags, mimetype='application/json')
 
 
 @app.route('/ThreatKB/tags_mapping', methods=['POST'])
@@ -56,7 +56,7 @@ def get_tags_for_source(source_table, source_id):
 def create_tags_mapping_rest():
     create_tags_mapping(request.json['source'], request.json['source_id'], request.json['tags'])
 
-    return '', 201
+    return jsonify(''), 201
 
 
 def create_tags_mapping(table, s_id, list_of_tags):
@@ -102,4 +102,4 @@ def delete_tags_mapping_by_id(id):
         abort(404)
     db.session.delete(entity)
     db.session.commit()
-    return '', 204
+    return jsonify(''), 204

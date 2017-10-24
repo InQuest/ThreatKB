@@ -1,7 +1,7 @@
 from app import app, db, bcrypt, admin_only, auto
 from app.models.users import KBUser
 from app.models import yara_rule, c2dns, c2ip
-from flask import request, jsonify, session, json, abort, send_file
+from flask import request, jsonify, session, json, abort, send_file, Response
 from flask.ext.login import current_user, login_required
 import flask_login
 import tempfile
@@ -55,7 +55,7 @@ def get_all_users():
 
     users = [user.to_dict() for user in users]
     users.append({"email": "Clear Owner"})
-    return json.dumps(users)
+    return Response(json.dumps(users), mimetype='application/json')
 
 
 @app.route('/ThreatKB/users/<int:user_id>', methods=['GET'])
