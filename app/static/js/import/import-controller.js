@@ -1,28 +1,15 @@
 'use strict';
 
 angular.module('ThreatKB').controller('ImportController',
-    ['$scope', '$location', 'Import', 'growl', 'Cfg_states', 'blockUI', 'Users',
-        function ($scope, $location, Import, growl, Cfg_states, blockUI, Users) {
+    ['$scope', '$location', 'Import', 'growl', 'Cfg_states', 'blockUI', 'Users', 'Cfg_settings',
+        function ($scope, $location, Import, growl, Cfg_states, blockUI, Users, Cfg_settings) {
 
             $scope.cfg_states = Cfg_states.query();
             $scope.shared_state = {};
             $scope.shared_owner = null;
             $scope.users = Users.query();
-            $scope.metadata_field_mapping = JSON.stringify({
-                "description": "description",
-                "confidence": "confidence",
-                "test_status": "test_status",
-                "severity": "severity",
-                "category": "category",
-                "file_type": "file_type",
-                "subcategory1": "subcategory1",
-                "subcategory2": "subcategory2",
-                "subcategory3": "subcategory3",
-                "reference_link": "reference_link",
-                "eventid": "eventid",
-                "revision": "revision",
-                "last_revision_date": "last_revision_date"
-            }, null, '\t');
+            //$scope.default_mapping = Cfg_settings.get({key: "DEFAULT_METADATA_MAPPING"});
+            $scope.default_mapping = Cfg_settings.get({key: "DEFAULT_METADATA_MAPPING"});
 
             $scope.block_message = "Committing Artifacts. This might take awhile, we're doing lots of advanced processing...";
 
