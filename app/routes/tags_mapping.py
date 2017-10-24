@@ -47,7 +47,7 @@ def get_tags_for_source(source_table, source_id):
             if entity.status_code == 200:
                 list_of_tags.append(json.loads(entity.data))
 
-    return Response(list_of_tags, mimetype='application/json')
+    return list_of_tags
 
 
 @app.route('/ThreatKB/tags_mapping', methods=['POST'])
