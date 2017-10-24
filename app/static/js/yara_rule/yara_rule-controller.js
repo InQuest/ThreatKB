@@ -201,8 +201,8 @@ angular.module('ThreatKB')
             };
 
             $scope.editor_options = {
-                lineWrapping: false,
                 lineNumbers: true,
+                lineWrapping: false,
                 mode: 'yara'
             };
 
