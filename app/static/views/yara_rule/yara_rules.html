@@ -130,9 +130,8 @@
                     <span class="error"
                           ng-show="form.description.$error.maxlength">Must be at most 4096 characters.</span>
                     <span class="error text-danger" ng-if="!yara_rule.description">*</span>
-                    <input type="text" class="form-control" name="description"
-                           ng-model="yara_rule.description" ng-required="true"
-                           ng-maxlength="4096"/>
+                    <textarea class="form-control" placeholder="Enter a description..." rows="4"
+                              ng-model="yara_rule.description" ng-maxlength="4096"></textarea>
 
                 </div>
 
