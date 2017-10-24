@@ -8,6 +8,6 @@ angular.module('ThreatKB')
                 'get': {method: 'GET'},
                 'update': {method: 'PUT'}
             }),
-            ENTITY_MAPPING: {CLEAN: 0, SIGNATURE: 1}
+            ENTITY_MAPPING: {SIGNATURE: 1}
         };
     }]);

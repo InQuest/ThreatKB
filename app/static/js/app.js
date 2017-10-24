@@ -94,7 +94,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                 access: {restricted: true, admin: true},
                 resolve: {
                     resolvedFiles: ['Files', function (Files) {
-                        return Files.resource.query({entity_type: Files.ENTITY_MAPPING.CLEAN});
+                        return Files.resource.query();
                     }]
                 }
             })
