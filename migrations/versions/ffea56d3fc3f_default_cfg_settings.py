@@ -44,8 +44,11 @@ def upgrade():
              "date_modified": date_modified},
             {"key": "MAX_MILLIS_PER_FILE_THRESHOLD", "value": "3.0", "public": False, "date_created": date_created,
              "date_modified": date_modified},
-            {"key": "FILE_STORE_PATH", "value": "/usr/local/ThreatKB/", "public": False, "date_created": date_created,
-             "date_modified": date_modified}
+            {"key": "FILE_STORE_PATH", "value": "/usr/local/ThreatKB/", "public": True, "date_created": date_created,
+             "date_modified": date_modified},
+            {"key": "DEFAULT_METADATA_MAPPING",
+             "value": "{\"description\": \"description\",\"confidence\": \"confidence\",\"test_status\": \"test_status\",\"severity\": \"severity\",\"category\": \"category\",\"file_type\": \"file_type\",\"subcategory1\": \"subcategory1\",\"subcategory2\": \"subcategory2\",\"subcategory3\": \"subcategory3\",\"reference_link\": \"reference_link\",\"eventid\": \"eventid\",\"revision\": \"revision\",\"last_revision_date\": \"last_revision_date\"}",
+             "public": True, "date_created": date_created, "date_modified": date_modified}
         ]
     )
 

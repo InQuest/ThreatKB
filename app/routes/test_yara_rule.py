@@ -79,7 +79,7 @@ def test_yara_rule_rest(rule_id):
             for f in yara_rule_entity.files:
                 file_store_path = Cfg_settings.get_setting("FILE_STORE_PATH")
                 if not file_store_path:
-                    raise Exception('File Store Path configuration setting not set.')
+                    raise Exception('FILE_STORE_PATH configuration setting not set.')
                 files_to_test.append(os.path.join(file_store_path,
                                                   str(f.entity_type) if f.entity_type is not None else "",
                                                   str(f.entity_id) if f.entity_id is not None else "",
