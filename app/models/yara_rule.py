@@ -121,7 +121,7 @@ class Yara_rule(db.Model):
 
         yara_rule_text = "rule %s\n{\n\n" % (yara_dict.get("name"))
         yara_rule_text += "\tmeta:\n"
-        for field in metadata_field_mapping.keys():
+        for field in metadata_field_mapping:
             if yara_dict.get(field, None):
                 yara_rule_text += "\t%s = \"%s\"\n" % (field, yara_dict[field])
 
