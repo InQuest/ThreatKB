@@ -288,7 +288,7 @@ angular.module('ThreatKB')
             });
 
             $scope.$watch('testingNeg', function () {
-                $scope.testButtonTextNeg = $scope.testingNeg ? 'Negative Testing...' : 'Negative Test Signature Now';
+                $scope.testButtonTextNeg = $scope.testingNeg ? 'Clean Testing...' : 'Clean Test Signature Now';
             });
 
             $scope.testSignature = function (id) {
@@ -327,7 +327,7 @@ angular.module('ThreatKB')
                     return $http.get('/ThreatKB/test_yara_rule/' + id + '?negative=1', {cache: false})
                         .then(function (response) {
                             var testResponse = response.data;
-                            var growlMsg = "Negative Test Summary<br />"
+                            var growlMsg = "Clean Test Summary<br />"
                                 + "---------------------<br/>"
                                 + "Total Time: " + testResponse['duration'] + " ms<br/>"
                                 + "Total Files: " + testResponse['files_tested'] + "<br/>"
