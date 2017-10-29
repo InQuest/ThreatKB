@@ -46,7 +46,7 @@ angular.module('ThreatKB').controller('ImportController',
 
                 blockUI.start($scope.block_message);
 
-                var field_mapping = JSON.parse($scope.metadata_field_mapping);
+                var field_mapping = JSON.parse($scope.default_mapping.value);
                 Import.commit_artifacts(artifacts_to_commit, $scope.shared_reference, $scope.shared_state.state.state, $scope.shared_owner, $scope.extract_ip, $scope.extract_dns, $scope.extract_signature, field_mapping).then(function (data) {
                     blockUI.stop();
                     var message = "";
@@ -77,7 +77,7 @@ angular.module('ThreatKB').controller('ImportController',
                     blockUI.start($scope.block_message);
                 }
 
-                var field_mapping = JSON.parse($scope.metadata_field_mapping);
+                var field_mapping = JSON.parse($scope.default_mapping.value);
                 Import.import_artifacts($scope.import_text, $scope.autocommit, $scope.shared_reference, $scope.shared_state.state.state, $scope.shared_owner, $scope.extract_ip, $scope.extract_dns, $scope.extract_signature, field_mapping).then(function (data) {
                         if ($scope.autocommit) {
                             blockUI.stop();
