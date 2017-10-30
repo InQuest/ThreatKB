@@ -12,10 +12,25 @@ angular.module('ThreatKB')
                 filterText: ''
             };
 
+            var paginationOptions = {
+                pageNumber: 1,
+                pageSize: 25
+            };
+
             $scope.gridOptions = {
+                paginationPageSizes: [25, 50, 75, 100],
+                paginationPageSize: 25,
+                useExternalPagination: true,
                 enableFiltering: true,
+                flatEntityAccess: true,
+                fastWatch: true,
                 onRegisterApi: function (gridApi) {
                     $scope.gridApi = gridApi;
+                    gridApi.pagination.on.paginationChanged($scope, function (newPage, pageSize) {
+                        paginationOptions.pageNumber = newPage;
+                        paginationOptions.pageSize = pageSize;
+                        getPage();
+                    });
                 },
                 rowHeight: 35,
                 columnDefs:
@@ -63,15 +78,19 @@ angular.module('ThreatKB')
                     ]
             };
 
+            var getPage = function () {
+                $http.get('/ThreatKB/c2ips')
+                    .then(function (response) {
+                        $scope.gridOptions.totalItems = response.data.length;
+                        var firstRow = (paginationOptions.pageNumber - 1) * paginationOptions.pageSize;
+                        $scope.gridOptions.data = response.data.slice(firstRow, firstRow + paginationOptions.pageSize);
+                    }, function (error) {
+                    });
+            };
+
             $scope.refreshData = function () {
                 $scope.gridOptions.data = $filter('filter')($scope.c2ips, $scope.searchText, undefined);
             };
-
-            $http.get('/ThreatKB/c2ips')
-                .then(function (response) {
-                    $scope.gridOptions.data = response.data;
-                }, function (error) {
-                });
 
             $scope.create = function () {
                 $scope.clear();
@@ -153,6 +172,8 @@ angular.module('ThreatKB')
                     $scope.save(id);
                 });
             };
+
+            getPage();
         }])
     .controller('C2ipSaveController', ['$scope', '$http', '$uibModalInstance', 'c2ip', 'Comments', 'Cfg_states', 'Tags',
         function ($scope, $http, $uibModalInstance, c2ip, Comments, Cfg_states, Tags) {
