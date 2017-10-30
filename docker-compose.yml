@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+   db:
+     image: mysql:5.7.20
+     volumes:
+       - db_data:/var/lib/docker/mysql
+     restart: always
+     ports:
+        - 3307:3306
+     environment:
+       MYSQL_ROOT_PASSWORD: P@sswordsRC00l
+       MYSQL_DATABASE: threatkb
+       MYSQL_USER: threatkb
+       MYSQL_PASSWORD: P@sswordsRC00l
+
+   threatkb:
+     depends_on:
+       - db
+     image: threatkb:latest
+     ports:
+       - "5000:5000"
+     restart: always
+     environment:
+       THREATKB_USER: admin@inquest.net
+       THREATKB_PASS: P@sswordsRC00l
+       MYSQL_ROOT_PASSWORD: P@sswordsRC00l
+       SQL_DATABASE: threatkb
+       SQL_USERNAME: threatkb
+       SQL_PASSWORD: P@sswordsRC00l
+       SQL_PORT: 3306
+       SQL_HOST: db
+       SQL_PROTOCOL: mysql
+volumes:
+    db_data:
