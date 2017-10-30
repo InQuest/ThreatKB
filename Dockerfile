@@ -4,7 +4,7 @@ ADD . /opt/inquestkb
 
 
 RUN apt-get update
-RUN apt-get install -y python2.7 python-pip npm libffi-dev libssl-dev mysql-client libmysqlclient-dev python-dev libpython-dev
+RUN apt-get install -y python2.7 python-pip npm libffi-dev libssl-dev mysql-client libmysqlclient-dev python-dev libpython-dev git
 RUN pip install virtualenv
 RUN npm install -g bower
 RUN ln -s /usr/bin/nodejs /usr/bin/node
