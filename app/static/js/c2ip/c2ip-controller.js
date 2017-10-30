@@ -89,6 +89,7 @@ angular.module('ThreatKB')
                 C2ip.delete({id: id}, function () {
                     $scope.c2ips = C2ip.query();
                     $scope.gridOptions.data = $scope.c2ips;
+                    $scope.refreshData();
                 });
             };
 
@@ -103,6 +104,7 @@ angular.module('ThreatKB')
                     C2ip.update({id: id}, $scope.c2ip, function () {
                         $scope.c2ips = C2ip.query();
                         $scope.gridOptions.data = $scope.c2ips;
+                        $scope.refreshData();
                     }, function (error) {
                         growl.error(error.data, {ttl: -1});
                     });
@@ -110,6 +112,7 @@ angular.module('ThreatKB')
                     C2ip.save($scope.c2ip, function () {
                         $scope.c2ips = C2ip.query();
                         $scope.gridOptions.data = $scope.c2ips;
+                        $scope.refreshData();
                     }, function (error) {
                         growl.error(error.data, {ttl: -1});
                     });

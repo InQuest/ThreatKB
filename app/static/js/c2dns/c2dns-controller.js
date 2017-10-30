@@ -89,6 +89,7 @@ angular.module('ThreatKB')
                 C2dns.delete({id: id}, function () {
                     $scope.c2dns = C2dns.query();
                     $scope.gridOptions.data = $scope.c2dns;
+                    $scope.refreshData();
                 });
             };
 
@@ -103,6 +104,7 @@ angular.module('ThreatKB')
                     C2dns.update({id: id}, $scope.c2dns, function () {
                         $scope.c2dns = C2dns.query();
                         $scope.gridOptions.data = $scope.c2dns;
+                        $scope.refreshData();
                     }, function (error) {
                         growl.error(error.data, {ttl: -1});
                     });
@@ -110,6 +112,7 @@ angular.module('ThreatKB')
                     C2dns.save($scope.c2dns, function () {
                         $scope.c2dns = C2dns.query();
                         $scope.gridOptions.data = $scope.c2dns;
+                        $scope.refreshData();
                     }, function (error) {
                         growl.error(error.data, {ttl: -1});
                     });
@@ -156,7 +159,6 @@ angular.module('ThreatKB')
             $scope.c2dns = c2dns;
             $scope.c2dns.new_comment = "";
             $scope.Comments = Comments;
-
 
             $scope.match_types = ['exact', 'wildcard'];
             if (!$scope.c2dns.match_type) {
