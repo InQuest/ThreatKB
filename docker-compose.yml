@@ -31,5 +31,7 @@ services:
        SQL_PORT: 3306
        SQL_HOST: db
        SQL_PROTOCOL: mysql
+       LISTEN_ON: 0.0.0.0
+       LISTEN_PORT: 5000
 volumes:
     db_data:
