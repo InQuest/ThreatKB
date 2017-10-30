@@ -12,10 +12,25 @@ angular.module('ThreatKB')
                 filterText: ''
             };
 
+            var paginationOptions = {
+                pageNumber: 1,
+                pageSize: 25
+            };
+
             $scope.gridOptions = {
+                paginationPageSizes: [25, 50, 75, 100],
+                paginationPageSize: 25,
+                useExternalPagination: true,
                 enableFiltering: true,
+                flatEntityAccess: true,
+                fastWatch: true,
                 onRegisterApi: function (gridApi) {
                     $scope.gridApi = gridApi;
+                    gridApi.pagination.on.paginationChanged($scope, function (newPage, pageSize) {
+                        paginationOptions.pageNumber = newPage;
+                        paginationOptions.pageSize = pageSize;
+                        getPage();
+                    });
                 },
                 rowHeight: 35,
                 columnDefs:
@@ -63,15 +78,19 @@ angular.module('ThreatKB')
                     ]
             };
 
+            var getPage = function () {
+                $http.get('/ThreatKB/c2dns')
+                    .then(function (response) {
+                        $scope.gridOptions.totalItems = response.data.length;
+                        var firstRow = (paginationOptions.pageNumber - 1) * paginationOptions.pageSize;
+                        $scope.gridOptions.data = response.data.slice(firstRow, firstRow + paginationOptions.pageSize);
+                    }, function (error) {
+                    });
+            };
+
             $scope.refreshData = function () {
                 $scope.gridOptions.data = $filter('filter')($scope.c2dns, $scope.searchText, undefined);
             };
-
-            $http.get('/ThreatKB/c2dns')
-                .then(function (response) {
-                    $scope.gridOptions.data = response.data;
-                }, function (error) {
-                });
 
             $scope.create = function () {
                 $scope.clear();
@@ -89,6 +108,7 @@ angular.module('ThreatKB')
                 C2dns.delete({id: id}, function () {
                     $scope.c2dns = C2dns.query();
                     $scope.gridOptions.data = $scope.c2dns;
+                    $scope.refreshData();
                 });
             };
 
@@ -103,6 +123,7 @@ angular.module('ThreatKB')
                     C2dns.update({id: id}, $scope.c2dns, function () {
                         $scope.c2dns = C2dns.query();
                         $scope.gridOptions.data = $scope.c2dns;
+                        $scope.refreshData();
                     }, function (error) {
                         growl.error(error.data, {ttl: -1});
                     });
@@ -110,6 +131,7 @@ angular.module('ThreatKB')
                     C2dns.save($scope.c2dns, function () {
                         $scope.c2dns = C2dns.query();
                         $scope.gridOptions.data = $scope.c2dns;
+                        $scope.refreshData();
                     }, function (error) {
                         growl.error(error.data, {ttl: -1});
                     });
@@ -150,13 +172,14 @@ angular.module('ThreatKB')
                     $scope.save(id);
                 });
             };
+
+            getPage();
         }])
     .controller('C2dnsSaveController', ['$scope', '$http', '$uibModalInstance', 'c2dns', 'Cfg_states', 'Comments', 'Tags',
         function ($scope, $http, $uibModalInstance, c2dns, Cfg_states, Comments, Tags) {
             $scope.c2dns = c2dns;
             $scope.c2dns.new_comment = "";
             $scope.Comments = Comments;
-
 
             $scope.match_types = ['exact', 'wildcard'];
             if (!$scope.c2dns.match_type) {

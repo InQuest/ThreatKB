@@ -90,9 +90,11 @@ span.glyphicon {
     min-height: 1000px;
 }
 
+/*
 .ui-grid, .ui-grid-viewport {
     height: auto !important;
 }
+*/
 
 .navbar-nav li {
     position: relative

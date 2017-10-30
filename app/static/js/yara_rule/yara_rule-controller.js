@@ -12,10 +12,25 @@ angular.module('ThreatKB')
                 filterText: ''
             };
 
+            var paginationOptions = {
+                pageNumber: 1,
+                pageSize: 25
+            };
+
             $scope.gridOptions = {
+                paginationPageSizes: [25, 50, 75, 100],
+                paginationPageSize: 25,
+                useExternalPagination: true,
                 enableFiltering: true,
+                flatEntityAccess: true,
+                fastWatch: true,
                 onRegisterApi: function (gridApi) {
                     $scope.gridApi = gridApi;
+                    gridApi.pagination.on.paginationChanged($scope, function (newPage, pageSize) {
+                        paginationOptions.pageNumber = newPage;
+                        paginationOptions.pageSize = pageSize;
+                        getPage();
+                    });
                 },
                 rowHeight: 35,
                 columnDefs:
@@ -65,15 +80,19 @@ angular.module('ThreatKB')
 
             $scope.state = {};
 
+            var getPage = function () {
+                $http.get('/ThreatKB/yara_rules')
+                    .then(function (response) {
+                        $scope.gridOptions.totalItems = response.data.length;
+                        var firstRow = (paginationOptions.pageNumber - 1) * paginationOptions.pageSize;
+                        $scope.gridOptions.data = response.data.slice(firstRow, firstRow + paginationOptions.pageSize);
+                    }, function (error) {
+                    });
+            };
+
             $scope.refreshData = function () {
                 $scope.gridOptions.data = $filter('filter')($scope.yara_rules, $scope.searchText, undefined);
             };
-
-            $http.get('/ThreatKB/yara_rules')
-                .then(function (response) {
-                    $scope.gridOptions.data = response.data;
-                }, function (error) {
-                });
 
             $scope.create = function () {
                 $scope.clear();
@@ -179,6 +198,8 @@ angular.module('ThreatKB')
                     }
                 });
             };
+
+            getPage();
         }])
     .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', 'yara_rule', 'yara_rules', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags', 'Yara_rule', 'Cfg_settings',
         function ($scope, $http, $uibModalInstance, yara_rule, yara_rules, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags, Yara_rule, Cfg_settings) {
