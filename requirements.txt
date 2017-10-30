@@ -51,4 +51,3 @@ Werkzeug==0.12.2
 Whoosh==2.7.4
 WTForms==2.1
 yara-python==3.6.3
-Flask-Autodoc==0.1.2
