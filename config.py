@@ -18,6 +18,7 @@ SQLALCHEMY_DATABASE_URI = '{protocol}://{username}:{password}@{hostname}:{port}/
     database = SQL_DATABASE
 )
 #SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'app.db')
+
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 

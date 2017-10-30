@@ -166,7 +166,8 @@ angular.module('ThreatKB')
                         yara_rules: function () {
                             return $scope.yara_rules;
                         }
-                    }
+                    },
+                    size: 'lg'
                 });
 
                 yara_ruleSave.result.then(function (entity) {
@@ -181,6 +182,7 @@ angular.module('ThreatKB')
         }])
     .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', 'yara_rule', 'yara_rules', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags', 'Yara_rule', 'Cfg_settings',
         function ($scope, $http, $uibModalInstance, yara_rule, yara_rules, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags, Yara_rule, Cfg_settings) {
+
             $scope.yara_rule = yara_rule;
             $scope.yara_rules = yara_rules;
             $scope.yara_rule.new_comment = "";
