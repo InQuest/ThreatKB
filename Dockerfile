@@ -1,6 +1,6 @@
 FROM ubuntu:14.04
 
-ADD . /opt/inquestkb
+ADD . /opt/threatkb
 
 
 RUN apt-get update
@@ -9,7 +9,7 @@ RUN pip install virtualenv
 RUN npm install -g bower
 RUN ln -s /usr/bin/nodejs /usr/bin/node
 
-WORKDIR /opt/inquestkb
+WORKDIR /opt/threatkb
 
 RUN virtualenv env
 RUN env/bin/pip install -r requirements.txt
@@ -17,4 +17,4 @@ RUN bower install --allow-root
 RUN chmod 744 docker-entrypoint.sh
 RUN chmod 744 wait-for-it.sh
 
-CMD ["/opt/inquestkb/docker-entrypoint.sh"]
+CMD ["/opt/threatkb/docker-entrypoint.sh"]
