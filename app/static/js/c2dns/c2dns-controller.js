@@ -92,6 +92,14 @@ angular.module('ThreatKB')
                 $scope.gridOptions.data = $filter('filter')($scope.c2dns, $scope.searchText, undefined);
             };
 
+            $scope.getTableHeight = function () {
+                var rowHeight = $scope.gridOptions.rowHeight;
+                var headerHeight = 100;
+                return {
+                    height: ($scope.gridOptions.data.length * rowHeight + headerHeight) + "px"
+                };
+            };
+
             $scope.create = function () {
                 $scope.clear();
                 $scope.open();

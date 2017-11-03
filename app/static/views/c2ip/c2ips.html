@@ -171,5 +171,7 @@
         </a>
     </div>
     <br>
-    <div ui-grid="gridOptions" ui-grid-pagination></div>
+    <div ui-if="gridOptions.data.length > 0" ui-grid="gridOptions" ng-style="getTableHeight()"
+         ui-grid-pagination ui-grid-auto-resize>
+    </div>
 </div>
