@@ -111,6 +111,16 @@
                 </div>
 
                 <div class="form-group">
+                    <label>Description:</label>
+                    <span class="error" ng-show="form.description.$error.minlength">Must be at least  characters.</span>
+                    <span class="error"
+                          ng-show="form.description.$error.maxlength">Must be at most 4096 characters.</span>
+                    <span class="error text-danger" ng-if="!c2dns.description">*</span>
+                    <textarea class="form-control" placeholder="Enter a description..." rows="4"
+                              ng-model="c2dns.description" ng-maxlength="4096"></textarea>
+                </div>
+
+                <div class="form-group">
                     <label>Tags:</label>
 
                     <tags-input ng-model="c2dns.tags" on-tag-added="addedTag($tag)" on-tag-removed="removedTag($tag)">

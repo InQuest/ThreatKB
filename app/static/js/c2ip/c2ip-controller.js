@@ -156,6 +156,7 @@ angular.module('ThreatKB')
                     "reference_link": "",
                     "expiration_type": "",
                     "expiration_timestamp": "",
+                    "description": "",
                     "id": "",
                     "tags": [],
                     "addedTags": [],
