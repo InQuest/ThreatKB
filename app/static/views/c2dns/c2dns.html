@@ -97,7 +97,10 @@
 
                 <div class="form-group">
                     <label>Reference Link:</label>
-
+                    <a target="_blank" ng-if="c2dns.reference_link"
+                       href="{{ c2dns.reference_link.indexOf('http') == 0 ? c2dns.reference_link : 'http://' + c2dns.reference_link }}">
+                        <span  class="glyphicon glyphicon-link" style="font-size: 1.0em;"></span>
+                    </a>
                     <input class="form-control" name="reference_link"
                            ng-model="c2dns.reference_link" ng-required="false"
                            ng-maxlength="2048"/>

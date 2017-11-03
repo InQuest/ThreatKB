@@ -81,6 +81,10 @@
 
                 <div class="form-group">
                     <label>Reference Link:</label>
+                    <a target="_blank" ng-if="c2ip.reference_link"
+                       href="{{ c2ip.reference_link.indexOf('http') == 0 ? c2ip.reference_link : 'http://' + c2ip.reference_link }}">
+                        <span  class="glyphicon glyphicon-link" style="font-size: 1.0em;"></span>
+                    </a>
                     <span class="error"
                           ng-show="form.reference_link.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
