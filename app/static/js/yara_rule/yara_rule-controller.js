@@ -185,8 +185,7 @@ angular.module('ThreatKB')
                         yara_rules: function () {
                             return $scope.yara_rules;
                         }
-                    },
-                    size: 'lg'
+                    }
                 });
 
                 yara_ruleSave.result.then(function (entity) {
@@ -275,8 +274,10 @@ angular.module('ThreatKB')
                                     entity_type: Files.ENTITY_MAPPING.SIGNATURE,
                                     entity_id: id
                                 })
+                                growl.info('Success ' + JSON.stringify(resp.data, null, 2));
                             }, function (resp) {
                                 console.log('Error status: ' + resp.status);
+                                growl.error(resp);
                             }, function (evt) {
                                 var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
                                 console.log('progress: ' + progressPercentage + '% ' + evt.config.data.file.name);

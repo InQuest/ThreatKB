@@ -31,3 +31,7 @@ class Cfg_settings(db.Model):
     def get_setting(key):
         setting = db.session.query(Cfg_settings).filter(Cfg_settings.key == key).first()
         return setting.value if setting else None
+
+    @staticmethod
+    def get_settings(key_like):
+        return db.session.query(Cfg_settings).filter(Cfg_settings.key.like(key_like)).all()
