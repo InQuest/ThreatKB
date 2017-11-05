@@ -49,7 +49,7 @@
                     <label>State:</label>
                     <span class="error text-danger">*</span>
 
-                    <ui-select ng-model="c2dns.state">
+                    <ui-select ng-model="c2dns.state" name="state">
                         <ui-select-match placeholder="Select a state..">
                             <span ng-bind="$select.selected.state || c2dns.state"></span>
                         </ui-select-match>

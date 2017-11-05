@@ -2,6 +2,7 @@ from app import db
 from app.models import yara_rule, c2dns, c2ip, tasks
 from sqlalchemy.event import listens_for
 
+
 class Cfg_states(db.Model):
     __tablename__ = "cfg_states"
 
@@ -22,7 +23,20 @@ class Cfg_states(db.Model):
         )
 
     def __repr__(self):
-        return '<Cfg_states %r>' % (self.id)
+        return '<Cfg_states %r>' % self.id
+
+
+def verify_state(state_to_verify):
+    cfg_state = Cfg_states.query.filter(Cfg_states.state == state_to_verify).first()
+    if not cfg_state:
+        entity = Cfg_states(
+            state=state_to_verify,
+            is_release_state=0
+        )
+        db.session.add(entity)
+        db.session.commit()
+
+    return state_to_verify
 
 
 @listens_for(Cfg_states, "before_insert")

@@ -150,6 +150,7 @@ angular.module('ThreatKB')
                 $scope.c2ip = {
                     "date_created": "",
                     "date_modified": "",
+                    "state": "",
                     "ip": "",
                     "asn": "",
                     "country": "",

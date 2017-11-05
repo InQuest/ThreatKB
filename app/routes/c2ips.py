@@ -6,6 +6,7 @@ from dateutil import parser
 from sqlalchemy import exc
 import json
 
+from app.models.cfg_states import verify_state
 from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
 
 
@@ -50,7 +51,7 @@ def create_c2ip():
         ip=request.json['ip']
         , asn=request.json['asn']
         , country=request.json['country']
-        , state=request.json['state']['state']
+        , state=verify_state(request.json['state']['state'])
         , reference_link=request.json['reference_link']
         , expiration_type=request.json['expiration_type']
         , expiration_timestamp=parser.parse(request.json['expiration_timestamp']) if request.json.get("expiration_type",
@@ -89,8 +90,8 @@ def update_c2ip(id):
         ip=request.json['ip'],
         asn=request.json['asn'],
         country=request.json['country'],
-        state=request.json['state']['state'] if request.json['state'] and 'state' in request.json['state'] else
-        request.json['state'],
+        state=verify_state(request.json['state']['state']) if request.json['state'] and 'state' in request.json['state']
+        else verify_state(request.json['state']),
         reference_link=request.json['reference_link'],
         expiration_type=request.json['expiration_type'],
         expiration_timestamp=parser.parse(request.json['expiration_timestamp']) if request.json.get(
