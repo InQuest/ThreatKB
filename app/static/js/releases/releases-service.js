@@ -27,8 +27,19 @@ angular.module('ThreatKB')
             })
         };
 
+        function get_latest_release() {
+            return $http.get('/ThreatKB/releases/latest', {
+                cache: false,
+            }).then(function (response) {
+                return response.data;
+            }, function (error) {
+                return $q.reject(error.data);
+            })
+        }
+
         return {
             resource: release_resource,
+            get_latest_release: get_latest_release,
             generate_release_notes: generate_release_notes,
             generate_artifact_export: generate_artifact_export
         };

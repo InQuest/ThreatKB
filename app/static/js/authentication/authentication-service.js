@@ -19,7 +19,8 @@ angular.module('ThreatKB')
                 getUser: getUser,
                 user: getUser,
                 getMe: getMe,
-                changePassword: changePassword
+                changePassword: changePassword,
+                getOwnershipData: getOwnershipData
             });
 
             function isLoggedIn() {
@@ -152,6 +153,22 @@ angular.module('ThreatKB')
                         user_dict = {};
                     });
             }
+
+            function getOwnershipData() {
+                return $http.get('/ThreatKB/users/ownership')
+                    .then(function (success) {
+                            if (success.status === 200 && success.data) {
+                                return success.data;
+                            } else {
+                                //TODO
+                            }
+                        }, function (error) {
+                            return $q.reject(error.data);
+                        }
+                    );
+            }
+
+
 
 
         }])
