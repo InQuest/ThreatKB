@@ -5,9 +5,23 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
     .config(['$routeProvider', function ($routeProvider) {
         $routeProvider
             .when('/', {
-                templateUrl: 'views/home.html',
-                //controller: 'HomeController',
-                access: {restricted: true, admin: false}
+                templateUrl: 'views/dashboard/dashboard.html',
+                controller: 'DashboardController',
+                access: {restricted: true, admin: false},
+                resolve: {
+                    resolvedCfgCategoryRangeMapping: ['CfgCategoryRangeMapping', function (CfgCategoryRangeMapping) {
+                        return CfgCategoryRangeMapping.query();
+                    }],
+                    resolvedCfg_states: ['Cfg_states', function (Cfg_states) {
+                        return Cfg_states.query();
+                    }],
+                    resolvedOwnershipData: ['AuthService', function (AuthService) {
+                        return AuthService.getOwnershipData();
+                    }],
+                    resolvedReleaseLatest: ['Release', function (Release) {
+                        return Release.get_latest_release();
+                    }]
+                }
             })
             .when('/login', {
                 templateUrl: 'views/login.html',

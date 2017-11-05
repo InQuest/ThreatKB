@@ -110,3 +110,20 @@ span.glyphicon {
     background: #9d9d9d
 }
 
+#dashboard_categories TD:last-child {
+    text-align: inherit;
+}
+
+#dashboard_states TD:last-child {
+    text-align: inherit;
+}
+
+#dashboard_ownership TD:last-child {
+    text-align: inherit;
+}
+
+#dashboard_release TD:last-child {
+    text-align: inherit;
+}
+
+

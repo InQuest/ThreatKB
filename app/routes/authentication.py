@@ -1,6 +1,6 @@
 from app import app, db, bcrypt, admin_only, auto
 from app.models.users import KBUser
-from app.models import yara_rule, c2dns, c2ip
+from app.models import yara_rule, c2dns, c2ip, tasks, users
 from flask import request, jsonify, session, json, abort, send_file, Response
 from flask.ext.login import current_user, login_required
 import flask_login
@@ -228,3 +228,51 @@ def status():
             return jsonify({'status': True, 'a': current_user.admin, 'user': current_user.to_dict()})
     else:
         return jsonify({'status': False, 'a': False, 'user': None})
+
+
+@app.route('/ThreatKB/users/ownership', methods=['GET'])
+@auto.doc()
+@login_required
+def get_users_ownership():
+    """Return all user ownership information.
+    Optional Arguments: include_inactive
+    Return: dictionary of user ownership assignments"""
+    include_inactive = request.args.get("include_inactive", False)
+
+    ownership_data = {"!Unassigned": {"task": [], "ip": [], "dns": [], "signatures": []}}
+    u = {user.id: user for user in users.KBUser.query.all()}
+    for user_id, user in u.iteritems():
+        ownership_data[user.email] = {"task": [], "ip": [], "dns": [], "signatures": []}
+
+    t = tasks.Tasks.query.all() if not include_inactive else tasks.Tasks.query.filter_by(tasks.Tasks.active > 0).all()
+    for task in t:
+        if task.owner_user_id:
+            ownership_data[u[task.owner_user_id].email]["task"].append(task.to_dict())
+        else:
+            ownership_data["!Unassigned"]["task"].append(task.to_dict())
+
+    ips = c2ip.C2ip.query.all()
+    for ip in ips:
+        if ip.owner_user_id:
+            ownership_data[u[ip.owner_user_id].email]["ip"].append(ip.to_dict())
+        else:
+            ownership_data["!Unassigned"]["ip"].append(ip.to_dict())
+
+    dnss = c2dns.C2dns.query.all()
+    for dns in dnss:
+        if dns.owner_user_id:
+            ownership_data[u[dns.owner_user_id].email]["dns"].append(dns.to_dict())
+        else:
+            ownership_data["!Unassigned"]["dns"].append(dns.to_dict())
+
+    signatures = yara_rule.Yara_rule.query.all() if not include_inactive else yara_rule.Yara_rule.query.filter_by(
+        yara_rule.Yara_rule.active > 0).all()
+    for signature in signatures:
+        if signature.owner_user_id:
+            ownership_data[u[signature.owner_user_id].email]["signatures"].append(signature.to_dict())
+        else:
+            ownership_data["!Unassigned"]["signatures"].append(signature.to_dict())
+
+    return Response(json.dumps(
+        [{"email": email, "ownership_data": ownership_data} for email, ownership_data in ownership_data.iteritems()]),
+                    mimetype="application/json")
