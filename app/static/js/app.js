@@ -41,7 +41,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                         return C2dns.query();
                     }],
                     openModalForId: [function () {
-                        return $route.current.params.id;
+                        return null;
                     }]
                 }
             })
