@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('C2dnsController', ['$scope', '$filter', '$http', '$uibModal', 'resolvedC2dns', 'C2dns', 'Cfg_states', 'growl', 'Users',
-        function ($scope, $filter, $http, $uibModal, resolvedC2dns, C2dns, Cfg_states, growl, Users) {
+    .controller('C2dnsController', ['$scope', '$filter', '$http', '$uibModal', 'resolvedC2dns', 'C2dns', 'Cfg_states', 'growl', 'Users', 'openModalForId',
+        function ($scope, $filter, $http, $uibModal, resolvedC2dns, C2dns, Cfg_states, growl, Users, openModalForId) {
 
             $scope.c2dns = resolvedC2dns;
 
@@ -183,12 +183,22 @@ angular.module('ThreatKB')
             };
 
             getPage();
+
+            if (openModalForId !== null) {
+                $scope.update(openModalForId);
+            }
         }])
-    .controller('C2dnsSaveController', ['$scope', '$http', '$uibModalInstance', 'c2dns', 'Cfg_states', 'Comments', 'Tags',
-        function ($scope, $http, $uibModalInstance, c2dns, Cfg_states, Comments, Tags) {
+    .controller('C2dnsSaveController', ['$scope', '$http', '$uibModalInstance', 'c2dns', 'Cfg_states', 'Comments', 'Tags', 'growl',
+        function ($scope, $http, $uibModalInstance, c2dns, Cfg_states, Comments, Tags, growl) {
             $scope.c2dns = c2dns;
             $scope.c2dns.new_comment = "";
             $scope.Comments = Comments;
+
+            $scope.c2dns.$promise.then(function (result) {
+            }, function (errorMsg) {
+                growl.error("Task Not Found", {ttl: -1});
+                $uibModalInstance.dismiss('cancel');
+            });
 
             $scope.match_types = ['exact', 'wildcard'];
             if (!$scope.c2dns.match_type) {

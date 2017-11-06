@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('C2ipController', ['$scope', '$filter', '$http', '$uibModal', 'resolvedC2ip', 'C2ip', 'Cfg_states', 'growl', 'Users',
-        function ($scope, $filter, $http, $uibModal, resolvedC2ip, C2ip, Cfg_states, growl, Users) {
+    .controller('C2ipController', ['$scope', '$filter', '$http', '$uibModal', 'resolvedC2ip', 'C2ip', 'Cfg_states', 'growl', 'Users', 'openModalForId',
+        function ($scope, $filter, $http, $uibModal, resolvedC2ip, C2ip, Cfg_states, growl, Users, openModalForId) {
 
             $scope.c2ips = resolvedC2ip;
 
@@ -184,12 +184,22 @@ angular.module('ThreatKB')
             };
 
             getPage();
+
+            if (openModalForId !== null) {
+                $scope.update(openModalForId);
+            }
         }])
-    .controller('C2ipSaveController', ['$scope', '$http', '$uibModalInstance', 'c2ip', 'Comments', 'Cfg_states', 'Tags',
-        function ($scope, $http, $uibModalInstance, c2ip, Comments, Cfg_states, Tags) {
+    .controller('C2ipSaveController', ['$scope', '$http', '$uibModalInstance', 'c2ip', 'Comments', 'Cfg_states', 'Tags', 'growl',
+        function ($scope, $http, $uibModalInstance, c2ip, Comments, Cfg_states, Tags, growl) {
             $scope.c2ip = c2ip;
             $scope.c2ip.new_comment = "";
             $scope.Comments = Comments;
+
+            $scope.c2ip.$promise.then(function (result) {
+            }, function (errorMsg) {
+                growl.error("C2ip Not Found", {ttl: -1});
+                $uibModalInstance.dismiss('cancel');
+            });
 
             $scope.cfg_states = Cfg_states.query();
 

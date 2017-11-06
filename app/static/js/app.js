@@ -39,6 +39,22 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                 resolve: {
                     resolvedC2dns: ['C2dns', function (C2dns) {
                         return C2dns.query();
+                    }],
+                    openModalForId: [function () {
+                        return $route.current.params.id;
+                    }]
+                }
+            })
+            .when('/c2dns/:id', {
+                templateUrl: 'views/c2dns/c2dns.html',
+                controller: 'C2dnsController',
+                access: {restricted: true, admin: false},
+                resolve: {
+                    resolvedC2dns: ['C2dns', function (C2dns) {
+                        return C2dns.query();
+                    }],
+                    openModalForId: ['$route', function ($route) {
+                        return $route.current.params.id;
                     }]
                 }
             })
@@ -49,6 +65,22 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                 resolve: {
                     resolvedC2ip: ['C2ip', function (C2ip) {
                         return C2ip.query();
+                    }],
+                    openModalForId: [function () {
+                        return null;
+                    }]
+                }
+            })
+            .when('/c2ips/:id', {
+                templateUrl: 'views/c2ip/c2ips.html',
+                controller: 'C2ipController',
+                access: {restricted: true, admin: false},
+                resolve: {
+                    resolvedC2ip: ['C2ip', function (C2ip) {
+                        return C2ip.query();
+                    }],
+                    openModalForId: ['$route', function ($route) {
+                        return $route.current.params.id;
                     }]
                 }
             })
@@ -99,6 +131,22 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                 resolve: {
                     resolvedYara_rule: ['Yara_rule', function (Yara_rule) {
                         return Yara_rule.resource.query();
+                    }],
+                    openModalForId: [function () {
+                        return null;
+                    }]
+                }
+            })
+            .when('/yara_rules/:id', {
+                templateUrl: 'views/yara_rule/yara_rules.html',
+                controller: 'Yara_ruleController',
+                access: {restricted: true, admin: false},
+                resolve: {
+                    resolvedYara_rule: ['Yara_rule', function (Yara_rule) {
+                        return Yara_rule.resource.query();
+                    }],
+                    openModalForId: ['$route', function ($route) {
+                        return $route.current.params.id;
                     }]
                 }
             })
@@ -144,6 +192,22 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                 resolve: {
                     resolvedTask: ['Task', function (Task) {
                         return Task.query();
+                    }],
+                    openModalForId: [function () {
+                        return null;
+                    }]
+                }
+            })
+            .when('/tasks/:id', {
+                templateUrl: 'views/tasks/tasks.html',
+                controller: 'TasksController',
+                access: {restricted: true, admin: false},
+                resolve: {
+                    resolvedTask: ['Task', function (Task) {
+                        return Task.query();
+                    }],
+                    openModalForId: ['$route', function ($route) {
+                        return $route.current.params.id;
                     }]
                 }
             })
