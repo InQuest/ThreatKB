@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('C2dnsController', ['$scope', '$filter', '$http', '$uibModal', 'resolvedC2dns', 'C2dns', 'Cfg_states', 'growl', 'Users',
-        function ($scope, $filter, $http, $uibModal, resolvedC2dns, C2dns, Cfg_states, growl, Users) {
+    .controller('C2dnsController', ['$scope', '$filter', '$http', '$uibModal', 'resolvedC2dns', 'C2dns', 'Cfg_states', 'growl', 'Users', 'openModalForId',
+        function ($scope, $filter, $http, $uibModal, resolvedC2dns, C2dns, Cfg_states, growl, Users, openModalForId) {
 
             $scope.c2dns = resolvedC2dns;
 
@@ -183,6 +183,10 @@ angular.module('ThreatKB')
             };
 
             getPage();
+
+            if (openModalForId !== null) {
+                $scope.update(openModalForId);
+            }
         }])
     .controller('C2dnsSaveController', ['$scope', '$http', '$uibModalInstance', 'c2dns', 'Cfg_states', 'Comments', 'Tags',
         function ($scope, $http, $uibModalInstance, c2dns, Cfg_states, Comments, Tags) {

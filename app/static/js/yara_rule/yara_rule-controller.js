@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('Yara_ruleController', ['$scope', '$filter', '$http', '$uibModal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states', 'CfgCategoryRangeMapping', 'Users', 'growl',
-        function ($scope, $filter, $http, $uibModal, resolvedYara_rule, Yara_rule, Cfg_states, CfgCategoryRangeMapping, Users, growl) {
+    .controller('Yara_ruleController', ['$scope', '$filter', '$http', '$uibModal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states', 'CfgCategoryRangeMapping', 'Users', 'growl', 'openModalForId',
+        function ($scope, $filter, $http, $uibModal, resolvedYara_rule, Yara_rule, Cfg_states, CfgCategoryRangeMapping, Users, growl, openModalForId) {
 
             $scope.yara_rules = resolvedYara_rule;
 
@@ -207,6 +207,9 @@ angular.module('ThreatKB')
             };
 
             getPage();
+            if (openModalForId !== null) {
+                $scope.update(openModalForId);
+            }
         }])
     .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', 'yara_rule', 'yara_rules', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags', 'Yara_rule', 'Cfg_settings',
         function ($scope, $http, $uibModalInstance, yara_rule, yara_rules, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags, Yara_rule, Cfg_settings) {
@@ -281,7 +284,7 @@ angular.module('ThreatKB')
                                 $scope.yara_rule.files = $scope.Files.resource.query({
                                     entity_type: Files.ENTITY_MAPPING.SIGNATURE,
                                     entity_id: id
-                                })
+                                });
                                 growl.info('Success ' + JSON.stringify(resp.data, null, 2));
                             }, function (resp) {
                                 console.log('Error status: ' + resp.status);

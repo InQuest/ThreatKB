@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('C2ipController', ['$scope', '$filter', '$http', '$uibModal', 'resolvedC2ip', 'C2ip', 'Cfg_states', 'growl', 'Users',
-        function ($scope, $filter, $http, $uibModal, resolvedC2ip, C2ip, Cfg_states, growl, Users) {
+    .controller('C2ipController', ['$scope', '$filter', '$http', '$uibModal', 'resolvedC2ip', 'C2ip', 'Cfg_states', 'growl', 'Users', 'openModalForId',
+        function ($scope, $filter, $http, $uibModal, resolvedC2ip, C2ip, Cfg_states, growl, Users, openModalForId) {
 
             $scope.c2ips = resolvedC2ip;
 
@@ -184,6 +184,10 @@ angular.module('ThreatKB')
             };
 
             getPage();
+
+            if (openModalForId !== null) {
+                $scope.update(openModalForId);
+            }
         }])
     .controller('C2ipSaveController', ['$scope', '$http', '$uibModalInstance', 'c2ip', 'Comments', 'Cfg_states', 'Tags',
         function ($scope, $http, $uibModalInstance, c2ip, Comments, Cfg_states, Tags) {
