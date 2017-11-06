@@ -176,6 +176,10 @@
 
                 <div class="form-group">
                     <label>Reference Link:</label>
+                    <a target="_blank" ng-if="yara_rule.reference_link"
+                       href="{{ yara_rule.reference_link.indexOf('http') == 0 ? yara_rule.reference_link : 'http://' + yara_rule.reference_link }}">
+                        <span class="glyphicon glyphicon-link" style="font-size: 1.0em;"></span>
+                    </a>
                     <span class="error"
                           ng-show="form.reference_link.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
@@ -308,5 +312,7 @@
         </a>
     </div>
     <br>
-    <div ui-grid="gridOptions" ui-grid-pagination></div>
+    <div ui-if="gridOptions.data.length > 0" ui-grid="gridOptions" ng-style="getTableHeight()"
+         ui-grid-pagination ui-grid-auto-resize>
+    </div>
 </div>

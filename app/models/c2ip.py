@@ -25,6 +25,7 @@ class C2ip(db.Model):
     reference_link = db.Column(db.String(2048))
     expiration_type = db.Column(db.String(32))
     expiration_timestamp = db.Column(db.DateTime(timezone=True))
+    description = db.Column(db.String(4096))
 
     created_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
     created_user = db.relationship('KBUser', foreign_keys=created_user_id,
@@ -59,6 +60,7 @@ class C2ip(db.Model):
             reference_link=self.reference_link,
             expiration_type=self.expiration_type,
             expiration_timestamp=self.expiration_timestamp.isoformat() if self.expiration_timestamp else None,
+            description=self.description,
             id=self.id,
             tags=tags_mapping.get_tags_for_source(self.__tablename__, self.id),
             addedTags=[],

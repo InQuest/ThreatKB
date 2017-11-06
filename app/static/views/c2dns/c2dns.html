@@ -49,7 +49,7 @@
                     <label>State:</label>
                     <span class="error text-danger">*</span>
 
-                    <ui-select ng-model="c2dns.state">
+                    <ui-select ng-model="c2dns.state" name="state">
                         <ui-select-match placeholder="Select a state..">
                             <span ng-bind="$select.selected.state || c2dns.state"></span>
                         </ui-select-match>
@@ -97,7 +97,10 @@
 
                 <div class="form-group">
                     <label>Reference Link:</label>
-
+                    <a target="_blank" ng-if="c2dns.reference_link"
+                       href="{{ c2dns.reference_link.indexOf('http') == 0 ? c2dns.reference_link : 'http://' + c2dns.reference_link }}">
+                        <span  class="glyphicon glyphicon-link" style="font-size: 1.0em;"></span>
+                    </a>
                     <input class="form-control" name="reference_link"
                            ng-model="c2dns.reference_link" ng-required="false"
                            ng-maxlength="2048"/>
@@ -105,6 +108,16 @@
                           ng-show="form.reference_link.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
                           ng-show="form.reference_link.$error.maxlength">Must be at most 2048 characters.</span>
+                </div>
+
+                <div class="form-group">
+                    <label>Description:</label>
+                    <span class="error" ng-show="form.description.$error.minlength">Must be at least  characters.</span>
+                    <span class="error"
+                          ng-show="form.description.$error.maxlength">Must be at most 4096 characters.</span>
+                    <span class="error text-danger" ng-if="!c2dns.description">*</span>
+                    <textarea class="form-control" placeholder="Enter a description..." rows="4"
+                              ng-model="c2dns.description" ng-maxlength="4096"></textarea>
                 </div>
 
                 <div class="form-group">
@@ -164,5 +177,7 @@
         </a>
     </div>
     <br>
-    <div ui-grid="gridOptions" ui-grid-pagination></div>
+    <div ui-if="gridOptions.data.length > 0" ui-grid="gridOptions" ng-style="getTableHeight()"
+         ui-grid-pagination ui-grid-auto-resize>
+    </div>
 </div>
