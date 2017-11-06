@@ -89,6 +89,12 @@ angular.module('ThreatKB')
             $scope.Comments = Comments;
             $scope.current_user = AuthService.getUser();
 
+            $scope.task.$promise.then(function (result) {
+            }, function (errorMsg) {
+                growl.error("Task Not Found", {ttl: -1});
+                $uibModalInstance.dismiss('cancel');
+            });
+
             $scope.cfg_states = Cfg_states.query();
 
             $scope.extract_artifact = function () {

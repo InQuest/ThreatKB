@@ -188,11 +188,17 @@ angular.module('ThreatKB')
                 $scope.update(openModalForId);
             }
         }])
-    .controller('C2dnsSaveController', ['$scope', '$http', '$uibModalInstance', 'c2dns', 'Cfg_states', 'Comments', 'Tags',
-        function ($scope, $http, $uibModalInstance, c2dns, Cfg_states, Comments, Tags) {
+    .controller('C2dnsSaveController', ['$scope', '$http', '$uibModalInstance', 'c2dns', 'Cfg_states', 'Comments', 'Tags', 'growl',
+        function ($scope, $http, $uibModalInstance, c2dns, Cfg_states, Comments, Tags, growl) {
             $scope.c2dns = c2dns;
             $scope.c2dns.new_comment = "";
             $scope.Comments = Comments;
+
+            $scope.c2dns.$promise.then(function (result) {
+            }, function (errorMsg) {
+                growl.error("Task Not Found", {ttl: -1});
+                $uibModalInstance.dismiss('cancel');
+            });
 
             $scope.match_types = ['exact', 'wildcard'];
             if (!$scope.c2dns.match_type) {

@@ -221,6 +221,12 @@ angular.module('ThreatKB')
             $scope.Files = Files;
             $scope.selected_signature = null;
 
+            $scope.yara_rule.$promise.then(function (result) {
+            }, function (errorMsg) {
+                growl.error("Yara Rule Not Found", {ttl: -1});
+                $uibModalInstance.dismiss('cancel');
+            });
+
             $scope.cfg_states = Cfg_states.query();
             $scope.cfg_category_range_mapping = CfgCategoryRangeMapping.query();
             $scope.do_not_bump_revision = false;
