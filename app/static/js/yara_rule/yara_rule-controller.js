@@ -35,8 +35,8 @@ angular.module('ThreatKB')
                 rowHeight: 35,
                 columnDefs:
                     [
-                        {field: 'eventid', displayName: "Event ID"},
-                        {field: 'name'},
+                        {field: 'eventid', displayName: "Event ID", width: "10%"},
+                        {field: 'name', width: "30%"},
                         {field: 'category'},
                         {field: 'state'},
                         {
