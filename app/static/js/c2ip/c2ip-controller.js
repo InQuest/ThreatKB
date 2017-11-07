@@ -189,17 +189,23 @@ angular.module('ThreatKB')
                 $scope.update(openModalForId);
             }
         }])
-    .controller('C2ipSaveController', ['$scope', '$http', '$uibModalInstance', 'c2ip', 'Comments', 'Cfg_states', 'Tags', 'growl',
-        function ($scope, $http, $uibModalInstance, c2ip, Comments, Cfg_states, Tags, growl) {
+    .controller('C2ipSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'c2ip', 'Comments', 'Cfg_states', 'Tags', 'growl',
+        function ($scope, $http, $uibModalInstance, $location, c2ip, Comments, Cfg_states, Tags, growl) {
             $scope.c2ip = c2ip;
             $scope.c2ip.new_comment = "";
             $scope.Comments = Comments;
 
-            $scope.c2ip.$promise.then(function (result) {
-            }, function (errorMsg) {
-                growl.error("C2ip Not Found", {ttl: -1});
-                $uibModalInstance.dismiss('cancel');
-            });
+            if ($scope.c2ip.$promise !== undefined) {
+                $scope.c2ip.$promise.then(function (result) {
+                }, function (errorMsg) {
+                    growl.error("C2ip Not Found", {ttl: -1});
+                    $uibModalInstance.dismiss('cancel');
+                });
+            }
+
+            $scope.getPermalink = function (id) {
+                return $location.absUrl() + "/" + id;
+            };
 
             $scope.cfg_states = Cfg_states.query();
 

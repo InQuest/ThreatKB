@@ -9,7 +9,16 @@
                 <button type="button" class="close"
                         ng-click="cancel()">&times;
                 </button>
-                <h4 class="modal-title" id="myC2dnsLabel">{{ c2dns.id ? 'Edit' : 'Create' }} DNS Artifact</h4>
+                <h4 class="modal-title" id="myC2dnsLabel">
+                    {{ c2dns.id ? 'Edit' : 'Create' }} DNS Artifact
+                    <a>
+                        <span ng-if="c2dns.id" class="glyphicon glyphicon-link" style="font-size: .8em"
+                              title="Copy permalink to clipboard" tooltip-placement="bottom" uib-tooltip="Copied!"
+                              tooltip-trigger="'outsideClick'"
+                              ngclipboard data-clipboard-text="{{ getPermalink(c2dns.id) }}">
+                        </span>
+                    </a>
+                </h4>
 
             </div>
             <div class="modal-body">

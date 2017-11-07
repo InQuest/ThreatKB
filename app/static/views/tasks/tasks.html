@@ -9,9 +9,16 @@
                 <button type="button" class="close"
                         ng-click="cancel()">&times;
                 </button>
-                <h4 class="modal-title" id="myTasksLabel" ng-if="!task.id">Create Task</h4>
-                <h4 class="modal-title" id="myTasksLabel" ng-if="task.id">Edit Task</h4>
-
+                <h4 class="modal-title" id="myTasksLabel">
+                    {{ task.id ? 'Edit' : 'Create' }} Task
+                    <a>
+                        <span ng-if="task.id" class="glyphicon glyphicon-link" style="font-size: .8em"
+                              title="Copy permalink to clipboard" tooltip-placement="bottom" uib-tooltip="Copied!"
+                              tooltip-trigger="'outsideClick'"
+                              ngclipboard data-clipboard-text="{{ getPermalink(task.id) }}">
+                        </span>
+                    </a>
+                </h4>
             </div>
             <div class="modal-body">
                 <div class="form-group" ng-if="task.id">

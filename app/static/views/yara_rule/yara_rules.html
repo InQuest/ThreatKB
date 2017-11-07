@@ -34,7 +34,16 @@
             <div class="modal-header">
                 <button type="button" class="close" ng-click="cancel()">&times;</button>
 
-                <h4 class="modal-title" id="myC2ipLabel" style="float: left">{{ yara_rule.id ? 'Edit' : 'Create' }} Signature Artifact</h4>
+                <h4 class="modal-title" id="myC2ipLabel" style="float: left">
+                    {{ yara_rule.id ? 'Edit' : 'Create' }} Signature Artifact
+                    <a>
+                        <span ng-if="yara_rule.id" class="glyphicon glyphicon-link" style="font-size: .8em"
+                              title="Copy permalink to clipboard" tooltip-placement="bottom" uib-tooltip="Copied!"
+                              tooltip-trigger="'outsideClick'"
+                              ngclipboard data-clipboard-text="{{ getPermalink(yara_rule.id) }}">
+                        </span>
+                    </a>
+                </h4>
                 <div class="pull-right" ng-if="yara_rule.id"
                      style="margin: 0 35px 0 0;">
                     <button ng-if="negTestDir.value" type="button" class="btn btn-primary"
