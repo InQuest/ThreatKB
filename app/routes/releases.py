@@ -42,10 +42,7 @@ def get_release_latest():
     entity = releases.Release.query.filter(releases.Release.is_test_release == 0).order_by(
         releases.Release.id.desc()).first()
 
-    if not entity:
-        abort(404)
-
-    return Response(json.dumps(entity.to_dict()), mimetype="application/json")
+    return Response(json.dumps(entity.to_dict() if entity else {}), mimetype="application/json")
 
 
 @app.route('/ThreatKB/releases/<int:release_id>/release_notes', methods=['GET'])
