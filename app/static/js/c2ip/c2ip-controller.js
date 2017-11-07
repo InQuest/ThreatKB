@@ -195,11 +195,13 @@ angular.module('ThreatKB')
             $scope.c2ip.new_comment = "";
             $scope.Comments = Comments;
 
-            $scope.c2ip.$promise.then(function (result) {
-            }, function (errorMsg) {
-                growl.error("C2ip Not Found", {ttl: -1});
-                $uibModalInstance.dismiss('cancel');
-            });
+            if ($scope.c2ip.$promise !== undefined) {
+                $scope.c2ip.$promise.then(function (result) {
+                }, function (errorMsg) {
+                    growl.error("C2ip Not Found", {ttl: -1});
+                    $uibModalInstance.dismiss('cancel');
+                });
+            }
 
             $scope.cfg_states = Cfg_states.query();
 

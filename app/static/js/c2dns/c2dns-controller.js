@@ -194,11 +194,13 @@ angular.module('ThreatKB')
             $scope.c2dns.new_comment = "";
             $scope.Comments = Comments;
 
-            $scope.c2dns.$promise.then(function (result) {
-            }, function (errorMsg) {
-                growl.error("Task Not Found", {ttl: -1});
-                $uibModalInstance.dismiss('cancel');
-            });
+            if ($scope.c2dns.$promise !== undefined) {
+                $scope.c2dns.$promise.then(function (result) {
+                }, function (errorMsg) {
+                    growl.error("Task Not Found", {ttl: -1});
+                    $uibModalInstance.dismiss('cancel');
+                });
+            }
 
             $scope.match_types = ['exact', 'wildcard'];
             if (!$scope.c2dns.match_type) {
