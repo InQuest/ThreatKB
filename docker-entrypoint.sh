@@ -6,6 +6,7 @@ env
 
 cd /opt/threatkb
 ./wait-for-it.sh db:3306 -- echo "db is up"
+find . -name "*.pyc" -exec rm -f {} \;
 env/bin/python manage.py db upgrade
 
 num_users=`echo "select count(*) from kb_users;" | mysql -u ${SQL_USERNAME} -p"${SQL_PASSWORD}" -h ${SQL_HOST} ${SQL_DATABASE} | sed 's/[^0-9]//g'`
