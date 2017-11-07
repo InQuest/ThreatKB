@@ -150,15 +150,15 @@ class Yara_rule(db.Model):
         yara_rule.name = yara_dict["rule_name"]
 
         yara_metadata = {key.lower(): val.strip().strip("\"") for key, val in yara_dict["metadata"].iteritems()}
-        for possible_field in metadata_field_mapping.keys():
+        for possible_field, mapped_to in metadata_field_mapping.iteritems():
             possible_field = possible_field.lower()
             if possible_field in yara_metadata.keys():
-                field = yara_metadata[possible_field] if not metadata_field_mapping[possible_field] in ["confidence",
+                field = yara_metadata[possible_field] if not mapped_to in ["confidence",
                                                                                                         "severity",
                                                                                 "eventid"] else int(
                     yara_metadata[possible_field])
 
-                if metadata_field_mapping[possible_field] in ["last_revision_date", "creation_date"]:
+                if mapped_to in ["last_revision_date", "creation_date"]:
                     try:
                         field = parser.parse(field)
                     except:
@@ -168,7 +168,7 @@ class Yara_rule(db.Model):
                 if possible_field == "eventid" and Yara_rule.query.filter_by(eventid=field).first():
                     continue
 
-                setattr(yara_rule, metadata_field_mapping[possible_field], field)
+                setattr(yara_rule, mapped_to, field)
 
         yara_rule.condition = " ".join(yara_dict["condition_terms"])
         yara_rule.strings = "\n".join(
