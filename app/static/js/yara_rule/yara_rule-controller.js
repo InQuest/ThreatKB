@@ -211,8 +211,8 @@ angular.module('ThreatKB')
                 $scope.update(openModalForId);
             }
         }])
-    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', 'yara_rule', 'yara_rules', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags', 'Yara_rule', 'Cfg_settings',
-        function ($scope, $http, $uibModalInstance, yara_rule, yara_rules, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags, Yara_rule, Cfg_settings) {
+    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'yara_rule', 'yara_rules', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags', 'Yara_rule', 'Cfg_settings',
+        function ($scope, $http, $uibModalInstance, $location, yara_rule, yara_rules, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags, Yara_rule, Cfg_settings) {
 
             $scope.yara_rule = yara_rule;
             $scope.yara_rules = yara_rules;
@@ -228,6 +228,10 @@ angular.module('ThreatKB')
                     $uibModalInstance.dismiss('cancel');
                 });
             }
+
+            $scope.getPermalink = function (id) {
+                return $location.absUrl() + "/" + id;
+            };
 
             $scope.cfg_states = Cfg_states.query();
             $scope.cfg_category_range_mapping = CfgCategoryRangeMapping.query();

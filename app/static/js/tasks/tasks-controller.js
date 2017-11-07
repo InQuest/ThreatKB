@@ -82,8 +82,8 @@ angular.module('ThreatKB')
                 $scope.update(openModalForId);
             }
         }])
-    .controller('TaskSaveController', ['$scope', '$http', '$uibModalInstance', 'task', 'Comments', 'Cfg_states', 'Import', 'growl', 'blockUI', 'AuthService',
-        function ($scope, $http, $uibModalInstance, task, Comments, Cfg_states, Import, growl, blockUI, AuthService) {
+    .controller('TaskSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'task', 'Comments', 'Cfg_states', 'Import', 'growl', 'blockUI', 'AuthService',
+        function ($scope, $http, $uibModalInstance, $location, task, Comments, Cfg_states, Import, growl, blockUI, AuthService) {
             $scope.task = task;
             $scope.task.new_comment = "";
             $scope.Comments = Comments;
@@ -96,6 +96,10 @@ angular.module('ThreatKB')
                     $uibModalInstance.dismiss('cancel');
                 });
             }
+
+            $scope.getPermalink = function (id) {
+                return $location.absUrl() + "/" + id;
+            };
 
             $scope.cfg_states = Cfg_states.query();
 
