@@ -4,8 +4,7 @@ from flask import abort, jsonify, request, Response
 from flask.ext.login import login_required
 import json
 
-from app.routes import tags
-from app.routes.tags import create_tag
+from app.routes.tags import create_tag, get_tags
 
 
 @app.route('/ThreatKB/tags_mapping', methods=['GET'])
@@ -43,7 +42,7 @@ def get_tags_for_source(source_table, source_id):
         return list_of_tags
     else:
         for entity in entities:
-            entity = tags.get_tags(entity.to_dict()['tag_id'])
+            entity = get_tags(entity.to_dict()['tag_id'])
             if entity.status_code == 200:
                 list_of_tags.append(json.loads(entity.data))
 
