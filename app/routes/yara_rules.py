@@ -1,11 +1,10 @@
 from app import app, db, auto
 from app.models import yara_rule, cfg_states, comments
-from flask import abort, jsonify, request, Response
+from flask import abort, jsonify, request, Response, json
 from flask.ext.login import current_user, login_required
 
 from app.routes.cfg_category_range_mapping import update_cfg_category_range_mapping_current
 from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
-import json
 
 
 @app.route('/ThreatKB/yara_rules/merge_signatures', methods=['POST'])

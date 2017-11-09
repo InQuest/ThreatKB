@@ -1,10 +1,9 @@
 from app import app, db, auto
 from app.models import c2ip
-from flask import abort, jsonify, request, Response
+from flask import abort, jsonify, request, Response, json
 from flask.ext.login import current_user, login_required
 from dateutil import parser
 from sqlalchemy import exc
-import json
 
 from app.models.cfg_states import verify_state
 from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
