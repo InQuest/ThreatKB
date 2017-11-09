@@ -4,6 +4,8 @@ from flask import abort, jsonify, request, Response
 from flask.ext.login import login_required
 import json
 
+from app.models.tags_mapping import Tags_mapping
+
 
 @app.route('/ThreatKB/tags', methods=['GET'])
 @auto.doc()
@@ -78,4 +80,17 @@ def delete_tags(id):
         abort(404)
     db.session.delete(entity)
     db.session.commit()
+
+    delete_tags_mapping_for_tag_id(id)
+
     return jsonify(''), 204
+
+
+def delete_tags_mapping_for_tag_id(t_id):
+    entities_to_delete = Tags_mapping.query.filter_by(tag_id=t_id).all()
+    if entities_to_delete:
+        for entity in entities_to_delete:
+            db.session.delete(entity)
+            db.session.commit()
+
+    return
