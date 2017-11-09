@@ -32,13 +32,13 @@ def merge_signatures():
     merge_from_yr.state = merged_state
     db.session.add(merge_from_yr)
     merged_into_comment = "This yara rule was merged into signature '%s' with event id '%s' by '%s'" % (
-    merge_to_yr.name, merge_to_yr.eventid, current_user.email)
+        merge_to_yr.name, merge_to_yr.eventid, current_user.email)
     db.session.add(
         comments.Comments(comment=merged_into_comment, entity_type=comments.Comments.ENTITY_MAPPING["SIGNATURE"],
                           entity_id=merge_from_yr.id, user_id=current_user.id))
 
     merged_from_comment = "The yara rule '%s' with event id '%s' was merged into this yara rule by '%s'" % (
-    merge_from_yr.name, merge_from_yr.eventid, current_user.email)
+        merge_from_yr.name, merge_from_yr.eventid, current_user.email)
     db.session.add(
         comments.Comments(comment=merged_from_comment, entity_type=comments.Comments.ENTITY_MAPPING["SIGNATURE"],
                           entity_id=merge_to_yr.id, user_id=current_user.id))
@@ -55,7 +55,7 @@ def get_all_yara_rules():
     Return: list of yara_rule artifact dictionaries"""
     include_inactive = request.args.get("include_inactive", False)
     include_merged = request.args.get('include_merged', False)
-    searches = request.args.get('searches', {})
+    searches = request.args.get('searches', '{}')
     page_number = request.args.get('page_number', False)
     page_size = request.args.get('page_size', False)
     sort_by = request.args.get('sort_by', False)
@@ -69,7 +69,8 @@ def get_all_yara_rules():
     if not include_inactive:
         entities = entities.filter_by(active=True)
 
-    for column, value in searches:
+    searches = json.loads(searches)
+    for column, value in searches.items():
         try:
             column = getattr(yara_rule.Yara_rule, column)
             entities = entities.filter(column.like("%" + str(value) + "%"))
@@ -79,17 +80,25 @@ def get_all_yara_rules():
     if not include_merged:
         entities = entities.filter(yara_rule.Yara_rule.state != 'Merged')
 
+    filtered_entities = entities
+    total_count = entities.count()
+
     if sort_by:
-        entities = entities.order_by("%s %s" % (sort_by, sort_direction))
+        filtered_entities = filtered_entities.order_by("%s %s" % (sort_by, sort_direction))
 
     if page_size:
-        entities = entities.limit(page_size)
+        filtered_entities = filtered_entities.limit(int(page_size))
 
     if page_number:
-        entities = entities.offset(page_number * page_size)
+        filtered_entities = filtered_entities.offset(int(page_number) * int(page_size))
 
-    entities = entities.all()
-    return Response(json.dumps([entity.to_dict() for entity in entities]), mimetype='application/json')
+    filtered_entities = filtered_entities.all()
+
+    response_dict = dict()
+    response_dict['data'] = [entity.to_dict() for entity in filtered_entities]
+    response_dict['total_count'] = total_count
+
+    return Response(json.dumps(response_dict), mimetype='application/json')
 
 
 @app.route('/ThreatKB/yara_rules/<int:id>', methods=['GET'])
@@ -172,7 +181,8 @@ def update_yara_rule(id):
 
     temp_sig_id = entity.eventid
     get_new_sig_id = False
-    if request.json['category'] and 'category' in request.json['category'] and not entity.category == request.json['category']['category']:
+    if request.json['category'] and 'category' in request.json['category'] and not entity.category == \
+            request.json['category']['category']:
         get_new_sig_id = True
         if not request.json['category']['current']:
             temp_sig_id = request.json['category']['range_min']
@@ -182,13 +192,15 @@ def update_yara_rule(id):
         if temp_sig_id > request.json['category']['range_max']:
             abort(400)
     entity = yara_rule.Yara_rule(
-        state=request.json['state']['state'] if request.json['state'] and 'state' in request.json['state'] else request.json['state'],
+        state=request.json['state']['state'] if request.json['state'] and 'state' in request.json['state'] else
+        request.json['state'],
         name=request.json['name'],
         test_status=request.json.get('test_status', None),
         confidence=request.json['confidence'],
         severity=request.json['severity'],
         description=request.json['description'],
-        category=request.json['category']['category'] if request.json['category'] and 'category' in request.json['category'] else request.json['category'],
+        category=request.json['category']['category'] if request.json['category'] and 'category' in request.json[
+            'category'] else request.json['category'],
         file_type=request.json['file_type'],
         subcategory1=request.json['subcategory1'],
         subcategory2=request.json['subcategory2'],
@@ -237,6 +249,6 @@ def delete_yara_rule(id):
     db.session.merge(entity)
     db.session.commit()
 
-    #delete_tags_mapping(entity.__tablename__, entity.id, tag_mapping_to_delete)
+    # delete_tags_mapping(entity.__tablename__, entity.id, tag_mapping_to_delete)
 
     return jsonify(''), 204

@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('C2dnsController', ['$scope', '$filter', '$http', '$uibModal', 'resolvedC2dns', 'C2dns', 'Cfg_states', 'growl', 'Users', 'openModalForId',
-        function ($scope, $filter, $http, $uibModal, resolvedC2dns, C2dns, Cfg_states, growl, Users, openModalForId) {
+    .controller('C2dnsController', ['$scope', '$filter', '$http', '$uibModal', 'resolvedC2dns', 'C2dns', 'Cfg_states', 'growl', 'Users', 'openModalForId', 'uiGridConstants',
+        function ($scope, $filter, $http, $uibModal, resolvedC2dns, C2dns, Cfg_states, growl, Users, openModalForId, uiGridConstants) {
 
             $scope.c2dns = resolvedC2dns;
 
@@ -14,18 +14,44 @@ angular.module('ThreatKB')
 
             var paginationOptions = {
                 pageNumber: 1,
-                pageSize: 25
+                pageSize: 25,
+                searches: {},
+                sort_by: null,
+                sort_dir: null
             };
 
             $scope.gridOptions = {
                 paginationPageSizes: [25, 50, 75, 100],
                 paginationPageSize: 25,
+                useExternalFiltering: true,
                 useExternalPagination: true,
+                useExternalSorting: true,
                 enableFiltering: true,
                 flatEntityAccess: true,
                 fastWatch: true,
                 onRegisterApi: function (gridApi) {
                     $scope.gridApi = gridApi;
+                    $scope.gridApi.core.on.filterChanged($scope, function () {
+                        var grid = this.grid;
+                        paginationOptions.searches = {};
+
+                        for (var i = 0; i < grid.columns.length; i++) {
+                            var column = grid.columns[i];
+                            if (column.filters[0].term !== undefined && column.filters[0].term !== null) {
+                                paginationOptions.searches[column.colDef.field] = column.filters[0].term
+                            }
+                        }
+                        getPage()
+                    });
+                    $scope.gridApi.core.on.sortChanged($scope, function (grid, sortColumns) {
+                        if (sortColumns.length === 0) {
+                            paginationOptions.sort_dir = null;
+                        } else {
+                            paginationOptions.sort_by = sortColumns[0].colDef.field;
+                            paginationOptions.sort_dir = sortColumns[0].sort.direction;
+                        }
+                        getPage();
+                    });
                     gridApi.pagination.on.paginationChanged($scope, function (newPage, pageSize) {
                         paginationOptions.pageNumber = newPage;
                         paginationOptions.pageSize = pageSize;
@@ -36,13 +62,15 @@ angular.module('ThreatKB')
                 columnDefs:
                     [
                         {field: 'domain_name'},
-                        {field: 'state'},
-                        {field: 'match_type'},
-                        {field: 'expiration_type'},
+                        {field: 'state', enableSorting: false},
+                        {field: 'match_type', enableSorting: false},
+                        {field: 'expiration_type', enableSorting: false},
                         {
                             field: 'owner_user.email',
                             displayName: 'Owner',
                             width: '20%',
+                            enableSorting: false,
+                            enableFiltering: false,
                             cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.owner_user"'
                             + ' on-select="grid.appScope.save(row.entity)">'
                             + '<ui-select-match placeholder="Select an owner ...">'
@@ -79,17 +107,31 @@ angular.module('ThreatKB')
             };
 
             var getPage = function () {
-                $http.get('/ThreatKB/c2dns')
+                var url = '/ThreatKB/c2dns?';
+                url += 'page_number=' + (paginationOptions.pageNumber - 1);
+                url += '&page_size=' + paginationOptions.pageSize;
+                switch (paginationOptions.sort_dir) {
+                    case uiGridConstants.ASC:
+                        url += '&sort_dir=ASC';
+                        break;
+                    case uiGridConstants.DESC:
+                        url += '&sort_dir=DESC';
+                        break;
+                    default:
+                        break;
+                }
+                if (paginationOptions.sort_by !== null) {
+                    url += '&sort_by=' + paginationOptions.sort_by;
+                }
+                if (paginationOptions.searches !== {}) {
+                    url += '&searches=' + JSON.stringify(paginationOptions.searches);
+                }
+                $http.get(url)
                     .then(function (response) {
-                        $scope.gridOptions.totalItems = response.data.length;
-                        var firstRow = (paginationOptions.pageNumber - 1) * paginationOptions.pageSize;
-                        $scope.gridOptions.data = response.data.slice(firstRow, firstRow + paginationOptions.pageSize);
+                        $scope.gridOptions.totalItems = response.data.total_count;
+                        $scope.gridOptions.data = response.data.data;
                     }, function (error) {
                     });
-            };
-
-            $scope.refreshData = function () {
-                $scope.gridOptions.data = $filter('filter')($scope.c2dns, $scope.searchText, undefined);
             };
 
             $scope.getTableHeight = function () {

@@ -1,10 +1,9 @@
 from app import app, db, auto
 from app.models import c2dns
-from flask import abort, jsonify, request, Response
+from flask import abort, jsonify, request, Response, json
 from flask.ext.login import login_required, current_user
 from dateutil import parser
 from sqlalchemy import exc
-import json
 
 from app.models.cfg_states import verify_state
 from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
@@ -16,7 +15,7 @@ from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
 def get_all_c2dns():
     """Return a list of all c2dns artifacts.
     Return: list of c2dns artifact dictionaries"""
-    searches = request.args.get('searches', {})
+    searches = request.args.get('searches', '{}')
     page_number = request.args.get('page_number', False)
     page_size = request.args.get('page_size', False)
     sort_by = request.args.get('sort_by', False)
@@ -27,25 +26,33 @@ def get_all_c2dns():
     if not current_user.admin:
         entities = entities.filter_by(owner_user_id=current_user.id)
 
-    for column, value in searches:
+    searches = json.loads(searches)
+    for column, value in searches.items():
         try:
             column = getattr(c2dns.C2dns, column)
             entities = entities.filter(column.like("%" + str(value) + "%"))
         except:
             continue
 
+    filtered_entities = entities
+    total_count = entities.count()
+
     if sort_by:
-        entities = entities.order_by("%s %s" % (sort_by, sort_direction))
+        filtered_entities = filtered_entities.order_by("%s %s" % (sort_by, sort_direction))
 
     if page_size:
-        entities = entities.limit(page_size)
+        filtered_entities = filtered_entities.limit(int(page_size))
 
     if page_number:
-        entities = entities.offset(page_number * page_size)
+        filtered_entities = filtered_entities.offset(int(page_number) * int(page_size))
 
-    entities = entities.all()
+    filtered_entities = filtered_entities.all()
 
-    return Response(json.dumps([entity.to_dict() for entity in entities]), mimetype='application/json')
+    response_dict = dict()
+    response_dict['data'] = [entity.to_dict() for entity in filtered_entities]
+    response_dict['total_count'] = total_count
+
+    return Response(json.dumps(response_dict), mimetype='application/json')
 
 
 @app.route('/ThreatKB/c2dns/<int:id>', methods=['GET'])

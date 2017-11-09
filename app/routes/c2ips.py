@@ -16,7 +16,7 @@ from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
 def get_all_c2ips():
     """Return a list of all c2ip artifacts.
     Return: list of c2ip artifact dictionaries"""
-    searches = request.args.get('searches', {})
+    searches = request.args.get('searches', '{}')
     page_number = request.args.get('page_number', False)
     page_size = request.args.get('page_size', False)
     sort_by = request.args.get('sort_by', False)
@@ -27,28 +27,33 @@ def get_all_c2ips():
     if not current_user.admin:
         entities = entities.filter_by(owner_user_id=current_user.id)
 
-    for column, value in searches:
+    searches = json.loads(searches)
+    for column, value in searches.items():
         try:
             column = getattr(c2ip.C2ip, column)
             entities = entities.filter(column.like("%" + str(value) + "%"))
         except:
             continue
 
+    filtered_entities = entities
+    total_count = entities.count()
+
     if sort_by:
-        entities = entities.order_by("%s %s" % (sort_by, sort_direction))
+        filtered_entities = filtered_entities.order_by("%s %s" % (sort_by, sort_direction))
 
     if page_size:
-        entities = entities.limit(page_size)
+        filtered_entities = filtered_entities.limit(int(page_size))
 
     if page_number:
-        entities = entities.offset(page_number * page_size)
+        filtered_entities = filtered_entities.offset(int(page_number) * int(page_size))
 
-    if not current_user.admin:
-        entities = entities.filter_by(owner_user_id=current_user.id)
+    filtered_entities = filtered_entities.all()
 
-    entities = entities.all()
+    response_dict = dict()
+    response_dict['data'] = [entity.to_dict() for entity in filtered_entities]
+    response_dict['total_count'] = total_count
 
-    return Response(json.dumps([entity.to_dict() for entity in entities]), mimetype='application/json')
+    return Response(json.dumps(response_dict), mimetype='application/json')
 
 
 @app.route('/ThreatKB/c2ips/<int:id>', methods=['GET'])
@@ -123,7 +128,7 @@ def update_c2ip(id):
             "expiration_timestamp", None) else None,
         owner_user_id=request.json['owner_user']['id'] if request.json.get("owner_user", None) and request.json[
             "owner_user"].get("id", None) else None,
-        description = request.json['description'],
+        description=request.json['description'],
         id=id,
         modified_user_id=current_user.id
     )
