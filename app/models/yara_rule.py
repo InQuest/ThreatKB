@@ -3,6 +3,7 @@ from app.models.files import Files
 from app.routes import tags_mapping
 from app.models.comments import Comments
 from app.models.cfg_category_range_mapping import CfgCategoryRangeMapping
+from app.models import cfg_settings
 from sqlalchemy.event import listens_for
 from dateutil import parser
 import datetime
@@ -146,6 +147,8 @@ class Yara_rule(db.Model):
 
     @staticmethod
     def get_yara_rule_from_yara_dict(yara_dict, metadata_field_mapping={}):
+        clobber_on_import = cfg_settings.Cfg_settings.get_setting("IMPORT_CLOBBER")
+
         yara_rule = Yara_rule()
         yara_rule.name = yara_dict["rule_name"]
 
@@ -165,8 +168,16 @@ class Yara_rule(db.Model):
                         field = datetime.datetime.now()
 
                 ## If the eventid already exists. Skip it.
-                if possible_field == "eventid" and Yara_rule.query.filter_by(eventid=field).first():
-                    continue
+                if possible_field == "eventid":
+                    existing_yara_rule = Yara_rule.query.filter_by(eventid=field).first()
+                    if existing_yara_rule:
+                        if not clobber_on_import:
+                            continue
+                        else:
+                            db.session.query(Yara_testing_history).filter_by(
+                                yara_rule_id=existing_yara_rule.id).delete()
+                            db.session.query(Yara_rule_history).filter_by(yara_rule_id=existing_yara_rule.id).delete()
+                            db.session.query(Yara_rule).filter_by(id=existing_yara_rule.id).delete()
 
                 setattr(yara_rule, mapped_to, field)
 
