@@ -55,6 +55,11 @@ def get_all_yara_rules():
     Return: list of yara_rule artifact dictionaries"""
     include_inactive = request.args.get("include_inactive", False)
     include_merged = request.args.get('include_merged', False)
+    searches = request.args.get('searches', {})
+    page_number = request.args.get('page_number', False)
+    page_size = request.args.get('page_size', False)
+    sort_by = request.args.get('sort_by', False)
+    sort_direction = request.args.get('sort_dir', 'ASC')
 
     entities = yara_rule.Yara_rule.query
 
@@ -64,8 +69,24 @@ def get_all_yara_rules():
     if not include_inactive:
         entities = entities.filter_by(active=True)
 
+    for column, value in searches:
+        try:
+            column = getattr(yara_rule.Yara_rule, column)
+            entities = entities.filter(column.like("%" + str(value) + "%"))
+        except:
+            continue
+
     if not include_merged:
         entities = entities.filter(yara_rule.Yara_rule.state != 'Merged')
+
+    if sort_by:
+        entities = entities.order_by("%s %s" % (sort_by, sort_direction))
+
+    if page_size:
+        entities = entities.limit(page_size)
+
+    if page_number:
+        entities = entities.offset(page_number * page_size)
 
     entities = entities.all()
     return Response(json.dumps([entity.to_dict() for entity in entities]), mimetype='application/json')

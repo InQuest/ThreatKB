@@ -16,7 +16,32 @@ from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
 def get_all_c2ips():
     """Return a list of all c2ip artifacts.
     Return: list of c2ip artifact dictionaries"""
+    searches = request.args.get('searches', {})
+    page_number = request.args.get('page_number', False)
+    page_size = request.args.get('page_size', False)
+    sort_by = request.args.get('sort_by', False)
+    sort_direction = request.args.get('sort_dir', 'ASC')
+
     entities = c2ip.C2ip.query
+
+    if not current_user.admin:
+        entities = entities.filter_by(owner_user_id=current_user.id)
+
+    for column, value in searches:
+        try:
+            column = getattr(c2ip.C2ip, column)
+            entities = entities.filter(column.like("%" + str(value) + "%"))
+        except:
+            continue
+
+    if sort_by:
+        entities = entities.order_by("%s %s" % (sort_by, sort_direction))
+
+    if page_size:
+        entities = entities.limit(page_size)
+
+    if page_number:
+        entities = entities.offset(page_number * page_size)
 
     if not current_user.admin:
         entities = entities.filter_by(owner_user_id=current_user.id)
