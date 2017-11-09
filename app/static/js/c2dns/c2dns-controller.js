@@ -157,8 +157,7 @@ angular.module('ThreatKB')
             $scope.delete = function (id) {
                 C2dns.delete({id: id}, function () {
                     $scope.c2dns = C2dns.query();
-                    $scope.gridOptions.data = $scope.c2dns;
-                    $scope.refreshData();
+                    getPage();
                 });
             };
 
@@ -172,16 +171,14 @@ angular.module('ThreatKB')
                 if (id) {
                     C2dns.update({id: id}, $scope.c2dns, function () {
                         $scope.c2dns = C2dns.query();
-                        $scope.gridOptions.data = $scope.c2dns;
-                        $scope.refreshData();
+                        getPage();
                     }, function (error) {
                         growl.error(error.data, {ttl: -1});
                     });
                 } else {
                     C2dns.save($scope.c2dns, function () {
                         $scope.c2dns = C2dns.query();
-                        $scope.gridOptions.data = $scope.c2dns;
-                        $scope.refreshData();
+                        getPage();
                     }, function (error) {
                         growl.error(error.data, {ttl: -1});
                     });
