@@ -7,6 +7,7 @@ import datetime
 import StringIO
 import zipfile
 
+
 class Release(db.Model):
     __tablename__ = "releases"
 
@@ -23,6 +24,18 @@ class Release(db.Model):
     @property
     def release_data_dict(self):
         return json.loads(self.release_data) if self.release_data else {}
+
+    def to_small_dict(self):
+        return dict(
+            id=self.id,
+            name=self.name,
+            is_test_release=self.is_test_release,
+            date_created=self.date_created.isoformat(),
+            created_user=self.created_user.to_dict(),
+            num_signatures=len(self.release_data_dict["Signatures"]["Signatures"]),
+            num_ips=len(self.release_data_dict["IP"]["IP"]),
+            num_dns=len(self.release_data_dict["DNS"]["DNS"])
+        )
 
     def to_dict(self):
         return dict(
@@ -71,7 +84,7 @@ class Release(db.Model):
         ##### SIGNATURES #######
         release_eventids = release_data["Signatures"]["Signatures"].keys()
         last_release_eventids = [long(release_id) for release_id in
-                                      last_release["Signatures"]["Signatures"].keys()]
+                                 last_release["Signatures"]["Signatures"].keys()]
 
         for signature in release_data["Signatures"]["Signatures"].values():
             eventid = signature["id"]
