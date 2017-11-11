@@ -39,7 +39,10 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                 access: {restricted: true, admin: false},
                 resolve: {
                     resolvedC2dns: ['C2dns', function (C2dns) {
-                        return C2dns.query();
+                        return C2dns.query({
+                            page_number: 0,
+                            page_size: 25
+                        });
                     }],
                     openModalForId: [function () {
                         return null;
@@ -52,7 +55,10 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                 access: {restricted: true, admin: false},
                 resolve: {
                     resolvedC2dns: ['C2dns', function (C2dns) {
-                        return C2dns.query();
+                        return C2dns.query({
+                            page_number: 0,
+                            page_size: 25
+                        });
                     }],
                     openModalForId: ['$route', function ($route) {
                         return $route.current.params.id;
@@ -65,7 +71,10 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                 access: {restricted: true, admin: false},
                 resolve: {
                     resolvedC2ip: ['C2ip', function (C2ip) {
-                        return C2ip.query();
+                        return C2ip.query({
+                            page_number: 0,
+                            page_size: 25
+                        });
                     }],
                     openModalForId: [function () {
                         return null;
@@ -78,7 +87,10 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                 access: {restricted: true, admin: false},
                 resolve: {
                     resolvedC2ip: ['C2ip', function (C2ip) {
-                        return C2ip.query();
+                        return C2ip.query({
+                            page_number: 0,
+                            page_size: 25
+                        });
                     }],
                     openModalForId: ['$route', function ($route) {
                         return $route.current.params.id;
@@ -131,7 +143,10 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                 access: {restricted: true, admin: false},
                 resolve: {
                     resolvedYara_rule: ['Yara_rule', function (Yara_rule) {
-                        return Yara_rule.resource.query();
+                        return Yara_rule.resource.query({
+                            page_number: 0,
+                            page_size: 25
+                        });
                     }],
                     openModalForId: [function () {
                         return null;
@@ -144,7 +159,10 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                 access: {restricted: true, admin: false},
                 resolve: {
                     resolvedYara_rule: ['Yara_rule', function (Yara_rule) {
-                        return Yara_rule.resource.query();
+                        return Yara_rule.resource.query({
+                            page_number: 0,
+                            page_size: 25
+                        });
                     }],
                     openModalForId: ['$route', function ($route) {
                         return $route.current.params.id;
