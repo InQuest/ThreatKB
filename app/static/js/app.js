@@ -192,7 +192,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
             .when('/import', {
                 templateUrl: 'views/import/import.html',
                 controller: 'ImportController',
-                access: {restricted: true, admin: true}
+                access: {restricted: true, admin: false}
             })
             .when('/releases', {
                 templateUrl: 'views/releases/releases.html',
