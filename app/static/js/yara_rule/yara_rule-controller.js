@@ -260,6 +260,10 @@ angular.module('ThreatKB')
             $scope.Files = Files;
             $scope.selected_signature = null;
 
+
+            $scope.file_store_path = Cfg_settings.get({key: "FILE_STORE_PATH"});
+            $scope.entity_mapping = Comments.ENTITY_MAPPING;
+
             if ($scope.yara_rule.$promise !== undefined) {
                 $scope.yara_rule.$promise.then(function (result) {
                 }, function (errorMsg) {
@@ -336,7 +340,7 @@ angular.module('ThreatKB')
                                     entity_type: Files.ENTITY_MAPPING.SIGNATURE,
                                     entity_id: id
                                 });
-                                growl.info('Success ' + JSON.stringify(resp.data, null, 2));
+                                growl.info('Success ' + JSON.stringify(resp.data, null, 2), {ttl: 3000});
                             }, function (resp) {
                                 console.log('Error status: ' + resp.status);
                                 growl.error(resp);
