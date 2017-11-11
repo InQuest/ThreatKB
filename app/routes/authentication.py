@@ -74,7 +74,6 @@ def get_user_by_id(user_id):
 @app.route('/ThreatKB/users/me', methods=['GET'])
 @auto.doc()
 @login_required
-@admin_only()
 def get_user_me():
     """Return the user associated with the given user id.
     Return: user dictionary"""
@@ -185,7 +184,6 @@ def create_user():
 @app.route('/ThreatKB/users/<int:user_id>', methods=['PUT'])
 @auto.doc()
 @login_required
-@admin_only()
 def update_user(user_id):
     """Update the user associated with the given user_id
     From Data: email (str), admin (bool), password (str), active (bool)
@@ -193,6 +191,9 @@ def update_user(user_id):
     user = KBUser.query.get(user_id)
     if not user:
         abort(404)
+
+    if not current_user.admin and not user.id == current_user.id:
+        return abort(403)
 
     user = KBUser(
         email=request.json['email'],

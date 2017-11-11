@@ -4,7 +4,7 @@ from flask import abort, jsonify, request, Response
 from flask.ext.login import login_required, current_user
 from dateutil import parser
 import json
-
+from sqlalchemy import or_
 
 @app.route('/ThreatKB/tasks', methods=['GET'])
 @auto.doc()
@@ -12,12 +12,19 @@ import json
 def get_all_tasks():
     """Return all active tasks
     Return: list of task dictionaries"""
-    entities = tasks.Tasks.query.filter_by(active=True).all()
+    entities = tasks.Tasks.query.filter_by(active=True)
+
+    if current_user.admin:
+        entities = entities.all()
+    else:
+        entities = entities.filter(
+            or_(tasks.Tasks.owner_user_id == current_user.id, tasks.Tasks.owner_user_id == None)).all()
 
     return Response(json.dumps([entity.to_dict() for entity in entities]), mimetype='application/json')
 
 
 @app.route('/ThreatKB/tasks/<int:id>', methods=['GET'])
+@login_required
 @auto.doc()
 def get_tasks(id):
     """Return task associated with given id
@@ -25,6 +32,9 @@ def get_tasks(id):
     entity = tasks.Tasks.query.get(id)
     if not entity:
         abort(404)
+
+    if not current_user.admin and not entity.owner_user_id == current_user.id and not entity.owner_user_id == None:
+        return jsonify({})
 
     return jsonify(entity.to_dict())
 

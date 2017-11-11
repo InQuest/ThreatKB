@@ -35,14 +35,20 @@ def get_release(release_id):
 @app.route('/ThreatKB/releases/latest', methods=['GET'])
 @auto.doc()
 @login_required
-@admin_only()
 def get_release_latest():
     """Return the latest release data
     Return: release dictionary"""
     entity = releases.Release.query.filter(releases.Release.is_test_release == 0).order_by(
         releases.Release.id.desc()).first()
 
-    return Response(json.dumps(entity.to_dict() if entity else {}), mimetype="application/json")
+    if not entity:
+        entity = {}
+    elif current_user.admin:
+        entity = entity.to_dict()
+    else:
+        entity = entity.to_small_dict()
+
+    return Response(json.dumps(entity), mimetype="application/json")
 
 
 @app.route('/ThreatKB/releases/<int:release_id>/release_notes', methods=['GET'])

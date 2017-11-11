@@ -1,14 +1,15 @@
-from app import db
+from app import db, current_user
 from app.models.files import Files
 from app.routes import tags_mapping
 from app.models.comments import Comments
 from app.models.cfg_category_range_mapping import CfgCategoryRangeMapping
-from app.models import cfg_settings
+from app.models import cfg_settings, cfg_states
 from sqlalchemy.event import listens_for
 from dateutil import parser
 import datetime
 import json
 
+from flask import abort
 
 class Yara_rule(db.Model):
 
@@ -192,8 +193,21 @@ class Yara_rule(db.Model):
 
 @listens_for(Yara_rule, "before_insert")
 def generate_eventid(mapper, connect, target):
+    if not current_user.admin:
+        release_state = cfg_states.Cfg_states.query.filter_by(cfg_states.Cfg_states.is_release_state > 0).first()
+        if release_state and target.state == release_state.state:
+            abort(403)
+
     if not target.eventid:
         target.eventid = CfgCategoryRangeMapping.get_next_category_eventid(target.category)
+
+
+@listens_for(Yara_rule, "before_update")
+def yara_rule_before_update(mapper, connect, target):
+    if not current_user.admin:
+        release_state = cfg_states.Cfg_states.query.filter_by(cfg_states.Cfg_states.is_release_state > 0).first()
+        if release_state and target.state == release_state.state:
+            abort(403)
 
 
 class Yara_rule_history(db.Model):
