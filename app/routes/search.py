@@ -9,7 +9,7 @@ import json
 @auto.doc()
 def do_search():
     """Returns list of artifacts based on the search criteria.
-    From Data: tag (str), state (str), category (str), description (str), artifact_type (str)
+    From Data: tag (str), state (str), category (str), description (str), artifact_type (comma-separated list of dns, ip, signature, task)
     Return: dictionary of lists of artifact dictionaries"""
     tag = request.args.get("tag", None)
     state = request.args.get('state', None)
@@ -19,6 +19,9 @@ def do_search():
 
     if not tag and not state and not category and not description and not artifact_type:
         abort(400)
+
+    if artifact_type:
+        artifact_type = [a.lower() for a in artifact_type.split(",")]
 
     results = {"tasks": [], "ips": [], "dns": [], "signatures": []}
 
@@ -57,16 +60,16 @@ def do_search():
         dns = dns.filter(c2dns.C2dns.description.like("%" + description + "%"))
         task = task.filter(tasks.Tasks.description.like("%" + description + "%"))
 
-    if not artifact_type or artifact_type == "signatures":
+    if not artifact_type or "signature" in artifact_type:
         results["signatures"] = [signature[0].to_dict() for signature in signatures.all()]
 
-    if not artifact_type or artifact_type == "ips":
+    if not artifact_type or "ip" in artifact_type:
         results["ips"] = [ip[0].to_dict() for ip in ips.all()]
 
-    if not artifact_type or artifact_type == "dns":
+    if not artifact_type or "dns" in artifact_type:
         results["dns"] = [d[0].to_dict() for d in dns.all()]
 
-    if not artifact_type or artifact_type == "tasks":
+    if not artifact_type or "task" in artifact_type:
         results["tasks"] = [t[0].to_dict() for t in task.all()]
 
     return Response(json.dumps(results), mimetype='application/json')
