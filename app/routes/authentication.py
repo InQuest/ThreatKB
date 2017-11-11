@@ -238,6 +238,7 @@ def get_users_ownership():
     Optional Arguments: include_inactive
     Return: dictionary of user ownership assignments"""
     include_inactive = request.args.get("include_inactive", False)
+    include_artifacts = request.args.get("include_artifacts", False)
 
     ownership_data = {"!Unassigned": {"task": [], "ip": [], "dns": [], "signatures": []}}
     u = {user.id: user for user in users.KBUser.query.all()}
@@ -247,31 +248,33 @@ def get_users_ownership():
     t = tasks.Tasks.query.all() if not include_inactive else tasks.Tasks.query.filter_by(tasks.Tasks.active > 0).all()
     for task in t:
         if task.owner_user_id:
-            ownership_data[u[task.owner_user_id].email]["task"].append(task.to_dict())
+            ownership_data[u[task.owner_user_id].email]["task"].append(task.to_dict() if include_artifacts else task.id)
         else:
-            ownership_data["!Unassigned"]["task"].append(task.to_dict())
+            ownership_data["!Unassigned"]["task"].append(task.to_dict() if include_artifacts else task.id)
 
     ips = c2ip.C2ip.query.all()
     for ip in ips:
         if ip.owner_user_id:
-            ownership_data[u[ip.owner_user_id].email]["ip"].append(ip.to_dict())
+            ownership_data[u[ip.owner_user_id].email]["ip"].append(ip.to_dict() if include_artifacts else ip.id)
         else:
-            ownership_data["!Unassigned"]["ip"].append(ip.to_dict())
+            ownership_data["!Unassigned"]["ip"].append(ip.to_dict() if include_artifacts else ip.id)
 
     dnss = c2dns.C2dns.query.all()
     for dns in dnss:
         if dns.owner_user_id:
-            ownership_data[u[dns.owner_user_id].email]["dns"].append(dns.to_dict())
+            ownership_data[u[dns.owner_user_id].email]["dns"].append(dns.to_dict() if include_artifacts else dns.id)
         else:
-            ownership_data["!Unassigned"]["dns"].append(dns.to_dict())
+            ownership_data["!Unassigned"]["dns"].append(dns.to_dict() if include_artifacts else dns.id)
 
     signatures = yara_rule.Yara_rule.query.all() if not include_inactive else yara_rule.Yara_rule.query.filter_by(
         yara_rule.Yara_rule.active > 0).all()
     for signature in signatures:
         if signature.owner_user_id:
-            ownership_data[u[signature.owner_user_id].email]["signatures"].append(signature.to_dict())
+            ownership_data[u[signature.owner_user_id].email]["signatures"].append(
+                signature.to_dict() if include_artifacts else signature.id)
         else:
-            ownership_data["!Unassigned"]["signatures"].append(signature.to_dict())
+            ownership_data["!Unassigned"]["signatures"].append(
+                signature.to_dict() if include_artifacts else signature.id)
 
     return Response(json.dumps(
         [{"email": email, "ownership_data": ownership_data} for email, ownership_data in ownership_data.iteritems()]),
