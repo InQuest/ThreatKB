@@ -87,6 +87,7 @@ def run(debug=False, port=5000, host='127.0.0.1'):
     from app.routes import documentation
     from app.routes import access_keys
     from app.routes import whitelist
+    from app.routes import search
 
     @app.before_first_request
     def setup_logging():
