@@ -6,7 +6,7 @@ class Tags_mapping(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    source_table = db.Column(db.Enum('c2dns', 'c2ip', 'yara_rules'), index=True)
+    source_table = db.Column(db.Enum('c2dns', 'c2ip', 'yara_rules', 'tasks'), index=True)
 
     source_id = db.Column(db.Integer, index=True)
 
