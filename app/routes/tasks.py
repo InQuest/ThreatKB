@@ -4,7 +4,7 @@ from flask import abort, jsonify, request, Response
 from flask.ext.login import login_required, current_user
 from dateutil import parser
 import json
-
+from sqlalchemy import or_
 
 @app.route('/ThreatKB/tasks', methods=['GET'])
 @auto.doc()
@@ -18,7 +18,7 @@ def get_all_tasks():
         entities = entities.all()
     else:
         entities = entities.filter(
-            tasks.Tasks.owner_user_id == current_user.id | tasks.Tasks.owner_user_id == None).all()
+            or_(tasks.Tasks.owner_user_id == current_user.id, tasks.Tasks.owner_user_id == None)).all()
 
     return Response(json.dumps([entity.to_dict() for entity in entities]), mimetype='application/json')
 
