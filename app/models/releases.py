@@ -60,9 +60,10 @@ class Release(db.Model):
         last_release = Release.query.filter(Release.is_test_release == 0).order_by(Release.id.desc()).first()
 
         if not last_release:
-            release_data["Signatures"]["Added"] = release_data["Signatures"]["Signatures"]
-            release_data["IP"]["Added"] = release_data["IP"]["IP"]
-            release_data["DNS"]["Added"] = release_data["DNS"]["DNS"]
+            release_data["Signatures"]["Added"] = [sig for id_, sig in
+                                                   release_data["Signatures"]["Signatures"].iteritems()]
+            release_data["IP"]["Added"] = [ip for id_, ip in release_data["IP"]["IP"].iteritems()]
+            release_data["DNS"]["Added"] = [dns for id_, dns in release_data["DNS"]["DNS"].iteritems()]
             return json.dumps(release_data)
 
         last_release = last_release.release_data_dict
@@ -127,18 +128,31 @@ class Release(db.Model):
         message = prepend_text.value if prepend_text else ""
         message += "New Signatures\n%s\n" % ("-" * 10)
         message += "\n\n".join(["EventID: %s\nName: %s\nCategory: %s\nConfidence: %s\nSeverity: %s\nDescription: %s" % (
-            entity["eventid"], entity["name"], entity["category"], entity["confidence"], entity["severity"],
-            entity["description"]) for entity in self.release_data_dict["Signatures"]["Added"]]) if \
+            entity.get("eventid", "eventid"),
+            entity.get("name", "name"),
+            entity.get("category", "category"),
+            entity.get("confidence", "confidence"),
+            entity.get("severity", "severity"),
+            entity.get("description", "description")) for entity in self.release_data_dict["Signatures"]["Added"]]) if \
             len(self.release_data_dict["Signatures"]["Added"]) > 0 else "NA"
         message += "\n\nRemoved Signatures\n%s\n" % ("-" * 10)
         message += "\n\n".join(["EventID: %s\nName: %s\nCategory: %s\nConfidence: %s\nSeverity: %s\nDescription: %s" % (
-            entity["eventid"], entity["name"], entity["category"], entity["confidence"], entity["severity"],
-            entity["description"]) for entity in self.release_data_dict["Signatures"]["Removed"]]) if \
+            entity.get("eventid", "eventid"),
+            entity.get("name", "name"),
+            entity.get("category", "category"),
+            entity.get("confidence", "confidence"),
+            entity.get("severity", "severity"),
+            entity.get("description", "description")) for entity in self.release_data_dict["Signatures"]["Removed"]]) if \
             len(self.release_data_dict["Signatures"]["Removed"]) > 0 else "NA"
         message += "\n\nModified Signatures\n%s\n" % ("-" * 10)
         message += "\n\n".join(["EventID: %s\nName: %s\nCategory: %s\nConfidence: %s\nSeverity: %s\nDescription: %s" % (
-            entity["eventid"], entity["name"], entity["category"], entity["confidence"], entity["severity"],
-            entity["description"]) for entity in self.release_data_dict["Signatures"]["Modified"]]) if \
+            entity.get("eventid", "eventid"),
+            entity.get("name", "name"),
+            entity.get("category", "category"),
+            entity.get("confidence", "confidence"),
+            entity.get("severity", "severity"),
+            entity.get("description", "description")) for entity in
+                                self.release_data_dict["Signatures"]["Modified"]]) if \
             len(self.release_data_dict["Signatures"]["Modified"]) > 0 else "NA"
 
         message += "\n\nFeed Content\n%s\n" % ("-" * 10)
