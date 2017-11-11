@@ -3,10 +3,13 @@ import re
 from ipaddr import IPAddress, IPNetwork
 from sqlalchemy.event import listens_for
 
-from app import db
+from app import db, current_user
 from app.models.whitelist import Whitelist
 from app.routes import tags_mapping
 from app.models.comments import Comments
+from app.models import cfg_states
+
+from flask import abort
 
 import ipwhois
 
@@ -127,3 +130,16 @@ def run_against_whitelist(mapper, connect, target):
 
     if abort_import:
         raise Exception('Failed Whitelist Validation')
+
+    if not current_user.admin:
+        release_state = cfg_states.Cfg_states.query.filter_by(cfg_states.Cfg_states.is_release_state > 0).first()
+        if release_state and target.state == release_state.state:
+            abort(403)
+
+
+@listens_for(C2ip, "before_update")
+def c2ip_before_update(mapper, connect, target):
+    if not current_user.admin:
+        release_state = cfg_states.Cfg_states.query.filter_by(cfg_states.Cfg_states.is_release_state > 0).first()
+        if release_state and target.state == release_state.state:
+            abort(403)

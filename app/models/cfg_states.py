@@ -1,5 +1,4 @@
 from app import db
-from app.models import yara_rule, c2dns, c2ip, tasks
 from sqlalchemy.event import listens_for
 
 
@@ -12,6 +11,7 @@ class Cfg_states(db.Model):
     is_release_state = db.Column(db.Integer, default=0)
 
     def to_dict(self):
+        from app.models import yara_rule, c2dns, c2ip, tasks
         return dict(
             state=self.state,
             id=self.id,
