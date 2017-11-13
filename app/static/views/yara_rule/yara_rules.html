@@ -41,7 +41,9 @@
                              tooltip-trigger="'outsideClick'"
                              ngclipboard data-clipboard-text="{{ getPermalink(yara_rule.id) }}">
                     </span></a>
-                    <a><span ng-if="yara_rule.id" class="glyphicon glyphicon-bookmark" style="font-size: .8em"
+                    <a><span ng-if="yara_rule.id"
+                             class="glyphicon {{ yara_rule.bookmarked ? 'glyphicon-star' : 'glyphicon-star-empty' }}"
+                             style="font-size: .8em"
                              title="Bookmark Signature artifact" tooltip-placement="bottom"
                              uib-tooltip="{{ yara_rule.bookmarked ? 'Bookmarked!' : 'Un-bookmarked!' }}"
                              tooltip-trigger="'outsideClick'"

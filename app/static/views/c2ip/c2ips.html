@@ -16,7 +16,9 @@
                              tooltip-trigger="'outsideClick'"
                              ngclipboard data-clipboard-text="{{ getPermalink(c2ip.id) }}">
                     </span></a>
-                    <a><span ng-if="c2ip.id" class="glyphicon glyphicon-bookmark" style="font-size: .8em"
+                    <a><span ng-if="c2ip.id"
+                             class="glyphicon {{ c2ip.bookmarked ? 'glyphicon-star' : 'glyphicon-star-empty' }}"
+                             style="font-size: .8em"
                              title="Bookmark IP artifact" tooltip-placement="bottom"
                              uib-tooltip="{{ c2ip.bookmarked ? 'Bookmarked!' : 'Un-bookmarked!' }}"
                              tooltip-trigger="'outsideClick'"
