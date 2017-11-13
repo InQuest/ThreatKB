@@ -11,13 +11,19 @@
                 </button>
                 <h4 class="modal-title" id="myTasksLabel">
                     {{ task.id ? 'Edit' : 'Create' }} Task
-                    <a>
-                        <span ng-if="task.id" class="glyphicon glyphicon-link" style="font-size: .8em"
-                              title="Copy permalink to clipboard" tooltip-placement="bottom" uib-tooltip="Copied!"
-                              tooltip-trigger="'outsideClick'"
-                              ngclipboard data-clipboard-text="{{ getPermalink(task.id) }}">
-                        </span>
-                    </a>
+                    <a><span ng-if="task.id" class="glyphicon glyphicon-link" style="font-size: .8em"
+                             title="Copy permalink to clipboard" tooltip-placement="bottom" uib-tooltip="Copied!"
+                             tooltip-trigger="'outsideClick'"
+                             ngclipboard data-clipboard-text="{{ getPermalink(task.id) }}">
+                    </span></a>
+                    <a><span ng-if="task.id"
+                             class="glyphicon {{ task.bookmarked ? 'glyphicon-star' : 'glyphicon-star-empty' }}"
+                             style="font-size: .8em"
+                             title="Bookmark Task artifact" tooltip-placement="bottom"
+                             uib-tooltip="{{ task.bookmarked ? 'Bookmarked!' : 'Un-bookmarked!' }}"
+                             tooltip-trigger="'outsideClick'"
+                             ng-click="task.bookmarked ? unbookmark(task.id) : bookmark(task.id)">
+                    </span></a>
                 </h4>
             </div>
             <div class="modal-body">

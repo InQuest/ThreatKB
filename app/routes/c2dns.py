@@ -5,7 +5,9 @@ from flask.ext.login import login_required, current_user
 from dateutil import parser
 from sqlalchemy import exc
 
+from app.models.bookmarks import Bookmarks
 from app.models.cfg_states import verify_state
+from app.routes.bookmarks import is_bookmarked, delete_bookmarks
 from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
 
 
@@ -65,7 +67,11 @@ def get_c2dns(id):
         abort(404)
     if not current_user.admin and entity.owner_user_id != current_user.id:
         abort(403)
-    return jsonify(entity.to_dict())
+
+    return_dict = entity.to_dict()
+    return_dict["bookmarked"] = True if is_bookmarked(Bookmarks.ENTITY_MAPPING["DNS"], id, current_user.id) else False
+
+    return jsonify(return_dict)
 
 
 @app.route('/ThreatKB/c2dns', methods=['POST'])
@@ -162,5 +168,6 @@ def delete_c2dns(id):
     db.session.commit()
 
     delete_tags_mapping(entity.__tablename__, entity.id, tag_mapping_to_delete)
+    delete_bookmarks(Bookmarks.ENTITY_MAPPING["DNS"], id, current_user.id)
 
     return jsonify(''), 204

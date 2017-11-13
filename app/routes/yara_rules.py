@@ -3,6 +3,8 @@ from app.models import yara_rule, cfg_states, comments
 from flask import abort, jsonify, request, Response, json
 from flask.ext.login import current_user, login_required
 
+from app.models.bookmarks import Bookmarks
+from app.routes.bookmarks import is_bookmarked, delete_bookmarks
 from app.routes.cfg_category_range_mapping import update_cfg_category_range_mapping_current
 from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
 
@@ -42,6 +44,8 @@ def merge_signatures():
         comments.Comments(comment=merged_from_comment, entity_type=comments.Comments.ENTITY_MAPPING["SIGNATURE"],
                           entity_id=merge_to_yr.id, user_id=current_user.id))
     db.session.commit()
+
+    delete_bookmarks(Bookmarks.ENTITY_MAPPING["SIGNATURE"], merge_from_id, current_user.id)
 
     return get_yara_rule(merge_to_yr.id)
 
@@ -111,7 +115,12 @@ def get_yara_rule(id):
         abort(404)
     if not current_user.admin and entity.owner_user_id != current_user.id:
         abort(403)
-    return jsonify(entity.to_dict())
+
+    return_dict = entity.to_dict()
+    return_dict["bookmarked"] = True if is_bookmarked(Bookmarks.ENTITY_MAPPING["SIGNATURE"], id, current_user.id)\
+        else False
+
+    return jsonify(return_dict)
 
 
 @app.route('/ThreatKB/yara_rules', methods=['POST'])
@@ -249,5 +258,6 @@ def delete_yara_rule(id):
     db.session.commit()
 
     # delete_tags_mapping(entity.__tablename__, entity.id, tag_mapping_to_delete)
+    delete_bookmarks(Bookmarks.ENTITY_MAPPING["SIGNATURE"], id, current_user.id)
 
     return jsonify(''), 204

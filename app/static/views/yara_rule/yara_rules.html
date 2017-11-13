@@ -36,13 +36,19 @@
 
                 <h4 class="modal-title" id="myC2ipLabel" style="float: left">
                     {{ yara_rule.id ? 'Edit' : 'Create' }} Signature Artifact
-                    <a>
-                        <span ng-if="yara_rule.id" class="glyphicon glyphicon-link" style="font-size: .8em"
-                              title="Copy permalink to clipboard" tooltip-placement="bottom" uib-tooltip="Copied!"
-                              tooltip-trigger="'outsideClick'"
-                              ngclipboard data-clipboard-text="{{ getPermalink(yara_rule.id) }}">
-                        </span>
-                    </a>
+                    <a><span ng-if="yara_rule.id" class="glyphicon glyphicon-link" style="font-size: .8em"
+                             title="Copy permalink to clipboard" tooltip-placement="bottom" uib-tooltip="Copied!"
+                             tooltip-trigger="'outsideClick'"
+                             ngclipboard data-clipboard-text="{{ getPermalink(yara_rule.id) }}">
+                    </span></a>
+                    <a><span ng-if="yara_rule.id"
+                             class="glyphicon {{ yara_rule.bookmarked ? 'glyphicon-star' : 'glyphicon-star-empty' }}"
+                             style="font-size: .8em"
+                             title="Bookmark Signature artifact" tooltip-placement="bottom"
+                             uib-tooltip="{{ yara_rule.bookmarked ? 'Bookmarked!' : 'Un-bookmarked!' }}"
+                             tooltip-trigger="'outsideClick'"
+                             ng-click="yara_rule.bookmarked ? unbookmark(yara_rule.id) : bookmark(yara_rule.id)">
+                    </span></a>
                 </h4>
                 <div class="pull-right" ng-if="yara_rule.id"
                      style="margin: 0 35px 0 0;">
