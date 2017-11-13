@@ -1,6 +1,36 @@
 <div>
 
     <!--<div class="table-responsive">-->
+    <div ng-if="bookmarks">
+        <h3>My Bookmarked Artifacts</h3>
+        <div id="dashboard_bookmarks">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Artifact Name</th>
+
+                    <th style="text-align: left">Artifact Type</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="bookmark in bookmarks | orderBy: 'entity_type'">
+                    <td ng-if="bookmark.id">
+                        <a target="_blank" href="{{ getPermalink(bookmark.permalink_prefix, bookmark.entity_id) }}">
+                            {{ bookmark.artifact_name }}
+                        </a>
+
+                    </td>
+
+                    <td ng-if="bookmark.id" style="text-align: left">{{ bookmark.entity_type }}</td>
+
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <br>
+
     <div ng-if="latest_release.id">
         <h3>Latest Production Release</h3>
         <div id="dashboard_release">
@@ -73,7 +103,9 @@
 
                 <td ng-if="owner.ownership_data.signatures">{{ owner.ownership_data.signatures.length }}</td>
 
-                <td>{{ owner.ownership_data.ip.length + owner.ownership_data.dns.length + owner.ownership_data.signatures.length }}</td>
+                <td>{{ owner.ownership_data.ip.length + owner.ownership_data.dns.length +
+                    owner.ownership_data.signatures.length }}
+                </td>
 
             </tr>
             </tbody>

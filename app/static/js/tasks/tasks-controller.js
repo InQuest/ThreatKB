@@ -82,8 +82,8 @@ angular.module('ThreatKB')
                 $scope.update(openModalForId);
             }
         }])
-    .controller('TaskSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'task', 'Comments', 'Cfg_states', 'Import', 'growl', 'blockUI', 'AuthService',
-        function ($scope, $http, $uibModalInstance, $location, task, Comments, Cfg_states, Import, growl, blockUI, AuthService) {
+    .controller('TaskSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'task', 'Comments', 'Cfg_states', 'Import', 'growl', 'blockUI', 'AuthService', 'Bookmarks',
+        function ($scope, $http, $uibModalInstance, $location, task, Comments, Cfg_states, Import, growl, blockUI, AuthService, Bookmarks) {
             $scope.task = task;
             $scope.task.new_comment = "";
             $scope.Comments = Comments;
@@ -96,6 +96,18 @@ angular.module('ThreatKB')
                     $uibModalInstance.dismiss('cancel');
                 });
             }
+
+            $scope.bookmark = function (id) {
+                Bookmarks.createBookmark(Bookmarks.ENTITY_MAPPING.TASK, id).then(function (data) {
+                    $scope.task.bookmarked = true;
+                });
+            };
+
+            $scope.unbookmark = function (id) {
+                Bookmarks.deleteBookmark(Bookmarks.ENTITY_MAPPING.TASK, id).then(function (data) {
+                    $scope.task.bookmarked = false;
+                });
+            };
 
             $scope.getPermalink = function (id) {
                 return $location.absUrl() + "/" + id;

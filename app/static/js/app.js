@@ -10,6 +10,9 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                 controller: 'DashboardController',
                 access: {restricted: true, admin: false},
                 resolve: {
+                    resolvedBookmarks: ['Bookmarks', function (Bookmarks) {
+                        return Bookmarks.getBookmarks();
+                    }],
                     resolvedCfgCategoryRangeMapping: ['CfgCategoryRangeMapping', function (CfgCategoryRangeMapping) {
                         return CfgCategoryRangeMapping.query();
                     }],

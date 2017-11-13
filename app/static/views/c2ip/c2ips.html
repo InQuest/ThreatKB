@@ -11,13 +11,17 @@
                 </button>
                 <h4 class="modal-title" id="myC2ipLabel">
                     {{ c2ip.id ? 'Edit' : 'Create' }} IP Artifact
-                    <a>
-                        <span ng-if="c2ip.id" class="glyphicon glyphicon-link" style="font-size: .8em"
-                              title="Copy permalink to clipboard" tooltip-placement="bottom" uib-tooltip="Copied!"
-                              tooltip-trigger="'outsideClick'"
-                              ngclipboard data-clipboard-text="{{ getPermalink(c2ip.id) }}">
-                        </span>
-                    </a>
+                    <a><span ng-if="c2ip.id" class="glyphicon glyphicon-link" style="font-size: .8em"
+                             title="Copy permalink to clipboard" tooltip-placement="bottom" uib-tooltip="Copied!"
+                             tooltip-trigger="'outsideClick'"
+                             ngclipboard data-clipboard-text="{{ getPermalink(c2ip.id) }}">
+                    </span></a>
+                    <a><span ng-if="c2ip.id" class="glyphicon glyphicon-bookmark" style="font-size: .8em"
+                             title="Bookmark IP artifact" tooltip-placement="bottom"
+                             uib-tooltip="{{ c2ip.bookmarked ? 'Bookmarked!' : 'Un-bookmarked!' }}"
+                             tooltip-trigger="'outsideClick'"
+                             ng-click="c2ip.bookmarked ? unbookmark(c2ip.id) : bookmark(c2ip.id)">
+                    </span></a>
                 </h4>
 
             </div>
@@ -92,7 +96,7 @@
                     <label>Reference Link:</label>
                     <a target="_blank" ng-if="c2ip.reference_link"
                        href="{{ c2ip.reference_link.indexOf('http') == 0 ? c2ip.reference_link : 'http://' + c2ip.reference_link }}">
-                        <span  class="glyphicon glyphicon-link" style="font-size: 1.0em;"></span>
+                        <span class="glyphicon glyphicon-link" style="font-size: 1.0em;"></span>
                     </a>
                     <span class="error"
                           ng-show="form.reference_link.$error.minlength">Must be at least  characters.</span>

@@ -7,6 +7,5 @@ angular.module('ThreatKB')
                 'update': {method: 'PUT'}
             }),
             ENTITY_MAPPING: {IP: 3, DNS: 2, SIGNATURE: 1, TASK: 4}
-        }
-            ;
+        };
     }]);

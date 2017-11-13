@@ -6,6 +6,10 @@ from dateutil import parser
 import json
 from sqlalchemy import or_
 
+from app.models.bookmarks import Bookmarks
+from app.routes.bookmarks import is_bookmarked, delete_bookmarks
+
+
 @app.route('/ThreatKB/tasks', methods=['GET'])
 @auto.doc()
 @login_required
@@ -36,7 +40,10 @@ def get_tasks(id):
     if not current_user.admin and not entity.owner_user_id == current_user.id and not entity.owner_user_id == None:
         return jsonify({})
 
-    return jsonify(entity.to_dict())
+    return_dict = entity.to_dict()
+    return_dict["bookmarked"] = True if is_bookmarked(Bookmarks.ENTITY_MAPPING["TASK"], id, current_user.id) else False
+
+    return jsonify(return_dict)
 
 
 @app.route('/ThreatKB/tasks', methods=['POST'])
@@ -75,7 +82,7 @@ def update_tasks(id):
     entity.description = request.json['description']
     entity.final_artifact = request.json['final_artifact']
     entity.state = request.json['state']['state'] if request.json['state'] and 'state' in request.json['state'] else \
-    request.json['state']
+        request.json['state']
     entity.created_user_id = current_user.id
     entity.modified_user_id = current_user.id
     entity.owner_user_id = request.json['owner_user']['id'] if request.json.get("owner_user", None) and request.json[
@@ -102,5 +109,7 @@ def delete_tasks(id):
     entity.active = False
     db.session.add(entity)
     db.session.commit()
+
+    delete_bookmarks(Bookmarks.ENTITY_MAPPING["TASK"], id, current_user.id)
 
     return jsonify(''), 204

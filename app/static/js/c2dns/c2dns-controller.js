@@ -227,8 +227,8 @@ angular.module('ThreatKB')
                 $scope.update(openModalForId);
             }
         }])
-    .controller('C2dnsSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'c2dns', 'Cfg_states', 'Comments', 'Tags', 'growl',
-        function ($scope, $http, $uibModalInstance, $location, c2dns, Cfg_states, Comments, Tags, growl) {
+    .controller('C2dnsSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'c2dns', 'Cfg_states', 'Comments', 'Tags', 'growl', 'Bookmarks',
+        function ($scope, $http, $uibModalInstance, $location, c2dns, Cfg_states, Comments, Tags, growl, Bookmarks) {
             $scope.c2dns = c2dns;
             $scope.c2dns.new_comment = "";
             $scope.Comments = Comments;
@@ -240,6 +240,18 @@ angular.module('ThreatKB')
                     $uibModalInstance.dismiss('cancel');
                 });
             }
+
+            $scope.bookmark = function (id) {
+                Bookmarks.createBookmark(Bookmarks.ENTITY_MAPPING.DNS, id).then(function (data) {
+                    $scope.c2dns.bookmarked = true;
+                });
+            };
+
+            $scope.unbookmark = function (id) {
+                Bookmarks.deleteBookmark(Bookmarks.ENTITY_MAPPING.DNS, id).then(function (data) {
+                    $scope.c2dns.bookmarked = false;
+                });
+            };
 
             $scope.getPermalink = function (id) {
                 return $location.absUrl() + "/" + id;

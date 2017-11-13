@@ -250,8 +250,8 @@ angular.module('ThreatKB')
                 $scope.update(openModalForId);
             }
         }])
-    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'yara_rule', 'yara_rules', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags', 'Yara_rule', 'Cfg_settings',
-        function ($scope, $http, $uibModalInstance, $location, yara_rule, yara_rules, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags, Yara_rule, Cfg_settings) {
+    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'yara_rule', 'yara_rules', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags', 'Yara_rule', 'Cfg_settings', 'Bookmarks',
+        function ($scope, $http, $uibModalInstance, $location, yara_rule, yara_rules, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags, Yara_rule, Cfg_settings, Bookmarks) {
 
             $scope.yara_rule = yara_rule;
             $scope.yara_rules = yara_rules;
@@ -271,6 +271,18 @@ angular.module('ThreatKB')
                     $uibModalInstance.dismiss('cancel');
                 });
             }
+
+            $scope.bookmark = function (id) {
+                Bookmarks.createBookmark(Bookmarks.ENTITY_MAPPING.SIGNATURE, id).then(function (data) {
+                    $scope.yara_rule.bookmarked = true;
+                });
+            };
+
+            $scope.unbookmark = function (id) {
+                Bookmarks.deleteBookmark(Bookmarks.ENTITY_MAPPING.SIGNATURE, id).then(function (data) {
+                    $scope.yara_rule.bookmarked = false;
+                });
+            };
 
             $scope.getPermalink = function (id) {
                 return $location.absUrl() + "/" + id;
