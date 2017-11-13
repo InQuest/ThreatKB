@@ -84,7 +84,6 @@ class C2ip(db.Model):
         c2ip.asn = geo_ip["asn"]
         c2ip.country = geo_ip["country_code"]
         c2ip.city = geo_ip["city"]
-        c2ip.state = geo_ip["state"]
         return c2ip
 
 
