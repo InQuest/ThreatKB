@@ -25,12 +25,12 @@ def upgrade():
         cfg_settings.Cfg_settings.__table__,
         [
             {"key": "GEOIP_ASN_DATABASE_FILE",
-             "value": '/usr/local/ThreatKB/MaxMind/GeoLite2-ASN.mmdb',
+             "value": 'data/GeoLite2-ASN.mmdb',
              "public": True,
              "date_created": date_created,
              "date_modified": date_modified},
             {"key": "GEOIP_CITY_DATABASE_FILE",
-             "value": '/usr/local/ThreatKB/MaxMind/GeoLite2-City.mmdb',
+             "value": 'data/GeoLite2-City.mmdb',
              "public": True,
              "date_created": date_created,
              "date_modified": date_modified}

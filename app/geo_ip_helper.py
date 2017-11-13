@@ -6,15 +6,15 @@ from ipaddr import IPAddress
 from app import app
 from app.models import cfg_settings
 
-app.config["GEOIP_ASN_DATABASE_FILE"] = cfg_settings.Cfg_settings.get_private_setting("GEOIP_ASN_DATABASE_FILE")
+app.config["GEOIP_ASN_DATABASE_FILE"] = cfg_settings.Cfg_settings.get_setting("GEOIP_ASN_DATABASE_FILE")
 if not app.config["GEOIP_ASN_DATABASE_FILE"]:
     app.config["GEOIP_ASN_DATABASE_FILE"] = os.getenv('GEOIP_ASN_DATABASE_FILE',
-                                                      '/usr/local/ThreatKB/MaxMind/GeoLite2-ASN.mmdb')
+                                                      'data/GeoLite2-ASN.mmdb')
 
-app.config["GEOIP_CITY_DATABASE_FILE"] = cfg_settings.Cfg_settings.get_private_setting("GEOIP_CITY_DATABASE_FILE")
+app.config["GEOIP_CITY_DATABASE_FILE"] = cfg_settings.Cfg_settings.get_setting("GEOIP_CITY_DATABASE_FILE")
 if not app.config["GEOIP_CITY_DATABASE_FILE"]:
     app.config["GEOIP_CITY_DATABASE_FILE"] = os.getenv('GEOIP_CITY_DATABASE_FILE',
-                                                       '/usr/local/ThreatKB/MaxMind/GeoLite2-City.mmdb')
+                                                       'data/GeoLite2-City.mmdb')
 
 GEOIP_ASN_DATABASE_FILE = app.config["GEOIP_ASN_DATABASE_FILE"]
 GEOIP_CITY_DATABASE_FILE = app.config["GEOIP_CITY_DATABASE_FILE"]
