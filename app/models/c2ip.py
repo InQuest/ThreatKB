@@ -4,6 +4,7 @@ from ipaddr import IPAddress, IPNetwork
 from sqlalchemy.event import listens_for
 
 from app import db, current_user
+from app.geo_ip_helper import get_geo_for_ip
 from app.models.whitelist import Whitelist
 from app.routes import tags_mapping
 from app.models.comments import Comments
@@ -76,21 +77,13 @@ class C2ip(db.Model):
 
     @classmethod
     def get_c2ip_from_ip(cls, ip):
-        whois = ipwhois.IPWhois(ip).lookup_whois()
+        geo_ip = get_geo_for_ip(str(ip))
 
         c2ip = C2ip()
         c2ip.ip = ip
-        c2ip.asn = whois.get("asn_description", None)
-
-        net = {}
-        for range in whois.get("nets", []):
-            if range["cidr"] == whois["asn_cidr"]:
-                net = range
-                break
-
-        c2ip.country = net.get("country", None)
-        c2ip.city = net.get("city", None)
-        c2ip.state = net.get("state", None)
+        c2ip.asn = geo_ip["asn"]
+        c2ip.country = geo_ip["country_code"]
+        c2ip.city = geo_ip["city"]
         return c2ip
 
 
