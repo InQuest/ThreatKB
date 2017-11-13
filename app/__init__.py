@@ -67,6 +67,8 @@ def run(debug=False, port=5000, host='127.0.0.1'):
     from app.celeryapp import make_celery
     celery = make_celery(app)
 
+    from app.geo_ip_helper import get_geo_for_ip
+
     from app.routes import index
     from app.routes import authentication
     from app.routes import c2ips
