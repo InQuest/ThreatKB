@@ -101,7 +101,6 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
 @app.route('/ThreatKB/import', methods=['POST'])
 @auto.doc()
 @login_required
-@admin_only()
 def import_artifacts():
     """Import data into ThreatKB as a 2-step process. The first is extraction and the second is committing. These phases can be completed by one single call to this endpoints or by calling this endpoint for extraction and /ThreatKB/import/commit for committing.
     From Data: import_text (str),
@@ -138,7 +137,6 @@ def import_artifacts():
 
 @app.route('/ThreatKB/import/commit', methods=['POST'])
 @login_required
-@admin_only()
 def commit_artifacts():
     """Commit previously extracted artifacts. The artifact dictionary
     From Data: artifacts (list of dicts)
