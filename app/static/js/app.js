@@ -326,5 +326,9 @@ angular.module('ThreatKB').config(function (blockUIConfig) {
         if (config.url.match(/^\/ThreatKB\/tags($|\/).*/)) {
             return false; // ... don't block it.
         }
+
+        if (config.url.match(/^\/ThreatKB\/.*(&|\?)searches=\{[^\}]/)) {
+            return false; // ... don't block it.
+        }
     };
 });
