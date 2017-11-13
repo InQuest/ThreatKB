@@ -133,12 +133,10 @@ class Release(db.Model):
         return json.dumps(release_data)
 
     def generate_release_notes(self):
-        prepend_text = cfg_settings.Cfg_settings.query.filter(and_(cfg_settings.Cfg_settings.public == False,
-                                                                   cfg_settings.Cfg_settings.key == "RELEASE_PREPEND_TEXT")).first()
-        postpend_text = cfg_settings.Cfg_settings.query.filter(and_(cfg_settings.Cfg_settings.public == False,
-                                                                    cfg_settings.Cfg_settings.key == "RELEASE_POSTPEND_TEXT")).first()
+        prepend_text = cfg_settings.Cfg_settings.get_setting("RELEASE_PREPEND_TEXT")
+        postpend_text = cfg_settings.Cfg_settings.get_setting("RELEASE_POSTPEND_TEXT")
 
-        message = prepend_text.value if prepend_text else ""
+        message = "%s\n\n" % (prepend_text) if prepend_text else ""
         message += "New Signatures\n%s\n" % ("-" * 10)
         message += "\n\n".join(["EventID: %s\nName: %s\nCategory: %s\nConfidence: %s\nSeverity: %s\nDescription: %s" % (
             entity.get("eventid", "eventid"),
@@ -175,6 +173,8 @@ class Release(db.Model):
         message += "C2IPs Removed: %s\n" % (len(self.release_data_dict["IP"]["Removed"]))
         message += "C2 Domains Added: %s\n" % (len(self.release_data_dict["DNS"]["Added"]))
         message += "C2 Domains Removed: %s\n" % (len(self.release_data_dict["DNS"]["Removed"]))
+
+        message += "\n\n%s" % (postpend_text) if postpend_text else ""
 
         stream = StringIO.StringIO()
         stream.write(message)

@@ -34,11 +34,11 @@ def get_geo_for_ip(ip_address):
                 ip=ip_address,
                 asn=asn_info.autonomous_system_organization,
                 country_code=city_info.country.iso_code,
-                city=city_info.city.names["en"],
-                state=ZIPCODE_DB[zip_code].state,
+                city=city_info.city.names["en"] if city_info.city.names else None,
+                state=ZIPCODE_DB[zip_code].state if zip_code and ZIPCODE_DB else None,
                 zip_code=zip_code,
-                country=city_info.country.names["en"],
-                continent=city_info.continent.names["en"]
+                country=city_info.registered_country.names["en"] if city_info.registered_country.names else None,
+                continent=city_info.continent.names["en"] if city_info.continent.names else None
             )
         return None
     except Exception as e:
