@@ -55,6 +55,17 @@ def merge_signatures():
 @login_required
 def get_all_yara_rules():
     """Return a list of all yara_rule artifacts.
+
+    include_merged: variable controlling whether merged signatures are returned, default False
+    include_inactive: variable controlling whether inactive signatures are returned, default False
+
+    Pagination variables:
+    page_number: page number to start on, default 0
+    page_size: the size of each page, default None (dont paginate)
+    sort_by: column to sort by, must exist on the Yara_rule model, default None
+    sort_direction: the direction to sort by if sorting, default ASC
+    searches: dictionary of column filters as {column1:filter1, column2:filter2}, columns must exist on Yara_rule model, default {}
+
     Return: list of yara_rule artifact dictionaries"""
     include_inactive = request.args.get("include_inactive", False)
     include_merged = request.args.get('include_merged', False)

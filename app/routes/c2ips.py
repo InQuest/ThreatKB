@@ -16,6 +16,14 @@ from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
 @login_required
 def get_all_c2ips():
     """Return a list of all c2ip artifacts.
+
+    Pagination variables:
+    page_number: page number to start on, default 0
+    page_size: the size of each page, default None (dont paginate)
+    sort_by: column to sort by, must exist on the Yara_rule model, default None
+    sort_direction: the direction to sort by if sorting, default ASC
+    searches: dictionary of column filters as {column1:filter1, column2:filter2}, columns must exist on Yara_rule model, default {}
+
     Return: list of c2ip artifact dictionaries"""
     searches = request.args.get('searches', '{}')
     page_number = request.args.get('page_number', False)
