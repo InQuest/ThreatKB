@@ -1,7 +1,7 @@
 <div>
 
     <!--<div class="table-responsive">-->
-    <div ng-if="bookmarks">
+    <div ng-if="bookmarks.length > 0">
         <h3>My Bookmarked Artifacts</h3>
         <div id="dashboard_bookmarks">
             <table class="table table-striped">
@@ -27,9 +27,10 @@
                 </tbody>
             </table>
         </div>
+
+        <br>
     </div>
 
-    <br>
 
     <div ng-if="latest_release.id">
         <h3>Latest Production Release</h3>
