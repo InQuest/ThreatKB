@@ -71,7 +71,6 @@ def create_bookmark():
 @app.route('/ThreatKB/bookmarks', methods=['DELETE'])
 @auto.doc()
 @login_required
-@admin_only()
 def delete_bookmark():
     """Delete bookmark
     From Data: entity_type (int) {"SIGNATURE": 1, "DNS": 2, "IP": 3, "TASK": 4}, entity_id
