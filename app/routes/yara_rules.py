@@ -99,6 +99,8 @@ def get_all_yara_rules():
 
     if sort_by:
         filtered_entities = filtered_entities.order_by("%s %s" % (sort_by, sort_direction))
+    else:
+        filtered_entities = filtered_entities.order_by("creation_date DESC")
 
     if page_size:
         filtered_entities = filtered_entities.limit(int(page_size))

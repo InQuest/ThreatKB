@@ -18,11 +18,13 @@ def get_all_tasks():
     Return: list of task dictionaries"""
     entities = tasks.Tasks.query.filter_by(active=True)
 
+
     if current_user.admin:
-        entities = entities.all()
+        entities = entities.order_by("date_created DESC").all()
     else:
         entities = entities.filter(
-            or_(tasks.Tasks.owner_user_id == current_user.id, tasks.Tasks.owner_user_id == None)).all()
+            or_(tasks.Tasks.owner_user_id == current_user.id, tasks.Tasks.owner_user_id == None)).order_by(
+            "date_created DESC").all()
 
     return Response(json.dumps([entity.to_dict() for entity in entities]), mimetype='application/json')
 

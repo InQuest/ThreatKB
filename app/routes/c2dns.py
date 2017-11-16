@@ -50,6 +50,8 @@ def get_all_c2dns():
 
     if sort_by:
         filtered_entities = filtered_entities.order_by("%s %s" % (sort_by, sort_direction))
+    else:
+        filtered_entities = filtered_entities.order_by("date_created DESC")
 
     if page_size:
         filtered_entities = filtered_entities.limit(int(page_size))
