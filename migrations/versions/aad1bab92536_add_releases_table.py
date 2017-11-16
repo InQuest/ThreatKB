@@ -22,7 +22,7 @@ def upgrade():
                     sa.Column('name', sa.String(length=500), nullable=False),
                     sa.Column('is_test_release', sa.Integer(), nullable=True),
                     sa.Column('date_created', sa.DateTime(timezone=True), nullable=True),
-                    sa.Column('release_data', sa.Text(), nullable=False),
+                    sa.Column('release_data', sa.LongText(), nullable=False),
                     sa.Column('created_user_id', sa.Integer(), nullable=False),
                     sa.ForeignKeyConstraint(['created_user_id'], ['kb_users.id'], ),
                     sa.PrimaryKeyConstraint('id')
