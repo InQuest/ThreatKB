@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('TasksController', ['$scope', '$uibModal', 'resolvedTask', 'Task', 'Cfg_states', 'growl', 'Users',
-        function ($scope, $uibModal, resolvedTask, Task, Cfg_states, growl, Users) {
+    .controller('TasksController', ['$scope', '$uibModal', 'resolvedTask', 'Task', 'Cfg_states', 'growl', 'Users', 'openModalForId',
+        function ($scope, $uibModal, resolvedTask, Task, Cfg_states, growl, Users, openModalForId) {
 
             $scope.tasks = resolvedTask;
 
@@ -28,7 +28,7 @@ angular.module('ThreatKB')
 
             $scope.save = function (id_or_ip) {
                 var id = id_or_ip;
-                if (typeof(id_or_ip) == "object") {
+                if (typeof(id_or_ip) === "object") {
                     id = id_or_ip.id;
                     $scope.task = id_or_ip;
                 }
@@ -56,8 +56,7 @@ angular.module('ThreatKB')
                     date_created: "",
                     date_modified: "",
                     state: "",
-                    id: "",
-
+                    id: ""
                 };
             };
 
@@ -78,13 +77,41 @@ angular.module('ThreatKB')
                     $scope.save(id);
                 });
             };
+
+            if (openModalForId !== null) {
+                $scope.update(openModalForId);
+            }
         }])
-    .controller('TaskSaveController', ['$scope', '$http', '$uibModalInstance', 'task', 'Comments', 'Cfg_states', 'Import', 'growl', 'blockUI', 'AuthService',
-        function ($scope, $http, $uibModalInstance, task, Comments, Cfg_states, Import, growl, blockUI, AuthService) {
+    .controller('TaskSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'task', 'Comments', 'Cfg_states', 'Import', 'growl', 'blockUI', 'AuthService', 'Bookmarks',
+        function ($scope, $http, $uibModalInstance, $location, task, Comments, Cfg_states, Import, growl, blockUI, AuthService, Bookmarks) {
             $scope.task = task;
             $scope.task.new_comment = "";
             $scope.Comments = Comments;
             $scope.current_user = AuthService.getUser();
+
+            if ($scope.task.$promise !== undefined) {
+                $scope.task.$promise.then(function (result) {
+                }, function (errorMsg) {
+                    growl.error("Task Not Found", {ttl: -1});
+                    $uibModalInstance.dismiss('cancel');
+                });
+            }
+
+            $scope.bookmark = function (id) {
+                Bookmarks.createBookmark(Bookmarks.ENTITY_MAPPING.TASK, id).then(function (data) {
+                    $scope.task.bookmarked = true;
+                });
+            };
+
+            $scope.unbookmark = function (id) {
+                Bookmarks.deleteBookmark(Bookmarks.ENTITY_MAPPING.TASK, id).then(function (data) {
+                    $scope.task.bookmarked = false;
+                });
+            };
+
+            $scope.getPermalink = function (id) {
+                return $location.absUrl() + "/" + id;
+            };
 
             $scope.cfg_states = Cfg_states.query();
 

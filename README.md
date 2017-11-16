@@ -80,3 +80,23 @@ $2b$12$Kfana8UbHxYwrksmXS5NiudRTG/m0hRloUwN/hc1mxl/dx5fPTwMC
 INSERT INTO kb_users (email, password, admin)
 VALUES ('test@test.com', '<hashed pass>', 1);
 ```
+
+## Docker Instructions
+```
+Edit docker-compose.yml if you want to change default ports, credentials, etc. Once the following is complete, visit http://127.0.0.1:5000/!#/login in your browser.
+
+(flask) danny@dannys-MBP InquestKB (staging) $ docker build -t threatkb .
+....snip....
+Successfully built 9a16b1f1c55b
+Successfully tagged threatkb:latest
+(flask) danny@dannys-MBP InquestKB (staging) $ docker-compose up
+Starting inquestkb_db_1 ... 
+Starting inquestkb_db_1 ... done
+Recreating inquestkb_threatkb_1 ... 
+Recreating inquestkb_threatkb_1 ... done
+Attaching to inquestkb_db_1, inquestkb_threatkb_1
+....snip...
+threatkb_1  |  * Debugger is active!
+threatkb_1  |  * Debugger PIN: 212-674-856
+```
+

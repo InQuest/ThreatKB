@@ -1,8 +1,9 @@
 angular.module('ThreatKB')
-    .controller('AuthController', ['$scope', '$location', 'AuthService', 'Cfg_settings',
-        function ($scope, $location, AuthService, Cfg_settings) {
+    .controller('AuthController', ['$scope', '$location', 'AuthService', 'Cfg_settings', '$uibModal',
+        function ($scope, $location, AuthService, Cfg_settings, $uibModal) {
             $scope.isLoggedIn = AuthService.isLoggedIn;
             $scope.isAdmin = AuthService.isAdmin;
+            $scope.user = AuthService.user;
             $scope.nav_image = Cfg_settings.get({key: "NAV_IMAGE"});
 
             $scope.login = function () {
@@ -38,7 +39,7 @@ angular.module('ThreatKB')
     .controller('UsersController', ['$scope', '$uibModal', 'resolvedUsers', 'UserService',
         function ($scope, $uibModal, resolvedUsers, UserService) {
             $scope.users = resolvedUsers;
-            $scope.user = {}
+            $scope.user = {};
             $scope.user.passwordConfirm = "";
 
 

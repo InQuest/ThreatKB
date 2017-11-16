@@ -1,8 +1,19 @@
-from app import db
+import re
+
+from ipaddr import IPAddress, IPNetwork
+from sqlalchemy.event import listens_for
+
+from app import db, current_user
+from app.geo_ip_helper import get_geo_for_ip
+from app.models.whitelist import Whitelist
 from app.routes import tags_mapping
 from app.models.comments import Comments
+from app.models import cfg_states
+
+from flask import abort
 
 import ipwhois
+
 
 class C2ip(db.Model):
     __tablename__ = "c2ip"
@@ -16,9 +27,9 @@ class C2ip(db.Model):
     country = db.Column(db.String(64))
     state = db.Column(db.String(32), index=True)
     reference_link = db.Column(db.String(2048))
-    reference_text = db.Column(db.String(2048))
     expiration_type = db.Column(db.String(32))
     expiration_timestamp = db.Column(db.DateTime(timezone=True))
+    description = db.Column(db.String(4096))
 
     created_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
     created_user = db.relationship('KBUser', foreign_keys=created_user_id,
@@ -51,9 +62,9 @@ class C2ip(db.Model):
             country=self.country,
             state=self.state,
             reference_link=self.reference_link,
-            reference_text=self.reference_text,
             expiration_type=self.expiration_type,
             expiration_timestamp=self.expiration_timestamp.isoformat() if self.expiration_timestamp else None,
+            description=self.description,
             id=self.id,
             tags=tags_mapping.get_tags_for_source(self.__tablename__, self.id),
             addedTags=[],
@@ -66,23 +77,62 @@ class C2ip(db.Model):
 
     @classmethod
     def get_c2ip_from_ip(cls, ip):
-        whois = ipwhois.IPWhois(ip).lookup_whois()
+        geo_ip = get_geo_for_ip(str(ip))
 
         c2ip = C2ip()
         c2ip.ip = ip
-        c2ip.asn = whois.get("asn_description", None)
-
-        net = {}
-        for range in whois.get("nets", []):
-            if range["cidr"] == whois["asn_cidr"]:
-                net = range
-                break
-
-        c2ip.country = net.get("country", None)
-        c2ip.city = net.get("city", None)
-        c2ip.state = net.get("state", None)
+        c2ip.asn = geo_ip["asn"]
+        c2ip.country = geo_ip["country_code"]
+        c2ip.city = geo_ip["city"]
         return c2ip
 
 
     def __repr__(self):
         return '<C2ip %r>' % (self.id)
+
+
+@listens_for(C2ip, "before_insert")
+def run_against_whitelist(mapper, connect, target):
+    new_ip = target.ip
+
+    abort_import = False
+
+    whitelists = Whitelist.query.all()
+    for whitelist in whitelists:
+        wa = str(whitelist.whitelist_artifact)
+
+        try:
+            if str(IPAddress(new_ip)) == str(IPAddress(wa)):
+                abort_import = True
+                break
+        except ValueError:
+            pass
+
+        try:
+            if IPAddress(new_ip) in IPNetwork(wa):
+                abort_import = True
+                break
+        except ValueError:
+            pass
+
+        regex = re.compile(wa)
+        result = regex.match(new_ip)
+        if result:
+            abort_import = True
+            break
+
+    if abort_import:
+        raise Exception('Failed Whitelist Validation')
+
+    if not current_user.admin:
+        release_state = cfg_states.Cfg_states.query.filter_by(cfg_states.Cfg_states.is_release_state > 0).first()
+        if release_state and target.state == release_state.state:
+            abort(403)
+
+
+@listens_for(C2ip, "before_update")
+def c2ip_before_update(mapper, connect, target):
+    if not current_user.admin:
+        release_state = cfg_states.Cfg_states.query.filter_by(cfg_states.Cfg_states.is_release_state > 0).first()
+        if release_state and target.state == release_state.state:
+            abort(403)

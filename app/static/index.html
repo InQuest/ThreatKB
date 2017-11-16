@@ -6,14 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ThreatKB</title>
     <link href="lib/bootstrap-css/css/bootstrap.min.css" rel="stylesheet">
-    <link href="lib/jquery-ui/themes/smoothness/jquery-ui.css" rel="stylesheet"/>
+    <link href="lib/jquery-ui/themes/smoothness/jquery-ui.min.css" rel="stylesheet"/>
     <link href="lib/angular-ui-select/dist/select.min.css" rel="stylesheet"/>
-    <link href="lib/ng-tags-input/ng-tags-input.css" rel="stylesheet">
+    <link href="lib/ng-tags-input/ng-tags-input.min.css" rel="stylesheet">
     <link href="lib/angular-bootstrap/ui-bootstrap-csp.css" rel="stylesheet"/>
     <link href="css/codemirror.css" rel="stylesheet">
     <link href="lib/angular-growl-v2/build/angular-growl.min.css" rel="stylesheet"/>
     <link href="lib/angular-block-ui/dist/angular-block-ui.min.css" rel="stylesheet"/>
-    <link href="lib/angular-ui-grid/ui-grid.css" rel="stylesheet"/>
+    <link href="lib/angular-ui-grid/ui-grid.min.css" rel="stylesheet"/>
 
     <link href="css/app.css" rel="stylesheet">
 </head>
@@ -33,7 +33,7 @@
             </div>
 
             <div class="collapse navbar-collapse navbar-ex1-collapse">
-                <ul class="nav navbar-nav" style="font-size: 8pt" ng-if="isLoggedIn()">
+                <ul class="nav navbar-nav" ng-if="isLoggedIn()">
 
                     <li>
                         <a href="#!/tasks">Tasks</a>
@@ -50,83 +50,80 @@
                     <li>
                         <a href="#!/yara_rules">Signatures</a>
                     </li>
-
-                    <li ng-if="isAdmin()">
-                        <a href="#!/cfg_reference_text_templates">Reference Text</a>
-                    </li>
-
-                    <li ng-if="isAdmin()">
-                        <a href="#!/cfg_states">States</a>
-                    </li>
-
-                    <li ng-if="isAdmin()">
-                        <a href="#!/cfg_category_range_mapping">Categories</a>
-                    </li>
-
-                    <li ng-if="isAdmin()">
-                        <a href="#!/tags">Tags</a>
-                    </li>
-
-                    <li ng-if="isAdmin()">
-                        <a href="#!/import">Import</a>
-                    </li>
-
-                    <li ng-if="isAdmin()">
-                        <a href="#!/cfg_settings">Settings</a>
-                    </li>
-
-                    <li ng-if="isAdmin()">
-                        <a href="#!/files">Files</a>
-                    </li>
-
-                    <li ng-if="isAdmin()">
-                        <a href="#!/users">Users</a>
-                    </li>
-
-                    <li ng-if="isAdmin()">
-                        <a href="#!/releases">Releases</a>
-                    </li>
-
                     <li>
-                        <a href="#!/access_keys">Keys</a>
+                        <a href="#!/import" title="Import"><span class="glyphicon glyphicon-import"></span></a></li>
                     </li>
-                </ul>
-                <ul class="nav navbar-nav pull-right" ng-show="isLoggedIn()">
-                    <li class="pull-right">
-                        <a ng-click="logout()" style="cursor:pointer;">logout</a>
+                    <li ng-show="isAdmin()">
+                        <a href="#!/releases" title="Releases"><span class="glyphicon glyphicon-export"></span></a></li>
                     </li>
+                    <li>
                 </ul>
-            </div>
+                <div class="btn-group pull-right" uib-dropdown ng-show="isLoggedIn()">
+                    <button id="btn-append-to-single-button" type="button" class="btn btn-sm navbar-inverse"
+                            style="padding-top:15px; border:0px;" uib-dropdown-toggle>
+                        <img ng-src="/ThreatKB/users/me/picture" style="height:25px;" ng-if="isLoggedIn()"></span>&nbsp;&nbsp;<span
+                            class="caret" style="color:#9d9d9d"></span>
+                    </button>
+                    <ul class="dropdown-menu" uib-dropdown-menu role="menu" style="background-color: #ECF0F1;"
+                        aria-labelledby="btn-append-to-single-button">
+                        <li role="menuitem"><a href="#!/profile">Edit Profile</a></li>
+                        <li role="menuitem"><a href="#!/access_keys">My API Keys</a></li>
+                        <li role="menuitem"><a href="/ThreatKB/documentation">API Documentation</a></li>
+                        <li role="menuitem"><a ng-click="logout()">Sign out</a></li>
+                    </ul>
+                </div>
 
-            <!-- /.navbar-collapse -->
-        </div>
+                <div class="btn-group pull-right" style="position:relative" uib-dropdown
+                     ng-show="isLoggedIn() && isAdmin()" style="box-shadow: -14px 0 0 -13px #9d9d9d">
+                    <button id="btn-append-to-single-button" type="button" class="btn btn-sm navbar-inverse"
+                            style="padding-top:17px; border:0px; font-size: 14px;" uib-dropdown-toggle>
+                        <span class="glyphicon glyphicon-cog" style="color:#9d9d9d"></span>&nbsp;<span class="caret"
+                                                                                                       style="color:#9d9d9d"></span>
+                    </button>
+                    <ul class="dropdown-menu" uib-dropdown-menu role="menu" style="background-color: #ECF0F1;"
+                        aria-labelledby="btn-append-to-single-button">
+
+                        <li role="menuitem"><a href="#!/users">Users</a></li>
+                        <li role="menuitem"><a href="#!/whitelist">Whitelist</a></li>
+                        <li role="menuitem"><a href="#!/tags">Tags</a></li>
+                        <!--<li role="menuitem"><a href="#!/files">Manage Files</a></li>-->
+                        <li role="menuitem"><a href="#!/cfg_states">States</a></li>
+                        <li role="menuitem"><a href="#!/cfg_category_range_mapping">Categories</a></li>
+                        <li role="menuitem"><a href="#!/cfg_settings">Settings</a></li>
+                    </ul>
+                </div>
+
+                <!-- /.navbar-collapse -->
+            </div>
     </nav>
 </div>
 
 <!-- /.container -->
 <div class="container" ng-view></div>
-<script src="lib/jquery/dist/jquery.js"></script>
-<script src="lib/jquery-ui/jquery-ui.js"></script>
-<script src="lib/lodash/dist/lodash.js"></script>
-<script src="lib/angular/angular.js"></script>
-<script src="lib/angular-resource/angular-resource.js"></script>
-<script src="lib/angular-route/angular-route.js"></script>
+<script src="lib/jquery/dist/jquery.min.js"></script>
+<script src="lib/jquery-ui/jquery-ui.min.js"></script>
+<script src="lib/lodash/dist/lodash.min.js"></script>
+<script src="lib/angular/angular.min.js"></script>
+<script src="lib/angular-resource/angular-resource.min.js"></script>
+<script src="lib/angular-route/angular-route.min.js"></script>
 <script src="lib/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
 <script src="lib/angular-sanitize/angular-sanitize.min.js"></script>
 <script src="lib/angular-ui-select/dist/select.min.js"></script>
-<script src="lib/ng-tags-input/ng-tags-input.js"></script>
+<script src="lib/ng-tags-input/ng-tags-input.min.js"></script>
 <script src="lib/angular-toArrayFilter/toArrayFilter.js"></script>
 <script src="js/codemirror/codemirror.js"></script>
 <script src="js/codemirror/yara.js"></script>
 <script src="lib/angular-ui-codemirror/ui-codemirror.min.js"></script>
-<script src="lib/ng-file-upload-shim/ng-file-upload-shim.js"></script> <!-- for no html5 browsers support -->
-<script src="lib/ng-file-upload/ng-file-upload.js"></script>
+<script src="lib/ng-file-upload-shim/ng-file-upload-shim.min.js"></script> <!-- for no html5 browsers support -->
+<script src="lib/ng-file-upload/ng-file-upload.min.js"></script>
 <script src="lib/angular-growl-v2/build/angular-growl.min.js"></script>
-<script src="lib/angular-password/angular-password.js"></script>
-<script src="lib/angular-messages/angular-messages.js"></script>
+<script src="lib/angular-password/angular-password.min.js"></script>
+<script src="lib/angular-messages/angular-messages.min.js"></script>
 <script src="lib/angular-file-saver/dist/angular-file-saver.bundle.min.js"></script>
 <script src="lib/angular-block-ui/dist/angular-block-ui.min.js"></script>
-<script src="lib/angular-ui-grid/ui-grid.js"></script>
+<script src="lib/angular-ui-grid/ui-grid.min.js"></script>
+<script src="lib/clipboard/dist/clipboard.min.js"></script>
+<script src="lib/ngclipboard/dist/ngclipboard.min.js"></script>
 
 <script src="js/app.js"></script>
 
@@ -135,7 +132,6 @@
 <script src="js/c2ip/c2ip-controller.js"></script>
 <script src="js/c2dns/c2dns-controller.js"></script>
 <script src="js/yara_rule/yara_rule-controller.js"></script>
-<script src="js/cfg_reference_text_templates/cfg_reference_text_templates-controller.js"></script>
 <script src="js/cfg_settings/cfg_settings-controller.js"></script>
 <script src="js/cfg_states/cfg_states-controller.js"></script>
 <script src="js/tags/tags-controller.js"></script>
@@ -147,13 +143,15 @@
 <script src="js/releases/releases-controller.js"></script>
 <script src="js/tasks/tasks-controller.js"></script>
 <script src="js/access_keys/access_keys-controller.js"></script>
+<script src="js/whitelist/whitelist-controller.js"></script>
+<script src="js/profile/profile-controller.js"></script>
+<script src="js/dashboard/dashboard-controller.js"></script>
 <!-- /Controllers -->
 
 <!-- Services -->
 <script src="js/c2ip/c2ip-service.js"></script>
 <script src="js/c2dns/c2dns-service.js"></script>
 <script src="js/yara_rule/yara_rule-service.js"></script>
-<script src="js/cfg_reference_text_templates/cfg_reference_text_templates-service.js"></script>
 <script src="js/cfg_settings/cfg_settings-service.js"></script>
 <script src="js/cfg_states/cfg_states-service.js"></script>
 <script src="js/tags/tags-service.js"></script>
@@ -167,6 +165,8 @@
 <script src="js/users/users-service.js"></script>
 <script src="js/tasks/tasks-service.js"></script>
 <script src="js/access_keys/access_keys-service.js"></script>
+<script src="js/whitelist/whitelist-service.js"></script>
+<script src="js/bookmarks/bookmarks-service.js"></script>
 <!-- /Services -->
 
 </body>

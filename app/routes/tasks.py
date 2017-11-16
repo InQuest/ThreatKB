@@ -1,9 +1,13 @@
 from app import app, db, auto
 from app.models import tasks
-from flask import abort, jsonify, request
+from flask import abort, jsonify, request, Response
 from flask.ext.login import login_required, current_user
 from dateutil import parser
 import json
+from sqlalchemy import or_
+
+from app.models.bookmarks import Bookmarks
+from app.routes.bookmarks import is_bookmarked, delete_bookmarks
 
 
 @app.route('/ThreatKB/tasks', methods=['GET'])
@@ -12,12 +16,21 @@ import json
 def get_all_tasks():
     """Return all active tasks
     Return: list of task dictionaries"""
-    entities = tasks.Tasks.query.filter_by(active=True).all()
+    entities = tasks.Tasks.query.filter_by(active=True)
 
-    return json.dumps([entity.to_dict() for entity in entities])
+
+    if current_user.admin:
+        entities = entities.order_by("date_created DESC").all()
+    else:
+        entities = entities.filter(
+            or_(tasks.Tasks.owner_user_id == current_user.id, tasks.Tasks.owner_user_id == None)).order_by(
+            "date_created DESC").all()
+
+    return Response(json.dumps([entity.to_dict() for entity in entities]), mimetype='application/json')
 
 
 @app.route('/ThreatKB/tasks/<int:id>', methods=['GET'])
+@login_required
 @auto.doc()
 def get_tasks(id):
     """Return task associated with given id
@@ -26,7 +39,13 @@ def get_tasks(id):
     if not entity:
         abort(404)
 
-    return jsonify(entity.to_dict())
+    if not current_user.admin and not entity.owner_user_id == current_user.id and not entity.owner_user_id == None:
+        return jsonify({})
+
+    return_dict = entity.to_dict()
+    return_dict["bookmarked"] = True if is_bookmarked(Bookmarks.ENTITY_MAPPING["TASK"], id, current_user.id) else False
+
+    return jsonify(return_dict)
 
 
 @app.route('/ThreatKB/tasks', methods=['POST'])
@@ -65,7 +84,7 @@ def update_tasks(id):
     entity.description = request.json['description']
     entity.final_artifact = request.json['final_artifact']
     entity.state = request.json['state']['state'] if request.json['state'] and 'state' in request.json['state'] else \
-    request.json['state']
+        request.json['state']
     entity.created_user_id = current_user.id
     entity.modified_user_id = current_user.id
     entity.owner_user_id = request.json['owner_user']['id'] if request.json.get("owner_user", None) and request.json[
@@ -93,4 +112,6 @@ def delete_tasks(id):
     db.session.add(entity)
     db.session.commit()
 
-    return '', 204
+    delete_bookmarks(Bookmarks.ENTITY_MAPPING["TASK"], id, current_user.id)
+
+    return jsonify(''), 204

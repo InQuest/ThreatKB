@@ -1,8 +1,10 @@
 from app import app, db, admin_only, auto
 from app.models import tags
-from flask import abort, jsonify, request
+from flask import abort, jsonify, request, Response
 from flask.ext.login import login_required
 import json
+
+from app.models.tags_mapping import Tags_mapping
 
 
 @app.route('/ThreatKB/tags', methods=['GET'])
@@ -12,7 +14,7 @@ def get_all_tags():
     """Return all tags
     Return: list of tag dictionaries"""
     entities = tags.Tags.query.all()
-    return json.dumps([entity.to_dict() for entity in entities])
+    return Response(json.dumps([entity.to_dict() for entity in entities]), mimetype="application/json")
 
 
 @app.route('/ThreatKB/tags/<int:id>', methods=['GET'])
@@ -78,4 +80,17 @@ def delete_tags(id):
         abort(404)
     db.session.delete(entity)
     db.session.commit()
-    return '', 204
+
+    delete_tags_mapping_for_tag_id(id)
+
+    return jsonify(''), 204
+
+
+def delete_tags_mapping_for_tag_id(t_id):
+    entities_to_delete = Tags_mapping.query.filter_by(tag_id=t_id).all()
+    if entities_to_delete:
+        for entity in entities_to_delete:
+            db.session.delete(entity)
+            db.session.commit()
+
+    return

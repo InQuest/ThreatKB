@@ -1,6 +1,6 @@
 from app import app, db, admin_only, auto
 from app.models import cfg_settings
-from flask import abort, jsonify, request
+from flask import abort, jsonify, request, Response
 from flask.ext.login import login_required, current_user
 from dateutil import parser
 import json
@@ -13,7 +13,7 @@ def get_all_cfg_settings():
     """Return all public config settings
     Return: list of config settings dictionaries"""
     entities = cfg_settings.Cfg_settings.query.filter_by(public=True).all()
-    return json.dumps([entity.to_dict() for entity in entities])
+    return Response(json.dumps([entity.to_dict() for entity in entities]), mimetype='application/json')
 
 
 @app.route('/ThreatKB/cfg_settings/<key>', methods=['GET'])
@@ -85,4 +85,4 @@ def delete_cfg_settings(key):
     db.session.delete(entity)
     db.session.commit()
 
-    return '', 204
+    return jsonify(''), 204

@@ -1,80 +1,77 @@
 'use strict';
 
 angular.module('ThreatKB')
-  .controller('TagsController', ['$scope', '$uibModal', 'resolvedTags', 'Tags',
-    function ($scope, $uibModal, resolvedTags, Tags) {
+    .controller('TagsController', ['$scope', '$uibModal', 'resolvedTags', 'Tags',
+        function ($scope, $uibModal, resolvedTags, Tags) {
+            $scope.tags = resolvedTags;
+            $scope.tag = {};
 
-      $scope.tags = resolvedTags;
+            $scope.create = function () {
+                $scope.clear();
+                $scope.open();
+            };
 
-      $scope.create = function () {
-        $scope.clear();
-        $scope.open();
-      };
+            $scope.update = function (id) {
+                $scope.tag = Tags.resource.get({id: id});
+                $scope.tags = Tags.resource.query();
+                $scope.open(id);
+            };
 
-      $scope.update = function (id) {
-        $scope.tags = Tags.get({id: id});
-        $scope.open(id);
-      };
+            $scope.delete = function (id) {
+                Tags.resource.delete({id: id},
+                    function () {
+                        $scope.tag = {};
+                        $scope.tags = Tags.resource.query();
+                    });
+            };
 
-      $scope.delete = function (id) {
-        Tags.delete({id: id},
-          function () {
-            $scope.tags = Tags.query();
-          });
-      };
+            $scope.save = function (id) {
+                if (id) {
+                    Tags.resource.update({id: id}, $scope.tag,
+                        function () {
+                            $scope.tags = Tags.resource.query();
+                        });
+                } else {
+                    Tags.resource.save($scope.tag,
+                        function () {
+                            $scope.tags = Tags.resource.query();
+                        });
+                }
+            };
 
-      $scope.save = function (id) {
-        if (id) {
-          Tags.update({id: id}, $scope.tags,
-            function () {
-              $scope.tags = Tags.query();
-//              $scope.clear();
-            });
-        } else {
-          Tags.save($scope.tags,
-            function () {
-              $scope.tags = Tags.query();
-//              $scope.clear();
-            });
-        }
-      };
+            $scope.clear = function () {
+                $scope.tag = {
+                    "text": "",
+                    "id": ""
+                };
+            };
 
-      $scope.clear = function () {
-        $scope.tags = {
+            $scope.open = function (id) {
+                var tagsSave = $uibModal.open({
+                    templateUrl: 'tags-save.html',
+                    controller: 'TagsSaveController',
+                    resolve: {
+                        tag: function () {
+                            return $scope.tag;
+                        }
+                    }
+                });
 
-          "text": "",
+                tagsSave.result.then(function (entity) {
+                    $scope.tag = entity;
+                    $scope.save(id);
+                });
+            };
+        }])
+    .controller('TagsSaveController', ['$scope', '$uibModalInstance', 'tag',
+        function ($scope, $uibModalInstance, tag) {
+            $scope.tag = tag;
 
-            "id": ""
-        };
-      };
+            $scope.ok = function () {
+                $uibModalInstance.close($scope.tag);
+            };
 
-      $scope.open = function (id) {
-        var tagsSave = $uibModal.open({
-          templateUrl: 'tags-save.html',
-          controller: 'TagsSaveController',
-          resolve: {
-            tags: function () {
-              return $scope.tags;
-            }
-          }
-        });
-
-        tagsSave.result.then(function (entity) {
-          $scope.tags = entity;
-          $scope.save(id);
-        });
-      };
-    }])
-  .controller('TagsSaveController', ['$scope', '$uibModalInstance', 'tags',
-    function ($scope, $uibModalInstance, tags) {
-      $scope.tags = tags;
-
-
-        $scope.ok = function () {
-        $uibModalInstance.close($scope.tags);
-      };
-
-      $scope.cancel = function () {
-        $uibModalInstance.dismiss('cancel');
-      };
-    }]);
+            $scope.cancel = function () {
+                $uibModalInstance.dismiss('cancel');
+            };
+        }]);

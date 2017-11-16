@@ -26,9 +26,8 @@
                 <div class="form-group">
                     <label>Value</label>
 
-                    <input type="text" class="form-control" name="value"
-                           ng-model="cfg_settings.value" ng-required="true"
-                           ng-maxlength="2048"/>
+                    <textarea class="form-control"
+                              ng-model="cfg_settings.value" name="metadata_field_mapping"></textarea>
                     <span class="error" ng-show="form.value.$error.minlength">Must be at least 1 character.</span>
                     <span class="error" ng-show="form.value.$error.maxlength">Must be at most 2048 characters.</span>
                 </div>

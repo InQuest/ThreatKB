@@ -1,4 +1,4 @@
- <div>
+<div>
 
     <script type="text/ng-template" id="c2ip-save.html">
         <form name="form" novalidate
@@ -9,7 +9,22 @@
                 <button type="button" class="close"
                         ng-click="cancel()">&times;
                 </button>
-                <h4 class="modal-title" id="myC2ipLabel">{{ c2ip.id ? 'Edit' : 'Create' }} IP Artifact</h4>
+                <h4 class="modal-title" id="myC2ipLabel">
+                    {{ c2ip.id ? 'Edit' : 'Create' }} IP Artifact
+                    <a><span ng-if="c2ip.id" class="glyphicon glyphicon-link" style="font-size: .8em"
+                             title="Copy permalink to clipboard" tooltip-placement="bottom" uib-tooltip="Copied!"
+                             tooltip-trigger="'outsideClick'"
+                             ngclipboard data-clipboard-text="{{ getPermalink(c2ip.id) }}">
+                    </span></a>
+                    <a><span ng-if="c2ip.id"
+                             class="glyphicon {{ c2ip.bookmarked ? 'glyphicon-star' : 'glyphicon-star-empty' }}"
+                             style="font-size: .8em"
+                             title="Bookmark IP artifact" tooltip-placement="bottom"
+                             uib-tooltip="{{ c2ip.bookmarked ? 'Bookmarked!' : 'Un-bookmarked!' }}"
+                             tooltip-trigger="'outsideClick'"
+                             ng-click="c2ip.bookmarked ? unbookmark(c2ip.id) : bookmark(c2ip.id)">
+                    </span></a>
+                </h4>
 
             </div>
             <div class="modal-body">
@@ -81,6 +96,10 @@
 
                 <div class="form-group">
                     <label>Reference Link:</label>
+                    <a target="_blank" ng-if="c2ip.reference_link"
+                       href="{{ c2ip.reference_link.indexOf('http') == 0 ? c2ip.reference_link : 'http://' + c2ip.reference_link }}">
+                        <span class="glyphicon glyphicon-link" style="font-size: 1.0em;"></span>
+                    </a>
                     <span class="error"
                           ng-show="form.reference_link.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
@@ -89,19 +108,6 @@
                     <input class="form-control" name="reference_link"
                            ng-model="c2ip.reference_link" ng-required="false"
                            ng-maxlength="2048"/>
-                </div>
-
-                <div class="form-group">
-                    <label>Reference Text:</label>
-                    <span class="error text-danger">*</span>
-                    <span class="error"
-                          ng-show="form.reference_text.$error.minlength">Must be at least  characters.</span>
-                    <span class="error"
-                          ng-show="form.reference_text.$error.maxlength">Must be at most 4096 characters.</span>
-
-                    <input class="form-control" name="reference_text"
-                           ng-model="c2ip.reference_text" ng-required="true"
-                           ng-maxlength="4096"/>
                 </div>
 
                 <div class="form-group">
@@ -125,11 +131,24 @@
                 </div>
 
                 <div class="form-group">
+                    <label>Description:</label>
+                    <span class="error" ng-show="form.description.$error.minlength">Must be at least  characters.</span>
+                    <span class="error"
+                          ng-show="form.description.$error.maxlength">Must be at most 4096 characters.</span>
+                    <span class="error text-danger" ng-if="!c2ip.description">*</span>
+                    <textarea class="form-control" placeholder="Enter a description..." rows="4"
+                              ng-model="c2ip.description" ng-maxlength="4096"></textarea>
+                </div>
+
+                <div class="form-group">
                     <label>Tags:</label>
 
                     <tags-input ng-model="c2ip.tags" on-tag-added="addedTag($tag)" on-tag-removed="removedTag($tag)">
-                        <auto-complete minlength="2" source="loadTags($query)" load-on-focus="true"
-                                       load-on-empty="true"></auto-complete>
+                        <auto-complete source="loadTags($query)"
+                                       min-length="0"
+                                       load-on-focus="true"
+                                       load-on-empty="true">
+                        </auto-complete>
                     </tags-input>
                 </div>
 
@@ -137,12 +156,13 @@
                     <label>Comments</label>
 
                     <div class="input-group">
-                        <textarea class="form-control" placeholder="Enter a comment..." rows="1"
+                        <textarea class="form-control" placeholder="Enter a comment..." rows="8"
                                   ng-model="c2ip.new_comment"></textarea>
 
-                        <span class="input-group-btn">
+                        <span class="input-group-btn" style="height:10px;">
                             <button class="btn btn-secondary" type="button"
-                                    ng-click="add_comment(c2ip.id)">Post</button>
+                                    ng-click="add_comment(c2ip.id)" style="height:100%;"><span
+                                    class="glyphicon glyphicon-plus"></span></button>
                         </span>
                     </div>
                     <BR>
@@ -166,15 +186,12 @@
     </script>
     <br>
     <div class="container-fluid">
-
-        <div class="inner-addon left-addon col-md-4" style="padding-left:0;">
-            <i class="glyphicon glyphicon-search"></i>
-            <input class="form-control" ng-change="refreshData()" placeholder="Search" ng-model="searchText"/>
-        </div>
         <a class="btn-link pull-right" style="color:inherit;" ng-click="create()">
             <span class="glyphicon glyphicon-plus-sign"></span>
         </a>
     </div>
     <br>
-    <div ui-grid="gridOptions" ui-grid-auto-resize></div>
+    <div ui-if="gridOptions.data.length > 0" ui-grid="gridOptions" ng-style="getTableHeight()"
+         ui-grid-pagination ui-grid-auto-resize>
+    </div>
 </div>

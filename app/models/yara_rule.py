@@ -1,22 +1,25 @@
-from app import db
+from app import db, current_user
 from app.models.files import Files
 from app.routes import tags_mapping
 from app.models.comments import Comments
 from app.models.cfg_category_range_mapping import CfgCategoryRangeMapping
+from app.models import cfg_settings, cfg_states
 from sqlalchemy.event import listens_for
+from dateutil import parser
+import datetime
 import json
+import distutils
+
+from flask import abort
 
 class Yara_rule(db.Model):
-    metadata_fields = ["description", "confidence", "test_status", "severity", "category", "file_type",
-                       "subcategory1", "subcategory2", "subcategory3", "reference_text", "reference_link",
-                       "eventid"]
 
     __tablename__ = "yara_rules"
 
     id = db.Column(db.Integer, primary_key=True)
-    date_created = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp())
-    date_modified = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp(),
-                              onupdate=db.func.current_timestamp())
+    creation_date = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp())
+    last_revision_date = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp(),
+                                   onupdate=db.func.current_timestamp())
     state = db.Column(db.String(32), index=True)
     revision = db.Column(db.Integer(unsigned=True), default=1)
     name = db.Column(db.String(128), index=True)
@@ -30,7 +33,6 @@ class Yara_rule(db.Model):
     subcategory2 = db.Column(db.String(32))
     subcategory3 = db.Column(db.String(32))
     reference_link = db.Column(db.String(2048))
-    reference_text = db.Column(db.String(2048))
     condition = db.Column(db.String(2048))
     strings = db.Column(db.String(30000))
     active = db.Column(db.Boolean, nullable=False, default=True)
@@ -50,7 +52,7 @@ class Yara_rule(db.Model):
 
     owner_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=True)
     owner_user = db.relationship('KBUser', foreign_keys=owner_user_id,
-                                    primaryjoin="KBUser.id==Yara_rule.owner_user_id")
+                                 primaryjoin="KBUser.id==Yara_rule.owner_user_id")
 
     comments = db.relationship("Comments", foreign_keys=[id],
                                primaryjoin="and_(Comments.entity_id==Yara_rule.id, Comments.entity_type=='%s')" % (
@@ -74,8 +76,8 @@ class Yara_rule(db.Model):
             entity_type=Comments.ENTITY_MAPPING["SIGNATURE"]).all()
         files = Files.query.filter_by(entity_id=self.id).filter_by(entity_type=Files.ENTITY_MAPPING["SIGNATURE"]).all()
         return dict(
-            date_created=self.date_created.isoformat(),
-            date_modified=self.date_modified.isoformat(),
+            creationed_date=self.creation_date.isoformat(),
+            last_revision_date=self.last_revision_date.isoformat(),
             state=self.state,
             name=self.name,
             test_status=self.test_status,
@@ -88,10 +90,9 @@ class Yara_rule(db.Model):
             subcategory2=self.subcategory2,
             subcategory3=self.subcategory3,
             reference_link=self.reference_link,
-            reference_text=self.reference_text,
             condition="condition:\n\t%s" % self.condition,
             strings="strings:\n\t%s" % self.strings,
-            event_id=self.eventid,
+            eventid=self.eventid,
             id=self.id,
             tags=tags_mapping.get_tags_for_source(self.__tablename__, self.id),
             addedTags=[],
@@ -119,9 +120,13 @@ class Yara_rule(db.Model):
 
     @staticmethod
     def to_yara_rule_string(yara_dict):
+        yr = Yara_rule()
+        metadata_field_mapping = [attr for attr in dir(yr) if
+                                  not callable(getattr(yr, attr)) and not attr.startswith("__")]
+
         yara_rule_text = "rule %s\n{\n\n" % (yara_dict.get("name"))
         yara_rule_text += "\tmeta:\n"
-        for field in Yara_rule.metadata_fields:
+        for field in metadata_field_mapping:
             if yara_dict.get(field, None):
                 yara_rule_text += "\t%s = \"%s\"\n" % (field, yara_dict[field])
 
@@ -137,27 +142,51 @@ class Yara_rule(db.Model):
 
         return yara_rule_text
 
-
     @staticmethod
     def make_yara_sane(text, type_):
         type_ = "%s:" if not type_.endswith(":") else type_
         return "\n\t".join([string.strip().strip("\t") for string in text.split("\n") if type_ not in string]).strip()
 
     @staticmethod
-    def get_yara_rule_from_yara_dict(yara_dict):
+    def get_yara_rule_from_yara_dict(yara_dict, metadata_field_mapping={}):
+        clobber_on_import = cfg_settings.Cfg_settings.get_setting("IMPORT_CLOBBER")
+        try:
+            clobber_on_import = distutils.util.strtobool(clobber_on_import)
+        except:
+            clobber_on_import = clobber_on_import
+
         yara_rule = Yara_rule()
         yara_rule.name = yara_dict["rule_name"]
 
-        yara_metadata = {key.lower(): val.strip().strip("\"") for key, val in yara_dict["metadata"].iteritems()}
-        for possible_field in Yara_rule.metadata_fields:
+        yara_metadata = {key.lower(): val.strip().strip("\"") for key, val in
+                         yara_dict["metadata"].iteritems()} if "metadata" in yara_dict else {}
+        for possible_field, mapped_to in metadata_field_mapping.iteritems():
+            possible_field = possible_field.lower()
             if possible_field in yara_metadata.keys():
-                field = yara_metadata[possible_field] if not possible_field in ["confidence", "severity",
+                field = yara_metadata[possible_field] if not mapped_to in ["confidence",
+                                                                                                        "severity",
                                                                                 "eventid"] else int(
                     yara_metadata[possible_field])
+
+                if mapped_to in ["last_revision_date", "creation_date"]:
+                    try:
+                        field = parser.parse(field)
+                    except:
+                        field = datetime.datetime.now()
+
                 ## If the eventid already exists. Skip it.
-                if possible_field == "eventid" and Yara_rule.query.filter_by(eventid=field).first():
-                    continue
-                setattr(yara_rule, possible_field, field)
+                if possible_field == "eventid":
+                    existing_yara_rule = Yara_rule.query.filter_by(eventid=field).first()
+                    if existing_yara_rule:
+                        if not clobber_on_import:
+                            continue
+                        else:
+                            db.session.query(Yara_testing_history).filter_by(
+                                yara_rule_id=existing_yara_rule.id).delete()
+                            db.session.query(Yara_rule_history).filter_by(yara_rule_id=existing_yara_rule.id).delete()
+                            db.session.query(Yara_rule).filter_by(id=existing_yara_rule.id).delete()
+
+                setattr(yara_rule, mapped_to, field)
 
         yara_rule.condition = " ".join(yara_dict["condition_terms"])
         yara_rule.strings = "\n".join(
@@ -170,8 +199,22 @@ class Yara_rule(db.Model):
 
 @listens_for(Yara_rule, "before_insert")
 def generate_eventid(mapper, connect, target):
+    if not current_user.admin:
+        release_state = cfg_states.Cfg_states.query.filter_by(cfg_states.Cfg_states.is_release_state > 0).first()
+        if release_state and target.state == release_state.state:
+            abort(403)
+
     if not target.eventid:
         target.eventid = CfgCategoryRangeMapping.get_next_category_eventid(target.category)
+
+
+@listens_for(Yara_rule, "before_update")
+def yara_rule_before_update(mapper, connect, target):
+    if not current_user.admin:
+        release_state = cfg_states.Cfg_states.query.filter_by(cfg_states.Cfg_states.is_release_state > 0).first()
+        if release_state and target.state == release_state.state:
+            abort(403)
+
 
 class Yara_rule_history(db.Model):
     __tablename__ = "yara_rules_history"

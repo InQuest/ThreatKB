@@ -8,13 +8,15 @@ import ply.yacc as yacc
 
 from urlparse import urlparse
 from more_itertools import unique_everseen
+from app.models import cfg_settings
 
 # Appears that Ply needs to read the source, so disable bytecode.
 sys.dont_write_bytecode
 
 
 def extract_ips(text):
-    ip_regex = '(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?:\/\d{1,3})?)'
+    regex = cfg_settings.Cfg_settings.get_setting(key="IMPORT_IP_REGEX")
+    ip_regex = regex if regex else '(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?:\/\d{1,3})?)'
     return re.compile(ip_regex).findall(text)
 
 
@@ -22,10 +24,11 @@ def extract_ips(text):
 
 def extract_dns(text):
     hostnames = []
-    url_regex = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
-    for url in re.compile(url_regex).findall(text):
+    regex = cfg_settings.Cfg_settings.get_setting(key="IMPORT_DNS_REGEX")
+    url_regex = regex if regex else 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+    for dns in re.compile(url_regex).findall(text):
         try:
-            hostnames.append(urlparse(url).netloc)
+            hostnames.append(dns)
         except:
             pass
     return hostnames
@@ -34,7 +37,14 @@ def extract_dns(text):
 #####################################################################
 
 def extract_yara_rules(text):
-    yara_rules = re.compile(r"^[\t\s]*rule[\t\s][^\r\n]+(?:\{|[\r\n][\r\n\s\t]*\{).*?\r?\n[\t\s]*\}[\s\t]*(?:$|\r?\n)", re.MULTILINE | re.DOTALL).findall(text)
+    split_regex = cfg_settings.Cfg_settings.get_setting(key="IMPORT_SIG_SPLIT_REGEX")
+    split_regex = split_regex if split_regex else "\n[\t\s]*\}[\s\t]*(rule[\t\s][^\r\n]+(?:\{|[\r\n][\r\n\s\t]*\{))"
+    parse_regex = cfg_settings.Cfg_settings.get_setting(key="IMPORT_SIG_PARSE_REGEX")
+    parse_regex = parse_regex if parse_regex else r"^[\t\s]*rule[\t\s][^\r\n]+(?:\{|[\r\n][\r\n\s\t]*\{).*?condition:.*?\r?\n?[\t\s]*\}[\s\t]*(?:$|\r?\n)"
+
+    yara_rules = re.sub(split_regex, "}\r\n\\1", text,
+                        re.MULTILINE | re.DOTALL)
+    yara_rules = re.compile(parse_regex, re.MULTILINE | re.DOTALL).findall(yara_rules)
     extracted = []
     for yara_rule in yara_rules:
         try:
@@ -47,18 +57,22 @@ def extract_yara_rules(text):
 
 #####################################################################
 
-def extract_artifacts(text):
+def extract_artifacts(do_extract_ip, do_extract_dns, do_extract_signature, text):
     ips = extract_ips(text)
     dns = extract_dns(text)
     yara_rules = extract_yara_rules(text)
     temp = []
+    output = []
 
-    output = [{"type": "IP", "artifact": ip} for ip in list(unique_everseen(ips))]
-    output.extend([{"type": "DNS", "artifact": hostname} for hostname in list(unique_everseen(dns))])
-    for yara_rule in yara_rules:
-        if not yara_rule["rule_name"] in temp:
-            temp.append(yara_rule["rule_name"])
-            output.append({"type": "YARA_RULE", "artifact": yara_rule["rule_name"], "rule": yara_rule})
+    if do_extract_ip:
+        output.extend([{"type": "IP", "artifact": ip} for ip in list(unique_everseen(ips))])
+    if do_extract_dns:
+        output.extend([{"type": "DNS", "artifact": hostname} for hostname in list(unique_everseen(dns))])
+    if do_extract_signature:
+        for yara_rule in yara_rules:
+            if not yara_rule["rule_name"] in temp:
+                temp.append(yara_rule["rule_name"])
+                output.append({"type": "YARA_RULE", "artifact": yara_rule["rule_name"], "rule": yara_rule})
     return output
 
 

@@ -1,7 +1,7 @@
 """initial migration
 
 Revision ID: 2221286081e8
-Revises: 
+Revises:
 Create Date: 2017-08-06 17:05:25.523671
 
 """
@@ -29,12 +29,12 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('tags_mapping',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('source_table', sa.Enum('c2dns', 'c2ip', 'yara_rule'), nullable=True),
-    sa.Column('source_id', sa.Integer(), nullable=True),
-    sa.Column('tag_id', sa.Integer(), nullable=True),
-    sa.PrimaryKeyConstraint('id')
-    )
+                    sa.Column('id', sa.Integer(), nullable=False),
+                    sa.Column('source_table', sa.Enum('c2dns', 'c2ip', 'yara_rule', 'tasks'), nullable=True),
+                    sa.Column('source_id', sa.Integer(), nullable=True),
+                    sa.Column('tag_id', sa.Integer(), nullable=True),
+                    sa.PrimaryKeyConstraint('id')
+                    )
     op.create_index(u'ix_tags_mapping_source_id', 'tags_mapping', ['source_id'], unique=False)
     op.create_index(u'ix_tags_mapping_source_table', 'tags_mapping', ['source_table'], unique=False)
     op.create_index(u'ix_tags_mapping_tag_id', 'tags_mapping', ['tag_id'], unique=False)

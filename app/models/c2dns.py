@@ -1,6 +1,15 @@
-from app import db
+import re
+
+from ipaddr import IPAddress, IPNetwork
+from sqlalchemy.event import listens_for
+
+from app import db, current_user
+from app.models.whitelist import Whitelist
 from app.routes import tags_mapping
 from app.models.comments import Comments
+from app.models import cfg_states
+
+from flask import abort
 
 class C2dns(db.Model):
     __tablename__ = "c2dns"
@@ -13,9 +22,9 @@ class C2dns(db.Model):
     domain_name = db.Column(db.String(2048), index=True, unique=True)
     match_type = db.Column(db.Enum('exact', 'wildcard'))
     reference_link = db.Column(db.String(2048))
-    reference_text = db.Column(db.String(2048))
     expiration_type = db.Column(db.String(32))
     expiration_timestamp = db.Column(db.DateTime(timezone=True))
+    description = db.Column(db.String(4096))
 
     created_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
     created_user = db.relationship('KBUser', foreign_keys=created_user_id,
@@ -49,9 +58,9 @@ class C2dns(db.Model):
             domain_name=self.domain_name,
             match_type=self.match_type,
             reference_link=self.reference_link,
-            reference_text=self.reference_text,
             expiration_type=self.expiration_type,
             expiration_timestamp=self.expiration_timestamp.isoformat() if self.expiration_timestamp else None,
+            description=self.description,
             id=self.id,
             tags=tags_mapping.get_tags_for_source(self.__tablename__, self.id),
             addedTags=[],
@@ -70,3 +79,48 @@ class C2dns(db.Model):
 
     def __repr__(self):
         return '<C2dns %r>' % (self.id)
+
+
+@listens_for(C2dns, "before_insert")
+def run_against_whitelist(mapper, connect, target):
+    domain_name = target.domain_name
+
+    abort_import = False
+
+    whitelists = Whitelist.query.all()
+    for whitelist in whitelists:
+        wa = str(whitelist.whitelist_artifact)
+
+        try:
+            ip = IPAddress(wa)
+            continue
+        except ValueError:
+            pass
+
+        try:
+            cidr = IPNetwork(wa)
+            continue
+        except ValueError:
+            pass
+
+        regex = re.compile(wa)
+        result = regex.match(domain_name)
+        if result:
+            abort_import = True
+            break
+
+    if abort_import:
+        raise Exception('Failed Whitelist Validation')
+
+    if not current_user.admin:
+        release_state = cfg_states.Cfg_states.query.filter_by(cfg_states.Cfg_states.is_release_state > 0).first()
+        if release_state and target.state == release_state.state:
+            abort(403)
+
+
+@listens_for(C2dns, "before_update")
+def c2dns_before_update(mapper, connect, target):
+    if not current_user.admin:
+        release_state = cfg_states.Cfg_states.query.filter_by(cfg_states.Cfg_states.is_release_state > 0).first()
+        if release_state and target.state == release_state.state:
+            abort(403)

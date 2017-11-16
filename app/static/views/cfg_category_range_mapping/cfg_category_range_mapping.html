@@ -75,15 +75,17 @@
         <table class="table table-striped">
             <thead>
             <tr>
-                <th>ID</th>
+                <th style="width:100px;">ID</th>
 
-                <th>Category</th>
+                <th nowrap style="width:350px;">Category</th>
 
                 <th>Range Min</th>
 
                 <th>Range Max</th>
 
                 <th>Current</th>
+
+                <th>Signature Count</th>
             </tr>
             </thead>
             <tbody>
@@ -97,6 +99,8 @@
                 <td ng-if="crm.range_max">{{ crm.range_max }}</td>
 
                 <td ng-if="crm.id">{{ crm.current }}</td>
+
+                <td ng-if="crm.id">{{ crm.sig_count }}</td>
 
                 <td ng-if="crm.id" style="float:right">
                     <button ng-click="update(crm.id)"

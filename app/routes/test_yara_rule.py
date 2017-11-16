@@ -1,5 +1,7 @@
+from __future__ import print_function
 from __future__ import division
 import multiprocessing
+import ntpath
 import os
 import time
 import datetime
@@ -11,10 +13,11 @@ from sqlalchemy.ext.serializer import loads, dumps
 
 from app import app, db, admin_only, auto
 from app.celeryapp import celery
-from app.models import yara_rule, files
-from flask import abort, jsonify, request, json
+from app.models import yara_rule
+from flask import abort, jsonify, request, json, Response
 from flask.ext.login import current_user, login_required
 
+from app.models.cfg_settings import Cfg_settings
 from app.models.yara_rule import Yara_testing_history
 
 
@@ -39,14 +42,19 @@ def clean_yara_test():
             results.append(dict(sig_id=rule_id,
                                 error="Error encountered"))
         else:
-            file_entities = files.Files.query \
-                .filter_by(entity_type=None, entity_id=None) \
-                .filter(files.Files.filename.op('regexp')(r'%s' % pattern)) \
-                .all()
+            clean_corpus_dir = Cfg_settings.get_setting("CLEAN_FILES_CORPUS_DIRECTORY")
+            if not clean_corpus_dir:
+                results.append(dict(sig_id=rule_id,
+                                    error="Error encountered"))
+            else:
+                files_to_test = []
+                for root_path, dirs, dir_files in os.walk(clean_corpus_dir):
+                    for f_name in dir_files:
+                        files_to_test.append(os.path.join(root_path, f_name))
 
-            test_yara_rule_task.delay(yara_rule_entity.id, dumps(file_entities), current_user.id)
+                test_yara_rule_task.delay(yara_rule_entity.id, dumps(files_to_test), current_user.id)
 
-    return json.dumps(results), 200
+    return Response(json.dumps(results), mimetype='application/json')
 
 
 @app.route('/ThreatKB/test_yara_rule/<int:rule_id>', methods=['GET'])
@@ -58,7 +66,27 @@ def test_yara_rule_rest(rule_id):
     yara_rule_entity = yara_rule.Yara_rule.query.get(rule_id)
     if not yara_rule_entity:
         abort(500)
-    return jsonify(test_yara_rule(yara_rule_entity, yara_rule_entity.files, current_user.id)), 200
+
+    try:
+        files_to_test = []
+        is_neg_test = str(request.args.get("negative", "0"))
+        if is_neg_test == "1":
+            neg_test_dir = Cfg_settings.get_setting("NEGATIVE_TESTING_FILE_DIRECTORY")
+            for root_path, dirs, dir_files in os.walk(neg_test_dir):
+                for f_name in dir_files:
+                    files_to_test.append(os.path.join(root_path, f_name))
+        else:
+            for f in yara_rule_entity.files:
+                file_store_path = Cfg_settings.get_setting("FILE_STORE_PATH")
+                if not file_store_path:
+                    raise Exception('FILE_STORE_PATH configuration setting not set.')
+                files_to_test.append(os.path.join(file_store_path,
+                                                  str(f.entity_type) if f.entity_type is not None else "",
+                                                  str(f.entity_id) if f.entity_id is not None else "",
+                                                  str(f.filename)))
+        return jsonify(test_yara_rule(yara_rule_entity, files_to_test, current_user.id)), 200
+    except Exception as e:
+        return e.message, 500
 
 
 @celery.task()
@@ -79,16 +107,18 @@ def test_yara_rule(yara_rule_entity, files_to_test, user, is_async=False):
 
     rule = get_yara_rule(yara_rule_entity)
 
-    total_file_count, count_of_files_matched, tests_terminated, total_file_time = 0, 0, 0, 0
-    threshold = app.config['MAX_MILLIS_PER_FILE_THRESHOLD']
+    total_file_count, count_of_files_matched, tests_terminated, total_file_time, errors_encountered = 0, 0, 0, 0, 0
+    error_msgs = []
+    threshold = float(Cfg_settings.get_private_setting("MAX_MILLIS_PER_FILE_THRESHOLD")) or 3.0
     processes = []
     manager_dicts = []
-    for f in files_to_test:
+    for file_path in files_to_test:
         total_file_count += 1
-        file_path = os.path.join(app.config['FILE_STORE_PATH'],
-                                 str(f.entity_type) if f.entity_type is not None else "",
-                                 str(f.entity_id) if f.entity_id is not None else "",
-                                 str(f.filename))
+
+        if not os.path.exists(file_path):
+            errors_encountered += 1
+            error_msgs.append(ntpath.basename(file_path) + " not in File Store Path.")
+            continue
 
         if not is_async:
             manager = multiprocessing.Manager()
@@ -133,9 +163,12 @@ def test_yara_rule(yara_rule_entity, files_to_test, user, is_async=False):
                                             user_id=user))
         db.session.commit()
 
-    return dict(files_tested=total_file_count,
+    return dict(duration=(total_file_time * 1000),
+                files_tested=total_file_count,
                 files_matched=count_of_files_matched,
-                tests_terminated=tests_terminated)
+                tests_terminated=tests_terminated,
+                errors_encountered=errors_encountered,
+                error_msgs=error_msgs)
 
 
 def get_yara_rule(yara_rule_entity):

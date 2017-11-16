@@ -90,6 +90,34 @@ span.glyphicon {
     min-height: 1000px;
 }
 
-.ui-grid, .ui-grid-viewport {
-    height: auto !important;
+.navbar-nav li {
+    position: relative
 }
+
+.navbar-nav li:after {
+    content: '';
+    position: absolute;
+    right: -2px;
+    width: 1px;
+    height: 50%;
+    top: 25%;
+    background: #9d9d9d
+}
+
+#dashboard_categories TD:last-child {
+    text-align: inherit;
+}
+
+#dashboard_states TD:last-child {
+    text-align: inherit;
+}
+
+#dashboard_ownership TD:last-child {
+    text-align: inherit;
+}
+
+#dashboard_release TD:last-child {
+    text-align: inherit;
+}
+
+

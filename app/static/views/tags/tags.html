@@ -1,18 +1,19 @@
 <div>
-    <script type = "text/ng-template" id="tags-save.html">
+    <script type="text/ng-template" id="tags-save.html">
         <form name="form" role="form" novalidate
               class="ng-scope ng-invalid ng-invalid-required ng-dirty"
               ng-submit="ok()">
 
             <div class="modal-header">
                 <button type="button" class="close"
-                        ng-click="cancel()">&times;</button>
+                        ng-click="cancel()">&times;
+                </button>
                 <h4 class="modal-title" id="myTagsLabel">Create or edit a Tags</h4>
             </div>
             <div class="modal-body">
-                <div class="form-group">
+                <div class="form-group" ng-if="tag.id">
                     <label>ID</label>
-                    <label type="text" class="form-control" name="id" ng-model="tags.id">{{ tags.id }}</label>
+                    <label type="text" class="form-control" name="id" ng-model="tag.id">{{ tag.id }}</label>
                 </div>
 
 
@@ -20,7 +21,7 @@
                     <label>text:</label>
 
                     <input type="text" class="form-control" name="text"
-                           ng-model="tags.text" ng-required="true"
+                           ng-model="tag.text" ng-required="true"
                            ng-maxlength="256"/>
                     <span class="error" ng-show="form.text.$error.minlength">Must be at least  characters.</span>
                     <span class="error" ng-show="form.text.$error.maxlength">Must be at most 256 characters.</span>
@@ -65,19 +66,17 @@
 
                 <td ng-if="tag.text">{{tag.text }}</td>
 
-                <td ng-if="tag.id" style="float:right">
-                    <center>
-                        <button type="submit"
-                                ng-click="update(tag.id)"
-                                class="btn btn-sm">
-                            <small><span class="glyphicon glyphicon-pencil"></span></small>
-                        </button>
-                        <button type="submit"
-                                ng-click="delete(tag.id)"
-                                class="btn btn-sm btn-danger">
-                            <small><span class="glyphicon glyphicon-remove-circle"></span></small>
-                        </button>
-                    </center>
+                <td ng-if="tag.id">
+                    <button type="submit"
+                            ng-click="update(tag.id)"
+                            class="btn btn-sm" style="float: left;">
+                        <small><span class="glyphicon glyphicon-pencil"></span></small>
+                    </button>
+                    <button type="submit"
+                            ng-click="delete(tag.id)"
+                            class="btn btn-sm btn-danger" style="float: left;">
+                        <small><span class="glyphicon glyphicon-remove-circle"></span></small>
+                    </button>
                 </td>
             </tr>
             </tbody>

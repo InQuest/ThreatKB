@@ -8,16 +8,11 @@ import json
 
 #####################################################################
 
-def save_artifacts(artifacts, shared_reference=None, shared_state=None, shared_owner=None):
+def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared_reference=None, shared_state=None,
+                   shared_owner=None, metadata_field_mapping={}):
     default_state = "Imported"
     return_artifacts = []
     duplicate_artifacts = []
-
-    preserve_event_id = cfg_settings.Cfg_settings.get_setting(key="PRESERVE_EVENT_ID_ON_IMPORT")
-    try:
-        preserve_event_id = json.loads(preserve_event_id)
-    except:
-        pass
 
     if not cfg_states.Cfg_states.query.filter_by(state=default_state).first():
         db.session.add(cfg_states.Cfg_states(state=default_state))
@@ -25,7 +20,7 @@ def save_artifacts(artifacts, shared_reference=None, shared_state=None, shared_o
 
     for artifact in artifacts:
         try:
-            if artifact["type"].lower() == "ip":
+            if artifact["type"].lower() == "ip" and extract_ip:
                 old_ip = c2ip.C2ip.query.filter(c2ip.C2ip.ip == artifact["artifact"]).first()
                 if old_ip:
                     message = "System comment: duplicate IP '%s' found at '%s' by '%s'" % (
@@ -47,7 +42,7 @@ def save_artifacts(artifacts, shared_reference=None, shared_state=None, shared_o
 
                     db.session.add(ip)
                     return_artifacts.append(ip)
-            elif artifact["type"].lower() == "dns":
+            elif artifact["type"].lower() == "dns" and extract_dns:
                 old_dns = c2dns.C2dns.query.filter(c2dns.C2dns.domain_name == artifact["artifact"]).first()
                 if old_dns:
                     message = "System comment: duplicate DNS '%s' found at '%s' by '%s'" % (
@@ -71,8 +66,8 @@ def save_artifacts(artifacts, shared_reference=None, shared_state=None, shared_o
 
                     db.session.add(dns)
                     return_artifacts.append(dns)
-            elif artifact["type"].lower() == "yara_rule":
-                yr = yara_rule.Yara_rule.get_yara_rule_from_yara_dict(artifact["rule"])
+            elif artifact["type"].lower() == "yara_rule" and extract_signature:
+                yr = yara_rule.Yara_rule.get_yara_rule_from_yara_dict(artifact["rule"], metadata_field_mapping)
                 yr.created_user_id, yr.modified_user_id = current_user.id, current_user.id
                 yr.state = default_state if not shared_state else shared_state
                 if shared_reference:
@@ -81,8 +76,6 @@ def save_artifacts(artifacts, shared_reference=None, shared_state=None, shared_o
                     yr.state = shared_state
                 if shared_owner:
                     yr.owner_user_id = shared_owner
-                if not preserve_event_id:
-                    yr.eventid = None
 
                 db.session.add(yr)
                 return_artifacts.append(yr)
@@ -100,7 +93,6 @@ def save_artifacts(artifacts, shared_reference=None, shared_state=None, shared_o
 @app.route('/ThreatKB/import', methods=['POST'])
 @auto.doc()
 @login_required
-@admin_only()
 def import_artifacts():
     """Import data into ThreatKB as a 2-step process. The first is extraction and the second is committing. These phases can be completed by one single call to this endpoints or by calling this endpoint for extraction and /ThreatKB/import/commit for committing.
     From Data: import_text (str),
@@ -111,6 +103,10 @@ def import_artifacts():
     shared_state = request.json.get('shared_state', None)
     shared_reference = request.json.get("shared_reference", None)
     shared_owner = request.json.get("shared_owner", None)
+    extract_ip = request.json.get('extract_ip', True)
+    extract_dns = request.json.get('extract_dns', True)
+    extract_signature = request.json.get('extract_signature', True)
+    metadata_field_mapping = request.json.get('metadata_field_mapping', {})
 
     if shared_owner:
         shared_owner = int(shared_owner)
@@ -118,11 +114,13 @@ def import_artifacts():
     if not import_text:
         abort(404)
 
-    artifacts = extract_artifacts(import_text)
+    artifacts = extract_artifacts(do_extract_ip=extract_ip, do_extract_dns=extract_dns,
+                                  do_extract_signature=extract_signature, text=import_text)
 
     if autocommit:
-        artifacts = save_artifacts(artifacts=artifacts, shared_reference=shared_reference, shared_state=shared_state,
-                                   shared_owner=shared_owner)
+        artifacts = save_artifacts(extract_ip=extract_ip, extract_dns=extract_dns, extract_signature=extract_signature,
+                                   artifacts=artifacts, shared_reference=shared_reference, shared_state=shared_state,
+                                   shared_owner=shared_owner, metadata_field_mapping=metadata_field_mapping)
 
     return jsonify({"artifacts": artifacts})
 
@@ -131,7 +129,6 @@ def import_artifacts():
 
 @app.route('/ThreatKB/import/commit', methods=['POST'])
 @login_required
-@admin_only()
 def commit_artifacts():
     """Commit previously extracted artifacts. The artifact dictionary
     From Data: artifacts (list of dicts)
@@ -140,9 +137,15 @@ def commit_artifacts():
     artifacts = request.json.get("artifacts", None)
     shared_reference = request.json.get("shared_reference", None)
     shared_state = request.json.get('shared_state', None)
+    extract_ip = request.json.get('extract_ip', True)
+    extract_dns = request.json.get('extract_dns', True)
+    extract_signature = request.json.get('extract_signature', True)
+    metadata_field_mapping = request.json.get('metadata_field_mapping', {})
 
     if not artifacts:
         abort(404)
 
-    artifacts = save_artifacts(artifacts=artifacts, shared_reference=shared_reference, shared_state=shared_state)
+    artifacts = save_artifacts(extract_ip=extract_ip, extract_dns=extract_dns, extract_signature=extract_signature,
+                               artifacts=artifacts, shared_reference=shared_reference, shared_state=shared_state,
+                               metadata_field_mapping=metadata_field_mapping)
     return jsonify({"artifacts": artifacts}), 201

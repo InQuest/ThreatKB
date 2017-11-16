@@ -13,6 +13,9 @@ class KBUser(db.Model):
     registered_on = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp())
     admin = db.Column(db.Boolean, nullable=False, default=False)
     active = db.Column(db.Boolean, nullable=False, default=True)
+    first_name = db.Column(db.String(255), nullable=True)
+    last_name = db.Column(db.String(255), nullable=True)
+    picture = db.Column(db.LargeBinary, nullable=True)
 
     def is_authenticated(self):
         return True
@@ -38,7 +41,9 @@ class KBUser(db.Model):
             registered_on=self.registered_on.isoformat(),
             admin=self.admin,
             active=self.active,
-            id=self.id
+            id=self.id,
+            first_name=self.first_name,
+            last_name=self.last_name
         )
 
     def generate_auth_token(self, s_key):
