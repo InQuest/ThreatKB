@@ -14,12 +14,6 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
     return_artifacts = []
     duplicate_artifacts = []
 
-    preserve_event_id = cfg_settings.Cfg_settings.get_setting(key="PRESERVE_EVENT_ID_ON_IMPORT")
-    try:
-        preserve_event_id = json.loads(preserve_event_id)
-    except:
-        pass
-
     if not cfg_states.Cfg_states.query.filter_by(state=default_state).first():
         db.session.add(cfg_states.Cfg_states(state=default_state))
         db.session.commit()
@@ -82,8 +76,6 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                     yr.state = shared_state
                 if shared_owner:
                     yr.owner_user_id = shared_owner
-                if not preserve_event_id:
-                    yr.eventid = None
 
                 db.session.add(yr)
                 return_artifacts.append(yr)

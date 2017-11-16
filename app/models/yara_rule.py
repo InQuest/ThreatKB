@@ -8,6 +8,7 @@ from sqlalchemy.event import listens_for
 from dateutil import parser
 import datetime
 import json
+import distutils
 
 from flask import abort
 
@@ -149,6 +150,10 @@ class Yara_rule(db.Model):
     @staticmethod
     def get_yara_rule_from_yara_dict(yara_dict, metadata_field_mapping={}):
         clobber_on_import = cfg_settings.Cfg_settings.get_setting("IMPORT_CLOBBER")
+        try:
+            clobber_on_import = distutils.util.strtobool(clobber_on_import)
+        except:
+            clobber_on_import = clobber_on_import
 
         yara_rule = Yara_rule()
         yara_rule.name = yara_dict["rule_name"]
