@@ -158,7 +158,8 @@ class Yara_rule(db.Model):
         yara_rule = Yara_rule()
         yara_rule.name = yara_dict["rule_name"]
 
-        yara_metadata = {key.lower(): val.strip().strip("\"") for key, val in yara_dict["metadata"].iteritems()}
+        yara_metadata = {key.lower(): val.strip().strip("\"") for key, val in
+                         yara_dict["metadata"].iteritems()} if "metadata" in yara_dict else {}
         for possible_field, mapped_to in metadata_field_mapping.iteritems():
             possible_field = possible_field.lower()
             if possible_field in yara_metadata.keys():
