@@ -193,7 +193,8 @@ class Release(db.Model):
             raise Exception("You need to specify a production release state first.")
 
         combined_rules = {}
-        for signature in self.release_data_dict["Signatures"]["Signatures"].values():
+        for signature in sorted(self.release_data_dict["Signatures"]["Signatures"].values(),
+                                key=lambda x: x["eventid"]):
             category = signature.get("category")
             if not signature["category"] in combined_rules:
                 combined_rules[category] = []
