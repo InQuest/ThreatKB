@@ -29,7 +29,7 @@ def get_release(release_id):
     if not entity:
         abort(404)
 
-    return Response(json.dumps(entity), mimetype="application/json")
+    return Response(json.dumps(entity.to_dict()), mimetype="application/json")
 
 
 @app.route('/ThreatKB/releases/latest', methods=['GET'])
