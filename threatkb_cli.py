@@ -11,6 +11,8 @@ import sys
 import re
 import os
 import ConfigParser
+import stat
+import traceback
 from StringIO import StringIO
 
 CREDENTIALS_FILE = os.path.expanduser('~/.threatkb/credentials')
@@ -18,27 +20,31 @@ API_KEY = None
 SECRET_KEY = None
 API_HOST = None
 THREATKB_CLI = None
-ENTITY_TYPES = {"SIGNATURE": 1, "DNS": 2, "IP": 3, "TASK": 4}
+ENTITY_TYPES = {"yara_rule": 1, "c2dns": 2, "c2ip": 3, "task": 4}
 
 
 class ThreatKB:
 
     def __init__(self, host, token, secret_key, base_uri='ThreatKB/', use_https=True):
-        self.host = host
+        self.host = host.lower().replace("http://", "").replace("https://", "")
         self.token = token
         self.secret_key = secret_key
         self.base_uri = base_uri
         self.use_https = use_https
         self.session = requests.Session()
 
-
-    def _request(self, method, uri, uri_params={}, body=None):
+    def _request(self, method, uri, uri_params={}, body=None, files={},
+                 headers={"Content-Type": "application/json;charset=UTF-8"}):
         uri_params["token"] = self.token
         uri_params["secret_key"] = self.secret_key
-        url = "%s://%s/%s/%s" % ("https" if self.use_https else "http", self.host, self.base_uri, uri)
+        url = "%s://%s%s%s" % ("https" if self.use_https else "http", self.host, self.base_uri, uri)
 
         # Try hitting the uri
-        response = self.session.request(method, url, params=uri_params, data=body, verify=False)
+        if files:
+            response = self.session.request(method, url, params=uri_params, data=body, verify=False, files=files)
+        else:
+            response = self.session.request(method, url, params=uri_params, data=body, verify=False, headers=headers)
+
         if response.status_code == 401:
             raise Exception("Invalid authentication token and secret key.")
 
@@ -46,7 +52,7 @@ class ThreatKB:
 
     def get(self, endpoint, id_=None, params={}):
         """If index is None, list all; else get one"""
-        r = self._request('GET', endpoint + ('/' + id_ if id_ else ''), uri_params=params)
+        r = self._request('GET', endpoint + ('/' + str(id_) if str(id_) else ''), uri_params=params)
         return r.content
 
     def update(self, endpoint, id_, json_data):
@@ -57,15 +63,18 @@ class ThreatKB:
         """True if '200 OK' else False"""
         return self._request('DELETE', '/'.join(endpoint, id_)).status_code == 200
 
-    def create(self, endpoint, json_data):
-        r = self._request('POST', endpoint, body=json_data)
+    def create(self, endpoint, json_data={}, files={}):
+        if files:
+            r = self._request('POST', endpoint, files=files)
+        else:
+            r = self._request('POST', endpoint, body=json_data)
         if r.status_code == 412:
             return None
         return r.content
 
 
 def initialize():
-    global API_KEY, SECRET_KEY, API_HOST
+    global API_KEY, SECRET_KEY, API_HOST, THREATKB_CLI
 
     config = ConfigParser.ConfigParser()
     try:
@@ -76,7 +85,8 @@ def initialize():
     except:
         raise Exception("Error. Run 'python %s configure' first." % (sys.argv[0]))
 
-    THREATKB_CLI = ThreatKB(host=API_HOST, token=API_TOKEN, secret_key=API_SECRET_KEY)
+    THREATKB_CLI = ThreatKB(host=API_HOST, token=API_TOKEN, secret_key=API_SECRET_KEY,
+                            use_https=False if API_HOST.startswith("http://") else True)
 
 
 def configure():
@@ -105,32 +115,35 @@ def configure():
     with open(CREDENTIALS_FILE, "wb") as configfile:
         config.write(configfile)
 
+    os.chmod(CREDENTIALS_FILE, stat.S_IRUSR | stat.S_IWUSR)
+
 
 def attach(params):
     global THREATKB_CLI
 
     try:
-        artifact, artifact_id, file = params
-    except:
-        help("""%s attach <artifact> <artifact_id> <file>
+        artifact, artifact_id, file = params[2:]
+    except Exception, e:
+        help(extra_text="""%s attach <artifact> <artifact_id> <file>
         
         artifact: yara_rule, c2dns, c2ip, task
         artifact_id: artifact id as an integer
-        file: the file to attach to the entity""")
+        file: the file to attach to the entity""" % (params[0]), params=params)
 
-    print THREATKB_CLI.create("file_upload", )
+    print THREATKB_CLI.create("file_upload",
+                              files={"entity_type": artifact, "entity_id": artifact_id, "file": open(file, 'rb')})
 
 def comment(params):
     global THREATKB_CLI, ENTITY_TYPES
 
     try:
-        artifact, artifact_id, comment = params
-    except:
-        help("""%s comment <artifact> <artifact_id> <comment>
+        artifact, artifact_id, comment = params[2:]
+    except Exception, e:
+        help(extra_text="""%s comment <artifact> <artifact_id> <comment>
         
         artifact: yara_rule, c2dns, c2ip, task
         artifact_id: artifact id as an integer
-        comment: the comment to add to the artifact""")
+        comment: the comment to add to the artifact""" % (params[0]), params=params)
 
     print THREATKB_CLI.create("comments", json.dumps(
         {"comment": comment, "entity_type": ENTITY_TYPES.get(artifact), "entity_id": artifact_id}))
@@ -139,11 +152,12 @@ def release(params):
     global THREATKB_CLI
 
     try:
-        release_id = params
-    except:
-        help("""%s release <release_id_or_latest>
+        release_id = params[2]
+    except Exception, e:
+        help(extra_text="""%s release <release_id_or_latest>
         
-        release_id_or_latest: the release id as an integer or latest to get the latest prod release""")
+        release_id_or_latest: the release id as an integer or latest to get the latest prod release""" % (params[0]),
+             params=params)
 
     print THREATKB_CLI.get("releases", release_id)
 
@@ -152,14 +166,14 @@ def search(params):
     global THREATKB_CLI
 
     try:
-        filter, filter_text = params
-    except:
-        help("""%s search <filter> <filter_text>
+        filter_, filter_text = params[2:]
+    except Exception, e:
+        help(extra_text="""%s search <filter> <filter_text>
         
-        filter: all, tag, state, artifact_type, description, category
-        filter_text: text to filter on""")
+        filter: tag, state, artifact_type, description, category
+        filter_text: text to filter on""" % (params[0]), params=params)
 
-    print THREATKB_CLI.get("search", params={filter: filter_text})
+    print THREATKB_CLI.get("search", params={filter_: filter_text})
 
 
 def help(params, extra_text="", exit=True):
@@ -180,6 +194,9 @@ def help(params, extra_text="", exit=True):
 
 
 def main():
+    if len(sys.argv) < 2:
+        help(sys.argv)
+
     action = sys.argv[1].lower()
     params = sys.argv
 
@@ -188,7 +205,7 @@ def main():
     elif action == "attach":
         initialize()
         attach(params)
-    elif action == "comments":
+    elif action == "comment":
         initialize()
         comment(params)
     elif action == "release":
@@ -200,8 +217,4 @@ def main():
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception, e:
-        sys.stderr.write(e.message + "\n")
-        sys.exit(1)
+    main()
