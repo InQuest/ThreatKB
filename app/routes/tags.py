@@ -40,11 +40,13 @@ def create_tags():
 
 
 def create_tag(tag_text):
-    entity = tags.Tags(
-        text=tag_text
-    )
-    db.session.add(entity)
-    db.session.commit()
+    entity = tags.Tags.query.filter(tags.Tags.text == tag_text).first()
+    if not entity:
+        entity = tags.Tags(
+            text=tag_text
+        )
+        db.session.add(entity)
+        db.session.commit()
     return entity
 
 
