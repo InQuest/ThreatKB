@@ -92,6 +92,7 @@ def run(debug=False, port=5000, host='127.0.0.1'):
     from app.routes import whitelist
     from app.routes import search
     from app.routes import bookmarks
+    from app.routes import version
 
     @app.before_first_request
     def setup_logging():
