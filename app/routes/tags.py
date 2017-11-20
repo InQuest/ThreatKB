@@ -61,12 +61,18 @@ def update_tags(id):
     entity = tags.Tags.query.get(id)
     if not entity:
         abort(404)
-    entity = tags.Tags(
-        text=request.json['text'],
-        id=id
-    )
-    db.session.merge(entity)
-    db.session.commit()
+
+    entity1 = tags.Tags.query.filter(tags.Tags.text == request.json['text']).first()
+    if not entity1:
+        entity = tags.Tags(
+            text=request.json['text'],
+            id=id
+        )
+        db.session.merge(entity)
+        db.session.commit()
+    else:
+        entity = entity1
+
     return jsonify(entity.to_dict()), 200
 
 
