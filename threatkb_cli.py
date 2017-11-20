@@ -52,7 +52,7 @@ class ThreatKB:
 
     def get(self, endpoint, id_=None, params={}):
         """If index is None, list all; else get one"""
-        r = self._request('GET', endpoint + ('/' + str(id_) if str(id_) else ''), uri_params=params)
+        r = self._request('GET', endpoint + ('/' + str(id_) if id_ else ''), uri_params=params)
         return r.content
 
     def update(self, endpoint, id_, json_data):
