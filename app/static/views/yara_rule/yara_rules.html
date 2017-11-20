@@ -186,7 +186,11 @@
                 <div class="form-group">
                     <label>Reference Link:</label>
                     <a target="_blank" ng-if="yara_rule.reference_link"
-                       href="{{ yara_rule.reference_link.indexOf('http') == 0 ? yara_rule.reference_link : 'http://' + yara_rule.reference_link }}">
+                       href="
+
+
+
+                               {{ yara_rule.reference_link.indexOf('http') == 0 ? yara_rule.reference_link : 'http://' + yara_rule.reference_link }}">
                         <span class="glyphicon glyphicon-link" style="font-size: 1.0em;"></span>
                     </a>
                     <span class="error"
@@ -261,8 +265,29 @@
                             <li class="list-group-item justify-content-between"
                                 ng-repeat="f in yara_rule.files | orderBy:'-last_revision_date'">
                                 <a title="{{ file_store_path.value }}/{{ entity_mapping.SIGNATURE }}/{{ f.entity_id }}/{{ f.filename }}"
-                                   href="ThreatKB/files/{{ f.entity_type }}/{{ f.entity_id }}/{{ f.id }}">{{ f.filename }}</a>
-                                <span class="pull-right">{{ f.user.email }}&nbsp;<small>{{ pretty_date(f.last_revision_date) }}</small></span>
+                                   href="ThreatKB/files/{{ f.entity_type }}/{{ f.entity_id }}/{{ f.id }}">{{ f.filename }}</a>&nbsp;<span
+                                    ng-if="f.date_modified"
+                                    style="font-size: 0.8em;">({{ pretty_date(f.date_modified) }} by {{ f.user.email }})</span>
+                                <div class="pull-right">
+                                    <div><a title="Search VirusTotal"
+                                            href="https://www.virustotal.com/#/file/{{ f.sha256 }}/detection"
+                                            target="_blank"><span class="glyphicon glyphicon-certificate"></span></a>
+                                        &nbsp;
+                                        <a title="Search Google" href="https://google.com/search?q={{ f.sha256 }}"
+                                           target="_blank"><span
+                                                class="glyphicon glyphicon-globe"></span></a>
+                                        &nbsp;
+                                        <a>
+                                            <span class="glyphicon glyphicon-link" style="font-size: 1.2em;"
+                                                  title="Copy FilePath to clipboard" tooltip-placement="bottom"
+                                                  uib-tooltip="Copied Filepath!"
+                                                  tooltip-trigger="'outsideClick'"
+                                                  ngclipboard
+                                                  data-clipboard-text="{{ file_store_path.value }}/{{ entity_mapping.SIGNATURE }}/{{ f.entity_id }}/{{ f.filename }}">
+                                            </span>
+                                        </a>
+                                    </div>
+                                </div>
                             </li>
                         </ul>
                     </div>
