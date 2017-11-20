@@ -16,6 +16,9 @@ class Files(db.Model):
     content_type = db.Column(db.String(100))
     entity_type = db.Column(db.Integer(unsigned=True), index=True, nullable=True)
     entity_id = db.Column(db.Integer(unsigned=True), index=True, nullable=True)
+    sha256 = db.Column(db.String(64), nullable=True)
+    md5 = db.Column(db.String(32), nullable=True)
+    sha1 = db.Column(db.String(40), nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
     user = db.relationship('KBUser', foreign_keys=user_id)
 
@@ -29,7 +32,10 @@ class Files(db.Model):
             if self.entity_type else None,
             entity_id=self.entity_id if self.entity_id else None,
             id=self.id,
-            user=self.user.to_dict()
+            user=self.user.to_dict(),
+            sha1=self.sha1,
+            md5=self.md5,
+            sha256=self.sha256
         )
 
     def __repr__(self):
