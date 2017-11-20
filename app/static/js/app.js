@@ -24,6 +24,9 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                     }],
                     resolvedReleaseLatest: ['Release', function (Release) {
                         return Release.get_latest_release();
+                    }],
+                    resolvedVersion: ['Version', function (Version) {
+                        return Version.get_version();
                     }]
                 }
             })

@@ -1,6 +1,31 @@
 <div>
 
     <!--<div class="table-responsive">-->
+    <div>
+        <h3>ThreatKB Version</h3>
+        <div id="dashboard_version">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Version</th>
+                    <th>Committer</th>
+                    <th>Commit Date</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>{{ version.version }}</td>
+                    <td>{{ version.version_email }}</td>
+                    <td style="text-align:left;">{{ version.version_date }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <br>
+    </div>
+
+    <!--<div class="table-responsive">-->
     <div ng-if="bookmarks.length > 0">
         <h3>My Bookmarked Artifacts</h3>
         <div id="dashboard_bookmarks">
