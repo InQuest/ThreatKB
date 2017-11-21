@@ -4,7 +4,7 @@ import os
 
 from app import app, db
 from app.models.access_keys import AccessKeys
-from flask import request, jsonify, json, abort, Response
+from flask import request, jsonify, json, abort, Response, send_file
 from flask.ext.login import current_user, login_required
 
 from app.models.users import KBUser
@@ -137,3 +137,11 @@ def update_key(key_id):
     key = AccessKeys.query.get(key_id)
 
     return jsonify(key.to_dict()), 200
+
+
+@app.route('/ThreatKB/access_keys/cli', methods=['GET'])
+@login_required
+def get_cli():
+    """Download the cli script
+     Return: cli file"""
+    return send_file(os.path.join(os.getcwd(), "threatkb_cli.py"))
