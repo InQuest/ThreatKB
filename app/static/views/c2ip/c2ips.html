@@ -24,6 +24,9 @@
                              tooltip-trigger="'outsideClick'"
                              ng-click="c2ip.bookmarked ? unbookmark(c2ip.id) : bookmark(c2ip.id)">
                     </span></a>
+                    <div ng-if="c2ip.id">
+                        <small>{{ getPermalink(c2ip.id) }}</small>
+                    </div>
                 </h4>
 
             </div>

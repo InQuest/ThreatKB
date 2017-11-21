@@ -24,6 +24,9 @@
                              tooltip-trigger="'outsideClick'"
                              ng-click="task.bookmarked ? unbookmark(task.id) : bookmark(task.id)">
                     </span></a>
+                    <div ng-if="task.id">
+                        <small>{{ getPermalink(task.id) }}</small>
+                    </div>
                 </h4>
             </div>
             <div class="modal-body">
