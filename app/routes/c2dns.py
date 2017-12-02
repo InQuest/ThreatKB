@@ -5,6 +5,7 @@ from flask.ext.login import login_required, current_user
 from dateutil import parser
 from sqlalchemy import exc
 
+from app.models.users import KBUser
 from app.models.bookmarks import Bookmarks
 from app.models.cfg_states import verify_state
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
@@ -39,6 +40,14 @@ def get_all_c2dns():
 
     searches = json.loads(searches)
     for column, value in searches.items():
+        if not value:
+            continue
+
+        if column == "owner_user.email":
+            entities = entities.join(KBUser, c2dns.C2dns.owner_user_id == KBUser.id).filter(
+                KBUser.email.like("%" + str(value) + "%"))
+            continue
+
         try:
             column = getattr(c2dns.C2dns, column)
             entities = entities.filter(column.like("%" + str(value) + "%"))

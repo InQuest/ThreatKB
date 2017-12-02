@@ -3,6 +3,7 @@ from app.models import yara_rule, cfg_states, comments
 from flask import abort, jsonify, request, Response, json
 from flask.ext.login import current_user, login_required
 
+from app.models.users import KBUser
 from app.models.bookmarks import Bookmarks
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
 from app.routes.cfg_category_range_mapping import update_cfg_category_range_mapping_current
@@ -85,6 +86,14 @@ def get_all_yara_rules():
 
     searches = json.loads(searches)
     for column, value in searches.items():
+        if not value:
+            continue
+
+        if column == "owner_user.email":
+            entities = entities.join(KBUser, yara_rule.Yara_rule.owner_user_id == KBUser.id).filter(
+                KBUser.email.like("%" + str(value) + "%"))
+            continue
+
         try:
             column = getattr(yara_rule.Yara_rule, column)
             entities = entities.filter(column.like("%" + str(value) + "%"))

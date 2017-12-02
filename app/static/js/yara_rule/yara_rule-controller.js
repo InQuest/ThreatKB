@@ -70,7 +70,6 @@ angular.module('ThreatKB')
                             displayName: 'Owner',
                             width: '20%',
                             enableSorting: false,
-                            enableFiltering: false,
                             cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.owner_user"'
                             + ' on-select="grid.appScope.save(row.entity)">'
                             + '<ui-select-match placeholder="Select an owner ...">'

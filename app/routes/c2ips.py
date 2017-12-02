@@ -5,6 +5,7 @@ from flask.ext.login import current_user, login_required
 from dateutil import parser
 from sqlalchemy import exc
 
+from app.models.users import KBUser
 from app.models.bookmarks import Bookmarks
 from app.models.cfg_states import verify_state
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
@@ -38,6 +39,14 @@ def get_all_c2ips():
 
     searches = json.loads(searches)
     for column, value in searches.items():
+        if not value:
+            continue
+
+        if column == "owner_user.email":
+            entities = entities.join(KBUser, c2ip.C2ip.owner_user_id == KBUser.id).filter(
+                KBUser.email.like("%" + str(value) + "%"))
+            continue
+
         try:
             column = getattr(c2ip.C2ip, column)
             entities = entities.filter(column.like("%" + str(value) + "%"))
