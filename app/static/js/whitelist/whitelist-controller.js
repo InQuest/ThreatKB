@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('WhitelistController', ['$scope', '$uibModal', 'resolvedWhitelists', 'Whitelist',
-        function ($scope, $uibModal, resolvedWhitelists, Whitelist) {
+    .controller('WhitelistController', ['$scope', '$uibModal', 'resolvedWhitelists', 'Whitelist', 'growl',
+        function ($scope, $uibModal, resolvedWhitelists, Whitelist, growl) {
             $scope.whitelists = resolvedWhitelists;
             $scope.whitelist = {};
 
@@ -29,11 +29,15 @@ angular.module('ThreatKB')
                     Whitelist.update({id: id}, $scope.whitelist,
                         function () {
                             $scope.whitelists = Whitelist.query();
+                        }, function (error) {
+                            growl.error(error.data, {ttl: 3000})
                         });
                 } else {
                     Whitelist.save($scope.whitelist,
-                        function () {
+                        function (data) {
                             $scope.whitelists = Whitelist.query();
+                        }, function (error) {
+                            growl.error(error.data, {ttl: 3000})
                         });
                 }
             };

@@ -5,7 +5,7 @@ from app.models import whitelist
 from flask import abort, jsonify, request, Response
 from flask.ext.login import login_required
 import json
-
+import re
 
 @app.route('/ThreatKB/whitelist', methods=['GET'])
 @auto.doc()
@@ -36,6 +36,9 @@ def create_whitelist():
     """Create new whitelist
     From Data: whitelist_artifact(str), notes (str)
     Return: whitelist dictionary"""
+
+    re.compile(request.json['whitelist_artifact'])
+
     entity = whitelist.Whitelist(
         whitelist_artifact=request.json['whitelist_artifact'],
         notes=request.json['notes'],
@@ -58,6 +61,9 @@ def update_whitelist(id):
     entity = whitelist.Whitelist.query.get(id)
     if not entity:
         abort(404)
+
+    re.compile(request.json['whitelist_artifact'])
+
     entity = whitelist.Whitelist(
         whitelist_artifact=request.json['whitelist_artifact'],
         notes=request.json['notes'],
