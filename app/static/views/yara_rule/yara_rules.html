@@ -201,6 +201,8 @@
 
 
 
+
+
                                {{ yara_rule.reference_link.indexOf('http') == 0 ? yara_rule.reference_link : 'http://' + yara_rule.reference_link }}">
                         <span class="glyphicon glyphicon-link" style="font-size: 1.0em;"></span>
                     </a>
@@ -228,10 +230,9 @@
                 </div>
 
                 <div class="form-group" ng-if="yara_rule.id">
-                    <label>Comments</label>
 
                     <div class="input-group">
-                        <textarea class="form-control" placeholder="Enter a comment..." rows="8"
+                        <textarea class="form-control" placeholder="Add a comment..." rows="4"
                                   ng-model="yara_rule.new_comment"></textarea>
 
                         <span class="input-group-btn" style="height:10px;">
@@ -240,13 +241,23 @@
                                     class="glyphicon glyphicon-plus"></span></button>
                         </span>
                     </div>
+
+                    <label>Comments ({{ yara_rule.comments.length }})</label>
                     <div style="padding-top:3px;">
-                        <ul class="list-group">
-                            <li class="list-group-item justify-content-between"
-                                ng-repeat="comment in yara_rule.comments | orderBy:'-date_created'">{{ print_comment(comment) }}
-                                <span class="pull-right">{{ comment.user.email }}&nbsp;<small>{{ pretty_date(comment.date_created) }}</small></span>
-                            </li>
-                        </ul>
+                        <uib-accordion>
+                            <div uib-accordion-group class="panel-default"
+                                 heading="See comments">
+                                <ul class="list-group">
+                                    <li class="list-group-item justify-content-between"
+                                        ng-repeat="comment in yara_rule.comments | orderBy:'-date_created'">
+                                        <div>
+                                            <pre>{{ comment.comment }}</pre>
+                                            <span>{{ comment.user.email }}&nbsp;<small>{{ pretty_date(comment.date_created) }}</small></span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </uib-accordion>
                     </div>
 
                     <div>
