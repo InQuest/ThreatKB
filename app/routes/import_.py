@@ -72,8 +72,6 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                 yr.state = default_state if not shared_state else shared_state
                 if shared_reference:
                     yr.reference_link = shared_reference
-                if shared_state:
-                    yr.state = shared_state
                 if shared_owner:
                     yr.owner_user_id = shared_owner
 
