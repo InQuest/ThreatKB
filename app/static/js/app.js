@@ -22,8 +22,8 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                     resolvedOwnershipData: ['AuthService', function (AuthService) {
                         return AuthService.getOwnershipData();
                     }],
-                    resolvedReleaseLatest: ['Release', function (Release) {
-                        return Release.get_latest_release();
+                    resolvedReleasesLatest: ['Release', function (Release) {
+                        return Release.get_latest_releases();
                     }],
                     resolvedVersion: ['Version', function (Version) {
                         return Version.get_version();

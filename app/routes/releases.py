@@ -1,10 +1,9 @@
 from flask import abort, jsonify, request, send_file, json, Response
 from flask.ext.login import login_required, current_user
 from app import app, db, admin_only, auto
-from app.models import releases
+from app.models import releases, cfg_settings
 import tempfile
 import uuid
-
 
 @app.route('/ThreatKB/releases', methods=['GET'])
 @auto.doc()
@@ -35,20 +34,32 @@ def get_release(release_id):
 @app.route('/ThreatKB/releases/latest', methods=['GET'])
 @auto.doc()
 @login_required
-def get_release_latest():
+def get_releases_latest():
     """Return the latest release data
-    Return: release dictionary"""
-    entity = releases.Release.query.filter(releases.Release.is_test_release == 0).order_by(
-        releases.Release.id.desc()).first()
+    From Data: count (int)
+    Return: list of release dictionaries"""
 
-    if not entity:
-        entity = {}
+    settings_count = cfg_settings.Cfg_settings.get_setting("DASHBOARD_RELEASES_COUNT")
+    count = request.args.get("count", None)
+    if not count:
+        count = settings_count
+
+    try:
+        count = int(count)
+    except:
+        count = 1
+
+    entities = releases.Release.query.filter(releases.Release.is_test_release == 0).order_by(
+        releases.Release.id.desc()).limit(count)
+
+    if not entities:
+        entities = []
     elif current_user.admin:
-        entity = entity.to_dict()
+        entities = [entity.to_small_dict() for entity in entities]
     else:
-        entity = entity.to_small_dict()
+        entities = [entity.to_small_dict() for entity in entities]
 
-    return Response(json.dumps(entity), mimetype="application/json")
+    return Response(json.dumps(entities), mimetype="application/json")
 
 
 @app.route('/ThreatKB/releases/<int:release_id>/release_notes', methods=['GET'])

@@ -1,31 +1,6 @@
 <div>
 
     <!--<div class="table-responsive">-->
-    <div>
-        <h3>ThreatKB Version</h3>
-        <div id="dashboard_version">
-            <table class="table table-striped">
-                <thead>
-                <tr>
-                    <th>Version</th>
-                    <th>Committer</th>
-                    <th>Commit Date</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td>{{ version.version }}</td>
-                    <td>{{ version.version_email }}</td>
-                    <td style="text-align:left;">{{ version.version_date }}</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <br>
-    </div>
-
-    <!--<div class="table-responsive">-->
     <div ng-if="bookmarks.length > 0">
         <h3>My Bookmarked Artifacts</h3>
         <div id="dashboard_bookmarks">
@@ -57,8 +32,8 @@
     </div>
 
 
-    <div ng-if="latest_release.id">
-        <h3>Latest Production Release</h3>
+    <div ng-if="latest_releases.length > 0">
+        <h3>Latest Production Releases</h3>
         <div id="dashboard_release">
             <table class="table table-striped">
                 <thead>
@@ -79,20 +54,20 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr>
-                    <td ng-if="latest_release.id">{{ latest_release.id }}</td>
+                <tr ng-repeat="release in latest_releases">
+                    <td ng-if="release.id">{{ release.id }}</td>
 
-                    <td ng-if="latest_release.name">{{ latest_release.name }}</td>
+                    <td ng-if="release.name">{{ release.name }}</td>
 
-                    <td ng-if="latest_release.date_created">{{ latest_release.date_created }}</td>
+                    <td ng-if="release.date_created">{{ release.date_created }}</td>
 
-                    <td>{{ latest_release.num_ips }}</td>
+                    <td>{{ release.num_ips }}</td>
 
-                    <td>{{ latest_release.num_dns }}</td>
+                    <td>{{ release.num_dns }}</td>
 
-                    <td>{{ latest_release.num_signatures }}</td>
+                    <td>{{ release.num_signatures }}</td>
 
-                    <td ng-if="latest_release.created_user.email">{{ latest_release.created_user.email }}</td>
+                    <td ng-if="release.created_user.email">{{ release.created_user.email }}</td>
                 </tr>
                 </tbody>
             </table>
@@ -211,6 +186,33 @@
             </tr>
             </tbody>
         </table>
+    </div>
+
+    <br>
+
+    <!--<div class="table-responsive">-->
+    <div>
+        <h3>ThreatKB Version</h3>
+        <div id="dashboard_version">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Version</th>
+                    <th>Committer</th>
+                    <th>Commit Date</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>{{ version.version }}</td>
+                    <td>{{ version.version_email }}</td>
+                    <td style="text-align:left;">{{ version.version_date }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <br>
     </div>
 
 </div>
