@@ -115,8 +115,12 @@ def run_against_whitelist(mapper, connect, target):
         except ValueError:
             pass
 
-        regex = re.compile(wa)
-        result = regex.match(new_ip)
+        try:
+            regex = re.compile(wa)
+            result = regex.search(new_ip)
+        except:
+            result = False
+
         if result:
             abort_import = True
             break
