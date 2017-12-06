@@ -46,6 +46,7 @@ def run(debug=False, port=5000, host='127.0.0.1'):
     from app.models import tags
     from app.models import tags_mapping
     from app.models import files
+    from app.models import scripts
     from app.models import cfg_category_range_mapping
     from app.models import releases
     from app.models import tasks
@@ -93,6 +94,7 @@ def run(debug=False, port=5000, host='127.0.0.1'):
     from app.routes import search
     from app.routes import bookmarks
     from app.routes import version
+    from app.routes import scripts
 
     @app.before_first_request
     def setup_logging():
