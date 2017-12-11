@@ -1,8 +1,8 @@
 from app import db
 import tempfile
-import uuid
-import envoy
+import subprocess
 import re
+
 
 class Scripts(db.Model):
     __tablename__ = "scripts"
@@ -26,6 +26,7 @@ class Scripts(db.Model):
             name=self.name,
             description=self.description,
             code=self.code,
+            interpreter=self.interpreter,
             match_regex=self.match_regex,
             date_created=self.date_created.isoformat(),
             date_modified=self.date_modified.isoformat(),
@@ -33,27 +34,29 @@ class Scripts(db.Model):
         )
 
     def run_script(self, arguments, highlight_lines_matching=None, timeout=10):
-        temp_script = "%s/%s" % (tempfile.gettempdir(), str(uuid.uuid4()).replace("-", ""))
+        temp_script = "%s/%s" % (tempfile.gettempdir(), re.sub("[^A-Za-z0-9_\.]", "", self.name))
         with open(temp_script, "w") as s:
             s.write(self.code)
 
         command = [self.interpreter, temp_script]
         command.extend(arguments)
-        results = envoy.run(" ".join(command), timeout=timeout)
-        results = {"stdout": results.std_out, "stderr": results.std_err, "retcode": results.status_code,
-                   "command": " ".join(results.command), "client_highlights": [], "server_highlights": []}
+        # results = envoy.run(" ".join(command), timeout=timeout)
+        proc = subprocess.Popen(" ".join(command), stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
+        proc.wait()
+        stdout, stderr = proc.communicate()
+
+        results = {"stdout": stdout, "stderr": stderr, "retcode": proc.returncode,
+                   "command": " ".join(command)}
 
         try:
-            regex = re.compile(self.match_regex)
-            for m in regex.finditer(results["stdout"]):
-                results["server_highlights"].append(m.start(), m.group())
+            if self.match_regex:
+                results["stdout"] = re.sub("(" + self.match_regex + ")", "<mark>\\1</mark>", results["stdout"])
         except:
             pass
 
         try:
-            regex = re.compile(highlight_lines_matching)
-            for m in regex.finditer(results["stdout"]):
-                results["client_highlights"].append(m.start(), m.group())
+            if highlight_lines_matching:
+                results["stdout"] = re.sub("(" + highlight_lines_matching + ")", "<mark>\\1</mark>", results["stdout"])
         except:
             pass
 

@@ -185,6 +185,26 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                     }]
                 }
             })
+            .when('/scripts', {
+                templateUrl: 'views/scripts/scripts.html',
+                controller: 'ScriptsController',
+                access: {restricted: true, admin: true},
+                resolve: {
+                    resolvedScripts: ['Script', function (Script) {
+                        return Script.resource.query();
+                    }]
+                }
+            })
+            .when('/scripts/run', {
+                templateUrl: 'views/scripts/scripts_run.html',
+                controller: 'ScriptsRunController',
+                access: {restricted: true, admin: false},
+                resolve: {
+                    resolvedScripts: ['Script', function (Script) {
+                        return Script.resource.query();
+                    }]
+                }
+            })
             .when('/users', {
                 templateUrl: 'views/users/users.html',
                 controller: 'UsersController',
