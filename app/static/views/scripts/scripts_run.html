@@ -1,0 +1,118 @@
+<div>
+    <script type="text/ng-template" id="script_run_run.html">
+        <form name="form" novalidate
+              class="ng-scope ng-invalid ng-invalid-required ng-dirty"
+              ng-submit="ok()">
+
+            <div class="modal-header">
+                <button type="button" class="close"
+                        ng-click="cancel()">&times;
+                </button>
+                <h4 class="modal-title" id="myScriptsLabel">Run Script</h4>
+            </div>
+            <div class="modal-body">
+
+                <div class="form-group">
+                    <label>Name:</label>
+                    <label class="form-control" name="name">{{ script.name }}</label>
+                </div>
+
+                <div class="form-group">
+                    <label>Description:</label>
+                    <label class="form-control" name="description">{{ script.description }}</label>
+                </div>
+
+                <div class="form-group">
+                    <label>Code</label>
+                    <textarea ui-codemirror="cmOption" ng-model="script.code"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Script Arguments:</label>
+
+                    <input class="form-control" name="arguments_"
+                           ng-model="script.arguments_" ng-required="true"
+                           ng-maxlength="512"/>
+                </div>
+
+                <div class="form-group">
+                    <label>Match Regex:</label>
+
+                    <input class="form-control" name="match_regex"
+                           ng-model="script.client_match_regex" ng-required="false"
+                           ng-maxlength="4096"/>
+                </div>
+
+                <div class="form-group" ng-if="results.command">
+                    <label>Command:</label>
+                    <label class="form-control" name="command">{{ results.command }}</label>
+                </div>
+
+                <div class="form-group" ng-if="results.stdout">
+                    <label>Stdout:</label>
+                    <textarea rows="8" readonly class="form-control" ng-bind-html="results.stdout"></textarea>
+                </div>
+
+                <div class="form-group" ng-if="results.stderr">
+                    <label>Stderr:</label>
+                    <textarea rows="8" readonly class="form-control" ng-bind-html="results.stderr"></textarea>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" ng-click="cancel()">Cancel
+                </button>
+                <span ng-click="run_script()" ng-disabled="form.$invalid" class="btn btn-danger">Run</span>
+            </div>
+        </form>
+    </script>
+
+    <br>
+    <div class="container-fluid">
+
+        <div class="inner-addon left-addon col-md-4" style="padding-left:0px;">
+            <i class="glyphicon glyphicon-search"></i>
+            <input type="text" class="form-control" placeholder="Search" ng-model="search"/>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Name</th>
+
+                <th>Description</th>
+
+                <th>Interpreter</th>
+
+                <th>Match Regex</th>
+
+                <th style="width: 120px;">
+                    <center>Actions</center>
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="script in scripts | toArray:false | filter:search track by $index">
+                <td ng-if="script.id">{{ script.name }}</td>
+
+                <td ng-if="script.id">{{ script.description }}</td>
+
+                <td ng-if="script.id">{{ script.interpreter }}</td>
+
+                <td ng-if="script.id">{{ script.match_regex }}</td>
+
+
+                <td ng-if="script.id">
+                    <center>
+                        <button ng-click="run_script(script.id)" class="btn btn-sm">
+                            <small><span class="glyphicon glyphicon-play-circle"></span></small>
+                        </button>
+                    </center>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
