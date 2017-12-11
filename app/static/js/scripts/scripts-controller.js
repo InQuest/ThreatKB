@@ -60,6 +60,7 @@ angular.module('ThreatKB')
                     templateUrl: 'script-save.html',
                     controller: 'ScriptSaveController',
                     size: 'lg',
+                    backdrop: 'static',
                     resolve: {
                         script: function () {
                             return $scope.script;

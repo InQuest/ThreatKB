@@ -16,6 +16,7 @@ angular.module('ThreatKB')
                     templateUrl: 'script_run_run.html',
                     controller: 'ScriptRunRunController',
                     size: 'lg',
+                    backdrop: 'static',
                     resolve: {
                         script: function () {
                             return $scope.script;

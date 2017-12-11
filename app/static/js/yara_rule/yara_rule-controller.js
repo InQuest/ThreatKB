@@ -224,6 +224,7 @@ angular.module('ThreatKB')
                     templateUrl: 'yara_rule-save.html',
                     controller: 'Yara_ruleSaveController',
                     size: 'lg',
+                    backdrop: 'static',
                     resolve: {
                         yara_rule: function () {
                             return $scope.yara_rule;

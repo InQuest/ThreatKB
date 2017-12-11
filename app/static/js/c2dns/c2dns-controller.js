@@ -207,6 +207,7 @@ angular.module('ThreatKB')
                     templateUrl: 'c2dns-save.html',
                     controller: 'C2dnsSaveController',
                     size: 'lg',
+                    backdrop: 'static',
                     resolve: {
                         c2dns: function () {
                             return $scope.c2dns;

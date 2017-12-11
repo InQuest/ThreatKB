@@ -208,6 +208,7 @@ angular.module('ThreatKB')
                     templateUrl: 'c2ip-save.html',
                     controller: 'C2ipSaveController',
                     size: 'lg',
+                    backdrop: 'static',
                     resolve: {
                         c2ip: function () {
                             return $scope.c2ip;
