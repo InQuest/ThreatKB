@@ -159,7 +159,7 @@ angular.module('ThreatKB')
             };
 
             $scope.update = function (id) {
-                $scope.yara_rule = Yara_rule.resource.get({id: id});
+                $scope.yara_rule = Yara_rule.resource.get({id: id, include_yara_string: 1});
                 $scope.cfg_states = Cfg_states.query();
                 $scope.users = Users.query();
                 $scope.cfg_category_range_mapping = CfgCategoryRangeMapping.query();

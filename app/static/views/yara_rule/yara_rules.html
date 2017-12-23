@@ -37,7 +37,8 @@
                 <h4 class="modal-title" id="myC2ipLabel" style="float: left">
                     {{ yara_rule.id ? 'Edit' : 'Create' }} Signature Artifact&nbsp;
                     <a><span ng-if="yara_rule.id" class="glyphicon glyphicon-link" style="font-size: .8em"
-                             title="Copy permalink to clipboard" tooltip-placement="bottom" uib-tooltip="Copied!"
+                             title="Copy permalink to clipboard" tooltip-placement="bottom"
+                             uib-tooltip="Copied permalink!"
                              tooltip-trigger="'outsideClick'"
                              ngclipboard data-clipboard-text="{{ getPermalink(yara_rule.id) }}">
                     </span></a>
@@ -56,6 +57,15 @@
 
                 <div class="pull-right" ng-if="yara_rule.id"
                      style="margin: 0 35px 0 0;">
+                    <a>
+                        <button class="btn btn-primary" ng-if="yara_rule.id"
+                                title="Copy Yara Rule to clipboard" tooltip-placement="bottom"
+                                uib-tooltip="Copied Yara Rule!"
+                                tooltip-trigger="'outsideClick'"
+                                ngclipboard data-clipboard-text="{{ yara_rule.yara_rule_string }}">
+                            Copy To Clipboard
+                        </button>
+                    </a>
                     <button ng-if="negTestDir.value" type="button" class="btn btn-primary"
                             ng-click="negTestSignature(yara_rule.id)">{{ testButtonTextNeg }}
                     </button>
@@ -197,6 +207,10 @@
                     <label>Reference Link:</label>
                     <a target="_blank" ng-if="yara_rule.reference_link"
                        href="
+
+
+
+
                                {{ yara_rule.reference_link.indexOf('http') == 0 ? yara_rule.reference_link : 'http://' + yara_rule.reference_link }}">
                         <span class="glyphicon glyphicon-link" style="font-size: 1.0em;"></span>
                     </a>
