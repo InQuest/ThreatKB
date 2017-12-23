@@ -6,6 +6,8 @@ angular.module('ThreatKB')
 
             $scope.yara_rules = resolvedYara_rule;
 
+            $scope.cfg_states = Cfg_states.query();
+
             $scope.users = Users.query();
 
             $scope.filterOptions = {
@@ -64,7 +66,22 @@ angular.module('ThreatKB')
                         {field: 'eventid', displayName: "Event ID", width: "10%"},
                         {field: 'name', width: "30%", enableSorting: false},
                         {field: 'category', enableSorting: false},
-                        {field: 'state', enableSorting: false},
+                        {
+                            field: 'state',
+                            displayName: 'State',
+                            enableSorting: false,
+                            cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.state"'
+                            + ' on-select="grid.appScope.save(row.entity)">'
+                            + '<ui-select-match placeholder="Select an state ...">'
+                            + '<small><span ng-bind="$select.selected.state || row.entity.state"></span></small>'
+                            + '</ui-select-match>'
+                            + '<ui-select-choices'
+                            + ' repeat="state in (grid.appScope.cfg_states | filter: $select.search) track by state.id">'
+                            + '<small><span ng-bind="state.state"></span></small>'
+                            + '</ui-select-choices>'
+                            + '</ui-select>'
+                            + '</div>'
+                        },
                         {
                             field: 'owner_user.email',
                             displayName: 'Owner',
