@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('Yara_ruleController', ['$scope', '$filter', '$http', '$uibModal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states', 'CfgCategoryRangeMapping', 'Users', 'growl', 'openModalForId', 'uiGridConstants',
-        function ($scope, $filter, $http, $uibModal, resolvedYara_rule, Yara_rule, Cfg_states, CfgCategoryRangeMapping, Users, growl, openModalForId, uiGridConstants) {
+    .controller('Yara_ruleController', ['$scope', '$filter', '$http', '$uibModal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states', 'CfgCategoryRangeMapping', 'Users', 'growl', 'openModalForId', 'uiGridConstants', 'FileSaver', 'Blob',
+        function ($scope, $filter, $http, $uibModal, resolvedYara_rule, Yara_rule, Cfg_states, CfgCategoryRangeMapping, Users, growl, openModalForId, uiGridConstants, FileSaver, Blob) {
 
             $scope.yara_rules = resolvedYara_rule;
 
@@ -10,9 +10,93 @@ angular.module('ThreatKB')
 
             $scope.users = Users.query();
 
+            $scope.clear_checked = function () {
+                $scope.checked_indexes = [];
+                $scope.checked_counter = 0;
+                $scope.all_checked = false;
+            };
+
+            $scope.clear_checked();
+
             $scope.filterOptions = {
                 filterText: ''
             };
+
+            $scope.disable_multi_actions = function () {
+                if ($scope.checked_counter < 1) {
+                    return true;
+                }
+                return false;
+            };
+            $scope.get_index_from_row = function (row) {
+                for (var i = 0; i < row.grid.rows.length; i++) {
+                    if (row.uid === row.grid.rows[i].uid) {
+                        return i;
+                    }
+                }
+            };
+
+            $scope.toggle_checked = function () {
+                if ($scope.all_checked) {
+                    $scope.check_all();
+                } else {
+                    $scope.uncheck_all();
+                }
+            };
+
+            $scope.update_checked_counter = function (row) {
+                var index = $scope.get_index_from_row(row);
+                if ($scope.checked_indexes[index]) {
+                    $scope.checked_counter += 1;
+                } else {
+                    $scope.checked_counter -= 1;
+                }
+            };
+
+            $scope.uncheck_all = function () {
+                for (var i = 0; i < $scope.checked_indexes.length; i++) {
+                    $scope.checked_indexes[i] = false;
+                }
+                $scope.checked_counter = 0;
+            };
+
+            $scope.check_all = function () {
+                for (var i = 0; i < $scope.checked_indexes.length; i++) {
+                    $scope.checked_indexes[i] = true;
+                }
+                $scope.checked_counter = $scope.checked_indexes.length;
+            };
+
+            $scope.copy_rules = function () {
+                var c = new Clipboard('.btn', {
+                    text: function (trigger) {
+                        var output = "";
+                        for (var i = 0; i < $scope.checked_indexes.length; i++) {
+                            if ($scope.checked_indexes[i]) {
+                                output += $scope.yara_rules[i].yara_rule_string + "\n\n";
+                            }
+                        }
+                        return output;
+                    }
+                })
+                growl.info("Successfully copied " + $scope.checked_counter + " signatures to clipboard.", {ttl: 3})
+            };
+
+            $scope.download_rules = function () {
+                var output = "";
+                for (var i = 0; i < $scope.checked_indexes.length; i++) {
+                    if ($scope.checked_indexes[i]) {
+                        output += $scope.yara_rules[i].yara_rule_string + "\n\n";
+                    }
+                }
+                try {
+                    FileSaver.saveAs(new Blob([output], {type: "text/plain"}), "yara_rules.txt");
+                }
+                catch (error) {
+                    growl.error("Error downloading signatures.", {ttl: -1});
+                }
+            };
+
 
             var paginationOptions = {
                 pageNumber: 1,
@@ -63,6 +147,14 @@ angular.module('ThreatKB')
                 rowHeight: 35,
                 columnDefs:
                     [
+                        {
+                            field: 'checked',
+                            displayName: "",
+                            enableSorting: false,
+                            width: "5%",
+                            headerCellTemplate: '<BR><center><input style="vertical-align: middle;" type="checkbox" ng-model="grid.appScope.all_checked" ng-click="grid.appScope.toggle_checked()" /></center>',
+                            cellTemplate: '<center><input type="checkbox" ng-model="grid.appScope.checked_indexes[grid.appScope.get_index_from_row(row)]" ng-change="grid.appScope.update_checked_counter(row)" /></center>'
+                        },
                         {field: 'eventid', displayName: "Event ID", width: "10%"},
                         {field: 'name', width: "30%", enableSorting: false},
                         {field: 'category', enableSorting: false},
@@ -158,6 +250,11 @@ angular.module('ThreatKB')
                     .then(function (response) {
                         $scope.gridOptions.totalItems = response.data.total_count;
                         $scope.gridOptions.data = response.data.data;
+                        $scope.yara_rules = $scope.gridOptions.data;
+                        $scope.clear_checked();
+                        for (var i = 0; i < $scope.gridOptions.data.length; i++) {
+                            $scope.checked_indexes.push(false);
+                        }
                     }, function (error) {
                     });
             };
@@ -219,6 +316,7 @@ angular.module('ThreatKB')
             };
 
             $scope.clear = function () {
+                $scope.checked_indexes = [];
                 $scope.yara_rule = {
                     "creation_date": "",
                     "last_revision_date": "",
