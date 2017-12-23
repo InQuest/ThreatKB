@@ -70,12 +70,12 @@ class Yara_rule(db.Model):
                                    primaryjoin="Yara_testing_history.yara_rule_id==Yara_rule.id", lazy="dynamic",
                                    cascade="all,delete")
 
-    def to_dict(self):
+    def to_dict(self, include_yara_rule_string=None):
         revisions = Yara_rule_history.query.filter_by(yara_rule_id=self.id).all()
         comments = Comments.query.filter_by(entity_id=self.id).filter_by(
             entity_type=Comments.ENTITY_MAPPING["SIGNATURE"]).all()
         files = Files.query.filter_by(entity_id=self.id).filter_by(entity_type=Files.ENTITY_MAPPING["SIGNATURE"]).all()
-        return dict(
+        yara_dict = dict(
             creationed_date=self.creation_date.isoformat(),
             last_revision_date=self.last_revision_date.isoformat(),
             state=self.state,
@@ -105,6 +105,12 @@ class Yara_rule(db.Model):
             owner_user=self.owner_user.to_dict() if self.owner_user else None,
             revision=self.revision
         )
+
+        if include_yara_rule_string:
+            yara_dict["yara_rule_string"] = Yara_rule.to_yara_rule_string(yara_dict)
+
+        return yara_dict
+
 
     def to_revision_dict(self):
         dict = self.to_dict()

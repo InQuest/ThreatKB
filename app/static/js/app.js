@@ -151,7 +151,8 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                     resolvedYara_rule: ['Yara_rule', function (Yara_rule) {
                         return Yara_rule.resource.query({
                             page_number: 0,
-                            page_size: 25
+                            page_size: 25,
+                            include_yara_string: 1
                         });
                     }],
                     openModalForId: [function () {
@@ -167,7 +168,8 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                     resolvedYara_rule: ['Yara_rule', function (Yara_rule) {
                         return Yara_rule.resource.query({
                             page_number: 0,
-                            page_size: 25
+                            page_size: 25,
+                            include_yara_string: 1
                         });
                     }],
                     openModalForId: ['$route', function ($route) {
