@@ -8,6 +8,8 @@ angular.module('ThreatKB')
 
             $scope.users = Users.query();
 
+            $scope.cfg_states = Cfg_states.query();
+
             $scope.filterOptions = {
                 filterText: ''
             };
@@ -62,9 +64,24 @@ angular.module('ThreatKB')
                 columnDefs:
                     [
                         {field: 'domain_name'},
-                        {field: 'state', enableSorting: false},
                         {field: 'match_type', enableSorting: false},
                         {field: 'expiration_type', enableSorting: false},
+                        {
+                            field: 'state',
+                            displayName: 'State',
+                            enableSorting: false,
+                            cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.state"'
+                            + ' on-select="grid.appScope.save(row.entity)">'
+                            + '<ui-select-match placeholder="Select an state ...">'
+                            + '<small><span ng-bind="$select.selected.state || row.entity.state"></span></small>'
+                            + '</ui-select-match>'
+                            + '<ui-select-choices'
+                            + ' repeat="state in (grid.appScope.cfg_states | filter: $select.search) track by state.id">'
+                            + '<small><span ng-bind="state.state"></span></small>'
+                            + '</ui-select-choices>'
+                            + '</ui-select>'
+                            + '</div>'
+                        },
                         {
                             field: 'owner_user.email',
                             displayName: 'Owner',
