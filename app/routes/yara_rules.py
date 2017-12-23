@@ -69,6 +69,10 @@ def get_all_yara_rules():
 
     Return: list of yara_rule artifact dictionaries"""
     include_inactive = request.args.get("include_inactive", False)
+    include_yara_string = request.args.get("include_yara_string", False)
+    if include_yara_string:
+        include_yara_string = True
+
     include_merged = request.args.get('include_merged', False)
     searches = request.args.get('searches', '{}')
     page_number = request.args.get('page_number', False)
@@ -120,7 +124,7 @@ def get_all_yara_rules():
     filtered_entities = filtered_entities.all()
 
     response_dict = dict()
-    response_dict['data'] = [entity.to_dict() for entity in filtered_entities]
+    response_dict['data'] = [entity.to_dict(include_yara_string) for entity in filtered_entities]
     response_dict['total_count'] = total_count
 
     return Response(json.dumps(response_dict), mimetype='application/json')
@@ -132,13 +136,17 @@ def get_all_yara_rules():
 def get_yara_rule(id):
     """Return yara_rule artifact associated with the given id
     Return: yara_rule artifact dictionary"""
+    include_yara_string = request.args.get("include_yara_string", False)
+    if include_yara_string:
+        include_yara_string = True
+
     entity = yara_rule.Yara_rule.query.get(id)
     if not entity:
         abort(404)
     if not current_user.admin and entity.owner_user_id != current_user.id:
         abort(403)
 
-    return_dict = entity.to_dict()
+    return_dict = entity.to_dict(include_yara_string)
     return_dict["bookmarked"] = True if is_bookmarked(Bookmarks.ENTITY_MAPPING["SIGNATURE"], id, current_user.id)\
         else False
 

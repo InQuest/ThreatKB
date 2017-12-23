@@ -96,11 +96,20 @@ angular.module('ThreatKB')
                             + '&nbsp;'
                             + '<button ng-click="grid.appScope.delete(row.entity.id)"'
                             + ' ng-confirm-click="Are you sure you want to '
-                            + 'inactivate this signature ({{ row.entity.name }})?" class="btn btn-sm btn-danger">'
+                            + 'inactivate this signature ({{ row.entity.name }}) ({{ row.entity.yara_rule_string }})?" class="btn btn-sm btn-danger">'
                             + '<small>'
                             + '<span class="glyphicon glyphicon-remove-circle"></span>'
                             + '</small>'
-                            + '</button></div>'
+                            + '</button>'
+                            + '&nbsp;'
+                            + '<button class="btn btn-sm">'
+                            + '<small><span class="glyphicon glyphicon-link" style="font-size: 1.2em;"'
+                            + 'title="Copy Yara Rule to clipboard" tooltip-placement="bottom"'
+                            + 'uib-tooltip="Copied Yara Rule!"'
+                            + 'tooltip-trigger="\'outsideClick\'"'
+                            + 'ngclipboard data-clipboard-text="{{ row.entity.yara_rule_string }}"></span></small>'
+                            + '</button>'
+                            + '</div>'
                         }
                     ]
             };
@@ -111,6 +120,7 @@ angular.module('ThreatKB')
                 var url = '/ThreatKB/yara_rules?';
                 url += 'page_number=' + (paginationOptions.pageNumber - 1);
                 url += '&page_size=' + paginationOptions.pageSize;
+                url += '&include_yara_string=1';
                 switch (paginationOptions.sort_dir) {
                     case uiGridConstants.ASC:
                         url += '&sort_dir=ASC';
