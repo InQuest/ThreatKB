@@ -1,7 +1,7 @@
 from itsdangerous import (TimedJSONWebSignatureSerializer
                           as Serializer, BadSignature)
 
-from app import db, app
+from app import db
 
 
 class KBUser(db.Model):
