@@ -22,6 +22,8 @@ celery = None
 
 app.config["SQLALCHEMY_ECHO"] = True
 
+ENTITY_MAPPING = {"SIGNATURE": 1, "DNS": 2, "IP": 3, "TASK": 4}
+
 
 def admin_only():
     def wrapper(f):

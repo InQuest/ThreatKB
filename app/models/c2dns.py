@@ -3,7 +3,7 @@ import re
 from ipaddr import IPAddress, IPNetwork
 from sqlalchemy.event import listens_for
 
-from app import db, current_user
+from app import db, current_user, ENTITY_MAPPING
 from app.models.whitelist import Whitelist
 from app.routes import tags_mapping
 from app.models.comments import Comments
@@ -40,7 +40,7 @@ class C2dns(db.Model):
 
     comments = db.relationship("Comments", foreign_keys=[id],
                                primaryjoin="and_(Comments.entity_id==C2dns.id, Comments.entity_type=='%s')" % (
-                               Comments.ENTITY_MAPPING["DNS"]), lazy="dynamic")
+                                   ENTITY_MAPPING["DNS"]), lazy="dynamic")
 
     tags = []
 
@@ -50,7 +50,7 @@ class C2dns(db.Model):
 
     def to_dict(self):
         comments = Comments.query.filter_by(entity_id=self.id).filter_by(
-            entity_type=Comments.ENTITY_MAPPING["DNS"]).all()
+            entity_type=ENTITY_MAPPING["DNS"]).all()
         return dict(
             date_created=self.date_created.isoformat(),
             date_modified=self.date_modified.isoformat(),

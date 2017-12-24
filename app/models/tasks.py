@@ -1,4 +1,4 @@
-from app import db
+from app import db, ENTITY_MAPPING
 from app.models.comments import Comments
 
 
@@ -29,11 +29,11 @@ class Tasks(db.Model):
 
     comments = db.relationship("Comments", foreign_keys=[id],
                                primaryjoin="and_(Comments.entity_id==Tasks.id, Comments.entity_type=='%s')" % (
-                                   Comments.ENTITY_MAPPING["DNS"]), lazy="dynamic")
+                                   ENTITY_MAPPING["DNS"]), lazy="dynamic")
 
     def to_dict(self):
         comments = Comments.query.filter_by(entity_id=self.id).filter_by(
-            entity_type=Comments.ENTITY_MAPPING["TASK"]).all()
+            entity_type=ENTITY_MAPPING["TASK"]).all()
         return dict(
             date_created=self.date_created.isoformat(),
             date_modified=self.date_modified.isoformat(),

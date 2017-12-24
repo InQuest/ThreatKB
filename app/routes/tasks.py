@@ -1,4 +1,4 @@
-from app import app, db, auto
+from app import app, db, auto, ENTITY_MAPPING
 from app.models import tasks
 from flask import abort, jsonify, request, Response
 from flask.ext.login import login_required, current_user
@@ -43,7 +43,7 @@ def get_tasks(id):
         return jsonify({})
 
     return_dict = entity.to_dict()
-    return_dict["bookmarked"] = True if is_bookmarked(Bookmarks.ENTITY_MAPPING["TASK"], id, current_user.id) else False
+    return_dict["bookmarked"] = True if is_bookmarked(ENTITY_MAPPING["TASK"], id, current_user.id) else False
 
     return jsonify(return_dict)
 
@@ -112,6 +112,6 @@ def delete_tasks(id):
     db.session.add(entity)
     db.session.commit()
 
-    delete_bookmarks(Bookmarks.ENTITY_MAPPING["TASK"], id, current_user.id)
+    delete_bookmarks(ENTITY_MAPPING["TASK"], id, current_user.id)
 
     return jsonify(''), 204

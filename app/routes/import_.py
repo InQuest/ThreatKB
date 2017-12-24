@@ -1,6 +1,6 @@
 from flask import abort, jsonify, request
 from flask.ext.login import login_required, current_user
-from app import app, db, admin_only, auto
+from app import app, db, admin_only, auto, ENTITY_MAPPING
 from app.models import c2ip, c2dns, yara_rule, cfg_states, cfg_settings, comments
 from app.utilities import extract_artifacts
 import json
@@ -27,7 +27,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                     artifact["artifact"], shared_reference if shared_reference else "no reference provided",
                     current_user.email)
                     db.session.add(
-                        comments.Comments(comment=message, entity_type=comments.Comments.ENTITY_MAPPING["IP"],
+                        comments.Comments(comment=message, entity_type=ENTITY_MAPPING["IP"],
                                           entity_id=old_ip.id, user_id=current_user.id))
                     duplicate_artifacts.append(artifact)
                 else:
@@ -49,7 +49,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                     artifact["artifact"], shared_reference if shared_reference else "no reference provided",
                     current_user.email)
                     db.session.add(
-                        comments.Comments(comment=message, entity_type=comments.Comments.ENTITY_MAPPING["DNS"],
+                        comments.Comments(comment=message, entity_type=ENTITY_MAPPING["DNS"],
                                           entity_id=old_dns.id, user_id=current_user.id))
                     duplicate_artifacts.append(artifact)
                 else:

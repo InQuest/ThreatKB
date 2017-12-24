@@ -1,4 +1,4 @@
-from app import db, current_user
+from app import db, current_user, ENTITY_MAPPING
 from app.models.files import Files
 from app.routes import tags_mapping
 from app.models.comments import Comments
@@ -56,11 +56,11 @@ class Yara_rule(db.Model):
 
     comments = db.relationship("Comments", foreign_keys=[id],
                                primaryjoin="and_(Comments.entity_id==Yara_rule.id, Comments.entity_type=='%s')" % (
-                                   Comments.ENTITY_MAPPING["SIGNATURE"]), lazy="dynamic", cascade="all,delete")
+                                   ENTITY_MAPPING["SIGNATURE"]), lazy="dynamic", cascade="all,delete")
 
     files = db.relationship("Files", foreign_keys=[id],
                             primaryjoin="and_(Files.entity_id==Yara_rule.id, Files.entity_type=='%s')" % (
-                                Files.ENTITY_MAPPING["SIGNATURE"]), lazy="dynamic", cascade="all,delete")
+                                ENTITY_MAPPING["SIGNATURE"]), lazy="dynamic", cascade="all,delete")
 
     history = db.relationship("Yara_rule_history", foreign_keys=[id],
                               primaryjoin="Yara_rule_history.yara_rule_id==Yara_rule.id", lazy="dynamic",
@@ -73,8 +73,8 @@ class Yara_rule(db.Model):
     def to_dict(self, include_yara_rule_string=None):
         revisions = Yara_rule_history.query.filter_by(yara_rule_id=self.id).all()
         comments = Comments.query.filter_by(entity_id=self.id).filter_by(
-            entity_type=Comments.ENTITY_MAPPING["SIGNATURE"]).all()
-        files = Files.query.filter_by(entity_id=self.id).filter_by(entity_type=Files.ENTITY_MAPPING["SIGNATURE"]).all()
+            entity_type=ENTITY_MAPPING["SIGNATURE"]).all()
+        files = Files.query.filter_by(entity_id=self.id).filter_by(entity_type=ENTITY_MAPPING["SIGNATURE"]).all()
         yara_dict = dict(
             creationed_date=self.creation_date.isoformat(),
             last_revision_date=self.last_revision_date.isoformat(),

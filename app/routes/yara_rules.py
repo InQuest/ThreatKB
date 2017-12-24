@@ -1,4 +1,4 @@
-from app import app, db, auto
+from app import app, db, auto, ENTITY_MAPPING
 from app.models import yara_rule, cfg_states, comments
 from flask import abort, jsonify, request, Response, json
 from flask.ext.login import current_user, login_required
@@ -36,17 +36,17 @@ def merge_signatures():
     merged_into_comment = "This yara rule was merged into signature '%s' with event id '%s' by '%s'" % (
         merge_to_yr.name, merge_to_yr.eventid, current_user.email)
     db.session.add(
-        comments.Comments(comment=merged_into_comment, entity_type=comments.Comments.ENTITY_MAPPING["SIGNATURE"],
+        comments.Comments(comment=merged_into_comment, entity_type=ENTITY_MAPPING["SIGNATURE"],
                           entity_id=merge_from_yr.id, user_id=current_user.id))
 
     merged_from_comment = "The yara rule '%s' with event id '%s' was merged into this yara rule by '%s'" % (
         merge_from_yr.name, merge_from_yr.eventid, current_user.email)
     db.session.add(
-        comments.Comments(comment=merged_from_comment, entity_type=comments.Comments.ENTITY_MAPPING["SIGNATURE"],
+        comments.Comments(comment=merged_from_comment, entity_type=ENTITY_MAPPING["SIGNATURE"],
                           entity_id=merge_to_yr.id, user_id=current_user.id))
     db.session.commit()
 
-    delete_bookmarks(Bookmarks.ENTITY_MAPPING["SIGNATURE"], merge_from_id, current_user.id)
+    delete_bookmarks(ENTITY_MAPPING["SIGNATURE"], merge_from_id, current_user.id)
 
     return get_yara_rule(merge_to_yr.id)
 
@@ -147,7 +147,7 @@ def get_yara_rule(id):
         abort(403)
 
     return_dict = entity.to_dict(include_yara_string)
-    return_dict["bookmarked"] = True if is_bookmarked(Bookmarks.ENTITY_MAPPING["SIGNATURE"], id, current_user.id)\
+    return_dict["bookmarked"] = True if is_bookmarked(ENTITY_MAPPING["SIGNATURE"], id, current_user.id) \
         else False
 
     return jsonify(return_dict)
@@ -288,6 +288,6 @@ def delete_yara_rule(id):
     db.session.commit()
 
     # delete_tags_mapping(entity.__tablename__, entity.id, tag_mapping_to_delete)
-    delete_bookmarks(Bookmarks.ENTITY_MAPPING["SIGNATURE"], id, current_user.id)
+    delete_bookmarks(ENTITY_MAPPING["SIGNATURE"], id, current_user.id)
 
     return jsonify(''), 204

@@ -3,7 +3,7 @@ import re
 from ipaddr import IPAddress, IPNetwork
 from sqlalchemy.event import listens_for
 
-from app import db, current_user
+from app import db, current_user, ENTITY_MAPPING
 from app.geo_ip_helper import get_geo_for_ip
 from app.models.whitelist import Whitelist
 from app.routes import tags_mapping
@@ -45,7 +45,7 @@ class C2ip(db.Model):
 
     comments = db.relationship("Comments", foreign_keys=[id],
                                primaryjoin="and_(Comments.entity_id==C2ip.id, Comments.entity_type=='%s')" % (
-                               Comments.ENTITY_MAPPING["IP"]), lazy="dynamic")
+                                   ENTITY_MAPPING["IP"]), lazy="dynamic")
 
     tags = []
 

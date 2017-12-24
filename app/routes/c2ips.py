@@ -1,4 +1,4 @@
-from app import app, db, auto
+from app import app, db, auto, ENTITY_MAPPING
 from app.models import c2ip
 from flask import abort, jsonify, request, Response, json
 from flask.ext.login import current_user, login_required
@@ -89,7 +89,7 @@ def get_c2ip(id):
         abort(403)
 
     return_dict = entity.to_dict()
-    return_dict["bookmarked"] = True if is_bookmarked(Bookmarks.ENTITY_MAPPING["IP"], id, current_user.id) else False
+    return_dict["bookmarked"] = True if is_bookmarked(ENTITY_MAPPING["IP"], id, current_user.id) else False
 
     return jsonify(return_dict)
 
@@ -188,6 +188,6 @@ def delete_c2ip(id):
     db.session.commit()
 
     delete_tags_mapping(entity.__tablename__, entity.id, tag_mapping_to_delete)
-    delete_bookmarks(Bookmarks.ENTITY_MAPPING["IP"], id, current_user.id)
+    delete_bookmarks(ENTITY_MAPPING["IP"], id, current_user.id)
 
     return jsonify(''), 204
