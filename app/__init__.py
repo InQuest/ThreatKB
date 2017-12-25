@@ -56,6 +56,7 @@ def run(debug=False, port=5000, host='127.0.0.1'):
     from app.models import users
     from app.models import whitelist
     from app.models import bookmarks
+    from app.models import metadata
 
     app.config["BROKER_URL"] = cfg_settings.Cfg_settings.get_private_setting("REDIS_BROKER_URL")
     app.config["TASK_SERIALIZER"] = cfg_settings.Cfg_settings.get_private_setting("REDIS_TASK_SERIALIZER")
@@ -97,6 +98,7 @@ def run(debug=False, port=5000, host='127.0.0.1'):
     from app.routes import bookmarks
     from app.routes import version
     from app.routes import scripts
+    from app.routes import metadata
 
     @app.before_first_request
     def setup_logging():
