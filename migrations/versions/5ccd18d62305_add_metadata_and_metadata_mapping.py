@@ -40,7 +40,6 @@ def upgrade():
                     sa.Column('metadata_id', sa.Integer(), nullable=False),
                     sa.Column('artifact_id', sa.Integer(), nullable=False),
                     sa.Column('created_user_id', sa.Integer(), nullable=False),
-                    sa.ForeignKeyConstraint(['artifact_id'], ['metadata.id'], ),
                     sa.ForeignKeyConstraint(['created_user_id'], ['kb_users.id'], ),
                     sa.ForeignKeyConstraint(['metadata_id'], ['metadata.id'], ),
                     sa.PrimaryKeyConstraint('id')
