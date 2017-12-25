@@ -49,15 +49,23 @@
                     </ui-select>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" ng-if="metadata.type && metadata.type !== 'select'">
                     <label>Default Value</label>
                     <input type="text" class="form-control" name="default"
                            ng-model="metadata.default" ng-required="false"
-                           ng-maxlength="4096" value="{{ metadata.default }}"/>
+                           ng-maxlength="4096" value="{{ metadata.default }}" placeholder="Optional default value"/>
                     <span class="error" ng-show="form.value.$error.minlength">Must be at least 1 character.</span>
                     <span class="error" ng-show="form.value.$error.maxlength">Must be at most 4096 characters.</span>
                 </div>
 
+                <div class="form-group" ng-if="metadata.type && metadata.type == 'select'">
+                    <label>Choices</label>
+                    <input type="text" class="form-control" name="choices"
+                           ng-model="metadata.choices" ng-required="false"
+                           ng-maxlength="512" placeholder="Comma-separated choices"/>
+                    <span class="error" ng-show="form.value.$error.minlength">Must be at least 1 character.</span>
+                    <span class="error" ng-show="form.value.$error.maxlength">Must be at most 512 characters.</span>
+                </div>
 
                 <div class="form-group">
                     <label>Show In Main Table</label>
@@ -105,7 +113,7 @@
 
                 <th>Artifact Type</th>
 
-                <th>Default</th>
+                <th>Default/Choices</th>
 
                 <th>Show In Table</th>
 
@@ -121,7 +129,9 @@
 
                 <td ng-if="metadata.key">{{ artifact_type_to_string(metadata.artifact_type) }}</td>
 
-                <td ng-if="metadata.key">{{ metadata.default }}</td>
+                <td ng-if="metadata.type && metadata.type !== 'select'">{{ metadata.default }}</td>
+
+                <td ng-if="metadata.type && metadata.type == 'select'">{{ metadata_short_choice_string(metadata) }}</td>
 
                 <td ng-if="metadata.key">{{ show_in_table_to_string(metadata.show_in_table) }}</td>
 

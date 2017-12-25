@@ -23,6 +23,7 @@ class Metadata(db.Model):
     created_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
     created_user = db.relationship('KBUser', foreign_keys=created_user_id,
                                    primaryjoin="KBUser.id==Metadata.created_user_id")
+    choices = db.relationship('MetadataChoices', primaryjoin="MetadataChoices.metadata_id==Metadata.id")
 
     def to_dict(self, include_mappings=False):
         try:
@@ -44,7 +45,9 @@ class Metadata(db.Model):
             default=default,
             show_in_table=self.show_in_table,
             active=self.active,
+            choices=[choice.to_dict() for choice in self.choices]
         )
+
         if include_mappings and self.active:
             results["mappings"] = [entity.to_dict() for entity in db.session.query(MetadataMapping).filter(
                 MetadataMapping.metadata_id == self.id).all()]
@@ -67,7 +70,7 @@ class MetadataMapping(db.Model):
     metadata_id = db.Column(db.Integer, db.ForeignKey('metadata.id'), nullable=False)
     metadata_object = db.relationship('Metadata', foreign_keys=metadata_id,
                                       primaryjoin="Metadata.id==MetadataMapping.metadata_id")
-    artifact_id = db.Column(db.Integer, db.ForeignKey('metadata.id'), nullable=False)
+    artifact_id = db.Column(db.Integer, nullable=False)
     created_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
     created_user = db.relationship('KBUser', foreign_keys=created_user_id,
                                    primaryjoin="KBUser.id==MetadataMapping.created_user_id")
@@ -84,3 +87,32 @@ class MetadataMapping(db.Model):
 
     def __repr__(self):
         return '<MetadataMapping %r>' % self.id
+
+
+class MetadataChoices(db.Model):
+    __tablename__ = "metadata_choices"
+
+    id = db.Column(db.Integer, primary_key=True)
+    choice = db.Column(db.String(512), nullable=False)
+
+    date_created = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp())
+    date_modified = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp(),
+                              onupdate=db.func.current_timestamp())
+    metadata_id = db.Column(db.Integer, db.ForeignKey('metadata.id'), nullable=False)
+    metadata_object = db.relationship('Metadata', foreign_keys=metadata_id,
+                                      primaryjoin="Metadata.id==MetadataChoices.metadata_id")
+    created_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
+    created_user = db.relationship('KBUser', foreign_keys=created_user_id,
+                                   primaryjoin="KBUser.id==MetadataChoices.created_user_id")
+
+    def to_dict(self):
+        return dict(
+            id=self.id,
+            choice=self.choice,
+            date_created=self.date_created.isoformat(),
+            date_modified=self.date_modified.isoformat(),
+            created_user=self.created_user.to_dict()
+        )
+
+    def __repr__(self):
+        return '<MetadataChoices %r>' % self.id

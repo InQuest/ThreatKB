@@ -5,13 +5,24 @@ angular.module('ThreatKB')
         function ($scope, $rootScope, $uibModal, resolvedMetadatas, Metadata, Comments) {
 
             $scope.metadatas = resolvedMetadatas;
+            $scope.metadata_short_choice_string = function (metadata) {
+                return metadata.choices.map(function (obj) {
+                    return obj.choice;
+                }).join(",");
+            };
+
             $scope.types = [{value: "string"},
-                {value: "integer"}, {value: "date"}, {value: "multiline_comment"}];
+                {value: "integer"}, {value: "date"}, {value: "multiline_comment"}, {value: "select"}];
             $scope.show_in_table_options = [{key: "Yes", value: 1}, {key: "No", value: 0}];
             $scope.artifact_type_options = $rootScope.ENTITY_MAPPING_REVERSE;
 
             $scope.artifact_type_to_string = function (type_) {
-                return $rootScope.ENTITY_MAPPING_REVERSE[type_].value;
+                for (var i = 0; i < $scope.ENTITY_MAPPING_REVERSE.length; i++) {
+                    var obj = $scope.ENTITY_MAPPING_REVERSE[i];
+                    if (obj.key == type_) {
+                        return obj.value;
+                    }
+                }
             };
 
             $scope.show_in_table_to_string = function (show_in_table) {
@@ -36,6 +47,7 @@ angular.module('ThreatKB')
                 Metadata.delete({id: id},
                     function () {
                         $scope.metadatas = Metadata.query();
+                        $scope.normalize_metadatas();
                     });
             };
 
@@ -44,12 +56,14 @@ angular.module('ThreatKB')
                     Metadata.update({id: id}, $scope.metadata,
                         function () {
                             $scope.metadatas = Metadata.query();
+                            $scope.normalize_metadatas();
                             //$scope.clear();
                         });
                 } else {
                     Metadata.save($scope.metadata,
                         function () {
                             $scope.metadatas = Metadata.query();
+                            $scope.normalize_metadatas();
                             //$scope.clear();
                         });
                 }

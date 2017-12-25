@@ -2,6 +2,7 @@ from app import db, current_user, ENTITY_MAPPING
 from app.models.files import Files
 from app.routes import tags_mapping
 from app.models.comments import Comments
+from app.models.metadata import MetadataMapping, Metadata
 from app.models.cfg_category_range_mapping import CfgCategoryRangeMapping
 from app.models import cfg_settings, cfg_states
 from sqlalchemy.event import listens_for
@@ -11,6 +12,7 @@ import json
 import distutils
 
 from flask import abort
+
 
 class Yara_rule(db.Model):
 
@@ -70,6 +72,15 @@ class Yara_rule(db.Model):
                                    primaryjoin="Yara_testing_history.yara_rule_id==Yara_rule.id", lazy="dynamic",
                                    cascade="all,delete")
 
+    @property
+    def metadata_fields(self):
+        return db.session.query(Metadata).filter(Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).all()
+
+    @property
+    def metadata_values(self):
+        return db.session.query(Metadata).join(MetadataMapping, Metadata.id == MetadataMapping.metadata_id).filter(
+            Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).filter(MetadataMapping.artifact_id == self.id).all()
+
     def to_dict(self, include_yara_rule_string=None):
         revisions = Yara_rule_history.query.filter_by(yara_rule_id=self.id).all()
         comments = Comments.query.filter_by(entity_id=self.id).filter_by(
@@ -103,7 +114,9 @@ class Yara_rule(db.Model):
             created_user=self.created_user.to_dict(),
             modified_user=self.modified_user.to_dict(),
             owner_user=self.owner_user.to_dict() if self.owner_user else None,
-            revision=self.revision
+            revision=self.revision,
+            metadata=[entity.to_dict() for entity in self.metadata_fields],
+            metadata_values=[entity.to_dict() for entity in self.metadata_values]
         )
 
         if include_yara_rule_string:
