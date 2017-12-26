@@ -55,6 +55,11 @@ class C2dns(db.Model):
             Metadata.artifact_type == ENTITY_MAPPING["DNS"]).filter(MetadataMapping.artifact_id == self.id).all()
 
     def to_dict(self):
+        metadata_dict = {}
+        metadata_values = [entity.to_dict() for entity in self.metadata_values]
+        for m in metadata_values:
+            metadata_dict[m["metadata"]["key"]] = m
+
         return dict(
             date_created=self.date_created.isoformat(),
             date_modified=self.date_modified.isoformat(),
@@ -73,7 +78,8 @@ class C2dns(db.Model):
             comments=[comment.to_dict() for comment in
                       Comments.query.filter_by(entity_id=self.id).filter_by(entity_type=ENTITY_MAPPING["DNS"]).all()],
             metadata=[entity.to_dict() for entity in self.metadata_fields],
-            metadata_values=[entity.to_dict() for entity in self.metadata_values]
+            metadata_values=metadata_values,
+            metadata_dict=metadata_dict
         )
 
     @classmethod

@@ -59,6 +59,11 @@ class C2ip(db.Model):
             Metadata.artifact_type == ENTITY_MAPPING["IP"]).filter(MetadataMapping.artifact_id == self.id).all()
 
     def to_dict(self):
+        metadata_dict = {}
+        metadata_values = [entity.to_dict() for entity in self.metadata_values]
+        for m in metadata_values:
+            metadata_dict[m["metadata"]["key"]] = m
+
         return dict(
             date_created=self.date_created.isoformat(),
             date_modified=self.date_modified.isoformat(),
@@ -77,7 +82,8 @@ class C2ip(db.Model):
             owner_user=self.owner_user.to_dict() if self.owner_user else None,
             comments=[comment.to_dict() for comment in self.comments],
             metadata=[entity.to_dict() for entity in self.metadata_fields],
-            metadata_values=[entity.to_dict() for entity in self.metadata_values]
+            metadata_values=metadata_values,
+            metadata_dict=metadata_dict
         )
 
     @classmethod
