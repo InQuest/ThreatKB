@@ -359,27 +359,16 @@ angular.module('ThreatKB').directive('ngConfirmClick', [
         };
     }]);
 
-angular.module('ThreatKB').directive('numbersOnly', function () {
+angular.module('ThreatKB').directive("formatDate", function () {
     return {
         require: 'ngModel',
-        link: function (scope, element, attr, ngModelCtrl) {
-            function fromUser(text) {
-                if (text) {
-                    var transformedInput = text.replace(/[^0-9]/g, '');
-
-                    if (transformedInput !== text) {
-                        ngModelCtrl.$setViewValue(transformedInput);
-                        ngModelCtrl.$render();
-                    }
-                    return transformedInput;
-                }
-                return undefined;
-            }
-
-            ngModelCtrl.$parsers.push(fromUser);
+        link: function (scope, elem, attr, modelCtrl) {
+            modelCtrl.$formatters.push(function (modelValue) {
+                return new Date(modelValue);
+            })
         }
-    };
-});
+    }
+})
 
 angular.module('ThreatKB').config(function (blockUIConfig) {
     // Tell the blockUI service to ignore certain requests

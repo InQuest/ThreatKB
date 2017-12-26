@@ -4,6 +4,7 @@ from flask import abort, jsonify, request, Response, json
 from flask.ext.login import current_user, login_required
 
 from app.models.users import KBUser
+from app.models.metadata import Metadata, MetadataMapping, MetadataChoices
 from app.models.bookmarks import Bookmarks
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
 from app.routes.cfg_category_range_mapping import update_cfg_category_range_mapping_current
@@ -237,6 +238,25 @@ def update_yara_rule(id):
     )
     db.session.merge(entity)
     db.session.commit()
+
+    dirty = False
+    for name, value_dict in request.json["metadata_values"].iteritems():
+        m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
+            Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).filter(
+            MetadataMapping.artifact_id == entity.id).first()
+        if m:
+            m.value = value_dict["value"]
+            db.session.add(m)
+            dirty = True
+        else:
+            m = db.session.query(Metadata).filter(Metadata.key == name).filter(
+                Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).first()
+            db.session.add(MetadataMapping(value=value_dict["value"], metadata_id=m.id, artifact_id=entity.id,
+                                           created_user_id=current_user.id))
+            dirty = True
+
+    if dirty:
+        db.session.commit()
 
     # THIS IS UGLY. FIGURE OUT WHY MERGE ISN'T WORKING
     entity = yara_rule.Yara_rule.query.get(entity.id)

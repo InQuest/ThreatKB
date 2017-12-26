@@ -163,12 +163,12 @@
                 <div class="form-group" ng-repeat="m in metadata[0].date" ng-if="yara_rule.id">
                     <label>{{ m.key }}:</label>
                     <input class="form-control" ng-model="yara_rule.metadata_values[m.key].value" type="date"
-                           ng-required="m.required"/>
+                           ng-required="m.required" format-date/>
                 </div>
 
                 <div class="form-group" ng-repeat="m in metadata[0].date" ng-if="!yara_rule.id">
                     <label>{{ m.key }}:</label>
-                    <input class="form-control" ng-model="m.default" type="date" ng-required="m.required">
+                    <input class="form-control" ng-model="m.default" type="date" ng-required="m.required" format-date>
                 </div>
 
                 <div class="form-group" ng-repeat="m in metadata[0].multiline_comment" ng-if="yara_rule.id">

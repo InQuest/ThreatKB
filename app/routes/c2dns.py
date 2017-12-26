@@ -6,6 +6,7 @@ from dateutil import parser
 from sqlalchemy import exc
 
 from app.models.users import KBUser
+from app.models.metadata import Metadata, MetadataMapping, MetadataChoices
 from app.models.bookmarks import Bookmarks
 from app.models.cfg_states import verify_state
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
@@ -99,17 +100,15 @@ def get_c2dns(id):
 @login_required
 def create_c2dns():
     """Create c2dns artifact
-    From Data: domain_name (str), match_type (str), reference_link (str), expiration_type (str), expiration_timestamp (date), state(str), description (str)
+    From Data: domain_name (str), match_type (str),  expiration_type (str), expiration_timestamp (date), state(str)
     Return: c2dns artifact dictionary"""
     entity = c2dns.C2dns(
         domain_name=request.json['domain_name']
         , match_type=request.json['match_type']
-        , reference_link=request.json['reference_link']
         , expiration_type=request.json['expiration_type']
         , expiration_timestamp=parser.parse(request.json['expiration_timestamp']) if request.json.get("expiration_type",
                                                                                                       None) else None
         , state=verify_state(request.json['state']['state'])
-        , description=request.json['description']
         , created_user_id=current_user.id
         , modified_user_id=current_user.id
     )
@@ -134,7 +133,7 @@ def create_c2dns():
 @login_required
 def update_c2dns(id):
     """Update c2dns artfifact
-    From Data: domain_name (str), match_type (str), reference_link (str), reference_text (str), expiration_type (str), expiration_timestamp (date), description (str), state(str)
+    From Data: domain_name (str), match_type (str), expiration_type (str), expiration_timestamp (date), state(str)
     Return: c2dns artifact dictionary"""
     entity = c2dns.C2dns.query.get(id)
     if not entity:
@@ -146,11 +145,9 @@ def update_c2dns(id):
         else verify_state(request.json['state']),
         domain_name=request.json['domain_name'],
         match_type=request.json['match_type'],
-        reference_link=request.json['reference_link'],
         expiration_type=request.json['expiration_type'],
         expiration_timestamp=parser.parse(request.json['expiration_timestamp']) if request.json.get(
             "expiration_timestamp", None) else None,
-        description=request.json['description'],
         id=id,
         owner_user_id=request.json['owner_user']['id'] if request.json.get("owner_user", None) and request.json[
             "owner_user"].get("id", None) else None,
@@ -166,6 +163,25 @@ def update_c2dns(id):
 
     create_tags_mapping(entity.__tablename__, entity.id, request.json['addedTags'])
     delete_tags_mapping(entity.__tablename__, entity.id, request.json['removedTags'])
+
+    dirty = False
+    for name, value_dict in request.json["metadata_values"].iteritems():
+        m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
+            Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["DNS"]).filter(
+            MetadataMapping.artifact_id == entity.id).first()
+        if m:
+            m.value = value_dict["value"]
+            db.session.add(m)
+            dirty = True
+        else:
+            m = db.session.query(Metadata).filter(Metadata.key == name).filter(
+                Metadata.artifact_type == ENTITY_MAPPING["DNS"]).first()
+            db.session.add(MetadataMapping(value=value_dict["value"], metadata_id=m.id, artifact_id=entity.id,
+                                           created_user_id=current_user.id))
+            dirty = True
+
+    if dirty:
+        db.session.commit()
 
     entity = c2dns.C2dns.query.get(entity.id)
     return jsonify(entity.to_dict()), 200

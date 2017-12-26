@@ -405,7 +405,7 @@ angular.module('ThreatKB')
             }
 
             $scope.update_selected_metadata = function (m, selected) {
-                yara_rule.metadata_values[m.key].value = selected;
+                yara_rule.metadata_values[m.key].value = selected.choice;
             };
 
             $scope.bookmark = function (id) {

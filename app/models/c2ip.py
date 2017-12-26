@@ -55,14 +55,15 @@ class C2ip(db.Model):
 
     @property
     def metadata_values(self):
-        return db.session.query(Metadata).join(MetadataMapping, Metadata.id == MetadataMapping.metadata_id).filter(
-            Metadata.artifact_type == ENTITY_MAPPING["IP"]).filter(MetadataMapping.artifact_id == self.id).all()
+        return db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
+            Metadata.active > 0).filter(MetadataMapping.artifact_id == self.id).all()
 
     def to_dict(self):
-        metadata_dict = {}
-        metadata_values = [entity.to_dict() for entity in self.metadata_values]
-        for m in metadata_values:
-            metadata_dict[m["metadata"]["key"]] = m
+        metadata_values_dict = {}
+        metadata_keys = Metadata.get_metadata_keys("IP")
+        metadata_values_dict = {m["metadata"]["key"]: m for m in [entity.to_dict() for entity in self.metadata_values]}
+        for key in list(set(metadata_keys) - set(metadata_values_dict.keys())):
+            metadata_values_dict[key] = {}
 
         return dict(
             date_created=self.date_created.isoformat(),
@@ -81,9 +82,8 @@ class C2ip(db.Model):
             modified_user=self.modified_user.to_dict(),
             owner_user=self.owner_user.to_dict() if self.owner_user else None,
             comments=[comment.to_dict() for comment in self.comments],
-            metadata=[entity.to_dict() for entity in self.metadata_fields],
-            metadata_values=metadata_values,
-            metadata_dict=metadata_dict
+            metadata=Metadata.get_metadata_dict("IP"),
+            metadata_values=metadata_values_dict,
         )
 
     @classmethod

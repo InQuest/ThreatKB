@@ -1,6 +1,6 @@
 from app import db, ENTITY_MAPPING
 from dateutil import parser
-
+import datetime
 
 class Metadata(db.Model):
     __tablename__ = "metadata"
@@ -38,6 +38,10 @@ class Metadata(db.Model):
 
         return metadata_dict
 
+    @staticmethod
+    def get_metadata_keys(entity_type):
+        return [entity.key for entity in db.session.query(Metadata).filter(
+            Metadata.artifact_type == ENTITY_MAPPING[entity_type]).filter(Metadata.active > 0).all()]
 
     def to_dict(self, include_mappings=False):
         try:
@@ -91,9 +95,16 @@ class MetadataMapping(db.Model):
                                    primaryjoin="KBUser.id==MetadataMapping.created_user_id")
 
     def to_dict(self):
+        if self.metadata_object.type_ == "date":
+            value = datetime.datetime.strftime(parser.parse(self.value), "%m/%d/%Y")
+        elif self.metadata_object.type_ == "integer":
+            value = int(self.value)
+        else:
+            value = self.value
+
         return dict(
             id=self.id,
-            value=self.value,
+            value=value,
             metadata=self.metadata_object.to_dict(),
             date_created=self.date_created.isoformat(),
             date_modified=self.date_modified.isoformat(),

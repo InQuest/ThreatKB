@@ -258,7 +258,7 @@ angular.module('ThreatKB')
             $scope.metadata = metadata;
 
             $scope.update_selected_metadata = function (m, selected) {
-                c2dns.metadata_values[m.key].value = selected;
+                $scope.c2dns.metadata_values[m.key].value = selected.choice;
             };
 
             if ($scope.c2dns.$promise !== undefined) {

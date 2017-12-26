@@ -76,9 +76,12 @@ class Yara_rule(db.Model):
         comments = Comments.query.filter_by(entity_id=self.id).filter_by(
             entity_type=ENTITY_MAPPING["SIGNATURE"]).all()
         files = Files.query.filter_by(entity_id=self.id).filter_by(entity_type=ENTITY_MAPPING["SIGNATURE"]).all()
-        metadata_values_dict = {}
 
+        metadata_values_dict = {}
+        metadata_keys = Metadata.get_metadata_keys("SIGNATURE")
         metadata_values_dict = {m["metadata"]["key"]: m for m in [entity.to_dict() for entity in self.metadata_values]}
+        for key in list(set(metadata_keys) - set(metadata_values_dict.keys())):
+            metadata_values_dict[key] = {}
 
         yara_dict = dict(
             creationed_date=self.creation_date.isoformat(),
