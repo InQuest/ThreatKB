@@ -71,7 +71,8 @@
                     <ui-select ng-model="metadata.required"
                                on-select="change_required_option($select.selected)">
                         <ui-select-match placeholder="Select an option...">
-                            <small><span ng-bind="$select.selected.key || metadata.required"></span></small>
+                            <small><span ng-bind="$select.selected.key || required_to_string(metadata.required)"></span>
+                            </small>
                         </ui-select-match>
                         <ui-select-choices
                                 repeat="option in (show_in_table_options | filter: $select.search) track by option.key">

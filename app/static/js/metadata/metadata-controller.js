@@ -129,6 +129,16 @@ angular.module('ThreatKB')
             $scope.show_in_table_options = show_in_table_options;
             $scope.artifact_type_options = artifact_type_options;
 
+            $scope.required_to_string = function (required) {
+                for (var i = 0; i < $scope.required_options.length; i++) {
+                    var obj = $scope.required_options[i];
+                    if (obj.value == required) {
+                        return obj.key;
+                    }
+                }
+                return "No";
+            };
+
             $scope.change_show_in_table_option = function (selected) {
                 $scope.metadata.show_in_table = selected.value;
             }

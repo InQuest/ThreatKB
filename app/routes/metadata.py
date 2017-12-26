@@ -15,12 +15,22 @@ def get_all_metadata():
     Return: list of metadata dictionaries"""
     active_only = request.args.get("active_only", True)
     artifact_type = request.args.get("artifact_type", 0)
+    format = request.args.get("format", "list")
+    filter = request.args.get("filter", None)
+
+    if format == "dict" and filter:
+        return Response(json.dumps([metadata.Metadata.get_metadata_dict(filter.upper())]), mimetype="application/json")
+
     q = metadata.Metadata.query
     q = q.filter_by(active=active_only)
     if artifact_type:
         q = q.filter_by(artifact_type == artifact_type)
 
-    return Response(json.dumps([entity.to_dict() for entity in q.all()]), mimetype='application/json')
+    if filter:
+        return Response(json.dumps([entity.to_dict() for entity in q.all() if entity.to_dict()["type"] == filter]),
+                        mimetype='application/json')
+    else:
+        return Response(json.dumps([entity.to_dict() for entity in q.all()]), mimetype='application/json')
 
 
 @app.route('/ThreatKB/metadata/<int:id>', methods=['GET'])

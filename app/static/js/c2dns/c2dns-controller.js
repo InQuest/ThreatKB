@@ -228,7 +228,13 @@ angular.module('ThreatKB')
                     resolve: {
                         c2dns: function () {
                             return $scope.c2dns;
-                        }
+                        },
+                        metadata: ['Metadata', function (Metadata) {
+                            return Metadata.query({
+                                filter: "dns",
+                                format: "dict"
+                            });
+                        }]
                     }
                 });
 
@@ -244,11 +250,16 @@ angular.module('ThreatKB')
                 $scope.update(openModalForId);
             }
         }])
-    .controller('C2dnsSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'c2dns', 'Cfg_states', 'Comments', 'Tags', 'growl', 'Bookmarks',
-        function ($scope, $http, $uibModalInstance, $location, c2dns, Cfg_states, Comments, Tags, growl, Bookmarks) {
+    .controller('C2dnsSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'c2dns', 'metadata', 'Cfg_states', 'Comments', 'Tags', 'growl', 'Bookmarks',
+        function ($scope, $http, $uibModalInstance, $location, c2dns, metadata, Cfg_states, Comments, Tags, growl, Bookmarks) {
             $scope.c2dns = c2dns;
             $scope.c2dns.new_comment = "";
             $scope.Comments = Comments;
+            $scope.metadata = metadata;
+
+            $scope.update_selected_metadata = function (m, selected) {
+                c2dns.metadata_values[m.key].value = selected;
+            };
 
             if ($scope.c2dns.$promise !== undefined) {
                 $scope.c2dns.$promise.then(function (result) {

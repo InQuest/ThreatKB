@@ -158,7 +158,7 @@ def get_yara_rule(id):
 @login_required
 def create_yara_rule():
     """Create yara_rule artifact
-    From Data: name (str), test_status (str), confidence (int), severity (int), description (str), state(str), category (str), file_type (str), subcategory1 (str), subcategory2 (str), subcategory3 (str), reference_link (str), condition (str), strings (str)
+    From Data: name (str), state(str), category (str), condition (str), strings (str)
     Return: yara_rule artifact dictionary"""
     new_sig_id = 0
     if request.json['category'] and 'category' in request.json['category']:
@@ -167,16 +167,7 @@ def create_yara_rule():
     entity = yara_rule.Yara_rule(
         state=request.json['state']['state'] if 'state' in request.json['state'] else None
         , name=request.json['name']
-        , test_status=request.json['test_status']
-        , confidence=request.json['confidence']
-        , severity=request.json['severity']
-        , description=request.json['description']
         , category=request.json['category']['category'] if 'category' in request.json['category'] else None
-        , file_type=request.json['file_type']
-        , subcategory1=request.json['subcategory1']
-        , subcategory2=request.json['subcategory2']
-        , subcategory3=request.json['subcategory3']
-        , reference_link=request.json['reference_link']
         , condition=yara_rule.Yara_rule.make_yara_sane(request.json['condition'], "condition:")
         , strings=yara_rule.Yara_rule.make_yara_sane(request.json['strings'], "strings:")
         , eventid=new_sig_id
@@ -198,7 +189,7 @@ def create_yara_rule():
 @login_required
 def update_yara_rule(id):
     """Update yara_rule artifact
-    From Data: name (str), test_status (str), confidence (int), severity (int), description (str), state(str), category (str), file_type (str), subcategory1 (str), subcategory2 (str), subcategory3 (str), reference_link (str), reference_text (str), condition (str), strings (str)
+    From Data: name (str), state(str), category (str), condition (str), strings (str)
     Return: yara_rule artifact dictionary"""
     do_not_bump_revision = request.json.get("do_not_bump_revision", False)
 
@@ -233,17 +224,8 @@ def update_yara_rule(id):
         state=request.json['state']['state'] if request.json['state'] and 'state' in request.json['state'] else
         request.json['state'],
         name=request.json['name'],
-        test_status=request.json.get('test_status', None),
-        confidence=request.json['confidence'],
-        severity=request.json['severity'],
-        description=request.json['description'],
         category=request.json['category']['category'] if request.json['category'] and 'category' in request
             .json['category'] else request.json['category'],
-        file_type=request.json['file_type'],
-        subcategory1=request.json['subcategory1'],
-        subcategory2=request.json['subcategory2'],
-        subcategory3=request.json['subcategory3'],
-        reference_link=request.json['reference_link'],
         condition=yara_rule.Yara_rule.make_yara_sane(request.json["condition"], "condition:"),
         strings=yara_rule.Yara_rule.make_yara_sane(request.json["strings"], "strings:"),
         eventid=temp_sig_id,

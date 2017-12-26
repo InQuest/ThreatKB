@@ -1,4 +1,4 @@
-from app import db
+from app import db, ENTITY_MAPPING
 from dateutil import parser
 
 
@@ -25,6 +25,19 @@ class Metadata(db.Model):
     created_user = db.relationship('KBUser', foreign_keys=created_user_id,
                                    primaryjoin="KBUser.id==Metadata.created_user_id")
     choices = db.relationship('MetadataChoices', primaryjoin="MetadataChoices.metadata_id==Metadata.id")
+
+    @staticmethod
+    def get_metadata_dict(entity_type):
+        metadata_dict = {}
+
+        for metadata in [entity.to_dict() for entity in db.session.query(Metadata).filter(
+                Metadata.artifact_type == ENTITY_MAPPING[entity_type]).filter(Metadata.active > 0).all()]:
+            if metadata["type"] not in metadata_dict.keys():
+                metadata_dict[metadata["type"]] = []
+            metadata_dict[metadata["type"]].append(metadata)
+
+        return metadata_dict
+
 
     def to_dict(self, include_mappings=False):
         try:

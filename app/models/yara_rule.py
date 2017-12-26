@@ -76,10 +76,9 @@ class Yara_rule(db.Model):
         comments = Comments.query.filter_by(entity_id=self.id).filter_by(
             entity_type=ENTITY_MAPPING["SIGNATURE"]).all()
         files = Files.query.filter_by(entity_id=self.id).filter_by(entity_type=ENTITY_MAPPING["SIGNATURE"]).all()
-        metadata_dict = {}
-        metadata_values = [entity.to_dict() for entity in self.metadata_values]
-        for m in metadata_values:
-            metadata_dict[m["metadata"]["key"]] = m
+        metadata_values_dict = {}
+
+        metadata_values_dict = {m["metadata"]["key"]: m for m in [entity.to_dict() for entity in self.metadata_values]}
 
         yara_dict = dict(
             creationed_date=self.creation_date.isoformat(),
@@ -101,9 +100,8 @@ class Yara_rule(db.Model):
             modified_user=self.modified_user.to_dict(),
             owner_user=self.owner_user.to_dict() if self.owner_user else None,
             revision=self.revision,
-            metadata=[entity.to_dict() for entity in self.metadata_fields],
-            metadata_values=metadata_values,
-            metadata_dict=metadata_dict
+            metadata=Metadata.get_metadata_dict("SIGNATURE"),
+            metadata_values=metadata_values_dict,
         )
 
         if include_yara_rule_string:
@@ -137,7 +135,7 @@ class Yara_rule(db.Model):
                                                                                         "modified_user"]:
                 yara_rule_text += "\t\t%s = \"%s\"\n" % (field, yara_dict[field])
 
-        for key, value_dict in yara_dict["metadata_dict"].iteritems():
+        for key, value_dict in yara_dict["metadata"].iteritems():
             if key and value_dict and "value" in value_dict:
                 yara_rule_text += "\t\t%s = \"%s\"\n" % (key, value_dict["value"])
 

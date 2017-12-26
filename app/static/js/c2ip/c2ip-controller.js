@@ -229,7 +229,13 @@ angular.module('ThreatKB')
                     resolve: {
                         c2ip: function () {
                             return $scope.c2ip;
-                        }
+                        },
+                        metadata: ['Metadata', function (Metadata) {
+                            return Metadata.query({
+                                filter: "ip",
+                                format: "dict"
+                            });
+                        }]
                     }
                 });
 
@@ -245,11 +251,16 @@ angular.module('ThreatKB')
                 $scope.update(openModalForId);
             }
         }])
-    .controller('C2ipSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'c2ip', 'Comments', 'Cfg_states', 'Tags', 'growl', 'Bookmarks',
-        function ($scope, $http, $uibModalInstance, $location, c2ip, Comments, Cfg_states, Tags, growl, Bookmarks) {
+    .controller('C2ipSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'c2ip', 'metadata', 'Comments', 'Cfg_states', 'Tags', 'growl', 'Bookmarks',
+        function ($scope, $http, $uibModalInstance, $location, c2ip, metadata, Comments, Cfg_states, Tags, growl, Bookmarks) {
             $scope.c2ip = c2ip;
             $scope.c2ip.new_comment = "";
             $scope.Comments = Comments;
+            $scope.metadata = metadata;
+
+            $scope.update_selected_metadata = function (m, selected) {
+                c2ip.metadata_values[m.key].value = selected;
+            };
 
             if ($scope.c2ip.$promise !== undefined) {
                 $scope.c2ip.$promise.then(function (result) {
