@@ -13,6 +13,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
     default_state = "Imported"
     return_artifacts = []
     duplicate_artifacts = []
+    fields_to_add = {}
 
     if not cfg_states.Cfg_states.query.filter_by(state=default_state).first():
         db.session.add(cfg_states.Cfg_states(state=default_state))
@@ -63,11 +64,10 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                     if shared_owner:
                         dns.owner_user_id = shared_owner
 
-
                     db.session.add(dns)
                     return_artifacts.append(dns)
             elif artifact["type"].lower() == "yara_rule" and extract_signature:
-                yr = yara_rule.Yara_rule.get_yara_rule_from_yara_dict(artifact["rule"], metadata_field_mapping)
+                yr, fta = yara_rule.Yara_rule.get_yara_rule_from_yara_dict(artifact["rule"], metadata_field_mapping)
                 yr.created_user_id, yr.modified_user_id = current_user.id, current_user.id
                 yr.state = default_state if not shared_state else shared_state
                 if shared_reference:
@@ -77,11 +77,21 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
 
                 db.session.add(yr)
                 return_artifacts.append(yr)
+                fields_to_add[yr] = fta
         except Exception, e:
             app.logger.exception(e)
             app.logger.error("Failed to commit artifacts '%s'" % (artifact))
 
     db.session.commit()
+    if fields_to_add:
+        for yr, fields in fields_to_add.iteritems():
+            for field in fields:
+                field.artifact_id = yr.id
+
+                field.created_user_id = current_user.id
+                db.session.add(field)
+        db.session.commit()
+
     return {"committed": [artifact.to_dict() for artifact in return_artifacts],
             "duplicates": duplicate_artifacts}
 

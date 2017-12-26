@@ -49,7 +49,7 @@ def extract_yara_rules(text):
     for yara_rule in yara_rules:
         try:
             extracted.append(parse_yara_rules_text(yara_rule)[0])
-        except:
+        except Exception, e:
             pass
 
     return extracted

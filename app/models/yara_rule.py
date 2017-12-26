@@ -135,6 +135,10 @@ class Yara_rule(db.Model):
             if yara_dict.get(field, None):
                 yara_rule_text += "\t%s = \"%s\"\n" % (field, yara_dict[field])
 
+        for key, value_dict in yara_dict["metadata_dict"].iteritems():
+            if key and value_dict and "value" in value_dict:
+                yara_rule_text += "\t%s = \"%s\"\n" % (key, value_dict["value"])
+
         if not "strings:" in yara_dict["strings"]:
             yara_rule_text += "\n\tstrings:\n\t\t%s" % (yara_dict["strings"])
         else:
@@ -152,8 +156,13 @@ class Yara_rule(db.Model):
         type_ = "%s:" if not type_.endswith(":") else type_
         return "\n\t".join([string.strip().strip("\t") for string in text.split("\n") if type_ not in string]).strip()
 
-    @staticmethod
-    def get_yara_rule_from_yara_dict(yara_dict, metadata_field_mapping={}):
+    @classmethod
+    def get_yara_rule_from_yara_dict(cls, yara_dict, metadata_field_mapping={}):
+        metadata_fields = {entity.key.lower(): entity for entity in
+                           db.session.query(Metadata).filter(Metadata.active > 0).filter(
+                               Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).all()}
+        fields_to_add = []
+
         clobber_on_import = cfg_settings.Cfg_settings.get_setting("IMPORT_CLOBBER")
         try:
             clobber_on_import = distutils.util.strtobool(clobber_on_import)
@@ -166,6 +175,7 @@ class Yara_rule(db.Model):
         yara_metadata = {key.lower(): val.strip().strip("\"") for key, val in
                          yara_dict["metadata"].iteritems()} if "metadata" in yara_dict else {}
         for possible_field, mapped_to in metadata_field_mapping.iteritems():
+            mapped_to = mapped_to.lower()
             possible_field = possible_field.lower()
             if possible_field in yara_metadata.keys():
                 field = yara_metadata[possible_field] if not mapped_to in ["confidence", "eventid"] else int(
@@ -189,7 +199,12 @@ class Yara_rule(db.Model):
                             db.session.query(Yara_rule_history).filter_by(yara_rule_id=existing_yara_rule.id).delete()
                             db.session.query(Yara_rule).filter_by(id=existing_yara_rule.id).delete()
 
-                setattr(yara_rule, mapped_to, field)
+                if mapped_to in cls.__table__.columns.keys():
+                    setattr(yara_rule, mapped_to, field)
+                else:
+                    if mapped_to in metadata_fields.keys():
+                        to_field = metadata_fields[mapped_to]
+                        fields_to_add.append(MetadataMapping(value=field, metadata_id=to_field.id))
 
         yara_rule.condition = " ".join(yara_dict["condition_terms"])
         yara_rule.strings = "\n".join(
@@ -197,7 +212,7 @@ class Yara_rule(db.Model):
              yara_dict["strings"]])
         if not yara_rule.category:
             yara_rule.category = CfgCategoryRangeMapping.DEFAULT_CATEGORY
-        return yara_rule
+        return yara_rule, fields_to_add
 
 
 @listens_for(Yara_rule, "before_insert")
