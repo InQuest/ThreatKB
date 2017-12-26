@@ -15,7 +15,6 @@ from flask import abort
 
 
 class Yara_rule(db.Model):
-
     __tablename__ = "yara_rules"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -69,14 +68,19 @@ class Yara_rule(db.Model):
 
     @property
     def metadata_values(self):
-        return db.session.query(Metadata).join(MetadataMapping, Metadata.id == MetadataMapping.metadata_id).filter(
-            Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).filter(MetadataMapping.artifact_id == self.id).all()
+        return db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
+            Metadata.active > 0).filter(MetadataMapping.artifact_id == self.id).all()
 
     def to_dict(self, include_yara_rule_string=None):
         revisions = Yara_rule_history.query.filter_by(yara_rule_id=self.id).all()
         comments = Comments.query.filter_by(entity_id=self.id).filter_by(
             entity_type=ENTITY_MAPPING["SIGNATURE"]).all()
         files = Files.query.filter_by(entity_id=self.id).filter_by(entity_type=ENTITY_MAPPING["SIGNATURE"]).all()
+        metadata_dict = {}
+        metadata_values = [entity.to_dict() for entity in self.metadata_values]
+        for m in metadata_values:
+            metadata_dict[m["metadata"]["key"]] = m
+
         yara_dict = dict(
             creationed_date=self.creation_date.isoformat(),
             last_revision_date=self.last_revision_date.isoformat(),
@@ -98,7 +102,8 @@ class Yara_rule(db.Model):
             owner_user=self.owner_user.to_dict() if self.owner_user else None,
             revision=self.revision,
             metadata=[entity.to_dict() for entity in self.metadata_fields],
-            metadata_values=[entity.to_dict() for entity in self.metadata_values]
+            metadata_values=metadata_values,
+            metadata_dict=metadata_dict
         )
 
         if include_yara_rule_string:
