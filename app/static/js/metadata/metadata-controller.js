@@ -14,6 +14,7 @@ angular.module('ThreatKB')
             $scope.types = [{value: "string"},
                 {value: "integer"}, {value: "date"}, {value: "multiline_comment"}, {value: "select"}];
             $scope.show_in_table_options = [{key: "Yes", value: 1}, {key: "No", value: 0}];
+            $scope.required_options = [{key: "Yes", value: 1}, {key: "No", value: 0}];
             $scope.artifact_type_options = $rootScope.ENTITY_MAPPING_REVERSE;
 
             $scope.artifact_type_to_string = function (type_) {
@@ -32,10 +33,25 @@ angular.module('ThreatKB')
                         return obj.key;
                     }
                 }
+                return "No";
+            };
+
+            $scope.required_to_string = function (required) {
+                for (var i = 0; i < $scope.required_options.length; i++) {
+                    var obj = $scope.required_options[i];
+                    if (obj.value == required) {
+                        return obj.key;
+                    }
+                }
+                return "No";
             };
 
             $scope.change_show_in_table_option = function (selected) {
-                $scope.show_in_table = $scope.show_in_table_options[selected];
+                $scope.metadata.show_in_table = $scope.show_in_table_options[selected];
+            }
+
+            $scope.change_required_option = function (selected) {
+                $scope.metadata.required = $scope.required_options[selected];
             }
 
             $scope.create = function () {
@@ -47,7 +63,6 @@ angular.module('ThreatKB')
                 Metadata.delete({id: id},
                     function () {
                         $scope.metadatas = Metadata.query();
-                        $scope.normalize_metadatas();
                     });
             };
 
@@ -56,14 +71,12 @@ angular.module('ThreatKB')
                     Metadata.update({id: id}, $scope.metadata,
                         function () {
                             $scope.metadatas = Metadata.query();
-                            $scope.normalize_metadatas();
                             //$scope.clear();
                         });
                 } else {
                     Metadata.save($scope.metadata,
                         function () {
                             $scope.metadatas = Metadata.query();
-                            $scope.normalize_metadatas();
                             //$scope.clear();
                         });
                 }
@@ -96,6 +109,9 @@ angular.module('ThreatKB')
                         },
                         artifact_type_options: function () {
                             return $scope.artifact_type_options;
+                        },
+                        required_options: function () {
+                            return $scope.required_options;
                         }
                     }
                 });
@@ -106,8 +122,8 @@ angular.module('ThreatKB')
                 });
             };
         }])
-    .controller('MetadataSaveController', ['$scope', '$rootScope', '$uibModalInstance', 'metadata', 'types', 'show_in_table_options', 'artifact_type_options', 'Metadata', 'Comments',
-        function ($scope, $rootScope, $uibModalInstance, metadata, types, show_in_table_options, artifact_type_options, Metadata, Comments) {
+    .controller('MetadataSaveController', ['$scope', '$rootScope', '$uibModalInstance', 'metadata', 'types', 'show_in_table_options', 'artifact_type_options', 'required_options', 'Metadata', 'Comments',
+        function ($scope, $rootScope, $uibModalInstance, metadata, types, show_in_table_options, artifact_type_options, required_options, Metadata, Comments) {
             $scope.metadata = metadata;
             $scope.types = types;
             $scope.show_in_table_options = show_in_table_options;
@@ -115,6 +131,10 @@ angular.module('ThreatKB')
 
             $scope.change_show_in_table_option = function (selected) {
                 $scope.metadata.show_in_table = selected.value;
+            }
+
+            $scope.change_required_option = function (selected) {
+                $scope.metadata.required = selected.value;
             }
 
             $scope.change_type_option = function (selected) {

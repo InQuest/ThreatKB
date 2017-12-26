@@ -66,7 +66,8 @@ def create_metadata():
         , artifact_type=request.json['artifact_type']
         , type_=type_
         , default=default
-        , show_in_table=request.json.get('show_in_table', 0)
+        , show_in_table=0
+        , required=request.json.get("required", 0)
         , created_user_id=current_user.id
     )
     db.session.add(entity)

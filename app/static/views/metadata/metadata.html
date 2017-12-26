@@ -34,21 +34,6 @@
                     </ui-select>
                 </div>
 
-
-                <div class="form-group">
-                    <label>Artifact Type</label>
-                    <ui-select ng-model="artifact_type" ng-required
-                               on-select="change_artifact_type_option($select.selected)">
-                        <ui-select-match placeholder="Select an option...">
-                            <small><span ng-bind="$select.selected.value || metadata.artifact_type"></span></small>
-                        </ui-select-match>
-                        <ui-select-choices
-                                repeat="option in (artifact_type_options | filter: $select.search) track by option.value">
-                            <small><span>{{ option.value }}</span></small>
-                        </ui-select-choices>
-                    </ui-select>
-                </div>
-
                 <div class="form-group" ng-if="metadata.type && metadata.type !== 'select'">
                     <label>Default Value</label>
                     <input type="text" class="form-control" name="default"
@@ -68,11 +53,25 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Show In Main Table</label>
-                    <ui-select ng-model="show_in_table" ng-required
-                               on-select="change_show_in_table_option($select.selected)">
+                    <label>On Artifact Type</label>
+                    <ui-select ng-model="artifact_type" ng-required
+                               on-select="change_artifact_type_option($select.selected)">
                         <ui-select-match placeholder="Select an option...">
-                            <small><span ng-bind="$select.selected.key || show_in_table"></span></small>
+                            <small><span ng-bind="$select.selected.value || metadata.artifact_type"></span></small>
+                        </ui-select-match>
+                        <ui-select-choices
+                                repeat="option in (artifact_type_options | filter: $select.search) track by option.value">
+                            <small><span>{{ option.value }}</span></small>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+
+                <div class="form-group">
+                    <label>Required</label>
+                    <ui-select ng-model="metadata.required"
+                               on-select="change_required_option($select.selected)">
+                        <ui-select-match placeholder="Select an option...">
+                            <small><span ng-bind="$select.selected.key || metadata.required"></span></small>
                         </ui-select-match>
                         <ui-select-choices
                                 repeat="option in (show_in_table_options | filter: $select.search) track by option.key">
@@ -115,7 +114,7 @@
 
                 <th>Default/Choices</th>
 
-                <th>Show In Table</th>
+                <th>Required</th>
 
                 <th style="width: 120px;">Actions</th>
             </tr>
@@ -133,7 +132,7 @@
 
                 <td ng-if="metadata.type && metadata.type == 'select'">{{ metadata_short_choice_string(metadata) }}</td>
 
-                <td ng-if="metadata.key">{{ show_in_table_to_string(metadata.show_in_table) }}</td>
+                <td ng-if="metadata.key">{{ required_to_string(metadata.required) }}</td>
 
                 <td ng-if="metadata.key" style="float:right">
                     <center>

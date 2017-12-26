@@ -106,7 +106,6 @@ class Yara_rule(db.Model):
 
         return yara_dict
 
-
     def to_revision_dict(self):
         dict = self.to_dict()
         del dict["comments"]
