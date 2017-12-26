@@ -25,16 +25,7 @@ class Yara_rule(db.Model):
     state = db.Column(db.String(32), index=True)
     revision = db.Column(db.Integer(unsigned=True), default=1)
     name = db.Column(db.String(128), index=True)
-    test_status = db.Column(db.String(16))
-    confidence = db.Column(db.Integer)
-    severity = db.Column(db.Integer)
-    description = db.Column(db.String(4096))
     category = db.Column(db.String(32), index=True)
-    file_type = db.Column(db.String(32))
-    subcategory1 = db.Column(db.String(32))
-    subcategory2 = db.Column(db.String(32))
-    subcategory3 = db.Column(db.String(32))
-    reference_link = db.Column(db.String(2048))
     condition = db.Column(db.String(2048))
     strings = db.Column(db.String(30000))
     active = db.Column(db.Boolean, nullable=False, default=True)
@@ -91,16 +82,7 @@ class Yara_rule(db.Model):
             last_revision_date=self.last_revision_date.isoformat(),
             state=self.state,
             name=self.name,
-            test_status=self.test_status,
-            confidence=self.confidence,
-            severity=self.severity,
-            description=self.description,
             category=self.category,
-            file_type=self.file_type,
-            subcategory1=self.subcategory1,
-            subcategory2=self.subcategory2,
-            subcategory3=self.subcategory3,
-            reference_link=self.reference_link,
             condition="condition:\n\t%s" % self.condition,
             strings="strings:\n\t%s" % self.strings,
             eventid=self.eventid,
@@ -182,9 +164,7 @@ class Yara_rule(db.Model):
         for possible_field, mapped_to in metadata_field_mapping.iteritems():
             possible_field = possible_field.lower()
             if possible_field in yara_metadata.keys():
-                field = yara_metadata[possible_field] if not mapped_to in ["confidence",
-                                                                                                        "severity",
-                                                                                "eventid"] else int(
+                field = yara_metadata[possible_field] if not mapped_to in ["confidence", "eventid"] else int(
                     yara_metadata[possible_field])
 
                 if mapped_to in ["last_revision_date", "creation_date"]:

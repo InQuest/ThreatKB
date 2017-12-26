@@ -7,7 +7,7 @@ from app import db, current_user, ENTITY_MAPPING
 from app.geo_ip_helper import get_geo_for_ip
 from app.models.whitelist import Whitelist
 from app.routes import tags_mapping
-from app.models.comments import Comments
+from app.models.metadata import Metadata, MetadataMapping
 from app.models import cfg_states
 
 from flask import abort
@@ -26,10 +26,8 @@ class C2ip(db.Model):
     asn = db.Column(db.String(128))
     country = db.Column(db.String(64))
     state = db.Column(db.String(32), index=True)
-    reference_link = db.Column(db.String(2048))
     expiration_type = db.Column(db.String(32))
     expiration_timestamp = db.Column(db.DateTime(timezone=True))
-    description = db.Column(db.String(4096))
 
     created_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
     created_user = db.relationship('KBUser', foreign_keys=created_user_id,
@@ -41,17 +39,24 @@ class C2ip(db.Model):
 
     owner_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=True)
     owner_user = db.relationship('KBUser', foreign_keys=owner_user_id,
-                                    primaryjoin="KBUser.id==C2ip.owner_user_id")
+                                 primaryjoin="KBUser.id==C2ip.owner_user_id")
 
     comments = db.relationship("Comments", foreign_keys=[id],
                                primaryjoin="and_(Comments.entity_id==C2ip.id, Comments.entity_type=='%s')" % (
                                    ENTITY_MAPPING["IP"]), lazy="dynamic")
 
     tags = []
-
     addedTags = []
-
     removedTags = []
+
+    @property
+    def metadata_fields(self):
+        return db.session.query(Metadata).filter(Metadata.artifact_type == ENTITY_MAPPING["IP"]).all()
+
+    @property
+    def metadata_values(self):
+        return db.session.query(Metadata).join(MetadataMapping, Metadata.id == MetadataMapping.metadata_id).filter(
+            Metadata.artifact_type == ENTITY_MAPPING["IP"]).filter(MetadataMapping.artifact_id == self.id).all()
 
     def to_dict(self):
         return dict(
@@ -61,10 +66,8 @@ class C2ip(db.Model):
             asn=self.asn,
             country=self.country,
             state=self.state,
-            reference_link=self.reference_link,
             expiration_type=self.expiration_type,
             expiration_timestamp=self.expiration_timestamp.isoformat() if self.expiration_timestamp else None,
-            description=self.description,
             id=self.id,
             tags=tags_mapping.get_tags_for_source(self.__tablename__, self.id),
             addedTags=[],
@@ -72,7 +75,9 @@ class C2ip(db.Model):
             created_user=self.created_user.to_dict(),
             modified_user=self.modified_user.to_dict(),
             owner_user=self.owner_user.to_dict() if self.owner_user else None,
-            comments=[comment.to_dict() for comment in self.comments]
+            comments=[comment.to_dict() for comment in self.comments],
+            metadata=[entity.to_dict() for entity in self.metadata_fields],
+            metadata_values=[entity.to_dict() for entity in self.metadata_values]
         )
 
     @classmethod
@@ -85,7 +90,6 @@ class C2ip(db.Model):
         c2ip.country = geo_ip["country_code"]
         c2ip.city = geo_ip["city"]
         return c2ip
-
 
     def __repr__(self):
         return '<C2ip %r>' % (self.id)
