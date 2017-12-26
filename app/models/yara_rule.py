@@ -132,12 +132,14 @@ class Yara_rule(db.Model):
         yara_rule_text = "rule %s\n{\n\n" % (yara_dict.get("name"))
         yara_rule_text += "\tmeta:\n"
         for field in metadata_field_mapping:
-            if yara_dict.get(field, None):
-                yara_rule_text += "\t%s = \"%s\"\n" % (field, yara_dict[field])
+            if yara_dict.get(field, None) and not "metadata" in field and not field in ["state", "strings", "condition",
+                                                                                        "id", "created_user",
+                                                                                        "modified_user"]:
+                yara_rule_text += "\t\t%s = \"%s\"\n" % (field, yara_dict[field])
 
         for key, value_dict in yara_dict["metadata_dict"].iteritems():
             if key and value_dict and "value" in value_dict:
-                yara_rule_text += "\t%s = \"%s\"\n" % (key, value_dict["value"])
+                yara_rule_text += "\t\t%s = \"%s\"\n" % (key, value_dict["value"])
 
         if not "strings:" in yara_dict["strings"]:
             yara_rule_text += "\n\tstrings:\n\t\t%s" % (yara_dict["strings"])
