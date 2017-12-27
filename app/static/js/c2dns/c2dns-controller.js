@@ -8,6 +8,8 @@ angular.module('ThreatKB')
 
             $scope.users = Users.query();
 
+            $scope.cfg_states = Cfg_states.query();
+
             $scope.filterOptions = {
                 filterText: ''
             };
@@ -62,15 +64,29 @@ angular.module('ThreatKB')
                 columnDefs:
                     [
                         {field: 'domain_name'},
-                        {field: 'state', enableSorting: false},
                         {field: 'match_type', enableSorting: false},
                         {field: 'expiration_type', enableSorting: false},
+                        {
+                            field: 'state',
+                            displayName: 'State',
+                            enableSorting: false,
+                            cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.state"'
+                            + ' on-select="grid.appScope.save(row.entity)">'
+                            + '<ui-select-match placeholder="Select an state ...">'
+                            + '<small><span ng-bind="$select.selected.state || row.entity.state"></span></small>'
+                            + '</ui-select-match>'
+                            + '<ui-select-choices'
+                            + ' repeat="state in (grid.appScope.cfg_states | filter: $select.search) track by state.id">'
+                            + '<small><span ng-bind="state.state"></span></small>'
+                            + '</ui-select-choices>'
+                            + '</ui-select>'
+                            + '</div>'
+                        },
                         {
                             field: 'owner_user.email',
                             displayName: 'Owner',
                             width: '20%',
                             enableSorting: false,
-                            enableFiltering: false,
                             cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.owner_user"'
                             + ' on-select="grid.appScope.save(row.entity)">'
                             + '<ui-select-match placeholder="Select an owner ...">'
@@ -176,6 +192,46 @@ angular.module('ThreatKB')
                         growl.error(error.data, {ttl: -1});
                     });
                 } else {
+                    $scope.c2dns.metadata_values = {};
+
+                    if ($scope.c2dns.metadata[0].hasOwnProperty("string")) {
+                        for (var i = 0; i < $scope.c2dns.metadata[0].string.length; i++) {
+                            var entity = $scope.c2dns.metadata[0].string[i];
+                            $scope.c2dns.metadata_values[entity.key] = {value: entity.default};
+                        }
+                    }
+                    if ($scope.c2dns.metadata[0].hasOwnProperty("multiline_comment")) {
+                        for (var i = 0; i < $scope.c2dns.metadata[0].multiline_comment.length; i++) {
+                            var entity = $scope.c2dns.metadata[0].multiline_comment[i];
+                            $scope.c2dns.metadata_values[entity.key] = {value: entity.default};
+                        }
+                    }
+
+                    if ($scope.c2dns.metadata[0].hasOwnProperty("date")) {
+                        for (var i = 0; i < $scope.c2dns.metadata[0].date.length; i++) {
+                            var entity = $scope.c2dns.metadata[0].date[i];
+                            $scope.c2dns.metadata_values[entity.key] = {value: entity.default};
+                        }
+                    }
+
+                    if ($scope.c2dns.metadata[0].hasOwnProperty("integer")) {
+                        for (var i = 0; i < $scope.c2dns.metadata[0].integer.length; i++) {
+                            var entity = $scope.c2dns.metadata[0].integer[i];
+                            $scope.c2dns.metadata_values[entity.key] = {value: entity.default};
+                        }
+                    }
+
+                    if ($scope.c2dns.metadata[0].hasOwnProperty("select")) {
+                        for (var i = 0; i < $scope.c2dns.metadata[0].select.length; i++) {
+                            var entity = $scope.c2dns.metadata[0].select[i];
+                            if (typeof(entity.default) == "object") {
+                                $scope.c2dns.metadata_values[entity.key] = {value: entity.default.choice};
+                            } else {
+                                $scope.c2dns.metadata_values[entity.key] = {value: entity.default};
+                            }
+                        }
+                    }
+
                     C2dns.save($scope.c2dns, function () {
                         //$scope.c2dns = C2dns.query();
                         getPage();
@@ -208,10 +264,17 @@ angular.module('ThreatKB')
                     templateUrl: 'c2dns-save.html',
                     controller: 'C2dnsSaveController',
                     size: 'lg',
+                    backdrop: 'static',
                     resolve: {
                         c2dns: function () {
                             return $scope.c2dns;
-                        }
+                        },
+                        metadata: ['Metadata', function (Metadata) {
+                            return Metadata.query({
+                                filter: "dns",
+                                format: "dict"
+                            });
+                        }]
                     }
                 });
 
@@ -227,11 +290,22 @@ angular.module('ThreatKB')
                 $scope.update(openModalForId);
             }
         }])
-    .controller('C2dnsSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'c2dns', 'Cfg_states', 'Comments', 'Tags', 'growl', 'Bookmarks',
-        function ($scope, $http, $uibModalInstance, $location, c2dns, Cfg_states, Comments, Tags, growl, Bookmarks) {
+    .controller('C2dnsSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'c2dns', 'metadata', 'Cfg_states', 'Comments', 'Tags', 'growl', 'Bookmarks',
+        function ($scope, $http, $uibModalInstance, $location, c2dns, metadata, Cfg_states, Comments, Tags, growl, Bookmarks) {
             $scope.c2dns = c2dns;
             $scope.c2dns.new_comment = "";
             $scope.Comments = Comments;
+            $scope.metadata = metadata;
+            if (!$scope.c2dns.id) {
+                $scope.c2dns.metadata = metadata;
+            }
+
+            $scope.update_selected_metadata = function (m, selected) {
+                if (!$scope.c2dns.metadata_values[m.key]) {
+                    $scope.c2dns.metadata_values[m.key] = {};
+                }
+                $scope.c2dns.metadata_values[m.key].value = selected.choice;
+            };
 
             if ($scope.c2dns.$promise !== undefined) {
                 $scope.c2dns.$promise.then(function (result) {

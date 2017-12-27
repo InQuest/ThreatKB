@@ -1,0 +1,151 @@
+<div>
+    <script type="text/ng-template" id="script-save.html">
+        <style type="text/css">
+
+            #rulesets .CodeMirror {
+                border-bottom: None;
+            }
+
+            .popover {
+                width: auto;
+            }
+
+            .popover-title {
+                display: none;
+            }
+
+            .popover-table td {
+                padding: 0 10px;
+                font-size: 11px;
+            }
+
+            .popover-content {
+                -webkit-border-radius: 3px;
+                -moz-border-radius: 3px;
+                border-radius: 3px;
+            }
+
+        </style>
+        <form name="form" novalidate
+              class="ng-scope ng-invalid ng-invalid-required ng-dirty"
+              ng-submit="ok()">
+
+            <div class="modal-header">
+                <button type="button" class="close"
+                        ng-click="cancel()">&times;
+                </button>
+                <h4 class="modal-title" id="myScriptsLabel">{{ script.id ? 'Edit' : 'Create' }} a Script</h4>
+            </div>
+            <div class="modal-body">
+
+                <div class="form-group">
+                    <label>Name:</label>
+
+                    <input class="form-control" name="name"
+                           ng-model="script.name" ng-required="true"
+                           ng-maxlength="128"/>
+                    <span class="error" ng-show="form.text.$error.maxlength">Must be at most 128 characters.</span>
+                </div>
+
+
+                <div class="form-group">
+                    <label>Description:</label>
+
+                    <input class="form-control" name="description"
+                           ng-model="script.description" ng-required="true"
+                           ng-maxlength="128"/>
+                    <span class="error" ng-show="form.text.$error.maxlength">Must be at most 128 characters.</span>
+                </div>
+
+                <div class="form-group">
+                    <label>Match Regex:</label>
+
+                    <input class="form-control" name="match_regex"
+                           ng-model="script.match_regex" ng-required="false"
+                           ng-maxlength="4096"/>
+                    <span class="error" ng-show="form.text.$error.maxlength">Must be at most 4096 characters.</span>
+                </div>
+
+                <div class="btn-group pull-right" uib-dropdown style="padding-bottom: 5px;">
+                    <button id="btn-append-to-single-button" type="button" class="btn btn-primary" uib-dropdown-toggle>
+                        <span ng-if="script.interpreter">{{ script.interpreter }}</span>
+                        <span ng-if="!script.interpreter">Select Interpreter</span>
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" uib-dropdown-menu role="menu"
+                        aria-labelledby="btn-append-to-single-button">
+                        <li ng-repeat="interpreter in interpreters">
+                            <a href="#" ng-click="change(interpreter)">{{ interpreter }}</a>
+                        </li>
+                    </ul>
+                </div>
+                <BR>
+                <BR>
+                <textarea ui-codemirror="cmOption" ng-model="script.code"></textarea>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" ng-click="cancel()">Cancel
+                </button>
+                <button ng-disabled="form.$invalid" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </script>
+
+    <br>
+    <div class="container-fluid">
+
+        <div class="inner-addon left-addon col-md-4" style="padding-left:0px;">
+            <i class="glyphicon glyphicon-search"></i>
+            <input type="text" class="form-control" placeholder="Search" ng-model="search"/>
+        </div>
+        <a class="btn-link pull-right" style="color:inherit;" ng-click="create()">
+            <span class="glyphicon glyphicon-plus-sign"></span>
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Name</th>
+
+                <th>Description</th>
+
+                <th>Interpreter</th>
+
+                <th>Match Regex</th>
+
+                <th style="width: 120px;">
+                    <center>Actions</center>
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="script in scripts | toArray:false | filter:search track by $index">
+                <td ng-if="script.id">{{ script.name }}</td>
+
+                <td ng-if="script.id">{{ script.description }}</td>
+
+                <td ng-if="script.id">{{ script.interpreter }}</td>
+
+                <td ng-if="script.id">{{ script.match_regex }}</td>
+
+
+                <td ng-if="script.id">
+                    <center>
+                        <button ng-click="update(script.id)" class="btn btn-sm">
+                            <small><span class="glyphicon glyphicon-pencil"></span></small>
+                        </button>
+                        <button ng-click="delete(script.id)"
+                                ng-confirm-click="Are you sure you want to delete {{ script.name }}?"
+                                class="btn btn-sm btn-danger">
+                            <small><span class="glyphicon glyphicon-remove-circle"></span></small>
+                        </button>
+                    </center>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -27,7 +27,7 @@ angular.module('ThreatKB')
             })
         };
 
-        function get_latest_release() {
+        function get_latest_releases() {
             return $http.get('/ThreatKB/releases/latest', {
                 cache: false,
             }).then(function (response) {
@@ -39,7 +39,7 @@ angular.module('ThreatKB')
 
         return {
             resource: release_resource,
-            get_latest_release: get_latest_release,
+            get_latest_releases: get_latest_releases,
             generate_release_notes: generate_release_notes,
             generate_artifact_export: generate_artifact_export
         };

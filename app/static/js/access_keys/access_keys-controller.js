@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('AccessKeysController', ['$scope', '$http', '$uibModal', 'resolvedAccessKeys', 'AccessKeys',
-        function ($scope, $http, $uibModal, resolvedAccessKeys, AccessKeys) {
+    .controller('AccessKeysController', ['$scope', '$http', '$uibModal', 'resolvedAccessKeys', 'AccessKeys', 'growl', 'FileSaver', 'Blob',
+        function ($scope, $http, $uibModal, resolvedAccessKeys, AccessKeys, growl, FileSaver, Blob) {
 
             $scope.access_keys = resolvedAccessKeys;
 
@@ -13,6 +13,23 @@ angular.module('ThreatKB')
                 });
             };
             $scope.getActiveInactiveCount();
+
+            $scope.get_cli = function () {
+                AccessKeys.get_cli().then(function (response) {
+                    var header = response.headers()['content-disposition'];
+                    //var startIndex = header.indexOf('filename=');
+                    //var filename = header.slice(startIndex + 9);
+                    var filename = "threatkb_cli.py";
+                    try {
+                        FileSaver.saveAs(new Blob([response.data], {type: response.headers()["Content-Type"]}), filename);
+                    }
+                    catch (error) {
+                        growl.error(error.message, {ttl: -1});
+                    }
+                }, function (error) {
+                    growl.error(error.data, {ttl: -1});
+                });
+            };
 
             $scope.update = function (id, status) {
                 $scope.access_key = AccessKeys.resource.get({id: id});

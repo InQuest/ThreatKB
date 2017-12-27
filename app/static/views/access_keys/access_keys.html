@@ -19,8 +19,8 @@
                     <br><br>
                     To help protect your security, store your secret key securely and do not share it.
                     <br><br>
-                <pre ng-model="access_key">Token: {{access_key.token}}
-Secret Key: {{access_key.s_key}}</pre>
+                <pre ng-model="access_key">Token: {{ access_key.token }}
+Secret Key: {{ access_key.s_key }}</pre>
                 </p>
             </div>
             <div class="modal-footer">
@@ -37,7 +37,8 @@ Secret Key: {{access_key.s_key}}</pre>
         </a>
     </div>
     <br>
-    <div>Note: You can have a maximum of two access keys (active or inactive) at a time.</div>
+    <div>Note: You can have a maximum of two access keys (active or inactive) at a time. Download cli
+        <a ng-click="get_cli()" title="Download cli">here</a></div>
     <br>
     <div class="table-responsive">
         <table class="table table-striped">
@@ -54,7 +55,7 @@ Secret Key: {{access_key.s_key}}</pre>
             </thead>
             <tbody>
             <tr ng-repeat="key in access_keys">
-                <td ng-if="key.id">{{key.created | date:'yyyy-MM-dd'}}</td>
+                <td ng-if="key.id">{{ key.created | date:'yyyy-MM-dd'}}</td>
 
                 <td ng-if="key.id" style="font-size: smaller;">{{ key.token }}</td>
 

@@ -32,9 +32,13 @@ def get_tags_mapping(id):
 @app.route('/ThreatKB/tags_mapping/<string:source_table>/<int:source_id>', methods=['GET'])
 @auto.doc()
 @login_required
-def get_tags_for_source(source_table, source_id):
+def get_tags_for_source_auth(source_table, source_id):
     """Return tag mapping associated with the given source_table and source_id
     Return: list of entity dictionaries associated with the tag"""
+    return get_tags_for_source(source_table, source_id)
+
+
+def get_tags_for_source(source_table, source_id):
     entities = tags_mapping.Tags_mapping.query.filter_by(source_table=source_table, source_id=source_id).all()
 
     list_of_tags = []

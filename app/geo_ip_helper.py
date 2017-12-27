@@ -40,6 +40,15 @@ def get_geo_for_ip(ip_address):
                 country=city_info.registered_country.names["en"] if city_info.registered_country.names else None,
                 continent=city_info.continent.names["en"] if city_info.continent.names else None
             )
-        return None
+        raise Exception("e")
     except Exception as e:
-        return None
+        return dict(
+            ip=ip_address,
+            asn=None,
+            country_code=None,
+            city=None,
+            state=None,
+            zip_code=None,
+            country=None,
+            continent=None
+        )

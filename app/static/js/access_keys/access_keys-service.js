@@ -17,8 +17,17 @@ angular.module('ThreatKB')
                 });
         }
 
+        function get_cli() {
+            return $http.get('/ThreatKB/access_keys/cli', {cache: false})
+                .then(function (response) {
+                    return response;
+                }, function (error) {
+                });
+        }
+
         return {
             resource: access_keys_resource,
-            getActiveInactiveCount: getActiveInactiveCount
+            getActiveInactiveCount: getActiveInactiveCount,
+            get_cli: get_cli
         };
     }]);

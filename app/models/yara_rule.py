@@ -1,7 +1,8 @@
-from app import db, current_user
+from app import db, current_user, ENTITY_MAPPING
 from app.models.files import Files
 from app.routes import tags_mapping
 from app.models.comments import Comments
+from app.models.metadata import MetadataMapping, Metadata
 from app.models.cfg_category_range_mapping import CfgCategoryRangeMapping
 from app.models import cfg_settings, cfg_states
 from sqlalchemy.event import listens_for
@@ -12,8 +13,8 @@ import distutils
 
 from flask import abort
 
-class Yara_rule(db.Model):
 
+class Yara_rule(db.Model):
     __tablename__ = "yara_rules"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -23,16 +24,7 @@ class Yara_rule(db.Model):
     state = db.Column(db.String(32), index=True)
     revision = db.Column(db.Integer(unsigned=True), default=1)
     name = db.Column(db.String(128), index=True)
-    test_status = db.Column(db.String(16))
-    confidence = db.Column(db.Integer)
-    severity = db.Column(db.Integer)
-    description = db.Column(db.String(4096))
     category = db.Column(db.String(32), index=True)
-    file_type = db.Column(db.String(32))
-    subcategory1 = db.Column(db.String(32))
-    subcategory2 = db.Column(db.String(32))
-    subcategory3 = db.Column(db.String(32))
-    reference_link = db.Column(db.String(2048))
     condition = db.Column(db.String(2048))
     strings = db.Column(db.String(30000))
     active = db.Column(db.Boolean, nullable=False, default=True)
@@ -56,11 +48,11 @@ class Yara_rule(db.Model):
 
     comments = db.relationship("Comments", foreign_keys=[id],
                                primaryjoin="and_(Comments.entity_id==Yara_rule.id, Comments.entity_type=='%s')" % (
-                                   Comments.ENTITY_MAPPING["SIGNATURE"]), lazy="dynamic", cascade="all,delete")
+                                   ENTITY_MAPPING["SIGNATURE"]), lazy="dynamic", cascade="all,delete")
 
     files = db.relationship("Files", foreign_keys=[id],
                             primaryjoin="and_(Files.entity_id==Yara_rule.id, Files.entity_type=='%s')" % (
-                                Files.ENTITY_MAPPING["SIGNATURE"]), lazy="dynamic", cascade="all,delete")
+                                ENTITY_MAPPING["SIGNATURE"]), lazy="dynamic", cascade="all,delete")
 
     history = db.relationship("Yara_rule_history", foreign_keys=[id],
                               primaryjoin="Yara_rule_history.yara_rule_id==Yara_rule.id", lazy="dynamic",
@@ -70,26 +62,33 @@ class Yara_rule(db.Model):
                                    primaryjoin="Yara_testing_history.yara_rule_id==Yara_rule.id", lazy="dynamic",
                                    cascade="all,delete")
 
-    def to_dict(self):
+    @property
+    def metadata_fields(self):
+        return db.session.query(Metadata).filter(Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).all()
+
+    @property
+    def metadata_values(self):
+        return db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
+            Metadata.active > 0).filter(MetadataMapping.artifact_id == self.id).all()
+
+    def to_dict(self, include_yara_rule_string=None):
         revisions = Yara_rule_history.query.filter_by(yara_rule_id=self.id).all()
         comments = Comments.query.filter_by(entity_id=self.id).filter_by(
-            entity_type=Comments.ENTITY_MAPPING["SIGNATURE"]).all()
-        files = Files.query.filter_by(entity_id=self.id).filter_by(entity_type=Files.ENTITY_MAPPING["SIGNATURE"]).all()
-        return dict(
+            entity_type=ENTITY_MAPPING["SIGNATURE"]).all()
+        files = Files.query.filter_by(entity_id=self.id).filter_by(entity_type=ENTITY_MAPPING["SIGNATURE"]).all()
+
+        metadata_values_dict = {}
+        metadata_keys = Metadata.get_metadata_keys("SIGNATURE")
+        metadata_values_dict = {m["metadata"]["key"]: m for m in [entity.to_dict() for entity in self.metadata_values]}
+        for key in list(set(metadata_keys) - set(metadata_values_dict.keys())):
+            metadata_values_dict[key] = {}
+
+        yara_dict = dict(
             creationed_date=self.creation_date.isoformat(),
             last_revision_date=self.last_revision_date.isoformat(),
             state=self.state,
             name=self.name,
-            test_status=self.test_status,
-            confidence=self.confidence,
-            severity=self.severity,
-            description=self.description,
             category=self.category,
-            file_type=self.file_type,
-            subcategory1=self.subcategory1,
-            subcategory2=self.subcategory2,
-            subcategory3=self.subcategory3,
-            reference_link=self.reference_link,
             condition="condition:\n\t%s" % self.condition,
             strings="strings:\n\t%s" % self.strings,
             eventid=self.eventid,
@@ -103,8 +102,15 @@ class Yara_rule(db.Model):
             created_user=self.created_user.to_dict(),
             modified_user=self.modified_user.to_dict(),
             owner_user=self.owner_user.to_dict() if self.owner_user else None,
-            revision=self.revision
+            revision=self.revision,
+            metadata=Metadata.get_metadata_dict("SIGNATURE"),
+            metadata_values=metadata_values_dict,
         )
+
+        if include_yara_rule_string:
+            yara_dict["yara_rule_string"] = Yara_rule.to_yara_rule_string(yara_dict)
+
+        return yara_dict
 
     def to_revision_dict(self):
         dict = self.to_dict()
@@ -127,8 +133,14 @@ class Yara_rule(db.Model):
         yara_rule_text = "rule %s\n{\n\n" % (yara_dict.get("name"))
         yara_rule_text += "\tmeta:\n"
         for field in metadata_field_mapping:
-            if yara_dict.get(field, None):
-                yara_rule_text += "\t%s = \"%s\"\n" % (field, yara_dict[field])
+            if yara_dict.get(field, None) and not "metadata" in field and not field in ["state", "strings", "condition",
+                                                                                        "id", "created_user",
+                                                                                        "modified_user"]:
+                yara_rule_text += "\t\t%s = \"%s\"\n" % (field, yara_dict[field])
+
+        for key, value_dict in yara_dict["metadata"].iteritems():
+            if key and value_dict and "value" in value_dict:
+                yara_rule_text += "\t\t%s = \"%s\"\n" % (key, value_dict["value"])
 
         if not "strings:" in yara_dict["strings"]:
             yara_rule_text += "\n\tstrings:\n\t\t%s" % (yara_dict["strings"])
@@ -147,8 +159,13 @@ class Yara_rule(db.Model):
         type_ = "%s:" if not type_.endswith(":") else type_
         return "\n\t".join([string.strip().strip("\t") for string in text.split("\n") if type_ not in string]).strip()
 
-    @staticmethod
-    def get_yara_rule_from_yara_dict(yara_dict, metadata_field_mapping={}):
+    @classmethod
+    def get_yara_rule_from_yara_dict(cls, yara_dict, metadata_field_mapping={}):
+        metadata_fields = {entity.key.lower(): entity for entity in
+                           db.session.query(Metadata).filter(Metadata.active > 0).filter(
+                               Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).all()}
+        fields_to_add = []
+
         clobber_on_import = cfg_settings.Cfg_settings.get_setting("IMPORT_CLOBBER")
         try:
             clobber_on_import = distutils.util.strtobool(clobber_on_import)
@@ -161,11 +178,10 @@ class Yara_rule(db.Model):
         yara_metadata = {key.lower(): val.strip().strip("\"") for key, val in
                          yara_dict["metadata"].iteritems()} if "metadata" in yara_dict else {}
         for possible_field, mapped_to in metadata_field_mapping.iteritems():
+            mapped_to = mapped_to.lower()
             possible_field = possible_field.lower()
             if possible_field in yara_metadata.keys():
-                field = yara_metadata[possible_field] if not mapped_to in ["confidence",
-                                                                                                        "severity",
-                                                                                "eventid"] else int(
+                field = yara_metadata[possible_field] if not mapped_to in ["confidence", "eventid"] else int(
                     yara_metadata[possible_field])
 
                 if mapped_to in ["last_revision_date", "creation_date"]:
@@ -186,7 +202,12 @@ class Yara_rule(db.Model):
                             db.session.query(Yara_rule_history).filter_by(yara_rule_id=existing_yara_rule.id).delete()
                             db.session.query(Yara_rule).filter_by(id=existing_yara_rule.id).delete()
 
-                setattr(yara_rule, mapped_to, field)
+                if mapped_to in cls.__table__.columns.keys():
+                    setattr(yara_rule, mapped_to, field)
+                else:
+                    if mapped_to in metadata_fields.keys():
+                        to_field = metadata_fields[mapped_to]
+                        fields_to_add.append(MetadataMapping(value=field, metadata_id=to_field.id))
 
         yara_rule.condition = " ".join(yara_dict["condition_terms"])
         yara_rule.strings = "\n".join(
@@ -194,7 +215,7 @@ class Yara_rule(db.Model):
              yara_dict["strings"]])
         if not yara_rule.category:
             yara_rule.category = CfgCategoryRangeMapping.DEFAULT_CATEGORY
-        return yara_rule
+        return yara_rule, fields_to_add
 
 
 @listens_for(Yara_rule, "before_insert")

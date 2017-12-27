@@ -57,6 +57,9 @@
                         <a href="#!/releases" title="Releases"><span class="glyphicon glyphicon-export"></span></a></li>
                     </li>
                     <li>
+                        <a href="#!/scripts/run" title="Run Tool"><span class="glyphicon glyphicon-play"></span></a>
+                    </li>
+                    <li>
                 </ul>
                 <div class="btn-group pull-right" uib-dropdown ng-show="isLoggedIn()">
                     <button id="btn-append-to-single-button" type="button" class="btn btn-sm navbar-inverse"
@@ -86,6 +89,8 @@
                         <li role="menuitem"><a href="#!/users">Users</a></li>
                         <li role="menuitem"><a href="#!/whitelist">Whitelist</a></li>
                         <li role="menuitem"><a href="#!/tags">Tags</a></li>
+                        <li role="menuitem"><a href="#!/scripts">Tool Scripts</a></li>
+                        <li role="menuitem"><a href="#!/metadata">Metadata</a></li>
                         <!--<li role="menuitem"><a href="#!/files">Manage Files</a></li>-->
                         <li role="menuitem"><a href="#!/cfg_states">States</a></li>
                         <li role="menuitem"><a href="#!/cfg_category_range_mapping">Categories</a></li>
@@ -146,6 +151,9 @@
 <script src="js/whitelist/whitelist-controller.js"></script>
 <script src="js/profile/profile-controller.js"></script>
 <script src="js/dashboard/dashboard-controller.js"></script>
+<script src="js/scripts/scripts-controller.js"></script>
+<script src="js/scripts/scripts-run-controller.js"></script>
+<script src="js/metadata/metadata-controller.js"></script>
 <!-- /Controllers -->
 
 <!-- Services -->
@@ -167,6 +175,9 @@
 <script src="js/access_keys/access_keys-service.js"></script>
 <script src="js/whitelist/whitelist-service.js"></script>
 <script src="js/bookmarks/bookmarks-service.js"></script>
+<script src="js/version/version-service.js"></script>
+<script src="js/scripts/scripts-service.js"></script>
+<script src="js/metadata/metadata-service.js"></script>
 <!-- /Services -->
 
 </body>

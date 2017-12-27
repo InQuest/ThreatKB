@@ -1,10 +1,12 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('ReleaseController', ['$scope', '$uibModal', 'resolvedRelease', 'Release', 'growl', 'FileSaver', 'Blob',
-        function ($scope, $uibModal, resolvedRelease, Release, growl, FileSaver, Blob) {
+    .controller('ReleaseController', ['$scope', '$uibModal', 'resolvedRelease', 'Release', 'growl', 'FileSaver', 'Blob', 'blockUI',
+        function ($scope, $uibModal, resolvedRelease, Release, growl, FileSaver, Blob, blockUI) {
 
             $scope.releases = resolvedRelease;
+
+            $scope.block_message = "Generating release. This could take up to a minute...";
 
             $scope.create = function () {
                 $scope.clear();
@@ -23,9 +25,12 @@ angular.module('ThreatKB')
                         $scope.releases = Release.resource.query();
                     });
                 } else {
+                    blockUI.start($scope.block_message);
                     Release.resource.save($scope.release, function () {
                         $scope.releases = Release.resource.query();
+                        blockUI.stop();
                     }, function (error) {
+                        blockUI.stop();
                         growl.error(error.data, {ttl: -1});
                     });
                 }
@@ -74,10 +79,13 @@ angular.module('ThreatKB')
             };
 
             $scope.generate_artifact_export = function (id) {
+                blockUI.start($scope.block_message);
                 Release.generate_artifact_export(id).then(function (response) {
                     var header = response.headers()['content-disposition'];
                     var startIndex = header.indexOf('filename=');
                     var filename = header.slice(startIndex + 9);
+                    blockUI.stop();
+
                     try {
                         FileSaver.saveAs(new Blob([response.data], {type: response.headers()["Content-Type"]}), filename);
                     }
@@ -90,8 +98,8 @@ angular.module('ThreatKB')
             };
         }
     ])
-    .controller('ReleaseSaveController', ['$scope', '$http', '$uibModalInstance', 'Release',
-        function ($scope, $http, $uibModalInstance, Release) {
+    .controller('ReleaseSaveController', ['$scope', '$http', '$uibModalInstance', 'Release', 'blockUI',
+        function ($scope, $http, $uibModalInstance, Release, blockUI) {
 
             $scope.ok = function () {
                 $uibModalInstance.close($scope.release);

@@ -65,6 +65,7 @@ angular.module('ThreatKB')
                     templateUrl: 'task-save.html',
                     controller: 'TaskSaveController',
                     size: 'lg',
+                    backdrop: 'static',
                     resolve: {
                         task: function () {
                             return $scope.task;

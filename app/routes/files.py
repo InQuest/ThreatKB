@@ -1,4 +1,4 @@
-from app import app, db, admin_only, auto
+from app import app, db, admin_only, auto, ENTITY_MAPPING
 from app.models import cfg_settings, files
 from flask import abort, jsonify, request, send_file, json, Response
 from flask.ext.login import login_required, current_user
@@ -9,6 +9,7 @@ import tempfile
 import uuid
 import shutil
 import subprocess
+import hashlib
 
 
 @app.route('/ThreatKB/files', methods=['GET'])
@@ -76,14 +77,20 @@ def upload_file():
                 content_type=f.content_type,
                 entity_type=(request.values['entity_type'] if 'entity_type' in request.values else None),
                 entity_id=(request.values['entity_id'] if 'entity_id' in request.values else None),
-                user_id=current_user.id
+                user_id=current_user.id,
+                sha1=hashlib.sha1(open(full_path, 'rb').read()).hexdigest(),
+                md5=hashlib.md5(open(full_path, 'rb').read()).hexdigest(),
+                sha256=hashlib.sha256(open(full_path, 'rb').read()).hexdigest()
             )
             db.session.add(file_entity)
         else:
             file_entity = files.Files(
                 id=file_entity.id,
                 user_id=current_user.id,
-                date_modified=db.func.current_timestamp()
+                date_modified=db.func.current_timestamp(),
+                sha1=hashlib.sha1(open(full_path, 'rb').read()).hexdigest(),
+                md5=hashlib.md5(open(full_path, 'rb').read()).hexdigest(),
+                sha256=hashlib.sha256(open(full_path, 'rb').read()).hexdigest()
             )
             db.session.merge(file_entity)
 
@@ -135,7 +142,10 @@ def upload_file():
                             content_type=f.content_type,
                             entity_type=(request.values['entity_type'] if 'entity_type' in request.values else None),
                             entity_id=(request.values['entity_id'] if 'entity_id' in request.values else None),
-                            user_id=current_user.id
+                            user_id=current_user.id,
+                            sha1=hashlib.sha1(open(full_path_temp, 'rb').read()).hexdigest(),
+                            md5=hashlib.md5(open(full_path_temp, 'rb').read()).hexdigest(),
+                            sha256=hashlib.sha256(open(full_path_temp, 'rb').read()).hexdigest()
                         )
                         db.session.add(file_entity)
                         app.logger.debug("POSTPROCESSOR FILE ADDED '%s'" % (file_entity.filename))
@@ -144,7 +154,10 @@ def upload_file():
                         file_entity = files.Files(
                             id=file_entity.id,
                             user_id=current_user.id,
-                            date_modified=db.func.current_timestamp()
+                            date_modified=db.func.current_timestamp(),
+                            sha1=hashlib.sha1(open(full_path_temp, 'rb').read()).hexdigest(),
+                            md5=hashlib.md5(open(full_path_temp, 'rb').read()).hexdigest(),
+                            sha256=hashlib.sha256(open(full_path_temp, 'rb').read()).hexdigest()
                         )
                         db.session.merge(file_entity)
 
@@ -169,7 +182,7 @@ def get_file_for_entity(entity_type, entity_id, file_id):
         abort(404)
 
     full_path = os.path.join(cfg_settings.Cfg_settings.get_setting("FILE_STORE_PATH"),
-                             str(files.Files.ENTITY_MAPPING[entity_type]) if entity_type != "0" else "",
+                             str(ENTITY_MAPPING[entity_type]) if entity_type != "0" else "",
                              str(entity_id) if entity_id != 0 else "",
                              secure_filename(file_entity.filename))
     if not os.path.exists(full_path):
