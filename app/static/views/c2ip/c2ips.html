@@ -167,7 +167,7 @@
                     <ui-select ng-model="c2ip.metadata_values[m.key].value"
                                on-select="update_selected_metadata(m, $select.selected)">
                         <ui-select-match placeholder="Select an option ...">
-                            <small><span ng-bind="$select.selected.choice || c2ip.metadata_values[m.key].value"></span>
+                            <small><span ng-bind="$select.selected.choice || option.choice"></span>
                             </small>
                         </ui-select-match>
                         <ui-select-choices
@@ -182,7 +182,7 @@
                     <ui-select ng-model="m.default"
                                on-select="update_selected_metadata(m, $select.selected)">
                         <ui-select-match placeholder="Select an option ...">
-                            <small><span ng-bind="$select.selected.choice || m.default"></span></small>
+                            <small><span ng-bind="$select.selected.choice || option.choice"></span></small>
                         </ui-select-match>
                         <ui-select-choices
                                 repeat="option in (m.choices | filter: $select.search) track by option.id">

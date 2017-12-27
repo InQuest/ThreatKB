@@ -192,6 +192,46 @@ angular.module('ThreatKB')
                         growl.error(error.data, {ttl: -1});
                     });
                 } else {
+                    $scope.c2ip.metadata_values = {};
+
+                    if ($scope.c2ip.metadata[0].hasOwnProperty("string")) {
+                        for (var i = 0; i < $scope.c2ip.metadata[0].string.length; i++) {
+                            var entity = $scope.c2ip.metadata[0].string[i];
+                            $scope.c2ip.metadata_values[entity.key] = {value: entity.default};
+                        }
+                    }
+                    if ($scope.c2ip.metadata[0].hasOwnProperty("multiline_comment")) {
+                        for (var i = 0; i < $scope.c2ip.metadata[0].multiline_comment.length; i++) {
+                            var entity = $scope.c2ip.metadata[0].multiline_comment[i];
+                            $scope.c2ip.metadata_values[entity.key] = {value: entity.default};
+                        }
+                    }
+
+                    if ($scope.c2ip.metadata[0].hasOwnProperty("date")) {
+                        for (var i = 0; i < $scope.c2ip.metadata[0].date.length; i++) {
+                            var entity = $scope.c2ip.metadata[0].date[i];
+                            $scope.c2ip.metadata_values[entity.key] = {value: entity.default};
+                        }
+                    }
+
+                    if ($scope.c2ip.metadata[0].hasOwnProperty("integer")) {
+                        for (var i = 0; i < $scope.c2ip.metadata[0].integer.length; i++) {
+                            var entity = $scope.c2ip.metadata[0].integer[i];
+                            $scope.c2ip.metadata_values[entity.key] = {value: entity.default};
+                        }
+                    }
+
+                    if ($scope.c2ip.metadata[0].hasOwnProperty("select")) {
+                        for (var i = 0; i < $scope.c2ip.metadata[0].select.length; i++) {
+                            var entity = $scope.c2ip.metadata[0].select[i];
+                            if (typeof(entity.default) == "object") {
+                                $scope.c2ip.metadata_values[entity.key] = {value: entity.default.choice};
+                            } else {
+                                $scope.c2ip.metadata_values[entity.key] = {value: entity.default};
+                            }
+                        }
+                    }
+
                     C2ip.save($scope.c2ip, function () {
                         //$scope.c2ips = C2ip.query();
                         getPage();
@@ -254,11 +294,17 @@ angular.module('ThreatKB')
     .controller('C2ipSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'c2ip', 'metadata', 'Comments', 'Cfg_states', 'Tags', 'growl', 'Bookmarks',
         function ($scope, $http, $uibModalInstance, $location, c2ip, metadata, Comments, Cfg_states, Tags, growl, Bookmarks) {
             $scope.c2ip = c2ip;
+            if (!$scope.c2ip.id) {
+                $scope.c2ip.metadata = metadata;
+            }
             $scope.c2ip.new_comment = "";
             $scope.Comments = Comments;
             $scope.metadata = metadata;
 
             $scope.update_selected_metadata = function (m, selected) {
+                if (!$scope.c2ip.metadata_values[m.key]) {
+                    $scope.c2ip.metadata_values[m.key] = {};
+                }
                 $scope.c2ip.metadata_values[m.key].value = selected.choice;
             };
 

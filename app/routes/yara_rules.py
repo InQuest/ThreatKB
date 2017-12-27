@@ -182,6 +182,25 @@ def create_yara_rule():
     if new_sig_id > 0:
         update_cfg_category_range_mapping_current(request.json['category']['id'], new_sig_id)
 
+    dirty = False
+    for name, value_dict in request.json["metadata_values"].iteritems():
+        m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
+            Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).filter(
+            MetadataMapping.artifact_id == entity.id).first()
+        if m:
+            m.value = value_dict["value"]
+            db.session.add(m)
+            dirty = True
+        else:
+            m = db.session.query(Metadata).filter(Metadata.key == name).filter(
+                Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).first()
+            db.session.add(MetadataMapping(value=value_dict["value"], metadata_id=m.id, artifact_id=entity.id,
+                                           created_user_id=current_user.id))
+            dirty = True
+
+    if dirty:
+        db.session.commit()
+
     return jsonify(entity.to_dict()), 201
 
 

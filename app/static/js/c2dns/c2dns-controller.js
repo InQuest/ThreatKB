@@ -192,6 +192,46 @@ angular.module('ThreatKB')
                         growl.error(error.data, {ttl: -1});
                     });
                 } else {
+                    $scope.c2dns.metadata_values = {};
+
+                    if ($scope.c2dns.metadata[0].hasOwnProperty("string")) {
+                        for (var i = 0; i < $scope.c2dns.metadata[0].string.length; i++) {
+                            var entity = $scope.c2dns.metadata[0].string[i];
+                            $scope.c2dns.metadata_values[entity.key] = {value: entity.default};
+                        }
+                    }
+                    if ($scope.c2dns.metadata[0].hasOwnProperty("multiline_comment")) {
+                        for (var i = 0; i < $scope.c2dns.metadata[0].multiline_comment.length; i++) {
+                            var entity = $scope.c2dns.metadata[0].multiline_comment[i];
+                            $scope.c2dns.metadata_values[entity.key] = {value: entity.default};
+                        }
+                    }
+
+                    if ($scope.c2dns.metadata[0].hasOwnProperty("date")) {
+                        for (var i = 0; i < $scope.c2dns.metadata[0].date.length; i++) {
+                            var entity = $scope.c2dns.metadata[0].date[i];
+                            $scope.c2dns.metadata_values[entity.key] = {value: entity.default};
+                        }
+                    }
+
+                    if ($scope.c2dns.metadata[0].hasOwnProperty("integer")) {
+                        for (var i = 0; i < $scope.c2dns.metadata[0].integer.length; i++) {
+                            var entity = $scope.c2dns.metadata[0].integer[i];
+                            $scope.c2dns.metadata_values[entity.key] = {value: entity.default};
+                        }
+                    }
+
+                    if ($scope.c2dns.metadata[0].hasOwnProperty("select")) {
+                        for (var i = 0; i < $scope.c2dns.metadata[0].select.length; i++) {
+                            var entity = $scope.c2dns.metadata[0].select[i];
+                            if (typeof(entity.default) == "object") {
+                                $scope.c2dns.metadata_values[entity.key] = {value: entity.default.choice};
+                            } else {
+                                $scope.c2dns.metadata_values[entity.key] = {value: entity.default};
+                            }
+                        }
+                    }
+
                     C2dns.save($scope.c2dns, function () {
                         //$scope.c2dns = C2dns.query();
                         getPage();
@@ -256,8 +296,14 @@ angular.module('ThreatKB')
             $scope.c2dns.new_comment = "";
             $scope.Comments = Comments;
             $scope.metadata = metadata;
+            if (!$scope.c2dns.id) {
+                $scope.c2dns.metadata = metadata;
+            }
 
             $scope.update_selected_metadata = function (m, selected) {
+                if (!$scope.c2dns.metadata_values[m.key]) {
+                    $scope.c2dns.metadata_values[m.key] = {};
+                }
                 $scope.c2dns.metadata_values[m.key].value = selected.choice;
             };
 
