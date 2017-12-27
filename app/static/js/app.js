@@ -133,6 +133,16 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                     }]
                 }
             })
+            .when('/metadata', {
+                templateUrl: 'views/metadata/metadata.html',
+                controller: 'MetadataController',
+                access: {restricted: true, admin: true},
+                resolve: {
+                    resolvedMetadatas: ['Metadata', function (Metadata) {
+                        return Metadata.query();
+                    }]
+                }
+            })
             .when('/tags', {
                 templateUrl: 'views/tags/tags.html',
                 controller: 'TagsController',
@@ -293,6 +303,11 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
 
 angular.module('ThreatKB').run(function ($rootScope, $location, AuthService) {
 
+
+    $rootScope.ENTITY_MAPPING = {IP: 3, DNS: 2, SIGNATURE: 1, TASK: 4};
+    $rootScope.ENTITY_MAPPING_REVERSE = [{key: 3, value: "IP"},
+        {key: 2, value: "DNS"}, {key: 1, value: "SIGNATURE"}, {key: 4, value: "TASK"}];
+
     $rootScope.pretty_date = function prettyDate(time) {
         var date = new Date((time || "").replace(/-/g, "/").replace(/[TZ]/g, " ")),
             diff = (((new Date()).getTime() - date.getTime()) / 1000),
@@ -343,6 +358,17 @@ angular.module('ThreatKB').directive('ngConfirmClick', [
             }
         };
     }]);
+
+angular.module('ThreatKB').directive("formatDate", function () {
+    return {
+        require: 'ngModel',
+        link: function (scope, elem, attr, modelCtrl) {
+            modelCtrl.$formatters.push(function (modelValue) {
+                return new Date(modelValue);
+            })
+        }
+    }
+})
 
 angular.module('ThreatKB').config(function (blockUIConfig) {
     // Tell the blockUI service to ignore certain requests

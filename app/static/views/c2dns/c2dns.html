@@ -112,31 +112,81 @@
                            ng-model="c2dns.expiration_timestamp" ng-required="false"/>
                 </div>
 
-
-                <div class="form-group">
-                    <label>Reference Link:</label>
-                    <a target="_blank" ng-if="c2dns.reference_link"
-                       href="{{ c2dns.reference_link.indexOf('http') == 0 ? c2dns.reference_link : 'http://' + c2dns.reference_link }}">
-                        <span class="glyphicon glyphicon-link" style="font-size: 1.0em;"></span>
-                    </a>
-                    <input class="form-control" name="reference_link"
-                           ng-model="c2dns.reference_link" ng-required="false"
-                           ng-maxlength="2048"/>
-                    <span class="error"
-                          ng-show="form.reference_link.$error.minlength">Must be at least  characters.</span>
-                    <span class="error"
-                          ng-show="form.reference_link.$error.maxlength">Must be at most 2048 characters.</span>
+                <!-- START DYNAMICALLY GENERATED CONTENT -->
+                <div class="form-group" ng-repeat="m in metadata[0].string" ng-if="c2dns.id">
+                    <label>{{ m.key }}:</label>
+                    <input class="form-control" ng-model="c2dns.metadata_values[m.key].value"
+                           ng-required="m.required"/>
                 </div>
 
-                <div class="form-group">
-                    <label>Description:</label>
-                    <span class="error" ng-show="form.description.$error.minlength">Must be at least  characters.</span>
-                    <span class="error"
-                          ng-show="form.description.$error.maxlength">Must be at most 4096 characters.</span>
-                    <span class="error text-danger" ng-if="!c2dns.description">*</span>
-                    <textarea class="form-control" placeholder="Enter a description..." rows="4"
-                              ng-model="c2dns.description" ng-maxlength="4096"></textarea>
+                <div class="form-group" ng-repeat="m in metadata[0].string" ng-if="!c2dns.id">
+                    <label>{{ m.key }}:</label>
+                    <input class="form-control" ng-model="m.default" ng-required="m.required">
                 </div>
+
+                <div class="form-group" ng-repeat="m in metadata[0].integer" ng-if="c2dns.id">
+                    <label>{{ m.key }}:</label>
+                    <input class="form-control" ng-model="c2dns.metadata_values[m.key].value" type="number"
+                           ng-required="m.required"/>
+                </div>
+
+                <div class="form-group" ng-repeat="m in metadata[0].integer" ng-if="!c2dns.id">
+                    <label>{{ m.key }}:</label>
+                    <input class="form-control" ng-model="m.default" type="number" ng-required="m.required">
+                </div>
+
+                <div class="form-group" ng-repeat="m in metadata[0].date" ng-if="c2dns.id">
+                    <label>{{ m.key }}:</label>
+                    <input class="form-control" ng-model="c2dns.metadata_values[m.key].value" type="date"
+                           ng-required="m.required" format-date/>
+                </div>
+
+                <div class="form-group" ng-repeat="m in metadata[0].date" ng-if="!c2dns.id">
+                    <label>{{ m.key }}:</label>
+                    <input class="form-control" ng-model="m.default" type="date" ng-required="m.required" format-date>
+                </div>
+
+                <div class="form-group" ng-repeat="m in metadata[0].multiline_comment" ng-if="c2dns.id">
+                    <label>{{ m.key }}:</label>
+                    <textarea class="form-control" ng-model="c2dns.metadata_values[m.key].value" rows="2"
+                              ng-required="m.required"></textarea>
+                </div>
+
+                <div class="form-group" ng-repeat="m in metadata[0].multiline_comment" rows="2" ng-if="!c2dns.id">
+                    <label>{{ m.key }}:</label>
+                    <textarea class="form-control" ng-model="m.default" ng-required="m.required"></textarea>
+                </div>
+
+                <div class="form-group" ng-repeat="m in metadata[0].select" ng-if="c2dns.id">
+                    <label>{{ m.key }}</label>
+                    <ui-select ng-model="c2dns.metadata_values[m.key].value"
+                               on-select="update_selected_metadata(m, $select.selected)">
+                        <ui-select-match placeholder="Select an option ...">
+                            <small><span ng-bind="$select.selected.choice || c2dns.metadata_values[m.key].value"></span>
+                            </small>
+                        </ui-select-match>
+                        <ui-select-choices
+                                repeat="option in (m.choices | filter: $select.search) track by option.id">
+                            <small><span>{{ option.choice }}</span></small>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+
+                <div class="form-group" ng-repeat="m in metadata[0].select" ng-if="!c2dns.id">
+                    <label>{{ m.key }}</label>
+                    <ui-select ng-model="m.default"
+                               on-select="update_selected_metadata(m, $select.selected)">
+                        <ui-select-match placeholder="Select an option ...">
+                            <small><span ng-bind="$select.selected.choice || m.default"></span></small>
+                        </ui-select-match>
+                        <ui-select-choices
+                                repeat="option in (m.choices | filter: $select.search) track by option.id">
+                            <small><span>{{ option.choice }}</span></small>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+
+                <!-- /START DYNAMICALLY GENERATED CONTENT -->
 
                 <div class="form-group">
                     <label>Tags:</label>
