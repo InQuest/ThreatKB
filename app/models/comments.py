@@ -1,8 +1,7 @@
-from app import db
+from app import db, ENTITY_MAPPING
 
 
 class Comments(db.Model):
-    ENTITY_MAPPING = {"SIGNATURE": 1, "DNS": 2, "IP": 3, "TASK": 4}
 
     id = db.Column(db.Integer, primary_key=True)
     date_created = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp())
@@ -21,7 +20,7 @@ class Comments(db.Model):
             date_created=self.date_created.isoformat(),
             date_modified=self.date_modified.isoformat(),
             comment=self.comment,
-            entity_type=self.ENTITY_MAPPING.keys()[self.ENTITY_MAPPING.values().index(self.entity_type)],
+            entity_type=ENTITY_MAPPING.keys()[ENTITY_MAPPING.values().index(self.entity_type)],
             entity_id=self.entity_id,
             id=self.id,
             user=self.user.to_dict()

@@ -308,6 +308,46 @@ angular.module('ThreatKB')
                         getPage();
                     });
                 } else {
+                    $scope.yara_rule.metadata_values = {};
+
+                    if ($scope.yara_rule.metadata[0].hasOwnProperty("string")) {
+                        for (var i = 0; i < $scope.yara_rule.metadata[0].string.length; i++) {
+                            var entity = $scope.yara_rule.metadata[0].string[i];
+                            $scope.yara_rule.metadata_values[entity.key] = {value: entity.default};
+                        }
+                    }
+                    if ($scope.yara_rule.metadata[0].hasOwnProperty("multiline_comment")) {
+                        for (var i = 0; i < $scope.yara_rule.metadata[0].multiline_comment.length; i++) {
+                            var entity = $scope.yara_rule.metadata[0].multiline_comment[i];
+                            $scope.yara_rule.metadata_values[entity.key] = {value: entity.default};
+                        }
+                    }
+
+                    if ($scope.yara_rule.metadata[0].hasOwnProperty("date")) {
+                        for (var i = 0; i < $scope.yara_rule.metadata[0].date.length; i++) {
+                            var entity = $scope.yara_rule.metadata[0].date[i];
+                            $scope.yara_rule.metadata_values[entity.key] = {value: entity.default};
+                        }
+                    }
+
+                    if ($scope.yara_rule.metadata[0].hasOwnProperty("integer")) {
+                        for (var i = 0; i < $scope.yara_rule.metadata[0].integer.length; i++) {
+                            var entity = $scope.yara_rule.metadata[0].integer[i];
+                            $scope.yara_rule.metadata_values[entity.key] = {value: entity.default};
+                        }
+                    }
+
+                    if ($scope.yara_rule.metadata[0].hasOwnProperty("select")) {
+                        for (var i = 0; i < $scope.yara_rule.metadata[0].select.length; i++) {
+                            var entity = $scope.yara_rule.metadata[0].select[i];
+                            if (typeof(entity.default) == "object") {
+                                $scope.yara_rule.metadata_values[entity.key] = {value: entity.default.choice};
+                            } else {
+                                $scope.yara_rule.metadata_values[entity.key] = {value: entity.default};
+                            }
+                        }
+                    }
+
                     Yara_rule.resource.save($scope.yara_rule, function () {
                         //$scope.yara_rules = Yara_rule.resource.query();
                         getPage();
@@ -356,7 +396,13 @@ angular.module('ThreatKB')
                         },
                         yara_rules: function () {
                             return $scope.yara_rules;
-                        }
+                        },
+                        metadata: ['Metadata', function (Metadata) {
+                            return Metadata.query({
+                                filter: "signature",
+                                format: "dict"
+                            });
+                        }],
                     }
                 });
 
@@ -375,15 +421,28 @@ angular.module('ThreatKB')
                 $scope.update(openModalForId);
             }
         }])
-    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'yara_rule', 'yara_rules', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags', 'Yara_rule', 'Cfg_settings', 'Bookmarks',
-        function ($scope, $http, $uibModalInstance, $location, yara_rule, yara_rules, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags, Yara_rule, Cfg_settings, Bookmarks) {
+    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'yara_rule', 'yara_rules', 'metadata', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags', 'Yara_rule', 'Cfg_settings', 'Bookmarks',
+        function ($scope, $http, $uibModalInstance, $location, yara_rule, yara_rules, metadata, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags, Yara_rule, Cfg_settings, Bookmarks) {
 
             $scope.yara_rule = yara_rule;
             $scope.yara_rules = yara_rules;
+            $scope.metadata = metadata;
             $scope.yara_rule.new_comment = "";
             $scope.Comments = Comments;
             $scope.Files = Files;
             $scope.selected_signature = null;
+
+            if (!$scope.yara_rule.id) {
+                $scope.yara_rule.metadata = metadata;
+            }
+
+
+            $scope.update_selected_metadata = function (m, selected) {
+                if (!$scope.yara_rule.metadata_values[m.key]) {
+                    $scope.yara_rule.metadata_values[m.key] = {};
+                }
+                $scope.yara_rule.metadata_values[m.key].value = selected.choice;
+            };
 
 
             $scope.file_store_path = Cfg_settings.get({key: "FILE_STORE_PATH"});
@@ -396,6 +455,10 @@ angular.module('ThreatKB')
                     $uibModalInstance.dismiss('cancel');
                 });
             }
+
+            $scope.update_selected_metadata = function (m, selected) {
+                yara_rule.metadata_values[m.key].value = selected.choice;
+            };
 
             $scope.bookmark = function (id) {
                 Bookmarks.createBookmark(Bookmarks.ENTITY_MAPPING.SIGNATURE, id).then(function (data) {

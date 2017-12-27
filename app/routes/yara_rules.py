@@ -1,9 +1,10 @@
-from app import app, db, auto
+from app import app, db, auto, ENTITY_MAPPING
 from app.models import yara_rule, cfg_states, comments
 from flask import abort, jsonify, request, Response, json
 from flask.ext.login import current_user, login_required
 
 from app.models.users import KBUser
+from app.models.metadata import Metadata, MetadataMapping, MetadataChoices
 from app.models.bookmarks import Bookmarks
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
 from app.routes.cfg_category_range_mapping import update_cfg_category_range_mapping_current
@@ -36,17 +37,17 @@ def merge_signatures():
     merged_into_comment = "This yara rule was merged into signature '%s' with event id '%s' by '%s'" % (
         merge_to_yr.name, merge_to_yr.eventid, current_user.email)
     db.session.add(
-        comments.Comments(comment=merged_into_comment, entity_type=comments.Comments.ENTITY_MAPPING["SIGNATURE"],
+        comments.Comments(comment=merged_into_comment, entity_type=ENTITY_MAPPING["SIGNATURE"],
                           entity_id=merge_from_yr.id, user_id=current_user.id))
 
     merged_from_comment = "The yara rule '%s' with event id '%s' was merged into this yara rule by '%s'" % (
         merge_from_yr.name, merge_from_yr.eventid, current_user.email)
     db.session.add(
-        comments.Comments(comment=merged_from_comment, entity_type=comments.Comments.ENTITY_MAPPING["SIGNATURE"],
+        comments.Comments(comment=merged_from_comment, entity_type=ENTITY_MAPPING["SIGNATURE"],
                           entity_id=merge_to_yr.id, user_id=current_user.id))
     db.session.commit()
 
-    delete_bookmarks(Bookmarks.ENTITY_MAPPING["SIGNATURE"], merge_from_id, current_user.id)
+    delete_bookmarks(ENTITY_MAPPING["SIGNATURE"], merge_from_id, current_user.id)
 
     return get_yara_rule(merge_to_yr.id)
 
@@ -147,7 +148,7 @@ def get_yara_rule(id):
         abort(403)
 
     return_dict = entity.to_dict(include_yara_string)
-    return_dict["bookmarked"] = True if is_bookmarked(Bookmarks.ENTITY_MAPPING["SIGNATURE"], id, current_user.id)\
+    return_dict["bookmarked"] = True if is_bookmarked(ENTITY_MAPPING["SIGNATURE"], id, current_user.id) \
         else False
 
     return jsonify(return_dict)
@@ -158,7 +159,7 @@ def get_yara_rule(id):
 @login_required
 def create_yara_rule():
     """Create yara_rule artifact
-    From Data: name (str), test_status (str), confidence (int), severity (int), description (str), state(str), category (str), file_type (str), subcategory1 (str), subcategory2 (str), subcategory3 (str), reference_link (str), condition (str), strings (str)
+    From Data: name (str), state(str), category (str), condition (str), strings (str)
     Return: yara_rule artifact dictionary"""
     new_sig_id = 0
     if request.json['category'] and 'category' in request.json['category']:
@@ -167,16 +168,7 @@ def create_yara_rule():
     entity = yara_rule.Yara_rule(
         state=request.json['state']['state'] if 'state' in request.json['state'] else None
         , name=request.json['name']
-        , test_status=request.json['test_status']
-        , confidence=request.json['confidence']
-        , severity=request.json['severity']
-        , description=request.json['description']
         , category=request.json['category']['category'] if 'category' in request.json['category'] else None
-        , file_type=request.json['file_type']
-        , subcategory1=request.json['subcategory1']
-        , subcategory2=request.json['subcategory2']
-        , subcategory3=request.json['subcategory3']
-        , reference_link=request.json['reference_link']
         , condition=yara_rule.Yara_rule.make_yara_sane(request.json['condition'], "condition:")
         , strings=yara_rule.Yara_rule.make_yara_sane(request.json['strings'], "strings:")
         , eventid=new_sig_id
@@ -190,6 +182,25 @@ def create_yara_rule():
     if new_sig_id > 0:
         update_cfg_category_range_mapping_current(request.json['category']['id'], new_sig_id)
 
+    dirty = False
+    for name, value_dict in request.json["metadata_values"].iteritems():
+        m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
+            Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).filter(
+            MetadataMapping.artifact_id == entity.id).first()
+        if m:
+            m.value = value_dict["value"]
+            db.session.add(m)
+            dirty = True
+        else:
+            m = db.session.query(Metadata).filter(Metadata.key == name).filter(
+                Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).first()
+            db.session.add(MetadataMapping(value=value_dict["value"], metadata_id=m.id, artifact_id=entity.id,
+                                           created_user_id=current_user.id))
+            dirty = True
+
+    if dirty:
+        db.session.commit()
+
     return jsonify(entity.to_dict()), 201
 
 
@@ -198,7 +209,7 @@ def create_yara_rule():
 @login_required
 def update_yara_rule(id):
     """Update yara_rule artifact
-    From Data: name (str), test_status (str), confidence (int), severity (int), description (str), state(str), category (str), file_type (str), subcategory1 (str), subcategory2 (str), subcategory3 (str), reference_link (str), reference_text (str), condition (str), strings (str)
+    From Data: name (str), state(str), category (str), condition (str), strings (str)
     Return: yara_rule artifact dictionary"""
     do_not_bump_revision = request.json.get("do_not_bump_revision", False)
 
@@ -233,17 +244,8 @@ def update_yara_rule(id):
         state=request.json['state']['state'] if request.json['state'] and 'state' in request.json['state'] else
         request.json['state'],
         name=request.json['name'],
-        test_status=request.json.get('test_status', None),
-        confidence=request.json['confidence'],
-        severity=request.json['severity'],
-        description=request.json['description'],
         category=request.json['category']['category'] if request.json['category'] and 'category' in request
             .json['category'] else request.json['category'],
-        file_type=request.json['file_type'],
-        subcategory1=request.json['subcategory1'],
-        subcategory2=request.json['subcategory2'],
-        subcategory3=request.json['subcategory3'],
-        reference_link=request.json['reference_link'],
         condition=yara_rule.Yara_rule.make_yara_sane(request.json["condition"], "condition:"),
         strings=yara_rule.Yara_rule.make_yara_sane(request.json["strings"], "strings:"),
         eventid=temp_sig_id,
@@ -255,6 +257,25 @@ def update_yara_rule(id):
     )
     db.session.merge(entity)
     db.session.commit()
+
+    dirty = False
+    for name, value_dict in request.json["metadata_values"].iteritems():
+        m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
+            Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).filter(
+            MetadataMapping.artifact_id == entity.id).first()
+        if m:
+            m.value = value_dict["value"]
+            db.session.add(m)
+            dirty = True
+        else:
+            m = db.session.query(Metadata).filter(Metadata.key == name).filter(
+                Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).first()
+            db.session.add(MetadataMapping(value=value_dict["value"], metadata_id=m.id, artifact_id=entity.id,
+                                           created_user_id=current_user.id))
+            dirty = True
+
+    if dirty:
+        db.session.commit()
 
     # THIS IS UGLY. FIGURE OUT WHY MERGE ISN'T WORKING
     entity = yara_rule.Yara_rule.query.get(entity.id)
@@ -288,6 +309,6 @@ def delete_yara_rule(id):
     db.session.commit()
 
     # delete_tags_mapping(entity.__tablename__, entity.id, tag_mapping_to_delete)
-    delete_bookmarks(Bookmarks.ENTITY_MAPPING["SIGNATURE"], id, current_user.id)
+    delete_bookmarks(ENTITY_MAPPING["SIGNATURE"], id, current_user.id)
 
     return jsonify(''), 204
