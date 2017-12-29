@@ -127,6 +127,9 @@ def create_c2ip():
 
     dirty = False
     for name, value_dict in request.json["metadata_values"].iteritems():
+        if not name or not value_dict:
+            continue
+
         m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
             Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["IP"]).filter(
             MetadataMapping.artifact_id == entity.id).first()
@@ -186,6 +189,9 @@ def update_c2ip(id):
 
     dirty = False
     for name, value_dict in request.json["metadata_values"].iteritems():
+        if not name or not value_dict:
+            continue
+
         m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
             Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["IP"]).filter(
             MetadataMapping.artifact_id == entity.id).first()
