@@ -128,6 +128,7 @@ angular.module('ThreatKB')
             $scope.types = types;
             $scope.show_in_table_options = show_in_table_options;
             $scope.artifact_type_options = artifact_type_options;
+            $scope.required_options = required_options;
 
             $scope.required_to_string = function (required) {
                 for (var i = 0; i < $scope.required_options.length; i++) {

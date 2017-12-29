@@ -1,4 +1,4 @@
-from app import app, db, admin_only, auto
+from app import app, db, admin_only, auto, ENTITY_MAPPING
 from app.models.bookmarks import Bookmarks
 from app.models.c2dns import C2dns
 from app.models.c2ip import C2ip
