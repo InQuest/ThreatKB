@@ -139,7 +139,7 @@ def run_against_whitelist(mapper, connect, target):
         raise Exception('Failed Whitelist Validation')
 
     if not current_user.admin:
-        release_state = cfg_states.Cfg_states.query.filter_by(cfg_states.Cfg_states.is_release_state > 0).first()
+        release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
         if release_state and target.state == release_state.state:
             abort(403)
 
@@ -147,6 +147,6 @@ def run_against_whitelist(mapper, connect, target):
 @listens_for(C2ip, "before_update")
 def c2ip_before_update(mapper, connect, target):
     if not current_user.admin:
-        release_state = cfg_states.Cfg_states.query.filter_by(cfg_states.Cfg_states.is_release_state > 0).first()
+        release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
         if release_state and target.state == release_state.state:
             abort(403)

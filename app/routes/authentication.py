@@ -246,7 +246,7 @@ def get_users_ownership():
     for user_id, user in u.iteritems():
         ownership_data[user.email] = {"task": [], "ip": [], "dns": [], "signatures": []}
 
-    t = tasks.Tasks.query.all() if not include_inactive else tasks.Tasks.query.filter_by(tasks.Tasks.active > 0).all()
+    t = tasks.Tasks.query.all() if not include_inactive else tasks.Tasks.query.filter(tasks.Tasks.active > 0).all()
     for task in t:
         if task.owner_user_id:
             ownership_data[u[task.owner_user_id].email]["task"].append(task.to_dict() if include_artifacts else task.id)
