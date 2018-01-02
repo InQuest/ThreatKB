@@ -110,7 +110,7 @@ def import_artifacts():
     import_text = request.json.get('import_text', None)
     shared_state = request.json.get('shared_state', None)
     shared_reference = request.json.get("shared_reference", None)
-    shared_owner = request.json.get("shared_owner", None)
+    shared_owner = request.json.get("shared_owner", current_user.id)
     extract_ip = request.json.get('extract_ip', True)
     extract_dns = request.json.get('extract_dns', True)
     extract_signature = request.json.get('extract_signature', True)
@@ -147,6 +147,7 @@ def commit_artifacts():
     shared_state = request.json.get('shared_state', None)
     extract_ip = request.json.get('extract_ip', True)
     extract_dns = request.json.get('extract_dns', True)
+    shared_owner = request.json.get("shared_owner", current_user.id)
     extract_signature = request.json.get('extract_signature', True)
     metadata_field_mapping = request.json.get('metadata_field_mapping', {})
 
@@ -155,5 +156,5 @@ def commit_artifacts():
 
     artifacts = save_artifacts(extract_ip=extract_ip, extract_dns=extract_dns, extract_signature=extract_signature,
                                artifacts=artifacts, shared_reference=shared_reference, shared_state=shared_state,
-                               metadata_field_mapping=metadata_field_mapping)
+                               metadata_field_mapping=metadata_field_mapping, shared_owner=shared_owner)
     return jsonify({"artifacts": artifacts}), 201
