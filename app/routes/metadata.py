@@ -9,7 +9,6 @@ import json
 @app.route('/ThreatKB/metadata', methods=['GET'])
 @auto.doc()
 @login_required
-@admin_only()
 def get_all_metadata():
     """Return all active metadata
     Return: list of metadata dictionaries"""
@@ -35,7 +34,6 @@ def get_all_metadata():
 
 @app.route('/ThreatKB/metadata/<int:id>', methods=['GET'])
 @login_required
-@admin_only()
 @auto.doc()
 def get_metadata(id):
     """Return task associated with given id
