@@ -110,14 +110,14 @@ def import_artifacts():
     import_text = request.json.get('import_text', None)
     shared_state = request.json.get('shared_state', None)
     shared_reference = request.json.get("shared_reference", None)
-    shared_owner = request.json.get("shared_owner", current_user.id)
+    shared_owner = request.json.get("shared_owner", None)
     extract_ip = request.json.get('extract_ip', True)
     extract_dns = request.json.get('extract_dns', True)
     extract_signature = request.json.get('extract_signature', True)
     metadata_field_mapping = request.json.get('metadata_field_mapping', {})
 
-    if shared_owner:
-        shared_owner = int(shared_owner)
+    if not shared_owner:
+        shared_owner = int(current_user.id)
 
     if not import_text:
         abort(404)
@@ -147,12 +147,15 @@ def commit_artifacts():
     shared_state = request.json.get('shared_state', None)
     extract_ip = request.json.get('extract_ip', True)
     extract_dns = request.json.get('extract_dns', True)
-    shared_owner = request.json.get("shared_owner", current_user.id)
+    shared_owner = request.json.get("shared_owner", None)
     extract_signature = request.json.get('extract_signature', True)
     metadata_field_mapping = request.json.get('metadata_field_mapping', {})
 
     if not artifacts:
         abort(404)
+
+    if not shared_owner:
+        shared_owner = int(current_user.id)
 
     artifacts = save_artifacts(extract_ip=extract_ip, extract_dns=extract_dns, extract_signature=extract_signature,
                                artifacts=artifacts, shared_reference=shared_reference, shared_state=shared_state,
