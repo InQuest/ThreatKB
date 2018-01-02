@@ -111,6 +111,7 @@ def create_c2dns():
         , state=verify_state(request.json['state']['state'])
         , created_user_id=current_user.id
         , modified_user_id=current_user.id
+        , owner_user_id=current_user.id
     )
     db.session.add(entity)
 

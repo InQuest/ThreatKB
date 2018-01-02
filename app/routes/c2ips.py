@@ -112,6 +112,7 @@ def create_c2ip():
                                                                                                       None) else None
         , created_user_id=current_user.id
         , modified_user_id=current_user.id
+        , owner_user_id=current_user.id
     )
     db.session.add(entity)
     try:

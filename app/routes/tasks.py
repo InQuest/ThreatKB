@@ -62,6 +62,7 @@ def create_tasks():
         , state=request.json['state']['state'] if 'state' in request.json['state'] else None
         , created_user_id=current_user.id
         , modified_user_id=current_user.id
+        , owner_user_id=current_user.id
     )
     db.session.add(entity)
     db.session.commit()
