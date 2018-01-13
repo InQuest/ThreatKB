@@ -81,7 +81,7 @@
                     </ui-select>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" ng-if="artifact_type=='SIGNATURE'">
                     <label>Export with Release?</label>
                     <ui-select ng-model="metadata.export_with_release"
                                on-select="change_export_option($select.selected)">
