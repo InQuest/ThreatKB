@@ -76,6 +76,7 @@ def create_metadata():
         , default=default
         , show_in_table=0
         , required=request.json.get("required", 0)
+        , export_with_release=request.json.get("export_with_release", 1)
         , created_user_id=current_user.id
     )
     db.session.add(entity)

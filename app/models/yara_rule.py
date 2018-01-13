@@ -132,15 +132,21 @@ class Yara_rule(db.Model):
 
         yara_rule_text = "rule %s\n{\n\n" % (yara_dict.get("name"))
         yara_rule_text += "\tmeta:\n"
+        metadata_strings = []
         for field in metadata_field_mapping:
-            if yara_dict.get(field, None) and not "metadata" in field and not field in ["state", "strings", "condition",
-                                                                                        "id", "created_user",
-                                                                                        "modified_user"]:
-                yara_rule_text += "\t\t%s = \"%s\"\n" % (field, yara_dict[field])
+            if yara_dict.get(field, None) and not "metadata" in field and field in ["revision", "name", "category"]:
+                metadata_strings.append("\t\t%s = \"%s\"\n" % (field, yara_dict[field]))
 
-        for key, value_dict in yara_dict["metadata"].iteritems():
-            if key and value_dict and "value" in value_dict:
-                yara_rule_text += "\t\t%s = \"%s\"\n" % (key, value_dict["value"])
+        try:
+            for type_, metalist in yara_dict["metadata"].iteritems():
+                for meta in metalist:
+                    if meta["export_with_release"]:
+                        metadata_strings.append("\t\t%s = \"%s\"\n" % (meta["key"], yara_dict["metadata_values"][
+                            "value"] if "values" in yara_dict["metadata_values"]else "NA"))
+        except Exception, e:
+            pass
+
+        yara_rule_text += "".join(sorted(metadata_strings))
 
         if not "strings:" in yara_dict["strings"]:
             yara_rule_text += "\n\tstrings:\n\t\t%s" % (yara_dict["strings"])
