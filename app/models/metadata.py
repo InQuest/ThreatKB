@@ -18,6 +18,7 @@ class Metadata(db.Model):
 
     show_in_table = db.Column(db.Integer, default=0, nullable=False)
     required = db.Column(db.Integer, default=0, nullable=False)
+    export_with_release = db.Column(db.Integer, default=1, nullable=False)
     date_created = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp())
     date_modified = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp(),
                               onupdate=db.func.current_timestamp())
@@ -65,6 +66,7 @@ class Metadata(db.Model):
             show_in_table=self.show_in_table,
             active=self.active,
             required=self.required,
+            export_with_release=self.export_with_release,
             choices=[choice.to_dict() for choice in self.choices]
         )
 

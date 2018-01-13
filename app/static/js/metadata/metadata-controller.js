@@ -15,6 +15,7 @@ angular.module('ThreatKB')
                 {value: "integer"}, {value: "date"}, {value: "multiline_comment"}, {value: "select"}];
             $scope.show_in_table_options = [{key: "Yes", value: 1}, {key: "No", value: 0}];
             $scope.required_options = [{key: "Yes", value: 1}, {key: "No", value: 0}];
+            $scope.export_options = [{key: "Yes", value: 1}, {key: "No", value: 0}];
             $scope.artifact_type_options = $rootScope.ENTITY_MAPPING_REVERSE;
 
             $scope.artifact_type_to_string = function (type_) {
@@ -40,6 +41,16 @@ angular.module('ThreatKB')
                 for (var i = 0; i < $scope.required_options.length; i++) {
                     var obj = $scope.required_options[i];
                     if (obj.value == required) {
+                        return obj.key;
+                    }
+                }
+                return "No";
+            };
+
+            $scope.export_to_string = function (export_) {
+                for (var i = 0; i < $scope.export_options.length; i++) {
+                    var obj = $scope.export_options[i];
+                    if (obj.value == export_) {
                         return obj.key;
                     }
                 }
@@ -112,6 +123,9 @@ angular.module('ThreatKB')
                         },
                         required_options: function () {
                             return $scope.required_options;
+                        },
+                        export_options: function () {
+                            return $scope.export_options;
                         }
                     }
                 });
@@ -122,18 +136,29 @@ angular.module('ThreatKB')
                 });
             };
         }])
-    .controller('MetadataSaveController', ['$scope', '$rootScope', '$uibModalInstance', 'metadata', 'types', 'show_in_table_options', 'artifact_type_options', 'required_options', 'Metadata', 'Comments',
-        function ($scope, $rootScope, $uibModalInstance, metadata, types, show_in_table_options, artifact_type_options, required_options, Metadata, Comments) {
+    .controller('MetadataSaveController', ['$scope', '$rootScope', '$uibModalInstance', 'metadata', 'types', 'show_in_table_options', 'artifact_type_options', 'required_options', 'export_options', 'Metadata', 'Comments',
+        function ($scope, $rootScope, $uibModalInstance, metadata, types, show_in_table_options, artifact_type_options, required_options, export_options, Metadata, Comments) {
             $scope.metadata = metadata;
             $scope.types = types;
             $scope.show_in_table_options = show_in_table_options;
             $scope.artifact_type_options = artifact_type_options;
             $scope.required_options = required_options;
+            $scope.export_options = export_options;
 
             $scope.required_to_string = function (required) {
                 for (var i = 0; i < $scope.required_options.length; i++) {
                     var obj = $scope.required_options[i];
                     if (obj.value == required) {
+                        return obj.key;
+                    }
+                }
+                return "No";
+            };
+
+            $scope.export_to_string = function (export_) {
+                for (var i = 0; i < $scope.export_options.length; i++) {
+                    var obj = $scope.export_options[i];
+                    if (obj.value == export_) {
                         return obj.key;
                     }
                 }
@@ -146,6 +171,10 @@ angular.module('ThreatKB')
 
             $scope.change_required_option = function (selected) {
                 $scope.metadata.required = selected.value;
+            }
+
+            $scope.change_export_option = function (selected) {
+                $scope.metadata.export_with_release = selected.value;
             }
 
             $scope.change_type_option = function (selected) {
