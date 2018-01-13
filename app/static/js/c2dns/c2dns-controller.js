@@ -311,8 +311,8 @@ angular.module('ThreatKB')
                 $scope.update(openModalForId);
             }
         }])
-    .controller('C2dnsSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'c2dns', 'metadata', 'Cfg_states', 'Comments', 'Tags', 'growl', 'Bookmarks',
-        function ($scope, $http, $uibModalInstance, $location, c2dns, metadata, Cfg_states, Comments, Tags, growl, Bookmarks) {
+    .controller('C2dnsSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'c2dns', 'metadata', 'Cfg_states', 'Comments', 'Tags', 'growl', 'Bookmarks', 'hotkeys',
+        function ($scope, $http, $uibModalInstance, $location, c2dns, metadata, Cfg_states, Comments, Tags, growl, Bookmarks, hotkeys) {
             $scope.c2dns = c2dns;
             $scope.c2dns.new_comment = "";
             $scope.Comments = Comments;
@@ -320,6 +320,23 @@ angular.module('ThreatKB')
             if (!$scope.c2dns.id) {
                 $scope.c2dns.metadata = metadata;
             }
+
+            hotkeys.bindTo($scope)
+                .add({
+                    combo: 'ctrl+s',
+                    description: 'Save',
+                    allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
+                    callback: function () {
+                        $scope.ok();
+                    }
+                }).add({
+                combo: 'ctrl+x',
+                description: 'Escape',
+                allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
+                callback: function () {
+                    $scope.cancel();
+                }
+            });
 
             $scope.update_selected_metadata = function (m, selected) {
                 if (!$scope.c2dns.metadata_values[m.key]) {

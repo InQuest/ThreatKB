@@ -312,8 +312,8 @@ angular.module('ThreatKB')
                 $scope.update(openModalForId);
             }
         }])
-    .controller('C2ipSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'c2ip', 'metadata', 'Comments', 'Cfg_states', 'Tags', 'growl', 'Bookmarks',
-        function ($scope, $http, $uibModalInstance, $location, c2ip, metadata, Comments, Cfg_states, Tags, growl, Bookmarks) {
+    .controller('C2ipSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'c2ip', 'metadata', 'Comments', 'Cfg_states', 'Tags', 'growl', 'Bookmarks', 'hotkeys',
+        function ($scope, $http, $uibModalInstance, $location, c2ip, metadata, Comments, Cfg_states, Tags, growl, Bookmarks, hotkeys) {
             $scope.c2ip = c2ip;
             if (!$scope.c2ip.id) {
                 $scope.c2ip.metadata = metadata;
@@ -321,6 +321,23 @@ angular.module('ThreatKB')
             $scope.c2ip.new_comment = "";
             $scope.Comments = Comments;
             $scope.metadata = metadata;
+
+            hotkeys.bindTo($scope)
+                .add({
+                    combo: 'ctrl+s',
+                    description: 'Save',
+                    allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
+                    callback: function () {
+                        $scope.ok();
+                    }
+                }).add({
+                combo: 'ctrl+x',
+                description: 'Escape',
+                allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
+                callback: function () {
+                    $scope.cancel();
+                }
+            });
 
             $scope.update_selected_metadata = function (m, selected) {
                 if (!$scope.c2ip.metadata_values[m.key]) {

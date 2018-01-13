@@ -83,12 +83,29 @@ angular.module('ThreatKB')
                 $scope.update(openModalForId);
             }
         }])
-    .controller('TaskSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'task', 'Comments', 'Cfg_states', 'Import', 'growl', 'blockUI', 'AuthService', 'Bookmarks',
-        function ($scope, $http, $uibModalInstance, $location, task, Comments, Cfg_states, Import, growl, blockUI, AuthService, Bookmarks) {
+    .controller('TaskSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'task', 'Comments', 'Cfg_states', 'Import', 'growl', 'blockUI', 'AuthService', 'Bookmarks', 'hotkeys',
+        function ($scope, $http, $uibModalInstance, $location, task, Comments, Cfg_states, Import, growl, blockUI, AuthService, Bookmarks, hotkeys) {
             $scope.task = task;
             $scope.task.new_comment = "";
             $scope.Comments = Comments;
             $scope.current_user = AuthService.getUser();
+
+            hotkeys.bindTo($scope)
+                .add({
+                    combo: 'ctrl+s',
+                    description: 'Save',
+                    allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
+                    callback: function () {
+                        $scope.ok();
+                    }
+                }).add({
+                combo: 'ctrl+x',
+                description: 'Escape',
+                allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
+                callback: function () {
+                    $scope.cancel();
+                }
+            });
 
             if ($scope.task.$promise !== undefined) {
                 $scope.task.$promise.then(function (result) {

@@ -442,8 +442,8 @@ angular.module('ThreatKB')
                 $scope.update(openModalForId);
             }
         }])
-    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'yara_rule', 'yara_rules', 'metadata', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags', 'Yara_rule', 'Cfg_settings', 'Bookmarks',
-        function ($scope, $http, $uibModalInstance, $location, yara_rule, yara_rules, metadata, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags, Yara_rule, Cfg_settings, Bookmarks) {
+    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'yara_rule', 'yara_rules', 'metadata', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags', 'Yara_rule', 'Cfg_settings', 'Bookmarks', 'hotkeys',
+        function ($scope, $http, $uibModalInstance, $location, yara_rule, yara_rules, metadata, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags, Yara_rule, Cfg_settings, Bookmarks, hotkeys) {
 
             $scope.yara_rule = yara_rule;
             $scope.yara_rules = yara_rules;
@@ -452,6 +452,23 @@ angular.module('ThreatKB')
             $scope.Comments = Comments;
             $scope.Files = Files;
             $scope.selected_signature = null;
+
+            hotkeys.bindTo($scope)
+                .add({
+                    combo: 'ctrl+s',
+                    description: 'Save',
+                    allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
+                    callback: function () {
+                        $scope.ok();
+                    }
+                }).add({
+                combo: 'ctrl+x',
+                description: 'Escape',
+                allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
+                callback: function () {
+                    $scope.cancel();
+                }
+            });
 
             if (!$scope.yara_rule.id) {
                 $scope.yara_rule.metadata = metadata;
