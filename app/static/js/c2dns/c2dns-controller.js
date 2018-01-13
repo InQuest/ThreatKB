@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('C2dnsController', ['$scope', '$filter', '$http', '$uibModal', 'resolvedC2dns', 'C2dns', 'Cfg_states', 'growl', 'Users', 'openModalForId', 'uiGridConstants',
-        function ($scope, $filter, $http, $uibModal, resolvedC2dns, C2dns, Cfg_states, growl, Users, openModalForId, uiGridConstants) {
+    .controller('C2dnsController', ['$scope', '$timeout', '$filter', '$http', '$uibModal', 'resolvedC2dns', 'C2dns', 'Cfg_states', 'growl', 'Users', 'openModalForId', 'uiGridConstants',
+        function ($scope, $timeout, $filter, $http, $uibModal, resolvedC2dns, C2dns, Cfg_states, growl, Users, openModalForId, uiGridConstants) {
 
             $scope.c2dns = resolvedC2dns;
 
@@ -39,7 +39,7 @@ angular.module('ThreatKB')
 
                         for (var i = 0; i < grid.columns.length; i++) {
                             var column = grid.columns[i];
-                            if (column.filters[0].term !== undefined && column.filters[0].term !== null) {
+                            if (column.filters[0].term !== undefined && column.filters[0].term !== null && column.filters[0].term !== "") {
                                 paginationOptions.searches[column.colDef.field] = column.filters[0].term
                             }
                         }
@@ -59,17 +59,38 @@ angular.module('ThreatKB')
                         paginationOptions.pageSize = pageSize;
                         getPage();
                     });
+                    gridApi.core.on.renderingComplete($scope, function () {
+                        $timeout(function () {
+                            $("div").each(function () {
+                                $(this).removeAttr("tabindex");
+                            });
+                            $("span").each(function () {
+                                $(this).removeAttr("tabindex");
+                            });
+                            $("input").each(function () {
+                                $(this).removeAttr("tabindex");
+                            });
+                            $(":input[type=text]").each(function (i) {
+                                if ($(this).hasClass("ui-grid-filter-input")) {
+                                    $(this).attr("tabindex", i + 1);
+                                    if ((i + 1) == 1) {
+                                        $(this).focus();
+                                    }
+                                }
+                            });
+                        }, 500);
+                    });
                 },
                 rowHeight: 35,
                 columnDefs:
                     [
                         {field: 'domain_name'},
-                        {field: 'match_type', enableSorting: false},
-                        {field: 'expiration_type', enableSorting: false},
+                        {field: 'match_type', enableSorting: true},
+                        {field: 'expiration_type', enableSorting: true},
                         {
                             field: 'state',
                             displayName: 'State',
-                            enableSorting: false,
+                            enableSorting: true,
                             cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.state"'
                             + ' on-select="grid.appScope.save(row.entity)">'
                             + '<ui-select-match placeholder="Select an state ...">'
