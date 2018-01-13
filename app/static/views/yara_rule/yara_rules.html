@@ -111,8 +111,8 @@
 
                 <div class="form-group">
                     <label>State:</label>
-                    <span class="error text-danger" ng-if="!yara_rule.state">*</span>
-                    <ui-select ng-model="yara_rule.state">
+                    <span class="error text-danger">*</span>
+                    <ui-select ng-model="yara_rule.state" ng-required="true">
                         <ui-select-match placeholder="Select a state..">
                             <span ng-bind="$select.selected.state || yara_rule.state"></span>
                         </ui-select-match>
@@ -125,8 +125,8 @@
 
                 <div class="form-group">
                     <label>Category:</label>
-                    <span class="error text-danger" ng-if="!yara_rule.category">*</span>
-                    <ui-select ng-model="yara_rule.category">
+                    <span class="error text-danger">*</span>
+                    <ui-select ng-model="yara_rule.category" ng-required="true">
                         <ui-select-match placeholder="Select a Category ...">
                             <span ng-bind="$select.selected.category || yara_rule.category"></span>
                         </ui-select-match>
@@ -140,23 +140,27 @@
                 <!-- START DYNAMICALLY GENERATED CONTENT -->
                 <div class="form-group" ng-repeat="m in metadata[0].string" ng-if="yara_rule.id">
                     <label>{{ m.key }}:</label>
+                    <span class="error text-danger" ng-if="m.required">*</span>
                     <input class="form-control" ng-model="yara_rule.metadata_values[m.key].value"
                            ng-required="m.required"/>
                 </div>
 
                 <div class="form-group" ng-repeat="m in metadata[0].string" ng-if="!yara_rule.id">
                     <label>{{ m.key }}:</label>
+                    <span class="error text-danger" ng-if="m.required">*</span>
                     <input class="form-control" ng-model="m.default" ng-required="m.required">
                 </div>
 
                 <div class="form-group" ng-repeat="m in metadata[0].integer" ng-if="yara_rule.id">
                     <label>{{ m.key }}:</label>
+                    <span class="error text-danger" ng-if="m.required">*</span>
                     <input class="form-control" ng-model="yara_rule.metadata_values[m.key].value" type="number"
                            ng-required="m.required"/>
                 </div>
 
                 <div class="form-group" ng-repeat="m in metadata[0].integer" ng-if="!yara_rule.id">
                     <label>{{ m.key }}:</label>
+                    <span class="error text-danger" ng-if="m.required">*</span>
                     <input class="form-control" ng-model="m.default" type="number" ng-required="m.required">
                 </div>
 
@@ -168,24 +172,28 @@
 
                 <div class="form-group" ng-repeat="m in metadata[0].date" ng-if="!yara_rule.id">
                     <label>{{ m.key }}:</label>
+                    <span class="error text-danger" ng-if="m.required">*</span>
                     <input class="form-control" ng-model="m.default" type="date" ng-required="m.required" format-date>
                 </div>
 
                 <div class="form-group" ng-repeat="m in metadata[0].multiline_comment" ng-if="yara_rule.id">
                     <label>{{ m.key }}:</label>
+                    <span class="error text-danger" ng-if="m.required">*</span>
                     <textarea class="form-control" ng-model="yara_rule.metadata_values[m.key].value" rows="2"
                               ng-required="m.required"></textarea>
                 </div>
 
                 <div class="form-group" ng-repeat="m in metadata[0].multiline_comment" rows="2" ng-if="!yara_rule.id">
                     <label>{{ m.key }}:</label>
+                    <span class="error text-danger" ng-if="m.required">*</span>
                     <textarea class="form-control" ng-model="m.default" ng-required="m.required"></textarea>
                 </div>
 
                 <div class="form-group" ng-repeat="m in metadata[0].select" ng-if="yara_rule.id">
                     <label>{{ m.key }}</label>
+                    <span class="error text-danger" ng-if="m.required">*</span>
                     <ui-select ng-model="yara_rule.metadata_values[m.key].value"
-                               on-select="update_selected_metadata(m, $select.selected)">
+                               on-select="update_selected_metadata(m, $select.selected)" ng-required="m.required">
                         <ui-select-match placeholder="Select an option ...">
                             <small><span
                                     ng-bind="$select.selected.choice || yara_rule.metadata_values[m.key].value"></span>
@@ -200,8 +208,9 @@
 
                 <div class="form-group" ng-repeat="m in metadata[0].select" ng-if="!yara_rule.id">
                     <label>{{ m.key }}</label>
+                    <span class="error text-danger" ng-if="m.required">*</span>
                     <ui-select ng-model="m.default"
-                               on-select="update_selected_metadata(m, $select.selected)">
+                               on-select="update_selected_metadata(m, $select.selected)" ng-required="m.required">
                         <ui-select-match placeholder="Select an option ...">
                             <small><span ng-bind="$select.selected.choice || m.default"></span></small>
                         </ui-select-match>

@@ -221,7 +221,7 @@ class Yara_rule(db.Model):
 @listens_for(Yara_rule, "before_insert")
 def generate_eventid(mapper, connect, target):
     if not current_user.admin:
-        release_state = cfg_states.Cfg_states.query.filter_by(cfg_states.Cfg_states.is_release_state > 0).first()
+        release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
         if release_state and target.state == release_state.state:
             abort(403)
 
@@ -232,7 +232,7 @@ def generate_eventid(mapper, connect, target):
 @listens_for(Yara_rule, "before_update")
 def yara_rule_before_update(mapper, connect, target):
     if not current_user.admin:
-        release_state = cfg_states.Cfg_states.query.filter_by(cfg_states.Cfg_states.is_release_state > 0).first()
+        release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
         if release_state and target.state == release_state.state:
             abort(403)
 

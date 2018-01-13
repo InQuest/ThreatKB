@@ -95,9 +95,9 @@ class MetadataMapping(db.Model):
                                    primaryjoin="KBUser.id==MetadataMapping.created_user_id")
 
     def to_dict(self):
-        if self.metadata_object.type_ == "date":
+        if self.metadata_object.type_ == "date" and self.value:
             value = datetime.datetime.strftime(parser.parse(self.value), "%m/%d/%Y")
-        elif self.metadata_object.type_ == "integer":
+        elif self.metadata_object.type_ == "integer" and self.value:
             value = int(self.value)
         else:
             value = self.value

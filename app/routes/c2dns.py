@@ -111,6 +111,7 @@ def create_c2dns():
         , state=verify_state(request.json['state']['state'])
         , created_user_id=current_user.id
         , modified_user_id=current_user.id
+        , owner_user_id=current_user.id
     )
     db.session.add(entity)
 
@@ -127,6 +128,9 @@ def create_c2dns():
 
     dirty = False
     for name, value_dict in request.json["metadata_values"].iteritems():
+        if not name or not value_dict:
+            continue
+
         m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
             Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["DNS"]).filter(
             MetadataMapping.artifact_id == entity.id).first()
@@ -185,6 +189,9 @@ def update_c2dns(id):
 
     dirty = False
     for name, value_dict in request.json["metadata_values"].iteritems():
+        if not name or not value_dict:
+            continue
+
         m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
             Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["DNS"]).filter(
             MetadataMapping.artifact_id == entity.id).first()

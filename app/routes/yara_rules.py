@@ -174,6 +174,7 @@ def create_yara_rule():
         , eventid=new_sig_id
         , created_user_id=current_user.id
         , modified_user_id=current_user.id
+        , owner_user_id=current_user.id
     )
     db.session.add(entity)
     db.session.commit()
@@ -184,6 +185,9 @@ def create_yara_rule():
 
     dirty = False
     for name, value_dict in request.json["metadata_values"].iteritems():
+        if not name or not value_dict:
+            continue
+
         m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
             Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).filter(
             MetadataMapping.artifact_id == entity.id).first()
@@ -260,6 +264,9 @@ def update_yara_rule(id):
 
     dirty = False
     for name, value_dict in request.json["metadata_values"].iteritems():
+        if not name or not value_dict:
+            continue
+
         m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
             Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).filter(
             MetadataMapping.artifact_id == entity.id).first()

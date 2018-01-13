@@ -306,7 +306,7 @@ angular.module('ThreatKB').run(function ($rootScope, $location, AuthService) {
 
     $rootScope.ENTITY_MAPPING = {IP: 3, DNS: 2, SIGNATURE: 1, TASK: 4};
     $rootScope.ENTITY_MAPPING_REVERSE = [{key: 3, value: "IP"},
-        {key: 2, value: "DNS"}, {key: 1, value: "SIGNATURE"}, {key: 4, value: "TASK"}];
+        {key: 2, value: "DNS"}, {key: 1, value: "SIGNATURE"}];
 
     $rootScope.pretty_date = function prettyDate(time) {
         var date = new Date((time || "").replace(/-/g, "/").replace(/[TZ]/g, " ")),
