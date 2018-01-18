@@ -434,6 +434,8 @@ angular.module('ThreatKB')
                         $scope.yara_rule = entity;
                         $scope.save(id);
                     }
+                }, function () {
+                    getPage();
                 });
             };
 
@@ -453,13 +455,24 @@ angular.module('ThreatKB')
             $scope.Files = Files;
             $scope.selected_signature = null;
 
+            $scope.save_artifact = function () {
+                Yara_rule.resource.update({id: $scope.yara_rule.id}, $scope.yara_rule,
+                    function (data) {
+                        if (!data) {
+                            growl.error(error, {ttl: -1});
+                        } else {
+                            growl.info("Successfully saved signature '" + $scope.yara_rule.name + "'.", {ttl: 2000});
+                        }
+                    });
+            };
+
             hotkeys.bindTo($scope)
                 .add({
                     combo: 'ctrl+s',
                     description: 'Save',
                     allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
                     callback: function () {
-                        $scope.ok();
+                        $scope.save_artifact();
                     }
                 }).add({
                 combo: 'ctrl+x',
