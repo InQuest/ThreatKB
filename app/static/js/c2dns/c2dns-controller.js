@@ -167,6 +167,7 @@ angular.module('ThreatKB')
                     .then(function (response) {
                         $scope.gridOptions.totalItems = response.data.total_count;
                         $scope.gridOptions.data = response.data.data;
+                        $scope.gridApi.core.refresh();
                     }, function (error) {
                     });
             };

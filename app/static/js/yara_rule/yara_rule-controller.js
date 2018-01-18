@@ -127,6 +127,7 @@ angular.module('ThreatKB')
                                 paginationOptions.searches[column.colDef.field] = column.filters[0].term
                             }
                         }
+
                         getPage()
                     });
                     $scope.gridApi.core.on.sortChanged($scope, function (grid, sortColumns) {
@@ -276,6 +277,7 @@ angular.module('ThreatKB')
                         for (var i = 0; i < $scope.gridOptions.data.length; i++) {
                             $scope.checked_indexes.push(false);
                         }
+                        $scope.gridApi.core.refresh();
                     }, function (error) {
                     });
             };
