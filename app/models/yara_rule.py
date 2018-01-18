@@ -84,7 +84,7 @@ class Yara_rule(db.Model):
             metadata_values_dict[key] = {}
 
         yara_dict = dict(
-            creationed_date=self.creation_date.isoformat(),
+            creation_date=self.creation_date.isoformat(),
             last_revision_date=self.last_revision_date.isoformat(),
             state=self.state,
             name=self.name,
