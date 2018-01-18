@@ -101,11 +101,17 @@
 
                 <label>Strings Editor</label>
                 <span class="error text-danger" ng-if="!yara_rule.strings">*</span>
+                <span class="pull-right">Wrap&nbsp;<input type="checkbox" ng-checked="wrap_editor"
+                                                          ng-model="wrap_editor"
+                                                          ng-change="change_wrap_editor()"></span>
                 <ui-codemirror ui-codemirror-opts="editor_options" ng-model="yara_rule.strings"></ui-codemirror>
                 <BR>
 
                 <label>Conditions Editor</label>
                 <span class="error text-danger" ng-if="!yara_rule.condition">*</span>
+                <span class="pull-right">Wrap&nbsp;<input type="checkbox" ng-checked="wrap_editor"
+                                                          ng-model="wrap_editor"
+                                                          ng-change="change_wrap_editor()"></span>
                 <ui-codemirror ui-codemirror-opts="editor_options" ng-model="yara_rule.condition"></ui-codemirror>
                 <BR>
 

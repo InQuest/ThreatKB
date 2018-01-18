@@ -444,8 +444,8 @@ angular.module('ThreatKB')
                 $scope.update(openModalForId);
             }
         }])
-    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'yara_rule', 'yara_rules', 'metadata', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags', 'Yara_rule', 'Cfg_settings', 'Bookmarks', 'hotkeys',
-        function ($scope, $http, $uibModalInstance, $location, yara_rule, yara_rules, metadata, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags, Yara_rule, Cfg_settings, Bookmarks, hotkeys) {
+    .controller('Yara_ruleSaveController', ['$scope', '$http', '$cookies', '$uibModalInstance', '$location', 'yara_rule', 'yara_rules', 'metadata', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags', 'Yara_rule', 'Cfg_settings', 'Bookmarks', 'hotkeys',
+        function ($scope, $http, $cookies, $uibModalInstance, $location, yara_rule, yara_rules, metadata, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags, Yara_rule, Cfg_settings, Bookmarks, hotkeys) {
 
             $scope.yara_rule = yara_rule;
             $scope.yara_rules = yara_rules;
@@ -454,6 +454,22 @@ angular.module('ThreatKB')
             $scope.Comments = Comments;
             $scope.Files = Files;
             $scope.selected_signature = null;
+
+            $scope.wrap_editor = ($cookies.get("wrap_editor") == "true");
+
+            if ($scope.wrap_editor == null) {
+                $scope.wrap_editor = false;
+                var expireDate = new Date();
+                expireDate.setDate(expireDate.getDate() + 365);
+                $cookies.put("wrap_editor", $scope.wrap_editor, {expires: expireDate});
+            }
+
+            $scope.change_wrap_editor = function () {
+                $scope.editor_options.lineWrapping = $scope.wrap_editor;
+                var expireDate = new Date();
+                expireDate.setDate(expireDate.getDate() + 365);
+                $cookies.put("wrap_editor", $scope.wrap_editor, {expires: expireDate});
+            };
 
             $scope.save_artifact = function () {
                 Yara_rule.resource.update({id: $scope.yara_rule.id}, $scope.yara_rule,
@@ -480,6 +496,14 @@ angular.module('ThreatKB')
                 allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
                 callback: function () {
                     $scope.cancel();
+                }
+            }).add({
+                combo: 'ctrl+w',
+                description: 'Toggle word wrap',
+                allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
+                callback: function () {
+                    $scope.wrap_editor = !$scope.wrap_editor;
+                    $scope.change_wrap_editor();
                 }
             });
 
@@ -542,7 +566,7 @@ angular.module('ThreatKB')
 
             $scope.editor_options = {
                 lineNumbers: true,
-                lineWrapping: false,
+                lineWrapping: $scope.wrap_editor,
                 mode: 'yara'
             };
 

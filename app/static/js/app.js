@@ -1,5 +1,5 @@
 // Declare app level module which depends on filters, and services
-angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize', 'ui.select', 'ngTagsInput',
+angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap', 'ngSanitize', 'ui.select', 'ngTagsInput',
     'angular-growl', 'angular-toArrayFilter', 'ui.codemirror', 'ngFileUpload', 'ngFileSaver', 'ngPassword',
     'ngMessages', 'blockUI', 'ui.grid', 'ui.grid.saveState', 'ui.grid.autoResize', 'ui.grid.pagination',
     'ngclipboard', 'cfp.hotkeys'])
