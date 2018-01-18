@@ -134,7 +134,9 @@ class Yara_rule(db.Model):
         yara_rule_text += "\tmeta:\n"
         metadata_strings = []
         for field in metadata_field_mapping:
-            if yara_dict.get(field, None) and not "metadata" in field and field in ["revision", "name", "category"]:
+            if yara_dict.get(field, None) and not "metadata" in field and field in ["creation_date",
+                                                                                    "last_revision_date", "revision",
+                                                                                    "name", "category"]:
                 metadata_strings.append("\t\t%s = \"%s\"\n" % (field, yara_dict[field]))
 
         try:
