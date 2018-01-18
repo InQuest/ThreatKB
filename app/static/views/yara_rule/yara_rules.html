@@ -267,16 +267,6 @@
                         </uib-accordion>
                     </div>
 
-                    <div>
-                        <uib-accordion>
-                            <div uib-accordion-group class="panel-default"
-                                 heading="{{ revision.revision }} @ {{ revision.date_created }} by {{ revision.user.email }}"
-                                 ng-repeat="revision in yara_rule.revisions">
-                                <pre>{{ revision.rule_json | json:4}}</pre>
-                            </div>
-                        </uib-accordion>
-                    </div>
-
                 </div>
 
                 <div class="form-group" ng-if="yara_rule.id">
@@ -333,16 +323,29 @@
                 </div>
 
                 <div>
-                    <label>Revisions</label>
-                    <div>
+                    <label>Revisions ({{ yara_rule.revisions.length }})</label>
+                    <div style="padding-top:3px;">
                         <uib-accordion>
                             <div uib-accordion-group class="panel-default"
-                                 heading="{{ revision.revision }} @ {{ revision.date_created }} by {{ revision.user.email }}"
-                                 ng-repeat="revision in yara_rule.revisions">
-                                <pre>{{ revision.rule_json | json:4}}</pre>
+                                 heading="See revisions">
+                                <ul class="list-group">
+                                    <li class="list-group-item justify-content-between"
+                                    >
+                                        <div>
+                                            <uib-accordion>
+                                                <div uib-accordion-group class="panel-default"
+                                                     heading="{{ revision.revision }} @ {{ revision.date_created }} by {{ revision.user.email }}"
+                                                     ng-repeat="revision in yara_rule.revisions | orderBy:'-date_created'">
+                                                    <pre>{{ revision.rule_json | json:4}}</pre>
+                                                </div>
+                                            </uib-accordion>
+                                        </div>
+                                    </li>
+                                </ul>
                             </div>
                         </uib-accordion>
                     </div>
+
                 </div>
             </div>
 
