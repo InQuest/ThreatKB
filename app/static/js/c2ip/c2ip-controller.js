@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('C2ipController', ['$scope', '$filter', '$http', '$uibModal', 'resolvedC2ip', 'C2ip', 'Cfg_states', 'growl', 'Users', 'openModalForId', 'uiGridConstants',
-        function ($scope, $filter, $http, $uibModal, resolvedC2ip, C2ip, Cfg_states, growl, Users, openModalForId, uiGridConstants) {
+    .controller('C2ipController', ['$scope', '$timeout', '$filter', '$http', '$uibModal', 'resolvedC2ip', 'C2ip', 'Cfg_states', 'growl', 'Users', 'openModalForId', 'uiGridConstants',
+        function ($scope, $timeout, $filter, $http, $uibModal, resolvedC2ip, C2ip, Cfg_states, growl, Users, openModalForId, uiGridConstants) {
 
             $scope.c2ips = resolvedC2ip;
 
@@ -39,7 +39,7 @@ angular.module('ThreatKB')
 
                         for (var i = 0; i < grid.columns.length; i++) {
                             var column = grid.columns[i];
-                            if (column.filters[0].term !== undefined && column.filters[0].term !== null) {
+                            if (column.filters[0].term !== undefined && column.filters[0].term !== null && column.filters[0].term !== "") {
                                 paginationOptions.searches[column.colDef.field] = column.filters[0].term
                             }
                         }
@@ -59,17 +59,38 @@ angular.module('ThreatKB')
                         paginationOptions.pageSize = pageSize;
                         getPage();
                     });
+                    gridApi.core.on.renderingComplete($scope, function () {
+                        $timeout(function () {
+                            $("div").each(function () {
+                                $(this).removeAttr("tabindex");
+                            });
+                            $("span").each(function () {
+                                $(this).removeAttr("tabindex");
+                            });
+                            $("input").each(function () {
+                                $(this).removeAttr("tabindex");
+                            });
+                            $(":input[type=text]").each(function (i) {
+                                if ($(this).hasClass("ui-grid-filter-input")) {
+                                    $(this).attr("tabindex", i + 1);
+                                    if ((i + 1) == 1) {
+                                        $(this).focus();
+                                    }
+                                }
+                            });
+                        }, 500);
+                    });
                 },
                 rowHeight: 35,
                 columnDefs:
                     [
-                        {field: 'ip', displayName: 'IP'},
-                        {field: 'asn', displayName: 'ASN', enableSorting: false},
-                        {field: 'country', enableSorting: false},
+                        {field: 'ip', displayName: 'IP', enableSorting: true},
+                        {field: 'asn', displayName: 'ASN', enableSorting: true},
+                        {field: 'country', enableSorting: true},
                         {
                             field: 'state',
                             displayName: 'State',
-                            enableSorting: false,
+                            enableSorting: true,
                             cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.state"'
                             + ' on-select="grid.appScope.save(row.entity)">'
                             + '<ui-select-match placeholder="Select an state ...">'
@@ -291,8 +312,8 @@ angular.module('ThreatKB')
                 $scope.update(openModalForId);
             }
         }])
-    .controller('C2ipSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'c2ip', 'metadata', 'Comments', 'Cfg_states', 'Tags', 'growl', 'Bookmarks',
-        function ($scope, $http, $uibModalInstance, $location, c2ip, metadata, Comments, Cfg_states, Tags, growl, Bookmarks) {
+    .controller('C2ipSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'c2ip', 'metadata', 'Comments', 'Cfg_states', 'Tags', 'growl', 'Bookmarks', 'hotkeys',
+        function ($scope, $http, $uibModalInstance, $location, c2ip, metadata, Comments, Cfg_states, Tags, growl, Bookmarks, hotkeys) {
             $scope.c2ip = c2ip;
             if (!$scope.c2ip.id) {
                 $scope.c2ip.metadata = metadata;
@@ -300,6 +321,23 @@ angular.module('ThreatKB')
             $scope.c2ip.new_comment = "";
             $scope.Comments = Comments;
             $scope.metadata = metadata;
+
+            hotkeys.bindTo($scope)
+                .add({
+                    combo: 'ctrl+s',
+                    description: 'Save',
+                    allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
+                    callback: function () {
+                        $scope.ok();
+                    }
+                }).add({
+                combo: 'ctrl+x',
+                description: 'Escape',
+                allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
+                callback: function () {
+                    $scope.cancel();
+                }
+            });
 
             $scope.update_selected_metadata = function (m, selected) {
                 if (!$scope.c2ip.metadata_values[m.key]) {

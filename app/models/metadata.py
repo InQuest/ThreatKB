@@ -18,6 +18,7 @@ class Metadata(db.Model):
 
     show_in_table = db.Column(db.Integer, default=0, nullable=False)
     required = db.Column(db.Integer, default=0, nullable=False)
+    export_with_release = db.Column(db.Integer, default=1, nullable=False)
     date_created = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp())
     date_modified = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp(),
                               onupdate=db.func.current_timestamp())
@@ -31,7 +32,8 @@ class Metadata(db.Model):
         metadata_dict = {}
 
         for metadata in [entity.to_dict() for entity in db.session.query(Metadata).filter(
-                Metadata.artifact_type == ENTITY_MAPPING[entity_type]).filter(Metadata.active > 0).all()]:
+                Metadata.artifact_type == ENTITY_MAPPING[entity_type]).filter(Metadata.active > 0).order_by(
+            Metadata.type_).order_by(Metadata.key).all()]:
             if metadata["type"] not in metadata_dict.keys():
                 metadata_dict[metadata["type"]] = []
             metadata_dict[metadata["type"]].append(metadata)
@@ -64,6 +66,7 @@ class Metadata(db.Model):
             show_in_table=self.show_in_table,
             active=self.active,
             required=self.required,
+            export_with_release=self.export_with_release,
             choices=[choice.to_dict() for choice in self.choices]
         )
 
