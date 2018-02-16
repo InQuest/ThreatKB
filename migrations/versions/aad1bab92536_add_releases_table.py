@@ -8,6 +8,8 @@ Create Date: 2017-08-29 15:20:45.220826
 from alembic import op
 import sqlalchemy as sa
 
+from sqlalchemy.dialects.mysql import LONGTEXT
+
 # revision identifiers, used by Alembic.
 revision = 'aad1bab92536'
 down_revision = '0bd5407cc66d'
@@ -22,7 +24,7 @@ def upgrade():
                     sa.Column('name', sa.String(length=500), nullable=False),
                     sa.Column('is_test_release', sa.Integer(), nullable=True),
                     sa.Column('date_created', sa.DateTime(timezone=True), nullable=True),
-                    sa.Column('release_data', sa.LongText(), nullable=False),
+                    sa.Column('release_data', LONGTEXT(), nullable=False),
                     sa.Column('created_user_id', sa.Integer(), nullable=False),
                     sa.ForeignKeyConstraint(['created_user_id'], ['kb_users.id'], ),
                     sa.PrimaryKeyConstraint('id')
