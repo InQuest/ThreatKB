@@ -34,12 +34,15 @@ Tested on Ubuntu Linux 14.04 -> 16.04
 2. Clone repo: `sudo git clone -b master git@github.com:InQuest/ThreatKB.git /opt/ThreatKB`
 3. Fix permissions of /opt/ThreatKB if needed: `sudo chown -R threatkb:threatkb /opt/ThreatKB`
 4. Create MySQL database: `mysql -u root -p{your password} create database threatkb;`
+    - If you wish to create a ThreatKB specific MySQL user, feel free to do so
 5. Update SQL config in /opt/ThreatKB/config.py parameters:
     - SQL_HOST
     - SQL_USERNAME
     - SQL_PASSWORD
 
 ### Application Install 
+**Note:** These steps and the execution of ThreatKB should be ran under the `threatkb` local user you created earlier
+  
 1. Run `./install.sh`
     - Setups a Python virtual environment in the directory `/opt/ThreatKB/flask`
     - Installs required node libraries for front-end
@@ -64,7 +67,7 @@ It's best to run the application and it's Python virtualenv within a screen sess
 4. Run the application:
     - `flask/bin/python run.py`
     - Follow the instructions below on creating your first Admin user before continuing to next step
-5. Open your browser to http://127.0.0.1:5000/#1/login and get started using ThreatKB!
+5. Open your browser to http://127.0.0.1:5000/#!/login and get started using ThreatKB!
 
 
 ### Admin User Creation
@@ -77,8 +80,21 @@ It's best to run the application and it's Python virtualenv within a screen sess
 ## Docker Installation  
 1. Edit docker-compose.yml if you change to change defaults such as ports or credentials
 2. Build the Docker image: `docker build -t threatkb .`
-3. Execute docker-compuse: `docker-compuse up`
-4. Open your browser to htp://127.0.0.1:5000/#1/login
+3. Execute docker-compuse: `docker-compose up`
+4. Open your browser to htp://127.0.0.1:5000/#!/login
+
+**Example output:**
+```
+$ docker-compose up
+-Starting inquestkb_db_1 ... 	
+-Starting inquestkb_db_1 ... done	
+-Recreating inquestkb_threatkb_1 ... 	
+-Recreating inquestkb_threatkb_1 ... done	
+-Attaching to inquestkb_db_1, inquestkb_threatkb_1	
+-....snip...	
+-threatkb_1  |  * Debugger is active!	
+-threatkb_1  |  * Debugger PIN: 212-674-856
+```
 
 ## Databases  
 Please see ThreatKB/migrations/README documentation
