@@ -1,12 +1,181 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('TasksController', ['$scope', '$uibModal', 'resolvedTask', 'Task', 'Cfg_states', 'growl', 'Users', 'openModalForId',
-        function ($scope, $uibModal, resolvedTask, Task, Cfg_states, growl, Users, openModalForId) {
+    .controller('TasksController', ['$scope', '$timeout', '$filter', '$http', '$uibModal', 'resolvedTask', 'Task', 'Cfg_states', 'growl', 'Users', 'openModalForId', 'uiGridConstants',
+        function ($scope, $timeout, $filter, $http, $uibModal, resolvedTask, Task, Cfg_states, growl, Users, openModalForId, uiGridConstants) {
 
             $scope.tasks = resolvedTask;
 
             $scope.users = Users.query();
+
+            $scope.cfg_states = Cfg_states.query();
+
+            $scope.filterOptions = {
+                filterText: ''
+            };
+
+            var paginationOptions = {
+                pageNumber: 1,
+                pageSize: 25,
+                searches: {},
+                sort_by: null,
+                sort_dir: null
+            };
+
+            $scope.gridOptions = {
+                paginationPageSizes: [25, 50, 75, 100],
+                paginationPageSize: 25,
+                useExternalFiltering: true,
+                useExternalPagination: true,
+                useExternalSorting: true,
+                enableFiltering: true,
+                flatEntityAccess: true,
+                fastWatch: true,
+                onRegisterApi: function (gridApi) {
+                    $scope.gridApi = gridApi;
+                    $scope.gridApi.core.on.filterChanged($scope, function () {
+                        var grid = this.grid;
+                        paginationOptions.searches = {};
+
+                        for (var i = 0; i < grid.columns.length; i++) {
+                            var column = grid.columns[i];
+                            if (column.filters[0].term !== undefined && column.filters[0].term !== null && column.filters[0].term !== "") {
+                                paginationOptions.searches[column.colDef.field] = column.filters[0].term
+                            }
+                        }
+                        getPage()
+                    });
+                    $scope.gridApi.core.on.sortChanged($scope, function (grid, sortColumns) {
+                        if (sortColumns.length === 0) {
+                            paginationOptions.sort_dir = null;
+                        } else {
+                            paginationOptions.sort_by = sortColumns[0].colDef.field;
+                            paginationOptions.sort_dir = sortColumns[0].sort.direction;
+                        }
+                        getPage();
+                    });
+                    gridApi.pagination.on.paginationChanged($scope, function (newPage, pageSize) {
+                        paginationOptions.pageNumber = newPage;
+                        paginationOptions.pageSize = pageSize;
+                        getPage();
+                    });
+                    gridApi.core.on.renderingComplete($scope, function () {
+                        $timeout(function () {
+                            $("div").each(function () {
+                                $(this).removeAttr("tabindex");
+                            });
+                            $("span").each(function () {
+                                $(this).removeAttr("tabindex");
+                            });
+                            $("input").each(function () {
+                                $(this).removeAttr("tabindex");
+                            });
+                            $(":input[type=text]").each(function (i) {
+                                if ($(this).hasClass("ui-grid-filter-input")) {
+                                    $(this).attr("tabindex", i + 1);
+                                    if ((i + 1) == 1) {
+                                        $(this).focus();
+                                    }
+                                }
+                            });
+                        }, 500);
+                    });
+                },
+                rowHeight: 35,
+                columnDefs:
+                    [
+                        {field: 'title', displayName: 'Title', enableSorting: true},
+                        {
+                            field: 'state',
+                            displayName: 'State',
+                            enableSorting: true,
+                            cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.state"'
+                            + ' on-select="grid.appScope.save(row.entity)">'
+                            + '<ui-select-match placeholder="Select a state ...">'
+                            + '<small><span ng-bind="$select.selected.state || row.entity.state"></span></small>'
+                            + '</ui-select-match>'
+                            + '<ui-select-choices'
+                            + ' repeat="state in (grid.appScope.cfg_states | filter: $select.search) track by state.id">'
+                            + '<small><span ng-bind="state.state"></span></small>'
+                            + '</ui-select-choices>'
+                            + '</ui-select>'
+                            + '</div>'
+                        },
+                        {
+                            field: 'owner_user.email',
+                            displayName: 'Owner',
+                            width: '20%',
+                            enableSorting: false,
+                            cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.owner_user"'
+                            + ' on-select="grid.appScope.save(row.entity)">'
+                            + '<ui-select-match placeholder="Select an owner ...">'
+                            + '<small><span ng-bind="$select.selected.email || row.entity.owner_user.email"></span></small>'
+                            + '</ui-select-match>'
+                            + '<ui-select-choices'
+                            + ' repeat="person in (grid.appScope.users | filter: $select.search) track by person.id">'
+                            + '<small><span ng-bind="person.email"></span></small>'
+                            + '</ui-select-choices>'
+                            + '</ui-select>'
+                            + '</div>'
+                        },
+                        {
+                            name: 'Actions',
+                            enableFiltering: false,
+                            enableColumnMenu: false,
+                            enableSorting: false,
+                            cellTemplate: '<div style="text-align: center;">'
+                            + '<button type="button" ng-click="grid.appScope.update(row.entity.id)"'
+                            + ' class="btn btn-sm">'
+                            + '<small><span class="glyphicon glyphicon-pencil"></span>'
+                            + '</small>'
+                            + '</button>'
+                            + '&nbsp;'
+                            + '<button confirmed-click="grid.appScope.delete(row.entity.id)"'
+                            + ' ng-confirm-click="Are you sure you want to '
+                            + 'delete this task?" class="btn btn-sm btn-danger">'
+                            + '<small>'
+                            + '<span class="glyphicon glyphicon-remove-circle"></span>'
+                            + '</small>'
+                            + '</button></div>'
+                        }
+                    ]
+            };
+
+            var getPage = function () {
+                var url = '/ThreatKB/tasks?';
+                url += 'page_number=' + (paginationOptions.pageNumber - 1);
+                url += '&page_size=' + paginationOptions.pageSize;
+                switch (paginationOptions.sort_dir) {
+                    case uiGridConstants.ASC:
+                        url += '&sort_dir=ASC';
+                        break;
+                    case uiGridConstants.DESC:
+                        url += '&sort_dir=DESC';
+                        break;
+                    default:
+                        break;
+                }
+                if (paginationOptions.sort_by !== null) {
+                    url += '&sort_by=' + paginationOptions.sort_by;
+                }
+                if (paginationOptions.searches !== {}) {
+                    url += '&searches=' + JSON.stringify(paginationOptions.searches);
+                }
+                $http.get(url)
+                    .then(function (response) {
+                        $scope.gridOptions.totalItems = response.data.total_count;
+                        $scope.gridOptions.data = response.data.data;
+                    }, function (error) {
+                    });
+            };
+
+            $scope.getTableHeight = function () {
+                var rowHeight = $scope.gridOptions.rowHeight;
+                var headerHeight = 100;
+                return {
+                    height: ($scope.gridOptions.data.length * rowHeight + headerHeight) + "px"
+                };
+            };
 
             $scope.create = function () {
                 $scope.clear();
@@ -22,7 +191,7 @@ angular.module('ThreatKB')
 
             $scope.delete = function (id) {
                 Task.delete({id: id}, function () {
-                    $scope.tasks = Task.query();
+                    getPage();
                 });
             };
 
@@ -35,13 +204,13 @@ angular.module('ThreatKB')
 
                 if (id) {
                     Task.update({id: id}, $scope.task, function () {
-                        $scope.tasks = Task.query();
-                        //$scope.clear();
+                        getPage();
+                    }, function (error) {
+                        growl.error(error.data, {ttl: -1});
                     });
                 } else {
                     Task.save($scope.task, function () {
-                        $scope.tasks = Task.query();
-                        //$scope.clear();
+                        getPage();
                     }, function (error) {
                         growl.error(error.data, {ttl: -1});
                     });
@@ -79,6 +248,8 @@ angular.module('ThreatKB')
                 });
             };
 
+            getPage();
+
             if (openModalForId !== null) {
                 $scope.update(openModalForId);
             }
@@ -99,13 +270,13 @@ angular.module('ThreatKB')
                         $scope.ok();
                     }
                 }).add({
-                combo: 'ctrl+x',
-                description: 'Escape',
-                allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
-                callback: function () {
-                    $scope.cancel();
-                }
-            });
+                    combo: 'ctrl+x',
+                    description: 'Escape',
+                    allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
+                    callback: function () {
+                        $scope.cancel();
+                    }
+                });
 
             if ($scope.task.$promise !== undefined) {
                 $scope.task.$promise.then(function (result) {

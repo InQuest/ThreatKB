@@ -7,6 +7,7 @@ import json
 from sqlalchemy import or_
 
 from app.models.bookmarks import Bookmarks
+from app.models.users import KBUser
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
 
 
@@ -15,18 +16,63 @@ from app.routes.bookmarks import is_bookmarked, delete_bookmarks
 @login_required
 def get_all_tasks():
     """Return all active tasks
+
+    Pagination variables:
+    page_number: page number to start on, default 0
+    page_size: the size of each page, default None (don't paginate)
+    sort_by: column to sort by, must exist on the Task model, default None
+    sort_direction: the direction to sort by if sorting, default ASC
+    searches: dictionary of column filters as {column1:filter1, column2:filter2}, columns must exist on Task model, default {}
+
     Return: list of task dictionaries"""
+    searches = request.args.get('searches', '{}')
+    page_number = request.args.get('page_number', False)
+    page_size = request.args.get('page_size', False)
+    sort_by = request.args.get('sort_by', False)
+    sort_direction = request.args.get('sort_dir', 'ASC')
+
     entities = tasks.Tasks.query.filter_by(active=True)
 
+    if not current_user.admin:
+        entities = entities.filter(or_(tasks.Tasks.owner_user_id == current_user.id, tasks.Tasks.owner_user_id == None))
 
-    if current_user.admin:
-        entities = entities.order_by("date_created DESC").all()
+    searches = json.loads(searches)
+    for column, value in searches.items():
+        if not value:
+            continue
+
+        if column == "owner_user.email":
+            entities = entities.join(KBUser, tasks.Tasks.owner_user_id == KBUser.id) \
+                .filter(KBUser.email.like("%" + str(value) + "%"))
+            continue
+
+        try:
+            column = getattr(tasks.Tasks, column)
+            entities = entities.filter(column.like("%" + str(value) + "%"))
+        except:
+            continue
+
+    filtered_entities = entities
+    total_count = entities.count()
+
+    if sort_by:
+        filtered_entities = filtered_entities.order_by("%s %s" % (sort_by, sort_direction))
     else:
-        entities = entities.filter(
-            or_(tasks.Tasks.owner_user_id == current_user.id, tasks.Tasks.owner_user_id == None)).order_by(
-            "date_created DESC").all()
+        filtered_entities = filtered_entities.order_by("date_created DESC")
 
-    return Response(json.dumps([entity.to_dict() for entity in entities]), mimetype='application/json')
+    if page_size:
+        filtered_entities = filtered_entities.limit(int(page_size))
+
+    if page_number:
+        filtered_entities = filtered_entities.offset(int(page_number) * int(page_size))
+
+    filtered_entities = filtered_entities.all()
+
+    response_dict = dict()
+    response_dict['data'] = [entity.to_dict() for entity in filtered_entities]
+    response_dict['total_count'] = total_count
+
+    return Response(json.dumps(response_dict), mimetype='application/json')
 
 
 @app.route('/ThreatKB/tasks/<int:id>', methods=['GET'])
@@ -56,13 +102,13 @@ def create_tasks():
     From Data: title (str), description (str), final_artifact(str), state (str)
     Return: task dictionary"""
     entity = tasks.Tasks(
-        title=request.json['title']
-        , description=request.json['description']
-        , final_artifact=request.json['final_artifact']
-        , state=request.json['state']['state'] if 'state' in request.json['state'] else None
-        , created_user_id=current_user.id
-        , modified_user_id=current_user.id
-        , owner_user_id=current_user.id
+        title=request.json['title'],
+        description=request.json['description'],
+        final_artifact=request.json['final_artifact'],
+        state=request.json['state']['state'] if 'state' in request.json['state'] else None,
+        created_user_id=current_user.id,
+        modified_user_id=current_user.id,
+        owner_user_id=current_user.id
     )
     db.session.add(entity)
     db.session.commit()
