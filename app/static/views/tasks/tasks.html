@@ -127,71 +127,14 @@
             </div>
         </form>
     </script>
-
-
     <br>
     <div class="container-fluid">
-
-        <div class="inner-addon left-addon col-md-4" style="padding-left: 0px; padding-right:0px;">
-            <i class="glyphicon glyphicon-search"></i>
-            <input type="text" class="form-control" placeholder="Search" ng-model="search"/>
-        </div>
-        <a class="btn-link pull-right" style="color:inherit;" ng-click="create()">
-            <span class="glyphicon glyphicon-plus-sign"></span>
-        </a>
+        <button class="btn btn-secondary pull-right" style="color:inherit;" ng-click="create()">
+            Create Task
+        </button>
     </div>
-
-
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-            <tr>
-                <th>Title</th>
-
-                <th>State</th>
-
-                <th style="width: 260px;">Owner</th>
-
-                <th style="width: 120px;">Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr ng-repeat="task in tasks | toArray:false | filter:search track by $index" ng-if="task.date_created">
-
-                <td>{{ task.title }}</td>
-
-                <td>{{ task.state }}</td>
-
-                <td>
-                    <ui-select ng-model="task.owner_user" on-select="save(task)">
-                        <ui-select-match placeholder="Select an owner ...">
-                            <small><span ng-bind="$select.selected.email || task.owner_user.email"></span></small>
-                        </ui-select-match>
-                        <ui-select-choices
-                                repeat="person in (users | filter: $select.search) track by person.id">
-                            <small><span ng-bind="person.email"></span></small>
-                        </ui-select-choices>
-                    </ui-select>
-
-                </td>
-
-                <td>
-                    <center>
-                        <button type="submit"
-                                ng-click="update(task.id)"
-                                class="btn btn-sm">
-                            <small><span class="glyphicon glyphicon-pencil"></span></small>
-                        </button>
-                        <button type="submit"
-                                ng-confirm-click="Are you sure you want to inactivate this task?"
-                                ng-click="delete(task.id)"
-                                class="btn btn-sm btn-danger">
-                            <small><span class="glyphicon glyphicon-remove-circle"></span></small>
-                        </button>
-                    </center>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+    <br>
+    <div ui-if="gridOptions.data.length > 0" ui-grid="gridOptions" ng-style="getTableHeight()"
+         ui-grid-pagination ui-grid-auto-resize>
     </div>
 </div>
