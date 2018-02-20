@@ -167,6 +167,7 @@ angular.module('ThreatKB')
                     .then(function (response) {
                         $scope.gridOptions.totalItems = response.data.total_count;
                         $scope.gridOptions.data = response.data.data;
+                        $scope.gridApi.core.refresh();
                     }, function (error) {
                     });
             };
@@ -303,6 +304,8 @@ angular.module('ThreatKB')
                 c2ipSave.result.then(function (entity) {
                     $scope.c2ip = entity;
                     $scope.save(id);
+                }, function () {
+                    getPage();
                 });
             };
 
@@ -312,8 +315,8 @@ angular.module('ThreatKB')
                 $scope.update(openModalForId);
             }
         }])
-    .controller('C2ipSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'c2ip', 'metadata', 'Comments', 'Cfg_states', 'Tags', 'growl', 'Bookmarks', 'hotkeys',
-        function ($scope, $http, $uibModalInstance, $location, c2ip, metadata, Comments, Cfg_states, Tags, growl, Bookmarks, hotkeys) {
+    .controller('C2ipSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'C2ip', 'c2ip', 'metadata', 'Comments', 'Cfg_states', 'Tags', 'growl', 'Bookmarks', 'hotkeys',
+        function ($scope, $http, $uibModalInstance, $location, C2ip, c2ip, metadata, Comments, Cfg_states, Tags, growl, Bookmarks, hotkeys) {
             $scope.c2ip = c2ip;
             if (!$scope.c2ip.id) {
                 $scope.c2ip.metadata = metadata;
@@ -322,13 +325,24 @@ angular.module('ThreatKB')
             $scope.Comments = Comments;
             $scope.metadata = metadata;
 
+            $scope.save_artifact = function () {
+                C2ip.update({id: $scope.c2ip.id}, $scope.c2ip,
+                    function (data) {
+                        if (!data) {
+                            growl.error(error, {ttl: -1});
+                        } else {
+                            growl.info("Successfully saved dns artifact '" + $scope.c2ip.ip + "'.", {ttl: 2000});
+                        }
+                    });
+            };
+
             hotkeys.bindTo($scope)
                 .add({
                     combo: 'ctrl+s',
                     description: 'Save',
                     allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
                     callback: function () {
-                        $scope.ok();
+                        $scope.save_artifact();
                     }
                 }).add({
                 combo: 'ctrl+x',
