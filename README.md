@@ -64,7 +64,7 @@ It's best to run the application and it's Python virtualenv within a screen sess
     - `celery -A app.celeryapp.celery work -E`
     - This is required in order for testing against your clean corpus of files
 4. Build the database tables and columns:
-    - `flask/bin/python manage.py upgrade`
+    - `flask/bin/python manage.py db upgrade`
 4. Run the application:
     - `flask/bin/python run.py`
     - Follow the instructions below on creating your first Admin user before continuing to next step
