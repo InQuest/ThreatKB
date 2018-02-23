@@ -16,7 +16,7 @@
 Tested on Ubuntu Linux 14.04 -> 16.04
 
 1. Install system dependencies and libraries:
-    - `sudo apt-get install git screen libffi-dev libssl-dev libsqlite3-dev`
+    - `sudo apt-get install git screen libffi-dev libssl-dev libsqlite3-dev libmysqlclient-dev`
 2. Install Python and associated packages:
     - `sudo apt-get install python2.7 python-pip python-dev libpython-dev`
 3. Install Python virtualenv library:
@@ -24,7 +24,8 @@ Tested on Ubuntu Linux 14.04 -> 16.04
 3. Install databases:
     - `sudo apt-get install mysql-server redis-server`
 4. Install front-end packages:
-    - `sudo apt-get install nodejs && npm install -g bower`
+    - `sudo apt-get install nodejs npm && npm install -g bower`
+    - On some systems, nodejs is installed as either `/usr/bin/node` or `/usr/bin/nodejs`, if it is installed as `/usr/bin/nodejs` simply run the command `sudo cp /usr/bin/nodejs node` for the npm install command to work properly
 
 **Note:** If you are running on CentOS, install these dependencies:
 `yum install MySQL-python libffi-devel mysql mysql-devel mysql-lib`
