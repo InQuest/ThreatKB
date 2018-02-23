@@ -30,8 +30,8 @@ Tested on Ubuntu Linux 14.04 -> 16.04
 `yum install MySQL-python libffi-devel mysql mysql-devel mysql-lib`
 
 ### System Prep  
-1. Create system user: `sudo useradd -d /opt/ThreatKB -s /bin/bash -m -U`
-2. Clone repo: `sudo git clone -b master git@github.com:InQuest/ThreatKB.git /opt/ThreatKB`
+1. Create system user: `sudo useradd -d /opt/ThreatKB -s /bin/bash -m -U threatkb`
+2. Clone repo: `sudo git clone -b master git@github.com:InQuest/ThreatKB.git /opt/ThreatKB/install`
 3. Fix permissions of /opt/ThreatKB if needed: `sudo chown -R threatkb:threatkb /opt/ThreatKB`
 4. Create MySQL database: `mysql -u root -p{your password} create database threatkb;`
     - If you wish to create a ThreatKB specific MySQL user, feel free to do so
