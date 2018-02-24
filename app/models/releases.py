@@ -138,33 +138,24 @@ class Release(db.Model):
 
         message = "%s\n\n" % (prepend_text) if prepend_text else ""
         message += "New Signatures\n%s\n" % ("-" * 10)
-        message += "\n\n".join(["EventID: %s\nName: %s\nCategory: %s\nConfidence: %s\nSeverity: %s\nDescription: %s" % (
+        message += "\n\n".join(["EventID: %s\nName: %s\nCategory: %s" % (
             entity.get("eventid", "eventid"),
             entity.get("name", "name"),
-            entity.get("category", "category"),
-            entity.get("confidence", "confidence"),
-            entity.get("severity", "severity"),
-            entity.get("description", "description")) for entity in self.release_data_dict["Signatures"]["Added"] if
+            entity.get("category", "category")) for entity in self.release_data_dict["Signatures"]["Added"] if
                                 type(entity) == dict]) if \
             len(self.release_data_dict["Signatures"]["Added"]) > 0 else "NA"
         message += "\n\nRemoved Signatures\n%s\n" % ("-" * 10)
-        message += "\n\n".join(["EventID: %s\nName: %s\nCategory: %s\nConfidence: %s\nSeverity: %s\nDescription: %s" % (
+        message += "\n\n".join(["EventID: %s\nName: %s\nCategory: %s" % (
             entity.get("eventid", "eventid"),
             entity.get("name", "name"),
-            entity.get("category", "category"),
-            entity.get("confidence", "confidence"),
-            entity.get("severity", "severity"),
-            entity.get("description", "description")) for entity in self.release_data_dict["Signatures"]["Removed"] if
+            entity.get("category", "category")) for entity in self.release_data_dict["Signatures"]["Removed"] if
                                 type(entity) == dict]) if \
             len(self.release_data_dict["Signatures"]["Removed"]) > 0 else "NA"
         message += "\n\nModified Signatures\n%s\n" % ("-" * 10)
-        message += "\n\n".join(["EventID: %s\nName: %s\nCategory: %s\nConfidence: %s\nSeverity: %s\nDescription: %s" % (
+        message += "\n\n".join(["EventID: %s\nName: %s\nCategory: %s" % (
             entity.get("eventid", "eventid"),
             entity.get("name", "name"),
-            entity.get("category", "category"),
-            entity.get("confidence", "confidence"),
-            entity.get("severity", "severity"),
-            entity.get("description", "description")) for entity in
+            entity.get("category", "category")) for entity in
                                 self.release_data_dict["Signatures"]["Modified"] if type(entity) == dict]) if \
             len(self.release_data_dict["Signatures"]["Modified"]) > 0 else "NA"
 
