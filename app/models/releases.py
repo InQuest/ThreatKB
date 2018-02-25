@@ -60,7 +60,9 @@ class Release(db.Model):
 
         dns = c2dns.C2dns.query.filter(c2dns.C2dns.state == release_state.state).all()
         ip = c2ip.C2ip.query.filter(c2ip.C2ip.state == release_state.state).all()
-        yr = yara_rule.Yara_rule.query.filter(yara_rule.Yara_rule.state == release_state.state).all()
+        yr = yara_rule.Yara_rule.query\
+            .filter(and_(yara_rule.Yara_rule.state == release_state.state, yara_rule.Yara_rule.active > 0))\
+            .all()
 
         release_data = {
             "Signatures": {"Signatures": {entity.to_dict()["id"]: entity.to_dict() for entity in yr}, "Added": [],
@@ -79,6 +81,7 @@ class Release(db.Model):
             release_data["DNS"]["Added"] = [dns for id_, dns in release_data["DNS"]["DNS"].iteritems()]
             return json.dumps(release_data)
 
+        last_release_date = last_release.date_created
         last_release = last_release.release_data_dict
 
         ##### SIGNATURES #######
@@ -91,7 +94,7 @@ class Release(db.Model):
             if not eventid in last_release_eventids:
                 release_data["Signatures"]["Added"].append(signature)
             else:
-                if parser.parse(signature["last_revision_date"]) > datetime.datetime.now():
+                if parser.parse(signature["last_revision_date"]) > last_release_date:
                     release_data["Signatures"]["Modified"].append(signature)
                 del last_release["Signatures"]["Signatures"][str(eventid)]
 
@@ -107,7 +110,7 @@ class Release(db.Model):
             if not ip_id in last_release_ips:
                 release_data["IP"]["Added"].append(ip)
             else:
-                if parser.parse(ip["date_modified"]) > datetime.datetime.now():
+                if parser.parse(ip["date_modified"]) > last_release_date:
                     release_data["IP"]["Modified"].append(ip)
                 del last_release["IP"]["IP"][str(ip_id)]
 
@@ -123,7 +126,7 @@ class Release(db.Model):
             if not dns_id in last_release_dns:
                 release_data["DNS"]["Added"].append(dns)
             else:
-                if parser.parse(dns["date_modified"]) > datetime.datetime.now():
+                if parser.parse(dns["date_modified"]) > last_release_date:
                     release_data["DNS"]["Modified"].append(dns)
                 del last_release["DNS"]["DNS"][str(dns_id)]
 
