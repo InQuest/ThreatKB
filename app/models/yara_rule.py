@@ -143,9 +143,12 @@ class Yara_rule(db.Model):
             for type_, metalist in yara_dict["metadata"].iteritems():
                 for meta in metalist:
                     if meta["export_with_release"]:
-                        metadata_strings.append("\t\t%s = \"%s\"\n" % (meta["key"], yara_dict["metadata_values"][
-                            "value"] if "values" in yara_dict["metadata_values"]else "NA"))
-        except Exception, e:
+                        metadata_strings.append("\t\t%s = \"%s\"\n" % (meta["key"],
+                                                                       yara_dict["metadata_values"][meta["key"]]["value"]
+                                                                       if "value" in yara_dict["metadata_values"][meta["key"]]
+                                                                       else "NA")
+                                                )
+        except Exception as e:
             pass
 
         yara_rule_text += "".join(sorted(metadata_strings))
