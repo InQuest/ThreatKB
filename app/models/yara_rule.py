@@ -68,8 +68,12 @@ class Yara_rule(db.Model):
 
     @property
     def metadata_values(self):
-        return db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
-            Metadata.active > 0).filter(MetadataMapping.artifact_id == self.id).all()
+        return db.session.query(MetadataMapping)\
+            .join(Metadata, Metadata.id == MetadataMapping.metadata_id)\
+            .filter(Metadata.active > 0) \
+            .filter(Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"])\
+            .filter(MetadataMapping.artifact_id == self.id)\
+            .all()
 
     def to_dict(self, include_yara_rule_string=None):
         revisions = Yara_rule_history.query.filter_by(yara_rule_id=self.id).all()
@@ -143,9 +147,12 @@ class Yara_rule(db.Model):
             for type_, metalist in yara_dict["metadata"].iteritems():
                 for meta in metalist:
                     if meta["export_with_release"]:
-                        metadata_strings.append("\t\t%s = \"%s\"\n" % (meta["key"], yara_dict["metadata_values"][
-                            "value"] if "values" in yara_dict["metadata_values"]else "NA"))
-        except Exception, e:
+                        metadata_strings.append("\t\t%s = \"%s\"\n" % (meta["key"],
+                                                                       yara_dict["metadata_values"][meta["key"]]["value"]
+                                                                       if "value" in yara_dict["metadata_values"][meta["key"]]
+                                                                       else "NA")
+                                                )
+        except Exception as e:
             pass
 
         yara_rule_text += "".join(sorted(metadata_strings))

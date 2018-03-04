@@ -108,7 +108,7 @@
                                     <li class="list-group-item justify-content-between"
                                         ng-repeat="comment in task.comments | orderBy:'-date_created'">
                                         <div>
-                                            <pre>{{ comment.comment }}</pre>
+                                            <pre style="word-break: normal; white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word;">{{ comment.comment }}</pre>
                                             <span>{{ comment.user.email }}&nbsp;<small>{{ pretty_date(comment.date_created) }}</small></span>
                                         </div>
                                     </li>
