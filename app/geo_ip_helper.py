@@ -6,12 +6,12 @@ from ipaddr import IPAddress
 from app import app
 from app.models import cfg_settings
 
-app.config["GEOIP_ASN_DATABASE_FILE"] = cfg_settings.Cfg_settings.get_setting("GEOIP_ASN_DATABASE_FILE")
+#app.config["GEOIP_ASN_DATABASE_FILE"] = cfg_settings.Cfg_settings.get_setting("GEOIP_ASN_DATABASE_FILE")
 if not app.config["GEOIP_ASN_DATABASE_FILE"]:
     app.config["GEOIP_ASN_DATABASE_FILE"] = os.getenv('GEOIP_ASN_DATABASE_FILE',
                                                       'data/GeoLite2-ASN.mmdb')
 
-app.config["GEOIP_CITY_DATABASE_FILE"] = cfg_settings.Cfg_settings.get_setting("GEOIP_CITY_DATABASE_FILE")
+#app.config["GEOIP_CITY_DATABASE_FILE"] = cfg_settings.Cfg_settings.get_setting("GEOIP_CITY_DATABASE_FILE")
 if not app.config["GEOIP_CITY_DATABASE_FILE"]:
     app.config["GEOIP_CITY_DATABASE_FILE"] = os.getenv('GEOIP_CITY_DATABASE_FILE',
                                                        'data/GeoLite2-City.mmdb')
