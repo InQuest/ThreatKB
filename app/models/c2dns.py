@@ -51,8 +51,12 @@ class C2dns(db.Model):
 
     @property
     def metadata_values(self):
-        return db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
-            Metadata.active > 0).filter(MetadataMapping.artifact_id == self.id).all()
+        return db.session.query(MetadataMapping)\
+            .join(Metadata, Metadata.id == MetadataMapping.metadata_id)\
+            .filter(Metadata.active > 0)\
+            .filter(Metadata.artifact_type == ENTITY_MAPPING["DNS"])\
+            .filter(MetadataMapping.artifact_id == self.id)\
+            .all()
 
     def to_dict(self):
         metadata_values_dict = {}
