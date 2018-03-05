@@ -318,6 +318,7 @@ angular.module('ThreatKB')
                             disableCountDown: true
                         });
                     }, function (error) {
+                    blockUI.stop();
                         growl.error(error.data, {ttl: -1});
                     }
                 );
