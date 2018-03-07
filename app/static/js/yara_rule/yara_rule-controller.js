@@ -128,7 +128,7 @@ angular.module('ThreatKB')
                             }
                         }
 
-                        getPage()
+                        getPage();
                     });
                     $scope.gridApi.core.on.sortChanged($scope, function (grid, sortColumns) {
                         if (sortColumns.length === 0) {
@@ -227,7 +227,7 @@ angular.module('ThreatKB')
                             + '&nbsp;'
                             + '<button confirmed-click="grid.appScope.delete(row.entity.id)"'
                             + ' ng-confirm-click="Are you sure you want to '
-                            + 'inactivate this signature ({{ row.entity.name }})?" class="btn btn-sm btn-danger">'
+                            + 'inactivate this signature?" class="btn btn-sm btn-danger">'
                             + '<small>'
                             + '<span class="glyphicon glyphicon-remove-circle"></span>'
                             + '</small>'
