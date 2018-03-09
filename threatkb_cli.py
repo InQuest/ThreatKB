@@ -37,7 +37,7 @@ class ThreatKB:
                  headers={"Content-Type": "application/json;charset=UTF-8"}):
         uri_params["token"] = self.token
         uri_params["secret_key"] = self.secret_key
-        url = "%s://%s%s%s" % ("https" if self.use_https else "http", self.host, self.base_uri, uri)
+        url = "%s://%s/%s%s" % ("https" if self.use_https else "http", self.host, self.base_uri, uri)
 
         # Try hitting the uri
         if files:
