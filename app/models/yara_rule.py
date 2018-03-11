@@ -176,6 +176,10 @@ class Yara_rule(db.Model):
 
     @classmethod
     def get_yara_rule_from_yara_dict(cls, yara_dict, metadata_field_mapping={}):
+        condition = yara_dict["condition"]
+        strings = yara_dict["strings"]
+        yara_dict = yara_dict["rule"]
+
         metadata_fields = {entity.key.lower(): entity for entity in
                            db.session.query(Metadata).filter(Metadata.active > 0).filter(
                                Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).all()}
@@ -224,10 +228,13 @@ class Yara_rule(db.Model):
                         to_field = metadata_fields[mapped_to]
                         fields_to_add.append(MetadataMapping(value=field, metadata_id=to_field.id))
 
-        yara_rule.condition = " ".join(yara_dict["condition_terms"])
-        yara_rule.strings = "\n".join(
-            ["%s = %s %s" % (r["name"], r["value"], " ".join(r["modifiers"]) if "modifiers" in r else "") for r in
-             yara_dict["strings"]])
+        # yara_rule.condition = " ".join(yara_dict["condition_terms"])
+        # yara_rule.strings = "\n".join(
+        #    ["%s = %s %s" % (r["name"], r["value"], " ".join(r["modifiers"]) if "modifiers" in r else "") for r in
+        #     yara_dict["strings"]])
+        yara_rule.condition = "\n" + condition
+        yara_rule.strings = "\n" + strings
+
         if not yara_rule.category:
             yara_rule.category = CfgCategoryRangeMapping.DEFAULT_CATEGORY
         return yara_rule, fields_to_add

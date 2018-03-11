@@ -67,7 +67,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                     db.session.add(dns)
                     return_artifacts.append(dns)
             elif artifact["type"].lower() == "yara_rule" and extract_signature:
-                yr, fta = yara_rule.Yara_rule.get_yara_rule_from_yara_dict(artifact["rule"], metadata_field_mapping)
+                yr, fta = yara_rule.Yara_rule.get_yara_rule_from_yara_dict(artifact, metadata_field_mapping)
                 yr.created_user_id, yr.modified_user_id = current_user.id, current_user.id
                 yr.state = default_state if not shared_state else shared_state
                 if shared_reference:
