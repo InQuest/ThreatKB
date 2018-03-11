@@ -13,6 +13,7 @@ import os
 import ConfigParser
 import stat
 import traceback
+import logging
 from StringIO import StringIO
 
 CREDENTIALS_FILE = os.path.expanduser('~/.threatkb/credentials')
@@ -22,23 +23,29 @@ API_HOST = None
 THREATKB_CLI = None
 ENTITY_TYPES = {"yara_rule": 1, "c2dns": 2, "c2ip": 3, "task": 4}
 
+if os.getenv("THREATKB_DEBUG"):
+    logging.basicConfig(level=logging.DEBUG,
+                        format='%(asctime)s - %(processName)s - %(name)s - %(lineno)s - %(levelname)s - %(message)s')
+
+LOG = logging.getLogger()
 
 class ThreatKB:
-
-    def __init__(self, host, token, secret_key, base_uri='ThreatKB/', use_https=True):
+    def __init__(self, host, token, secret_key, base_uri='ThreatKB/', use_https=True, log=LOG):
         self.host = host.lower().replace("http://", "").replace("https://", "")
         self.token = token
         self.secret_key = secret_key
         self.base_uri = base_uri
         self.use_https = use_https
+        self.log = log
         self.session = requests.Session()
 
     def _request(self, method, uri, uri_params={}, body=None, files={},
                  headers={"Content-Type": "application/json;charset=UTF-8"}):
         uri_params["token"] = self.token
         uri_params["secret_key"] = self.secret_key
-        url = "%s://%s/%s%s" % ("https" if self.use_https else "http", self.host, self.base_uri, uri)
+        url = "%s://%s%s%s" % ("https" if self.use_https else "http", self.host, self.base_uri, uri)
 
+        self.log.debug("Sending %s API request to: %s" % (method, url))
         # Try hitting the uri
         if files:
             response = self.session.request(method, url, params=uri_params, data=body, verify=False, files=files)
@@ -82,6 +89,8 @@ def initialize():
         API_TOKEN = config.get("default", "token")
         API_SECRET_KEY = config.get("default", "secret_key")
         API_HOST = config.get("default", "api_host")
+        if not API_HOST.endswith("/"):
+            API_HOST = "%s/" % (API_HOST)
     except:
         raise Exception("Error. Run 'python %s configure' first." % (sys.argv[0]))
 
@@ -133,6 +142,7 @@ def attach(params):
     print THREATKB_CLI.create("file_upload",
                               files={"entity_type": artifact, "entity_id": artifact_id, "file": open(file, 'rb')})
 
+
 def comment(params):
     global THREATKB_CLI, ENTITY_TYPES
 
@@ -147,6 +157,7 @@ def comment(params):
 
     print THREATKB_CLI.create("comments", json.dumps(
         {"comment": comment, "entity_type": ENTITY_TYPES.get(artifact), "entity_id": artifact_id}))
+
 
 def release(params):
     global THREATKB_CLI
@@ -214,6 +225,8 @@ def main():
     elif action == "search":
         initialize()
         search(params)
+    else:
+        help(sys.argv)
 
 
 if __name__ == "__main__":
