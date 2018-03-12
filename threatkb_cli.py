@@ -165,10 +165,7 @@ def release(params):
     try:
         release_id = params[2]
     except Exception, e:
-        help(extra_text="""%s release <release_id_or_latest>
-        
-        release_id_or_latest: the release id as an integer or latest to get the latest prod release""" % (params[0]),
-             params=params)
+        release_id = None
 
     print THREATKB_CLI.get("releases", release_id)
 
