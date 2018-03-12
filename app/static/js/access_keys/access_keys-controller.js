@@ -64,7 +64,8 @@ angular.module('ThreatKB')
                         access_keys: function () {
                             return $scope.access_keys;
                         }
-                    }
+                    },
+                    size: 'lg'
                 });
 
                 keyGen.result.then(function (keys) {
