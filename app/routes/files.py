@@ -10,7 +10,7 @@ import uuid
 import shutil
 import subprocess
 import hashlib
-
+import re
 
 @app.route('/ThreatKB/files', methods=['GET'])
 @auto.doc()
@@ -131,7 +131,13 @@ def upload_file():
                     current_tempfile = os.path.join(root, name)
                     app.logger.debug("POSTPROCESSOR TEMPFILE '%s'" % (current_tempfile))
                     try:
-                        if name == filename or re.search(postprocessing_exclude_files_regex, filename):
+                        if name == filename:
+                            app.logger.debug("Filename '%s' is the original file. Skipping.")
+                            continue
+                        if re.search(postprocessing_exclude_files_regex, filename):
+                            app.logger.debug(
+                                "Filename '%s' matched against postprocessing exclude regex of '%s'. Skipping." % (
+                                filename, postprocessing_exclude_files_regex))
                             continue
                     except:
                         pass
