@@ -41,8 +41,6 @@ def get_releases_latest():
 
     settings_count = cfg_settings.Cfg_settings.get_setting("DASHBOARD_RELEASES_COUNT")
     count = request.args.get("count", None)
-    if not count:
-        count = settings_count
 
     try:
         count = int(count)
@@ -58,6 +56,9 @@ def get_releases_latest():
         entities = [entity.to_small_dict() for entity in entities]
     else:
         entities = [entity.to_small_dict() for entity in entities]
+
+    if len(entities) == 1:
+        entities = entities[0]
 
     return Response(json.dumps(entities), mimetype="application/json")
 

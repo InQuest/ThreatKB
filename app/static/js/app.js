@@ -23,7 +23,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                         return AuthService.getOwnershipData();
                     }],
                     resolvedReleasesLatest: ['Release', function (Release) {
-                        return Release.get_latest_releases();
+                        return Release.get_latest_releases(3);
                     }],
                     resolvedVersion: ['Version', function (Version) {
                         return Version.get_version();
