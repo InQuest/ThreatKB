@@ -118,8 +118,8 @@
                 <div class="form-group">
                     <label>State:</label>
                     <span class="error text-danger">*</span>
-                    <ui-select ng-model="yara_rule.state" ng-required="true">
-                        <ui-select-match placeholder="Select a state..">
+                    <ui-select ng-model="yara_rule.state" ng-required="true" on-select="">
+                        <ui-select-match placeholder="Select a state or press delete to clear..">
                             <span ng-bind="$select.selected.state || yara_rule.state"></span>
                         </ui-select-match>
                         <ui-select-choices repeat="state in (cfg_states | filter: $select.search) track by state.id">
@@ -133,7 +133,7 @@
                     <label>Category:</label>
                     <span class="error text-danger">*</span>
                     <ui-select ng-model="yara_rule.category" ng-required="true">
-                        <ui-select-match placeholder="Select a Category ...">
+                        <ui-select-match placeholder="Select a category or press delete to clear...">
                             <span ng-bind="$select.selected.category || yara_rule.category"></span>
                         </ui-select-match>
                         <ui-select-choices
@@ -200,7 +200,7 @@
                     <span class="error text-danger" ng-if="m.required">*</span>
                     <ui-select ng-model="yara_rule.metadata_values[m.key].value"
                                on-select="update_selected_metadata(m, $select.selected)" ng-required="m.required">
-                        <ui-select-match placeholder="Select an option ...">
+                        <ui-select-match placeholder="Select an option or press delete to clear...">
                             <small><span
                                     ng-bind="$select.selected.choice || yara_rule.metadata_values[m.key].value"></span>
                             </small>
@@ -217,7 +217,7 @@
                     <span class="error text-danger" ng-if="m.required">*</span>
                     <ui-select ng-model="m.default"
                                on-select="update_selected_metadata(m, $select.selected)" ng-required="m.required">
-                        <ui-select-match placeholder="Select an option ...">
+                        <ui-select-match placeholder="Select an option or press delete to clear...">
                             <small><span ng-bind="$select.selected.choice || m.default"></span></small>
                         </ui-select-match>
                         <ui-select-choices
@@ -359,7 +359,7 @@
                 <div class="pull-left" style="width:250px; padding-right:4px;">
                     <ui-select ng-model="selected_signature"
                                on-select="update_selected_signature($select.selected)">
-                        <ui-select-match placeholder="Select a signature ...">
+                        <ui-select-match placeholder="Select a signature or press delete to clear...">
                             <small><span ng-bind="$select.selected.name || row.entity.name"></span></small>
                         </ui-select-match>
                         <ui-select-choices

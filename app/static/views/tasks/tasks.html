@@ -64,7 +64,7 @@
                     <span class="error text-danger" ng-if="!task.state">*</span>
 
                     <ui-select ng-model="task.state">
-                        <ui-select-match placeholder="Select a state..">
+                        <ui-select-match placeholder="Select a state or press delete to clear..">
                             <span ng-bind="$select.selected.state || task.state"></span>
                         </ui-select-match>
                         <ui-select-choices repeat="state in (cfg_states | filter: $select.search) track by state.id">

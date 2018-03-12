@@ -68,7 +68,7 @@
                     <span class="error text-danger">*</span>
 
                     <ui-select ng-model="c2ip.state" name="state">
-                        <ui-select-match placeholder="Select a state..">
+                        <ui-select-match placeholder="Select a state or press delete to clear..">
                             <span ng-bind="$select.selected.state || c2ip.state"></span>
                         </ui-select-match>
                         <ui-select-choices repeat="state in (cfg_states | filter: $select.search) track by state.id">
@@ -175,7 +175,7 @@
                     <span class="error text-danger" ng-if="m.required">*</span>
                     <ui-select ng-model="c2ip.metadata_values[m.key].value"
                                on-select="update_selected_metadata(m, $select.selected)" ng-required="m.required">
-                        <ui-select-match placeholder="Select an option ...">
+                        <ui-select-match placeholder="Select an option or press delete to clear...">
                             <small><span ng-bind="$select.selected.choice || option.choice"></span>
                             </small>
                         </ui-select-match>
@@ -191,7 +191,7 @@
                     <span class="error text-danger" ng-if="m.required">*</span>
                     <ui-select ng-model="m.default"
                                on-select="update_selected_metadata(m, $select.selected)" ng-required="m.required">
-                        <ui-select-match placeholder="Select an option ...">
+                        <ui-select-match placeholder="Select an option or press delete to clear...">
                             <small><span ng-bind="$select.selected.choice || option.choice"></span></small>
                         </ui-select-match>
                         <ui-select-choices
