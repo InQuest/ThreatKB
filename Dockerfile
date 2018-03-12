@@ -19,5 +19,12 @@ RUN git log -1 --format="%cE" >> version
 RUN git log -1 --format="%ci" >> version
 RUN chmod 744 docker-entrypoint.sh
 RUN chmod 744 wait-for-it.sh
+RUN apt-get update
+RUN apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+RUN apt-key fingerprint 0EBFCD88
+RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+RUN apt-get update
+RUN apt-get install -y docker-ce
 
 CMD ["/opt/threatkb/docker-entrypoint.sh"]
