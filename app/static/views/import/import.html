@@ -10,13 +10,13 @@
 
                     IP&nbsp;
                     <input type="checkbox" ng-model="extract_ip" ng-checked="true">
-                    &nbsp;&nbsp;&nbsp;
+                    &nbsp;&nbsp;
                     DNS&nbsp;
                     <input type="checkbox" ng-model="extract_dns" ng-checked="true">
-                    &nbsp;&nbsp;&nbsp;
-                    Signature&nbsp;
+                    &nbsp;
+                    Signature
                     <input type="checkbox" ng-model="extract_signature" ng-checked="true">
-                    &nbsp;&nbsp;&nbsp;
+                    &nbsp;&nbsp;
                     Autocommit&nbsp;
                     <input type="checkbox" ng-model="autocommit">
                 &nbsp;&nbsp;
@@ -29,7 +29,7 @@
             <div class="form-group">
 
                 <ui-select ng-model="shared_state.state">
-                    <ui-select-match placeholder="Select a shared state or press delete to clear..">
+                    <ui-select-match placeholder="Select a shared state..">
                         <span ng-bind="$select.selected.state || shared_state.state.state"></span>
                     </ui-select-match>
                     <ui-select-choices repeat="state in (cfg_states | filter: $select.search) track by state.id">
