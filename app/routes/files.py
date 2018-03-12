@@ -109,15 +109,21 @@ def upload_file():
 
             current_path = os.getcwd()
             os.chdir(tempdir)
+            app.logger.debug("POSTPROCESSOR CWD is now '%s'" % (tempdir))
+            app.logger.debug("POSTPROCESSOR DIRLIST is:\n\n%s" % (os.listdir()))
             try:
                 command = "%s %s" % (postprocessor.value, filename) if not "{FILENAME}" in postprocessor.value else str(
                     postprocessor.value).replace("{FILENAME}", filename)
                 app.logger.debug("POSTPROCESSOR COMMAND '%s'" % (command))
                 proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
                 proc.wait()
+                stdout, stderr = proc.communicate()
+                app.log.debug("POSTPROCESSOR STDOUT is:\n\n%s" % (stdout))
+                app.log.debug("POSTPROCESSOR STDERR is: \n\n%s" % (stderr))
             except Exception, e:
                 pass
 
+            app.logger.debug("POSTPROCESSOR DIRLIST is now:\n\n%s" % (os.listdir()))
             for root, dirs, files_local in os.walk(tempdir, topdown=False):
                 for name in files_local:
                     current_tempfile = os.path.join(root, name)
