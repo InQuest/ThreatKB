@@ -97,6 +97,7 @@ def upload_file():
         ## POSTPROCESSOR FUNCTIONALITY ##
         app.logger.debug("POSTPROCESSOR STARTING")
         postprocessors = cfg_settings.Cfg_settings.get_settings("POSTPROCESSOR%")
+        postprocessing_exclude_files_regex = cfg_settings.Cfg_settings.get_setting("POSTPROCESSING_EXCLUDE_FILES_REGEX")
         for postprocessor in postprocessors:
             app.logger.debug("POSTPROCESSOR STARTING '%s'" % (postprocessor.key))
             postprocessing_tempdir = cfg_settings.Cfg_settings.get_setting("POSTPROCESSING_FILE_STORE_PATH") or "/tmp"
@@ -111,7 +112,7 @@ def upload_file():
             current_path = os.getcwd()
             os.chdir(tempdir)
             app.logger.debug("POSTPROCESSOR CWD is now '%s'" % (tempdir))
-            app.logger.debug("POSTPROCESSOR DIRLIST is:\n\n%s" % (os.listdir()))
+            app.logger.debug("POSTPROCESSOR DIRLIST is:\n\n%s" % (os.listdir(".")))
             try:
                 command = "%s %s" % (postprocessor.value, filename) if not "{FILENAME}" in postprocessor.value else str(
                     postprocessor.value).replace("{FILENAME}", filename)
@@ -124,13 +125,16 @@ def upload_file():
             except Exception, e:
                 pass
 
-            app.logger.debug("POSTPROCESSOR DIRLIST is now:\n\n%s" % (os.listdir()))
+            app.logger.debug("POSTPROCESSOR DIRLIST is now:\n\n%s" % (os.listdir(".")))
             for root, dirs, files_local in os.walk(tempdir, topdown=False):
                 for name in files_local:
                     current_tempfile = os.path.join(root, name)
                     app.logger.debug("POSTPROCESSOR TEMPFILE '%s'" % (current_tempfile))
-                    if name == filename:
-                        continue
+                    try:
+                        if name == filename or re.search(postprocessing_exclude_files_regex, filename):
+                            continue
+                    except:
+                        pass
 
                     full_path_temp = os.path.join(file_store_path_root,
                                                   request.values[
