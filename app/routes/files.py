@@ -99,7 +99,8 @@ def upload_file():
         postprocessors = cfg_settings.Cfg_settings.get_settings("POSTPROCESSOR%")
         for postprocessor in postprocessors:
             app.logger.debug("POSTPROCESSOR STARTING '%s'" % (postprocessor.key))
-            tempdir = "%s/%s" % (tempfile.gettempdir(), uuid.uuid4())
+            postprocessing_tempdir = cfg_settings.Cfg_settings.get_setting("POSTPROCESSING_FILE_STORE_PATH") or "/tmp"
+            tempdir = "%s/%s" % (postprocessing_tempdir.rstrip(os.sep), uuid.uuid4())
             files_added[postprocessor.key] = []
             try:
                 os.makedirs(tempdir)
