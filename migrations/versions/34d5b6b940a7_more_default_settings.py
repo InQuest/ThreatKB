@@ -42,7 +42,7 @@ def upgrade():
             {"key": "IMPORT_SIG_PARSE_REGEX",
              "value": """^[\t\s]*rule[\t\s][^\r\n]+(?:\{|[\r\n][\r\n\s\t]*\{).*?condition:.*?\r?\n?[\t\s]*\}[\s\t]*(?:$|\r?\n)""",
              "public": True,
-             "description": "Regex to parse out yara rules from import text",
+             "description": "Regex to parse out yara rules from import text.",
              "date_created": date_created, "date_modified": date_modified},
             {"key": "NEGATIVE_TESTING_FILE_DIRECTORY",
              "value": """files/clean/""",
@@ -52,12 +52,12 @@ def upgrade():
             {"key": "RELEASE_PREPEND_TEXT",
              "value": "",
              "public": True,
-             "description": "Prepend this text to generated release notes",
+             "description": "Prepend this text to generated release notes.",
              "date_created": date_created, "date_modified": date_modified},
             {"key": "RELEASE_APPEND_TEXT",
              "value": "",
              "public": True,
-             "description": "Append this text to generated release notes",
+             "description": "Append this text to generated release notes.",
              "date_created": date_created, "date_modified": date_modified},
 
         ]

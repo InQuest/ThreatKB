@@ -28,12 +28,14 @@ def upgrade():
              "value": 'data/GeoLite2-ASN.mmdb',
              "public": True,
              "date_created": date_created,
-             "date_modified": date_modified},
+             "date_modified": date_modified,
+             "description": "Relative path of the GeoIP asn database file."},
             {"key": "GEOIP_CITY_DATABASE_FILE",
              "value": 'data/GeoLite2-City.mmdb',
              "public": True,
              "date_created": date_created,
-             "date_modified": date_modified}
+             "date_modified": date_modified,
+             "description": "Relative path of the GeoIP city database file."}
         ]
     )
 

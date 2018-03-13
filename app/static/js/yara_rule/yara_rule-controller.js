@@ -252,6 +252,8 @@ angular.module('ThreatKB')
                 url += 'page_number=' + (paginationOptions.pageNumber - 1);
                 url += '&page_size=' + paginationOptions.pageSize;
                 url += '&include_yara_string=1';
+                url += '&short=1';
+
                 switch (paginationOptions.sort_dir) {
                     case uiGridConstants.ASC:
                         url += '&sort_dir=ASC';
