@@ -158,14 +158,6 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                 controller: 'Yara_ruleController',
                 access: {restricted: true, admin: false},
                 resolve: {
-                    resolvedYara_rule: ['Yara_rule', function (Yara_rule) {
-                        return Yara_rule.resource.query({
-                            page_number: 0,
-                            page_size: 25,
-                            include_yara_string: 1,
-                            short: 1
-                        });
-                    }],
                     openModalForId: [function () {
                         return null;
                     }]

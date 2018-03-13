@@ -1,10 +1,8 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('Yara_ruleController', ['$scope', '$timeout', '$filter', '$http', '$uibModal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states', 'CfgCategoryRangeMapping', 'Users', 'growl', 'openModalForId', 'uiGridConstants', 'FileSaver', 'Blob',
-        function ($scope, $timeout, $filter, $http, $uibModal, resolvedYara_rule, Yara_rule, Cfg_states, CfgCategoryRangeMapping, Users, growl, openModalForId, uiGridConstants, FileSaver, Blob) {
-
-            $scope.yara_rules = resolvedYara_rule;
+    .controller('Yara_ruleController', ['$scope', '$timeout', '$filter', '$http', '$uibModal', 'Yara_rule', 'Cfg_states', 'CfgCategoryRangeMapping', 'Users', 'growl', 'openModalForId', 'uiGridConstants', 'FileSaver', 'Blob',
+        function ($scope, $timeout, $filter, $http, $uibModal, Yara_rule, Cfg_states, CfgCategoryRangeMapping, Users, growl, openModalForId, uiGridConstants, FileSaver, Blob) {
 
             $scope.cfg_states = Cfg_states.query();
 
@@ -284,6 +282,8 @@ angular.module('ThreatKB')
                     });
             };
 
+            getPage();
+
             $scope.getTableHeight = function () {
                 var rowHeight = $scope.gridOptions.rowHeight;
                 var headerHeight = 100;
@@ -434,7 +434,7 @@ angular.module('ThreatKB')
                 });
             };
 
-            getPage();
+            //getPage();
             if (openModalForId !== null) {
                 $scope.update(openModalForId);
             }
