@@ -608,7 +608,7 @@ angular.module('ThreatKB')
                                     entity_type: Files.ENTITY_MAPPING.SIGNATURE,
                                     entity_id: id
                                 });
-                                growl.info('Success ' + JSON.stringify(resp.data, null, 2), {ttl: 3000});
+                                growl.info('Success ' + JSON.stringify(resp.data, null, 2));
                             }, function (resp) {
                                 console.log('Error status: ' + resp.status);
                                 growl.error(resp);

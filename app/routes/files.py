@@ -43,6 +43,7 @@ def upload_file():
         return jsonify({})
 
     files_added = {}
+    files_skipped = {}
     if f:
         file_store_path_root = cfg_settings.Cfg_settings.get_setting("FILE_STORE_PATH") or "/tmp"
         filename = secure_filename(f.filename)
@@ -103,6 +104,7 @@ def upload_file():
             postprocessing_tempdir = cfg_settings.Cfg_settings.get_setting("POSTPROCESSING_FILE_STORE_PATH") or "/tmp"
             tempdir = "%s/%s" % (postprocessing_tempdir.rstrip(os.sep), uuid.uuid4())
             files_added[postprocessor.key] = []
+            files_skipped[postprocessor.key] = []
             try:
                 os.makedirs(tempdir)
                 shutil.copy(full_path, tempdir)
@@ -134,10 +136,11 @@ def upload_file():
                         if name == filename:
                             app.logger.debug("Filename '%s' is the original file. Skipping.")
                             continue
-                        if re.search(postprocessing_exclude_files_regex, filename):
+                        if re.search(postprocessing_exclude_files_regex, name, re.IGNORECASE):
                             app.logger.debug(
                                 "Filename '%s' matched against postprocessing exclude regex of '%s'. Skipping." % (
                                 filename, postprocessing_exclude_files_regex))
+                            files_skipped[postprocessor.key].append(name)
                             continue
                     except:
                         pass
@@ -182,7 +185,7 @@ def upload_file():
             shutil.rmtree(tempdir)
 
         db.session.commit()
-        return jsonify(files_added)
+        return jsonify({"files_added": files_added, "files_skipped": files_skipped})
 
     return jsonify({})
 

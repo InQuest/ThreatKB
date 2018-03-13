@@ -141,6 +141,8 @@ def get_yara_rule(id):
     """Return yara_rule artifact associated with the given id
     Return: yara_rule artifact dictionary"""
     include_yara_string = request.args.get("include_yara_string", False)
+    short = distutils.util.strtobool(request.args.get("short", "false"))
+
     if include_yara_string:
         include_yara_string = True
 
