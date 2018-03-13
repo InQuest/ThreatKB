@@ -21,42 +21,6 @@ from app.models.cfg_settings import Cfg_settings
 from app.models.yara_rule import Yara_testing_history
 
 
-@app.route('/ThreatKB/test_yara_rule', methods=['POST'])
-@auto.doc()
-@login_required
-@admin_only()
-def clean_yara_test():
-    """Create asynchronous testing tasks for sig_ids against all files matching pattern
-     From Data: sig_ids (list of ints), pattern (str)
-     Return: list of result dictionaries"""
-    pattern = request.values['pattern'] if 'pattern' in request.values else ".*"
-    sig_ids = json.loads(request.values['sig_ids']) if 'sig_ids' in request.values else []
-
-    if sig_ids.__len__() == 0:
-        sig_ids = get_all_sig_ids()
-
-    results = []
-    for rule_id in sig_ids:
-        yara_rule_entity = yara_rule.Yara_rule.query.get(rule_id)
-        if not yara_rule_entity:
-            results.append(dict(sig_id=rule_id,
-                                error="Error encountered"))
-        else:
-            clean_corpus_dir = Cfg_settings.get_setting("CLEAN_FILES_CORPUS_DIRECTORY")
-            if not clean_corpus_dir:
-                results.append(dict(sig_id=rule_id,
-                                    error="Error encountered"))
-            else:
-                files_to_test = []
-                for root_path, dirs, dir_files in os.walk(clean_corpus_dir):
-                    for f_name in dir_files:
-                        files_to_test.append(os.path.join(root_path, f_name))
-
-                test_yara_rule_task.delay(yara_rule_entity.id, dumps(files_to_test), current_user.id)
-
-    return Response(json.dumps(results), mimetype='application/json')
-
-
 @app.route('/ThreatKB/test_yara_rule/<int:rule_id>', methods=['GET'])
 @auto.doc()
 @login_required

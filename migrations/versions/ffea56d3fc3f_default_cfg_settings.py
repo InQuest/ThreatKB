@@ -28,8 +28,6 @@ def upgrade():
              "date_modified": date_modified},
             {"key": "YARA_PATH", "value": "/usr/local/bin/yara", "public": True, "date_created": date_created,
              "date_modified": date_modified},
-            {"key": "CLEAN_FILES_CORPUS_DIRECTORY", "value": "files/clean/", "public": True,
-             "date_created": date_created, "date_modified": date_modified},
             {"key": "ATTACHED_FILES_CORPUS_DIRECTORY", "value": "files/attached/", "public": True,
              "date_created": date_created, "date_modified": date_modified},
             {"key": "ATTACHED_FILES_PREPROCESSOR", "value": "", "public": True, "date_created": date_created,
@@ -54,7 +52,7 @@ def upgrade():
 
 
 def downgrade():
-    keys = ["NAV_IMAGE", "YARA_PATH", "CLEAN_FILES_CORPUS_DIRECTORY", "ATTACHED_FILES_CORPUS_DIRECTORY",
+    keys = ["NAV_IMAGE", "YARA_PATH", "ATTACHED_FILES_CORPUS_DIRECTORY",
             "ATTACHED_FILES_PREPROCESSOR", "REDIS_BROKER_URL", "REDIS_TASK_SERIALIZER", "REDIS_RESULT_SERIALIZER",
             "REDIS_ACCEPT_CONTENT", "MAX_MILLIS_PER_FILE_THRESHOLD"]
     for key in keys:
