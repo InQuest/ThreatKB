@@ -167,7 +167,7 @@ def release(params):
     except Exception, e:
         release_id = None
 
-    print THREATKB_CLI.get("releases", release_id)
+    print THREATKB_CLI.get("releases", release_id, {"full": 1})
 
 
 def search(params):

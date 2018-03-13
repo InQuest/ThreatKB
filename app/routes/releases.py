@@ -41,6 +41,7 @@ def get_releases_latest():
 
     settings_count = cfg_settings.Cfg_settings.get_setting("DASHBOARD_RELEASES_COUNT")
     count = request.args.get("count", None)
+    full = request.args.get("full", None)
 
     try:
         count = int(count)
@@ -53,9 +54,9 @@ def get_releases_latest():
     if not entities:
         entities = []
     elif current_user.admin:
-        entities = [entity.to_small_dict() for entity in entities]
+        entities = [entity.to_small_dict() if not full else entity.to_dict() for entity in entities]
     else:
-        entities = [entity.to_small_dict() for entity in entities]
+        entities = [entity.to_small_dict() if not full else entity.to_dict() for entity in entities]
 
     if len(entities) == 1:
         entities = entities[0]
