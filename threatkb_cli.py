@@ -1,3 +1,4 @@
+#!/bin/env python
 """Client class.
 Usage:
     import threatkb
