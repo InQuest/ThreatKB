@@ -2,6 +2,7 @@ from app import app, db, auto, ENTITY_MAPPING
 from app.models import yara_rule, cfg_states, comments
 from flask import abort, jsonify, request, Response, json
 from flask.ext.login import current_user, login_required
+import distutils
 
 from app.models.users import KBUser
 from app.models.metadata import Metadata, MetadataMapping, MetadataChoices
@@ -71,6 +72,8 @@ def get_all_yara_rules():
     Return: list of yara_rule artifact dictionaries"""
     include_inactive = request.args.get("include_inactive", False)
     include_yara_string = request.args.get("include_yara_string", False)
+    short = distutils.util.strtobool(request.args.get("short", "false"))
+
     if include_yara_string:
         include_yara_string = True
 
@@ -125,7 +128,7 @@ def get_all_yara_rules():
     filtered_entities = filtered_entities.all()
 
     response_dict = dict()
-    response_dict['data'] = [entity.to_dict(include_yara_string) for entity in filtered_entities]
+    response_dict['data'] = [entity.to_dict(include_yara_string, short) for entity in filtered_entities]
     response_dict['total_count'] = total_count
 
     return Response(json.dumps(response_dict), mimetype='application/json')
@@ -147,7 +150,7 @@ def get_yara_rule(id):
     if not current_user.admin and entity.owner_user_id != current_user.id:
         abort(403)
 
-    return_dict = entity.to_dict(include_yara_string)
+    return_dict = entity.to_dict(include_yara_string, short)
     return_dict["bookmarked"] = True if is_bookmarked(ENTITY_MAPPING["SIGNATURE"], id, current_user.id) \
         else False
 

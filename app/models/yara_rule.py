@@ -68,14 +68,14 @@ class Yara_rule(db.Model):
 
     @property
     def metadata_values(self):
-        return db.session.query(MetadataMapping)\
-            .join(Metadata, Metadata.id == MetadataMapping.metadata_id)\
+        return db.session.query(MetadataMapping) \
+            .join(Metadata, Metadata.id == MetadataMapping.metadata_id) \
             .filter(Metadata.active > 0) \
-            .filter(Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"])\
-            .filter(MetadataMapping.artifact_id == self.id)\
+            .filter(Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]) \
+            .filter(MetadataMapping.artifact_id == self.id) \
             .all()
 
-    def to_dict(self, include_yara_rule_string=None):
+    def to_dict(self, include_yara_rule_string=None, short=False):
         revisions = Yara_rule_history.query.filter_by(yara_rule_id=self.id).all()
         comments = Comments.query.filter_by(entity_id=self.id).filter_by(
             entity_type=ENTITY_MAPPING["SIGNATURE"]).all()
@@ -93,23 +93,26 @@ class Yara_rule(db.Model):
             state=self.state,
             name=self.name,
             category=self.category,
-            condition="condition:\n\t%s" % self.condition,
-            strings="strings:\n\t%s" % self.strings,
             eventid=self.eventid,
             id=self.id,
             tags=tags_mapping.get_tags_for_source(self.__tablename__, self.id),
             addedTags=[],
             removedTags=[],
-            comments=[comment.to_dict() for comment in comments],
-            revisions=[revision.to_dict() for revision in revisions],
-            files=[file.to_dict() for file in files],
             created_user=self.created_user.to_dict(),
             modified_user=self.modified_user.to_dict(),
             owner_user=self.owner_user.to_dict() if self.owner_user else None,
             revision=self.revision,
             metadata=Metadata.get_metadata_dict("SIGNATURE"),
             metadata_values=metadata_values_dict,
+            condition="condition:\n\t%s" % self.condition,
+            strings="strings:\n\t%s" % self.strings
         )
+
+        if not short:
+            yara_dict.update(dict(comments=[comment.to_dict() for comment in comments],
+                                  revisions=[revision.to_dict() for revision in revisions],
+                                  files=[file.to_dict() for file in files],
+                                  ))
 
         if include_yara_rule_string:
             yara_dict["yara_rule_string"] = Yara_rule.to_yara_rule_string(yara_dict)
@@ -148,8 +151,10 @@ class Yara_rule(db.Model):
                 for meta in metalist:
                     if meta["export_with_release"]:
                         metadata_strings.append("\t\t%s = \"%s\"\n" % (meta["key"],
-                                                                       yara_dict["metadata_values"][meta["key"]]["value"]
-                                                                       if "value" in yara_dict["metadata_values"][meta["key"]]
+                                                                       yara_dict["metadata_values"][meta["key"]][
+                                                                           "value"]
+                                                                       if "value" in yara_dict["metadata_values"][
+                                                                           meta["key"]]
                                                                        else "NA")
                                                 )
         except Exception as e:
