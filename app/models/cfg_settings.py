@@ -9,6 +9,7 @@ class Cfg_settings(db.Model):
                               onupdate=db.func.current_timestamp())
     public = db.Column(db.Boolean, index=True, default=True)
     value = db.Column(db.String(2048))
+    description = db.Column(db.String(512))
 
     def to_dict(self):
         return dict(
@@ -16,6 +17,7 @@ class Cfg_settings(db.Model):
             date_modified=self.date_modified.isoformat(),
             key=self.key,
             value=self.value,
+            description=self.description
         )
 
     def __repr__(self):

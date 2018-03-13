@@ -137,7 +137,7 @@ class Release(db.Model):
 
     def generate_release_notes(self):
         prepend_text = cfg_settings.Cfg_settings.get_setting("RELEASE_PREPEND_TEXT")
-        postpend_text = cfg_settings.Cfg_settings.get_setting("RELEASE_POSTPEND_TEXT")
+        postpend_text = cfg_settings.Cfg_settings.get_setting("RELEASE_APPEND_TEXT")
 
         message = "%s\n\n" % (prepend_text) if prepend_text else ""
         message += "New Signatures\n%s\n" % ("-" * 10)
