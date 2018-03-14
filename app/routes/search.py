@@ -1,5 +1,6 @@
 from flask import request, Response, json, abort
 from flask.ext.login import login_required
+from sqlalchemy import or_
 from app import app, db, auto
 from app.models import yara_rule, c2dns, c2ip, tasks, tags, tags_mapping
 import json
@@ -13,11 +14,11 @@ def do_search():
     Return: dictionary of lists of artifact dictionaries"""
     tag = request.args.get("tag", None)
     state = request.args.get('state', None)
+    all = request.args.get("all", None)
     artifact_type = request.args.get('artifact_type', None)
-    description = request.args.get('description', None)
     category = request.args.get('category', None)
 
-    if not tag and not state and not category and not description and not artifact_type:
+    if not tag and not state and not category and not artifact_type and not all:
         abort(400)
 
     if artifact_type:
@@ -57,11 +58,17 @@ def do_search():
     if category:
         signatures = signatures.filter(yara_rule.Yara_rule.category == category)
 
-    if description:
-        signatures = signatures.filter(yara_rule.Yara_rule.description.like("%" + description + "%"))
-        ips = ips.filter(c2ip.C2ip.description.like("%" + description + "%"))
-        dns = dns.filter(c2dns.C2dns.description.like("%" + description + "%"))
-        task = task.filter(tasks.Tasks.description.like("%" + description + "%"))
+    if all:
+        signatures = signatures.filter(
+            or_(yara_rule.Yara_rule.name.like("%" + all + "%"), yara_rule.Yara_rule.category.like("%" + all + "%"),
+                yara_rule.Yara_rule.state.like("%" + all + "%"), yara_rule.Yara_rule.strings.like("%" + all + "%"),
+                yara_rule.Yara_rule.condition.like("%" + all + "%")))
+        ips = ips.filter(or_(c2ip.C2ip.state.like("%" + all + "%"), c2ip.C2ip.ip.like("%" + all + "%"),
+                             c2ip.C2ip.asn.like("%" + all + "%"), c2ip.C2ip.country.like("%" + all + "%"),
+                             c2ip.C2ip.state.like("%" + all + "%")))
+        dns = dns.filter(or_(c2dns.C2dns.state.like("%" + all + "%"), c2dns.C2dns.domain_name.like("%" + all + "%")))
+        task = task.filter(or_(tasks.Tasks.state.like("%" + all + "%"), tasks.Tasks.title.like("%" + all + "%"),
+                               tasks.Tasks.final_artifact.like("%" + all + "%")))
 
     if not artifact_type or "signature" in artifact_type:
         results["signatures"] = [signature.to_dict() for signature in signatures.all()]
