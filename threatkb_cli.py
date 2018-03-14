@@ -179,7 +179,7 @@ def search(params):
     except Exception, e:
         help(extra_text="""%s search <filter> <filter_text>
         
-        filter: tag, state, description, category
+        filter: all, tag, state, category
         filter_text: text to filter on""" % (params[0]), params=params)
 
     print THREATKB_CLI.get("search", params={filter_: filter_text})
