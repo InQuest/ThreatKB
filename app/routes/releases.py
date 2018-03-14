@@ -4,6 +4,7 @@ from app import app, db, admin_only, auto
 from app.models import releases, cfg_settings
 import tempfile
 import uuid
+import distutils
 
 @app.route('/ThreatKB/releases', methods=['GET'])
 @auto.doc()
@@ -41,7 +42,7 @@ def get_releases_latest():
 
     settings_count = cfg_settings.Cfg_settings.get_setting("DASHBOARD_RELEASES_COUNT")
     count = request.args.get("count", None)
-    short = request.args.get("short", True)
+    short = distutils.util.strtobool(request.args.get("short", True))
 
     try:
         count = int(count)
