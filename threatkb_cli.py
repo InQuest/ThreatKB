@@ -9,11 +9,10 @@ Usage:
 import requests
 import json
 import sys
-import re
 import os
 import ConfigParser
 import stat
-import traceback
+import argparse
 import logging
 from StringIO import StringIO
 
@@ -23,6 +22,7 @@ SECRET_KEY = None
 API_HOST = None
 THREATKB_CLI = None
 ENTITY_TYPES = {"yara_rule": 1, "c2dns": 2, "c2ip": 3, "task": 4}
+FILTER_KEYS = None
 
 if os.getenv("THREATKB_DEBUG"):
     logging.basicConfig(level=logging.DEBUG,
@@ -30,14 +30,16 @@ if os.getenv("THREATKB_DEBUG"):
 
 LOG = logging.getLogger()
 
+
 class ThreatKB:
-    def __init__(self, host, token, secret_key, base_uri='ThreatKB/', use_https=True, log=LOG):
+    def __init__(self, host, token, secret_key, filter_on_keys=[], base_uri='ThreatKB/', use_https=True, log=LOG):
         self.host = host.lower().replace("http://", "").replace("https://", "")
         self.token = token
         self.secret_key = secret_key
         self.base_uri = base_uri
         self.use_https = use_https
         self.log = log
+        self.filter_on_keys = filter_on_keys
         self.session = requests.Session()
 
     def _request(self, method, uri, uri_params={}, body=None, files={},
@@ -58,10 +60,25 @@ class ThreatKB:
 
         return response
 
+    def filter_output(self, output):
+        try:
+
+            o = json.loads(output)
+            if type(o) == dict:
+                return dict(zip(self.filter_on_keys, [o[k] for k in self.filter_on_keys]))
+            else:
+                results = []
+                for obj in o:
+                    results.append(dict(zip(self.filter_on_keys, [obj[k] for k in self.filter_on_keys])))
+                return results
+                # return project(o, self.filter_on_keys)
+        except Exception, e:
+            return output
+
     def get(self, endpoint, id_=None, params={}):
         """If index is None, list all; else get one"""
         r = self._request('GET', endpoint + ('/' + str(id_) if id_ else ''), uri_params=params)
-        return r.content
+        return self.filter_output(r.content)
 
     def update(self, endpoint, id_, json_data):
         r = self._request('PUT', '/'.join(endpoint, id_), json_data)
@@ -82,7 +99,7 @@ class ThreatKB:
 
 
 def initialize():
-    global API_KEY, SECRET_KEY, API_HOST, THREATKB_CLI
+    global API_KEY, SECRET_KEY, API_HOST, THREATKB_CLI, FILTER_KEYS
 
     config = ConfigParser.ConfigParser()
     try:
@@ -96,7 +113,8 @@ def initialize():
         raise Exception("Error. Run 'python %s configure' first." % (sys.argv[0]))
 
     THREATKB_CLI = ThreatKB(host=API_HOST, token=API_TOKEN, secret_key=API_SECRET_KEY,
-                            use_https=False if API_HOST.startswith("http://") else True)
+                            use_https=False if API_HOST.startswith("http://") else True,
+                            filter_on_keys=FILTER_KEYS)
 
 
 def configure():
@@ -112,8 +130,9 @@ def configure():
     except:
         pass
 
-    API_KEY = raw_input("Token [%s]: " % ("%s%s" % ("*"*(len(API_KEY)-3), API_KEY[-3:]) if API_KEY else "*"*10))
-    SECRET_KEY = raw_input("Secret Key [%s]: " % ("%s%s" % ("*"*(len(SECRET_KEY)-3), SECRET_KEY[-3:]) if SECRET_KEY else "*"*10))
+    API_KEY = raw_input("Token [%s]: " % ("%s%s" % ("*" * (len(API_KEY) - 3), API_KEY[-3:]) if API_KEY else "*" * 10))
+    SECRET_KEY = raw_input(
+        "Secret Key [%s]: " % ("%s%s" % ("*" * (len(SECRET_KEY) - 3), SECRET_KEY[-3:]) if SECRET_KEY else "*" * 10))
     API_HOST = raw_input(
         "API Host [%s]: " % ("%s%s" % ("*" * (len(API_HOST) - 3), API_HOST[-3:]) if API_HOST else "*" * 10))
 
@@ -132,7 +151,7 @@ def attach(params):
     global THREATKB_CLI
 
     try:
-        artifact, artifact_id, file = params[2:]
+        artifact, artifact_id, file = params[1:]
     except Exception, e:
         help(extra_text="""%s attach <artifact> <artifact_id> <file>
         
@@ -148,7 +167,7 @@ def comment(params):
     global THREATKB_CLI, ENTITY_TYPES
 
     try:
-        artifact, artifact_id, comment = params[2:]
+        artifact, artifact_id, comment = params[1:]
     except Exception, e:
         help(extra_text="""%s comment <artifact> <artifact_id> <comment>
         
@@ -164,7 +183,7 @@ def release(params):
     global THREATKB_CLI
 
     try:
-        release_id = params[2]
+        release_id = params[1]
     except Exception, e:
         release_id = None
 
@@ -175,7 +194,7 @@ def search(params):
     global THREATKB_CLI
 
     try:
-        filter_, filter_text = params[2:]
+        filter_, filter_text = params[1:]
     except Exception, e:
         help(extra_text="""%s search <filter> <filter_text>
         
@@ -186,8 +205,11 @@ def search(params):
 
 
 def help(params, extra_text="", exit=True):
-    sys.stderr.write("""
-    %s <command> 
+    return """
+    %s <options> <command> 
+    
+    Options:
+      --filter-on-field: Object field to filter on. (EX: You only want the IDs of some search result)
     
     Commands:
       configure: Configure the cli api
@@ -195,19 +217,40 @@ def help(params, extra_text="", exit=True):
       comments: comment on an artifact
       release: pull release data from a specific release
       search: search the database
-    
+
     %s
-    """ % (params[0], extra_text))
-    if exit:
-        sys.exit(1)
+    """ % (params[0], extra_text)
 
 
 def main():
+    global FILTER_KEYS
+
     if len(sys.argv) < 2:
         help(sys.argv)
 
-    action = sys.argv[1].lower()
-    params = sys.argv
+    parser = argparse.ArgumentParser(
+        description="threatkb_cli.py is a cli tool for interacting with the ThreatKB API.",
+        usage=help(sys.argv)
+    )
+
+    # Define accepted arguments and metadata.
+    parser.add_argument('--filter-on-keys',
+                        action='store',
+                        type=str,
+                        default=None,
+                        dest='filter_keys_only',
+                        help=argparse.SUPPRESS)
+
+    args, params = parser.parse_known_args()
+
+    try:
+        action = params[0]
+    except:
+        print help(sys.argv)
+        sys.exit(1)
+
+    if args.filter_keys_only:
+        FILTER_KEYS = [key.strip() for key in args.filter_keys_only.split(",")]
 
     if action == "configure":
         configure()
