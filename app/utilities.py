@@ -79,6 +79,9 @@ def get_strings_and_conditions(rule):
                 segment_change = True
         if SEGMENT and not segment_change:
             segments[SEGMENT].append(line)
+
+    segments["strings"][-1] = segments["strings"][-1].rstrip(" }")
+    segments["condition"][-1] = segments["condition"][-1].rstrip(" }")
     return "\n".join(segments["strings"]), "\n".join(segments["condition"])
 
 #####################################################################
