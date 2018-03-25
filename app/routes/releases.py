@@ -42,7 +42,7 @@ def get_releases_latest():
 
     settings_count = cfg_settings.Cfg_settings.get_setting("DASHBOARD_RELEASES_COUNT")
     count = request.args.get("count", None)
-    short = distutils.util.strtobool(request.args.get("short", True))
+    short = distutils.util.strtobool(request.args.get("short", "True"))
 
     try:
         count = int(count)
