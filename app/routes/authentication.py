@@ -49,9 +49,9 @@ def get_all_users():
     include_inactive = request.args.get("include_inactive", False)
 
     if not include_inactive:
-        users = KBUser.query.filter(KBUser.active > 0).all()
+        users = KBUser.query.filter(KBUser.active > 0).order_by(KBUser.email).all()
     else:
-        users = KBUser.query.all()
+        users = KBUser.query.order_by(KBUser.email).all()
 
     users = [user.to_dict() for user in users]
     users.append({"email": "Clear Owner"})
