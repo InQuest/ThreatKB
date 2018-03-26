@@ -380,10 +380,14 @@ angular.module('ThreatKB')
             };
 
             $scope.getPermalink = function (id) {
-                if ($location.absUrl().endsWith(id)) {
-                    return $location.absUrl();
+                var location = $location.absUrl();
+                var last_spot = location.split("/")[location.split("/").length - 1]
+                if (isNaN(parseInt(last_spot, 10))) {
+                    return $location.absUrl() + "/" + id;
+                } else if (!isNaN(parseInt(last_spot, 10)) && last_spot != id) {
+                    return $location.absUrl().replace(/\/[0-9]+$/, "/" + id)
                 }
-                return $location.absUrl() + "/" + id;
+                return $location.absUrl();
             };
 
             $scope.match_types = ['exact', 'wildcard'];
