@@ -51,7 +51,9 @@ def get_all_bookmarks():
             app.logger.exception(e)
 
     return Response(json.dumps([bookmark.to_dict(bookmark.artifact_name, bookmark.permalink_prefix)
-                                for bookmark in bookmarks]), mimetype='application/json')
+                                for bookmark in bookmarks if
+                                hasattr(bookmark, "artifact_name") and hasattr(bookmark, "permalink_prefix")]),
+                    mimetype='application/json')
 
 
 @app.route('/ThreatKB/bookmarks', methods=['POST'])

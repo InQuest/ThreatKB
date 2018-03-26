@@ -381,6 +381,9 @@ angular.module('ThreatKB')
             };
 
             $scope.getPermalink = function (id) {
+                if ($location.absUrl().endsWith(id)) {
+                    return $location.absUrl();
+                }
                 return $location.absUrl() + "/" + id;
             };
 
