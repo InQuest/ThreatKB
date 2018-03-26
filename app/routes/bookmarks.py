@@ -30,22 +30,25 @@ def get_all_bookmarks():
 
     bookmarks = bookmarks.all()
     for bookmark in bookmarks:
-        if bookmark.entity_type == ENTITY_MAPPING["DNS"]:
-            entity = C2dns.query.get(bookmark.entity_id)
-            bookmark.artifact_name = entity.domain_name
-            bookmark.permalink_prefix = "c2dns"
-        elif bookmark.entity_type == ENTITY_MAPPING["IP"]:
-            entity = C2ip.query.get(bookmark.entity_id)
-            bookmark.permalink_prefix = "c2ips"
-            bookmark.artifact_name = entity.ip
-        elif bookmark.entity_type == ENTITY_MAPPING["SIGNATURE"]:
-            entity = Yara_rule.query.get(bookmark.entity_id)
-            bookmark.permalink_prefix = "yara_rules"
-            bookmark.artifact_name = entity.name
-        elif bookmark.entity_type == ENTITY_MAPPING["TASK"]:
-            entity = Tasks.query.get(bookmark.entity_id)
-            bookmark.artifact_name = entity.title
-            bookmark.permalink_prefix = "tasks"
+        try:
+            if bookmark.entity_type == ENTITY_MAPPING["DNS"]:
+                entity = C2dns.query.get(bookmark.entity_id)
+                bookmark.artifact_name = entity.domain_name
+                bookmark.permalink_prefix = "c2dns"
+            elif bookmark.entity_type == ENTITY_MAPPING["IP"]:
+                entity = C2ip.query.get(bookmark.entity_id)
+                bookmark.permalink_prefix = "c2ips"
+                bookmark.artifact_name = entity.ip
+            elif bookmark.entity_type == ENTITY_MAPPING["SIGNATURE"]:
+                entity = Yara_rule.query.get(bookmark.entity_id)
+                bookmark.permalink_prefix = "yara_rules"
+                bookmark.artifact_name = entity.name
+            elif bookmark.entity_type == ENTITY_MAPPING["TASK"]:
+                entity = Tasks.query.get(bookmark.entity_id)
+                bookmark.artifact_name = entity.title
+                bookmark.permalink_prefix = "tasks"
+        except Exception, e:
+            app.logger.exception(e)
 
     return Response(json.dumps([bookmark.to_dict(bookmark.artifact_name, bookmark.permalink_prefix)
                                 for bookmark in bookmarks]), mimetype='application/json')
