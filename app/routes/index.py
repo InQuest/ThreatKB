@@ -13,4 +13,4 @@ def root():
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static/images'),
-                               'inquest_logo.ico', mimetype='image/vnd.microsoft.icon')
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
