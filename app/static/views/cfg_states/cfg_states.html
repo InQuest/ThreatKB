@@ -35,10 +35,10 @@
                 <div class="form-group">
                     <label>State Type</label><br>
                     <div class="btn-group" data-toggle="buttons">
-                        <label class="btn btn-default" ng-class="{active:cfg_states.is_retired_state==true}"
-                               ng-click="set_as_retired_state()">
+                        <label class="btn btn-default" ng-class="{active:cfg_states.is_release_state==true}"
+                               ng-click="set_as_release_state()">
                             <input type="radio">
-                            Retired
+                            Release
                         </label>
                         <label class="btn btn-default"
                                ng-class="{active:!cfg_states.is_retired_state && !cfg_states.is_release_state}"
@@ -46,10 +46,10 @@
                             <input type="radio">
                             Neither
                         </label>
-                        <label class="btn btn-default" ng-class="{active:cfg_states.is_release_state==true}"
-                               ng-click="set_as_release_state()">
+                        <label class="btn btn-default" ng-class="{active:cfg_states.is_retired_state==true}"
+                               ng-click="set_as_retired_state()">
                             <input type="radio">
-                            Release
+                            Retired
                         </label>
                     </div>
                 </div>

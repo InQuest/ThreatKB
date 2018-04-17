@@ -2,6 +2,7 @@ from app import app, db, admin_only, auto, current_user
 from app.models import cfg_states
 from flask import abort, jsonify, request, Response
 from flask.ext.login import login_required
+from sqlalchemy import or_
 import json
 
 
@@ -45,8 +46,12 @@ def create_cfg_states():
     """
     entity = cfg_states.Cfg_states(
         state=request.json['state'],
-        is_release_state=0 if not request.json.get("is_release_state", None) else 1
+        is_release_state=0 if not request.json.get("is_release_state", None) else 1,
+        is_retired_state=0 if not request.json.get("is_retired_state", None) else 1
     )
+    cfg_states.Cfg_states.query.filter(
+        or_(cfg_states.Cfg_states.is_release_state > 0, cfg_states.Cfg_states.is_retired_state > 0)).update(
+        {cfg_states.Cfg_states.is_retired_state: 0, cfg_states.Cfg_states.is_release_state: 0})
     db.session.add(entity)
     db.session.commit()
     return jsonify(entity.to_dict()), 201
@@ -66,8 +71,12 @@ def update_cfg_states(id):
     entity = cfg_states.Cfg_states(
         state=request.json['state'],
         id=id,
-        is_release_state=0 if not request.json.get("is_release_state", None) else 1
+        is_release_state=0 if not request.json.get("is_release_state", None) else 1,
+        is_retired_state=0 if not request.json.get("is_retired_state", None) else 1
     )
+    cfg_states.Cfg_states.query.filter(
+        or_(cfg_states.Cfg_states.is_release_state > 0, cfg_states.Cfg_states.is_retired_state > 0)).update(
+        {cfg_states.Cfg_states.is_retired_state: 0, cfg_states.Cfg_states.is_release_state: 0})
     db.session.merge(entity)
     db.session.commit()
     return jsonify(entity.to_dict()), 200
