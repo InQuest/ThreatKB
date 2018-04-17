@@ -37,18 +37,14 @@
                     <div class="btn-group" data-toggle="buttons">
                         <label class="btn btn-default" ng-class="{active:cfg_states.is_release_state==true}"
                                ng-click="set_as_release_state()">
-                            <input type="radio">
                             Release
                         </label>
-                        <label class="btn btn-default"
-                               ng-class="{active:!cfg_states.is_retired_state && !cfg_states.is_release_state}"
-                               ng-click="clear_states()">
-                            <input type="radio">
-                            Neither
+                        <label class="btn btn-default" ng-class="{active:cfg_states.is_draft_state==true}"
+                               ng-click="set_as_draft_state()">
+                            Draft
                         </label>
                         <label class="btn btn-default" ng-class="{active:cfg_states.is_retired_state==true}"
                                ng-click="set_as_retired_state()">
-                            <input type="radio">
                             Retired
                         </label>
                     </div>
@@ -87,6 +83,8 @@
 
                 <th>Release State</th>
 
+                <th>Draft State</th>
+
                 <th>Retired State</th>
 
                 <th>Signature Count</th>
@@ -109,8 +107,12 @@
                 <td ng-if="cfg_state.is_release_state && cfg_state.id">Yes</td>
                 <td ng-if="!cfg_state.is_release_state && cfg_state.id">No</td>
 
+                <td ng-if="cfg_state.is_draft_state && cfg_state.id">Yes</td>
+                <td ng-if="!cfg_state.is_draft_state && cfg_state.id">No</td>
+
                 <td ng-if="cfg_state.is_retired_state && cfg_state.id">Yes</td>
                 <td ng-if="!cfg_state.is_retired_state && cfg_state.id">No</td>
+
 
                 <td ng-if="cfg_state.id">{{ cfg_state.sig_count }}</td>
                 <td ng-if="cfg_state.id">{{ cfg_state.dns_count }}</td>

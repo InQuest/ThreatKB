@@ -70,20 +70,39 @@ angular.module('ThreatKB')
             $scope.cfg_states = cfg_states;
 
             $scope.set_as_release_state = function () {
-                $scope.cfg_states.is_release_state = true;
-                $scope.cfg_states.is_retired_state = !$scope.cfg_states.is_release_state;
-
+                if ($scope.cfg_states.is_release_state) {
+                    $scope.clear_states();
+                } else {
+                    $scope.cfg_states.is_draft_state = false;
+                    $scope.cfg_states.is_release_state = true;
+                    $scope.cfg_states.is_retired_state = false;
+                }
             };
 
             $scope.set_as_retired_state = function () {
-                $scope.cfg_states.is_retired_state = true;
-                $scope.cfg_states.is_release_state = !$scope.cfg_states.is_retired_state;
-
+                if ($scope.cfg_states.is_retired_state) {
+                    $scope.clear_states();
+                } else {
+                    $scope.cfg_states.is_draft_state = false;
+                    $scope.cfg_states.is_release_state = false;
+                    $scope.cfg_states.is_retired_state = true;
+                }
             };
 
             $scope.clear_states = function () {
-                $scope.cfg_states.is_retired_state = false;
+                $scope.cfg_states.is_draft_state = false;
                 $scope.cfg_states.is_release_state = false;
+                $scope.cfg_states.is_retired_state = false;
+            }
+
+            $scope.set_as_draft_state = function () {
+                if ($scope.cfg_states.is_draft_state) {
+                    $scope.clear_states();
+                } else {
+                    $scope.cfg_states.is_draft_state = true;
+                    $scope.cfg_states.is_release_state = false;
+                    $scope.cfg_states.is_retired_state = false;
+                }
             };
 
             $scope.ok = function () {
