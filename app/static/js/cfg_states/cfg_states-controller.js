@@ -69,6 +69,22 @@ angular.module('ThreatKB')
         function ($scope, $uibModalInstance, cfg_states) {
             $scope.cfg_states = cfg_states;
 
+            $scope.set_as_release_state = function () {
+                $scope.cfg_states.is_release_state = true;
+                $scope.cfg_states.is_retired_state = !$scope.cfg_states.is_release_state;
+
+            };
+
+            $scope.set_as_retired_state = function () {
+                $scope.cfg_states.is_retired_state = true;
+                $scope.cfg_states.is_release_state = !$scope.cfg_states.is_retired_state;
+
+            };
+
+            $scope.clear_states = function () {
+                $scope.cfg_states.is_retired_state = false;
+                $scope.cfg_states.is_release_state = false;
+            };
 
             $scope.ok = function () {
                 $uibModalInstance.close($scope.cfg_states);
