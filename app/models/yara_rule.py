@@ -271,6 +271,7 @@ class Yara_rule_history(db.Model):
 
     date_created = db.Column(db.DateTime(timezone=True))
     revision = db.Column(db.Integer(unsigned=True))
+    state = db.Column(db.String(32), index=True)
 
     rule_json = db.Column(db.Text, nullable=False)
 
@@ -285,7 +286,8 @@ class Yara_rule_history(db.Model):
             revision=self.revision,
             rule_json=json.loads(self.rule_json),
             yara_rule_id=self.yara_rule_id,
-            user=self.user.to_dict()
+            user=self.user.to_dict(),
+            state=self.state
         )
 
     def __repr__(self):

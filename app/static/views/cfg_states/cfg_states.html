@@ -39,9 +39,9 @@
                                ng-click="set_as_release_state()">
                             Release
                         </label>
-                        <label class="btn btn-default" ng-class="{active:cfg_states.is_draft_state==true}"
-                               ng-click="set_as_draft_state()">
-                            Draft
+                        <label class="btn btn-default" ng-class="{active:cfg_states.is_staging_state==true}"
+                               ng-click="set_as_staging_state()">
+                            Staging
                         </label>
                         <label class="btn btn-default" ng-class="{active:cfg_states.is_retired_state==true}"
                                ng-click="set_as_retired_state()">
@@ -83,7 +83,7 @@
 
                 <th>Release State</th>
 
-                <th>Draft State</th>
+                <th>Staging State</th>
 
                 <th>Retired State</th>
 
@@ -107,8 +107,8 @@
                 <td ng-if="cfg_state.is_release_state && cfg_state.id">Yes</td>
                 <td ng-if="!cfg_state.is_release_state && cfg_state.id">No</td>
 
-                <td ng-if="cfg_state.is_draft_state && cfg_state.id">Yes</td>
-                <td ng-if="!cfg_state.is_draft_state && cfg_state.id">No</td>
+                <td ng-if="cfg_state.is_staging_state && cfg_state.id">Yes</td>
+                <td ng-if="!cfg_state.is_staging_state && cfg_state.id">No</td>
 
                 <td ng-if="cfg_state.is_retired_state && cfg_state.id">Yes</td>
                 <td ng-if="!cfg_state.is_retired_state && cfg_state.id">No</td>

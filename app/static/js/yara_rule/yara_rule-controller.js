@@ -331,6 +331,8 @@ angular.module('ThreatKB')
                     Yara_rule.resource.update({id: id}, $scope.yara_rule, function () {
                         //$scope.yara_rules = Yara_rule.resource.query();
                         getPage();
+                    }, function (err) {
+                        growl.error(err.data);
                     });
                 } else {
                     $scope.yara_rule.metadata_values = {};
@@ -376,6 +378,8 @@ angular.module('ThreatKB')
                     Yara_rule.resource.save($scope.yara_rule, function () {
                         //$scope.yara_rules = Yara_rule.resource.query();
                         getPage();
+                    }, function (err) {
+                        growl.error(err.data);
                     });
                 }
             };

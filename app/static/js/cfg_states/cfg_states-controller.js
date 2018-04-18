@@ -73,7 +73,7 @@ angular.module('ThreatKB')
                 if ($scope.cfg_states.is_release_state) {
                     $scope.clear_states();
                 } else {
-                    $scope.cfg_states.is_draft_state = false;
+                    $scope.cfg_states.is_staging_state = false;
                     $scope.cfg_states.is_release_state = true;
                     $scope.cfg_states.is_retired_state = false;
                 }
@@ -83,23 +83,23 @@ angular.module('ThreatKB')
                 if ($scope.cfg_states.is_retired_state) {
                     $scope.clear_states();
                 } else {
-                    $scope.cfg_states.is_draft_state = false;
+                    $scope.cfg_states.is_staging_state = false;
                     $scope.cfg_states.is_release_state = false;
                     $scope.cfg_states.is_retired_state = true;
                 }
             };
 
             $scope.clear_states = function () {
-                $scope.cfg_states.is_draft_state = false;
+                $scope.cfg_states.is_staging_state = false;
                 $scope.cfg_states.is_release_state = false;
                 $scope.cfg_states.is_retired_state = false;
             }
 
-            $scope.set_as_draft_state = function () {
-                if ($scope.cfg_states.is_draft_state) {
+            $scope.set_as_staging_state = function () {
+                if ($scope.cfg_states.is_staging_state) {
                     $scope.clear_states();
                 } else {
-                    $scope.cfg_states.is_draft_state = true;
+                    $scope.cfg_states.is_staging_state = true;
                     $scope.cfg_states.is_release_state = false;
                     $scope.cfg_states.is_retired_state = false;
                 }

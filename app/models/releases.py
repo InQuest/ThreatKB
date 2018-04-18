@@ -55,8 +55,17 @@ class Release(db.Model):
             return self.release_data
 
         release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
+        staging_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_staging_state > 0).first()
+        retired_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_retired_state > 0).first()
+
         if not release_state:
             raise Exception("You need to specify a production release state first.")
+
+        if not staging_state:
+            raise Exception("You need to specify a staging release state first.")
+
+        if not retired_state:
+            raise Exception("You need to specify a retired release state first.")
 
         dns = c2dns.C2dns.query.filter(c2dns.C2dns.state == release_state.state).all()
         ip = c2ip.C2ip.query.filter(c2ip.C2ip.state == release_state.state).all()
@@ -71,6 +80,20 @@ class Release(db.Model):
                     "Modified": []},
             "IP": {"IP": {entity.to_dict()["id"]: entity.to_dict() for entity in ip}, "Added": [], "Removed": [],
                    "Modified": []}}
+
+        staging_yr = yara_rule.Yara_rule.query \
+            .filter(and_(yara_rule.Yara_rule.state == staging_state.state, yara_rule.Yara_rule.active > 0)) \
+            .all()
+
+        for staging_yr_rule in staging_yr:
+            staging_yr_rule_last_release_version = yara_rule.Yara_rule_history.query.filter(
+                and_(yara_rule.Yara_rule_history.yara_rule_id == staging_yr_rule.id,
+                     yara_rule.Yara_rule_history.state == release_state.state)).order_by(
+                yara_rule.Yara_rule_history.date_created.desc()).limit(1).first()
+            if staging_yr_rule_last_release_version:
+                release_data["Signatures"]["Signatures"][
+                    staging_yr_rule_last_release_version.yara_rule_id] = json.loads(
+                    staging_yr_rule_last_release_version.rule_json)
 
         last_release = Release.query.filter(Release.is_test_release == 0).order_by(Release.id.desc()).first()
 
