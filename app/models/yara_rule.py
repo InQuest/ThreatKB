@@ -76,11 +76,6 @@ class Yara_rule(db.Model):
             .all()
 
     def to_dict(self, include_yara_rule_string=None, short=False):
-        revisions = Yara_rule_history.query.filter_by(yara_rule_id=self.id).all()
-        comments = Comments.query.filter_by(entity_id=self.id).filter_by(
-            entity_type=ENTITY_MAPPING["SIGNATURE"]).all()
-        files = Files.query.filter_by(entity_id=self.id).filter_by(entity_type=ENTITY_MAPPING["SIGNATURE"]).all()
-
         metadata_values_dict = {}
         metadata_keys = Metadata.get_metadata_keys("SIGNATURE")
         metadata_values_dict = {m["metadata"]["key"]: m for m in [entity.to_dict() for entity in self.metadata_values]}
@@ -109,6 +104,10 @@ class Yara_rule(db.Model):
         )
 
         if not short:
+            revisions = Yara_rule_history.query.filter_by(yara_rule_id=self.id).all()
+            comments = Comments.query.filter_by(entity_id=self.id).filter_by(
+                entity_type=ENTITY_MAPPING["SIGNATURE"]).all()
+            files = Files.query.filter_by(entity_id=self.id).filter_by(entity_type=ENTITY_MAPPING["SIGNATURE"]).all()
             yara_dict.update(dict(comments=[comment.to_dict() for comment in comments],
                                   revisions=[revision.to_dict() for revision in revisions],
                                   files=[file.to_dict() for file in files],
@@ -127,6 +126,12 @@ class Yara_rule(db.Model):
         del dict["removedTags"]
         del dict["addedTags"]
         return dict
+
+    def to_release_dict(self):
+        dict = self.to_dict()
+        del dict["revisions"]
+        return dict
+
 
     def __repr__(self):
         return '<Yara_rule %r>' % (self.id)

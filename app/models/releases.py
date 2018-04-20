@@ -74,7 +74,8 @@ class Release(db.Model):
             .all()
 
         release_data = {
-            "Signatures": {"Signatures": {entity.to_dict()["id"]: entity.to_dict() for entity in yr}, "Added": [],
+            "Signatures": {"Signatures": {entity.to_release_dict()["id"]: entity.to_dict() for entity in yr},
+                           "Added": [],
                            "Removed": [], "Modified": []},
             "DNS": {"DNS": {entity.to_dict()["id"]: entity.to_dict() for entity in dns}, "Added": [], "Removed": [],
                     "Modified": []},
