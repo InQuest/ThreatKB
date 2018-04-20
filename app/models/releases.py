@@ -229,7 +229,7 @@ class Release(db.Model):
         z = zipfile.ZipFile(memzip, mode="w", compression=zipfile.ZIP_DEFLATED)
         for category, rules in combined_rules.iteritems():
             rules = "\n\n".join([yara_rule.Yara_rule.to_yara_rule_string(signature) for signature in rules])
-            z.writestr("%s/%s.yar" % (signature_directory, category), rules)
+            z.writestr("%s/%s.yar" % (signature_directory, category), rules.encode("utf-8"))
 
         if ips:
             z.writestr(ip_text_filename, "\n".join(ips))
