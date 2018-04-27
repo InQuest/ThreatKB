@@ -3,7 +3,7 @@ from app.models import c2dns, c2ip, yara_rule, cfg_settings, cfg_states
 from sqlalchemy import and_
 from dateutil import parser
 import json
-import datetime
+from sqlalchemy.event import listens_for
 import StringIO
 import zipfile
 
@@ -241,3 +241,8 @@ class Release(db.Model):
 
     def __repr__(self):
         return '<Release %r>' % (self.id)
+
+
+@listens_for(Release, "before_insert")
+def generate_eventid(mapper, connect, target):
+    target.release_data = str(target.release_data).encode("utf-8")
