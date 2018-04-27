@@ -7,7 +7,7 @@ import json
 from sqlalchemy.event import listens_for
 import StringIO
 import zipfile
-
+import zlib
 
 class Release(db.Model):
     __tablename__ = "releases"
@@ -16,11 +16,22 @@ class Release(db.Model):
     name = db.Column(db.String(500), nullable=False)
     is_test_release = db.Column(db.Integer, default=0)
     date_created = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp())
-    release_data = db.Column(db.Text, nullable=False)
+    _release_data = db.Column(db.LargeBinary, nullable=False)
 
     created_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
     created_user = db.relationship('KBUser', foreign_keys=created_user_id,
                                    primaryjoin="KBUser.id==Release.created_user_id")
+
+    @property
+    def release_data(self):
+        try:
+            return zlib.decompress(self._release_data)
+        except:
+            return self._release_data
+
+    @release_data.setter
+    def release_data(self, value):
+        self._release_data = zlib.compress(value, 8)
 
     @property
     def release_data_dict(self):
@@ -33,9 +44,12 @@ class Release(db.Model):
             is_test_release=self.is_test_release,
             date_created=self.date_created.isoformat(),
             created_user=self.created_user.to_dict(),
-            num_signatures=len(self.release_data_dict["Signatures"]["Signatures"]),
-            num_ips=len(self.release_data_dict["IP"]["IP"]),
-            num_dns=len(self.release_data_dict["DNS"]["DNS"])
+            num_signatures=len(self.release_data_dict["Signatures"]["Signatures"]) if self.release_data_dict.get(
+                "Signatures", None) and self.release_data_dict["Signatures"].get("Signatures", None) else 0,
+            num_ips=len(self.release_data_dict["IP"]["IP"]) if self.release_data_dict.get("IP", None) and
+                                                               self.release_data_dict["IP"].get("IP", None) else 0,
+            num_dns=len(self.release_data_dict["DNS"]["DNS"]) if self.release_data_dict.get("DNS", None) and
+                                                                 self.release_data_dict["DNS"].get("DNS", None) else 0
         )
 
     def to_dict(self):
@@ -46,9 +60,12 @@ class Release(db.Model):
             release_data=self.release_data,
             date_created=self.date_created.isoformat(),
             created_user=self.created_user.to_dict(),
-            num_signatures=len(self.release_data_dict["Signatures"]["Signatures"]),
-            num_ips=len(self.release_data_dict["IP"]["IP"]),
-            num_dns=len(self.release_data_dict["DNS"]["DNS"])
+            num_signatures=len(self.release_data_dict["Signatures"]["Signatures"]) if self.release_data_dict.get(
+                "Signatures", None) and self.release_data_dict["Signatures"].get("Signatures", None) else 0,
+            num_ips=len(self.release_data_dict["IP"]["IP"]) if self.release_data_dict.get("IP", None) and
+                                                               self.release_data_dict["IP"].get("IP", None) else 0,
+            num_dns=len(self.release_data_dict["DNS"]["DNS"]) if self.release_data_dict.get("DNS", None) and
+                                                                 self.release_data_dict["DNS"].get("DNS", None) else 0
         )
 
     def get_release_data(self):
@@ -99,7 +116,8 @@ class Release(db.Model):
 
         last_release = Release.query.filter(Release.is_test_release == 0).order_by(Release.id.desc()).first()
 
-        if not last_release:
+        if not last_release or not all(
+            [artifact in last_release.release_data_dict for artifact in ["Signatures", "IP", "DNS"]]):
             release_data["Signatures"]["Added"] = [sig for id_, sig in
                                                    release_data["Signatures"]["Signatures"].iteritems()]
             release_data["IP"]["Added"] = [ip for id_, ip in release_data["IP"]["IP"].iteritems()]
