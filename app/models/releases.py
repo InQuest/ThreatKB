@@ -1,7 +1,8 @@
-from app import db, app
+from app import db
 from app.models import c2dns, c2ip, yara_rule, cfg_settings, cfg_states
 from sqlalchemy import and_
 from dateutil import parser
+from datetime import datetime
 import json
 from sqlalchemy.event import listens_for
 import StringIO
@@ -201,9 +202,9 @@ class Release(db.Model):
     def generate_artifact_export(self):
         release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
         ip_text_filename = cfg_settings.Cfg_settings.query.filter_by(key="EXPORT_FILENAME_IP").first()
-        ip_text_filename = ip_text_filename.value if ip_text_filename else "IPs.txt"
+        ip_text_filename = ip_text_filename.value if ip_text_filename else "IPs.csv"
         dns_text_filename = cfg_settings.Cfg_settings.query.filter_by(key="EXPORT_FILENAME_DNS").first()
-        dns_text_filename = dns_text_filename.value if dns_text_filename else "DNS.txt"
+        dns_text_filename = dns_text_filename.value if dns_text_filename else "DNS.csv"
         signature_directory = cfg_settings.Cfg_settings.query.filter_by(key="EXPORT_DIRECTORY_SIGNATURE").first()
         signature_directory = signature_directory.value if signature_directory else "signatures"
 
@@ -219,10 +220,26 @@ class Release(db.Model):
 
             combined_rules[category].append(signature)
 
-        ips = [ip.get("ip") for ip in self.release_data_dict["IP"]["IP"].values()]
+        ips = []
+        for ip in self.release_data_dict["IP"]["IP"].values():
+            output = "%s,%s" % (parser.parse(ip.get("date_created")).strftime("%m/%d/%Y"), ip.get("ip"))
+            if "description" in ip["metadata_values"].keys():
+                output += "," + ip["metadata_values"]["description"]["value"]
+            elif "Description" in ip["metadata_values"].keys():
+                output += "," + ip["metadata_values"]["Description"]["value"]
+            ips.append(output + "\n")
+
         ips.sort()
 
-        dns = [dns.get("domain_name") for dns in self.release_data_dict["DNS"]["DNS"].values()]
+        dns = []
+        for d in self.release_data_dict["DNS"]["DNS"].values():
+            output = "%s,%s" % (parser.parse(d.get("date_created")).strftime("%m/%d/%Y"), d.get("domain_name"))
+            if "description" in d["metadata_values"].keys():
+                output += "," + d["metadata_values"]["description"]["value"]
+            elif "Description" in d["metadata_values"].keys():
+                output += "," + d["metadata_values"]["Description"]["value"]
+            dns.append(output + "\n")
+
         dns.sort()
 
         memzip = StringIO.StringIO()
