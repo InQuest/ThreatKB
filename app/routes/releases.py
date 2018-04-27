@@ -14,7 +14,7 @@ def get_all_releases():
     """Return all releases in ThreatKB
     Return: list of release dictionaries"""
     entities = releases.Release.query.filter_by().all()
-    return Response(json.dumps([entity.to_dict() for entity in entities]), mimetype="application/json")
+    return Response(json.dumps([entity.to_small_dict() for entity in entities]), mimetype="application/json")
 
 
 @app.route('/ThreatKB/releases/<int:release_id>', methods=['GET'])
