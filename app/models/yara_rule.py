@@ -150,7 +150,8 @@ class Yara_rule(db.Model):
             if yara_dict.get(field, None) and not "metadata" in field and field in ["creation_date",
                                                                                     "last_revision_date", "revision",
                                                                                     "name", "category", "eventid"]:
-                metadata_strings.append("\t\t%s = \"%s\"\n" % (field.title(), yara_dict[field]))
+                metadata_strings.append("\t\t%s = \"%s\"\n" % (
+                field.title() if not field.lower() == "eventid" else "EventID", yara_dict[field]))
 
         try:
             for type_, metalist in yara_dict["metadata"].iteritems():
