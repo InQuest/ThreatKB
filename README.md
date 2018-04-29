@@ -110,3 +110,9 @@ Releases are controlled by artifact states. States are configurable in the State
 The Release, Staging, and Retired states must be configured in the admin section *before* you can generate a release. If they are not, the system will error out. 
 
 When a release is created, the system first pulls all signatures that are in the release state. Then, it gathers all signatures that are in the staging state and checks their revision history for the most recently released revision that is in the release state. If it finds it, it will include it in the release. If it does not find any previously released revisions, it will skip the signature.
+
+## Thank You
+ThreatKB utilizes Plyara to parse yara rules into python dictionaries. A huge thank you to the Plyara team! Links to the project are below:
+
+https://github.com/8u1a/plyara
+https://github.com/8u1a/plyara/blob/master/LICENSE

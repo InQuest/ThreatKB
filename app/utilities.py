@@ -46,10 +46,13 @@ def extract_yara_rules(text):
                         re.MULTILINE | re.DOTALL)
     yara_rules = re.compile(parse_regex, re.MULTILINE | re.DOTALL).findall(yara_rules)
     extracted = []
-    for yara_rule in yara_rules:
+    for yara_rule_original in yara_rules:
         try:
-            parsed_rule = parse_yara_rules_text(yara_rule)[0]
-            strings, condition = get_strings_and_conditions(yara_rule)
+            yara_rule_to_parse = re.sub(r'//[^\n]*', "", yara_rule_original, re.MULTILINE)
+            yara_rule_to_parse = re.sub(r'(^|\n)[\s\t]*//*', "", yara_rule_to_parse)
+            parsed_rule = parse_yara_rules_text(yara_rule_to_parse)[0]
+
+            strings, condition = get_strings_and_conditions(yara_rule_original)
             extracted.append({"parsed_rule": parsed_rule, "strings": strings, "condition": condition})
         except Exception, e:
             pass
@@ -121,6 +124,13 @@ def parse_yara_rules_text(text):
     return parseString(text)
 
 
+#####################################################################
+# All code below this point was taken from the Plyara project.
+# Huge thank you to the Plyara team for awesome project!
+#
+# https://github.com/8u1a/plyara
+# https://github.com/8u1a/plyara/blob/master/LICENSE
+#
 #####################################################################
 
 class ElementTypes:
