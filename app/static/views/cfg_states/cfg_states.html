@@ -32,13 +32,27 @@
                     <span class="error" ng-show="form.state.$error.maxlength">Must be at most 32 characters.</span>
                 </div>
 
+                <div class="form-group">
+                    <label>State Type</label><br>
+                    <div class="btn-group" data-toggle="buttons">
+                        <label class="btn btn-default" ng-class="{active:cfg_states.is_release_state==true}"
+                               ng-click="set_as_release_state()">
+                            Release
+                        </label>
+                        <label class="btn btn-default" ng-class="{active:cfg_states.is_staging_state==true}"
+                               ng-click="set_as_staging_state()">
+                            Staging
+                        </label>
+                        <label class="btn btn-default" ng-class="{active:cfg_states.is_retired_state==true}"
+                               ng-click="set_as_retired_state()">
+                            Retired
+                        </label>
+                    </div>
+                </div>
+
 
             </div>
             <div class="modal-footer">
-                <div class="pull-left" style="padding: 5px 0 0 5px;">
-                    <input type="checkbox" class="pull-left" ng-model="cfg_states.is_release_state">
-                    &nbsp;Use This For Production Releases
-                </div>
                 <button type="button" class="btn btn-default" ng-click="cancel()">Cancel
                 </button>
                 <button type="submit" ng-disabled="form.$invalid" class="btn btn-primary">Save</button>
@@ -69,6 +83,10 @@
 
                 <th>Release State</th>
 
+                <th>Staging State</th>
+
+                <th>Retired State</th>
+
                 <th>Signature Count</th>
 
                 <th>DNS Count</th>
@@ -88,6 +106,13 @@
 
                 <td ng-if="cfg_state.is_release_state && cfg_state.id">Yes</td>
                 <td ng-if="!cfg_state.is_release_state && cfg_state.id">No</td>
+
+                <td ng-if="cfg_state.is_staging_state && cfg_state.id">Yes</td>
+                <td ng-if="!cfg_state.is_staging_state && cfg_state.id">No</td>
+
+                <td ng-if="cfg_state.is_retired_state && cfg_state.id">Yes</td>
+                <td ng-if="!cfg_state.is_retired_state && cfg_state.id">No</td>
+
 
                 <td ng-if="cfg_state.id">{{ cfg_state.sig_count }}</td>
                 <td ng-if="cfg_state.id">{{ cfg_state.dns_count }}</td>

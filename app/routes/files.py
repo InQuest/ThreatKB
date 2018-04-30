@@ -10,7 +10,7 @@ import uuid
 import shutil
 import subprocess
 import hashlib
-
+import re
 
 @app.route('/ThreatKB/files', methods=['GET'])
 @auto.doc()
@@ -43,6 +43,7 @@ def upload_file():
         return jsonify({})
 
     files_added = {}
+    files_skipped = {}
     if f:
         file_store_path_root = cfg_settings.Cfg_settings.get_setting("FILE_STORE_PATH") or "/tmp"
         filename = secure_filename(f.filename)
@@ -97,10 +98,13 @@ def upload_file():
         ## POSTPROCESSOR FUNCTIONALITY ##
         app.logger.debug("POSTPROCESSOR STARTING")
         postprocessors = cfg_settings.Cfg_settings.get_settings("POSTPROCESSOR%")
+        postprocessing_exclude_files_regex = cfg_settings.Cfg_settings.get_setting("POSTPROCESSING_EXCLUDE_FILES_REGEX")
         for postprocessor in postprocessors:
             app.logger.debug("POSTPROCESSOR STARTING '%s'" % (postprocessor.key))
-            tempdir = "%s/%s" % (tempfile.gettempdir(), uuid.uuid4())
+            postprocessing_tempdir = cfg_settings.Cfg_settings.get_setting("POSTPROCESSING_FILE_STORE_PATH") or "/tmp"
+            tempdir = "%s/%s" % (postprocessing_tempdir.rstrip(os.sep), uuid.uuid4())
             files_added[postprocessor.key] = []
+            files_skipped[postprocessor.key] = []
             try:
                 os.makedirs(tempdir)
                 shutil.copy(full_path, tempdir)
@@ -109,21 +113,37 @@ def upload_file():
 
             current_path = os.getcwd()
             os.chdir(tempdir)
+            app.logger.debug("POSTPROCESSOR CWD is now '%s'" % (tempdir))
+            app.logger.debug("POSTPROCESSOR DIRLIST is:\n\n%s" % (os.listdir(".")))
             try:
                 command = "%s %s" % (postprocessor.value, filename) if not "{FILENAME}" in postprocessor.value else str(
                     postprocessor.value).replace("{FILENAME}", filename)
                 app.logger.debug("POSTPROCESSOR COMMAND '%s'" % (command))
                 proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
                 proc.wait()
+                stdout, stderr = proc.communicate()
+                app.log.debug("POSTPROCESSOR STDOUT is:\n\n%s" % (stdout))
+                app.log.debug("POSTPROCESSOR STDERR is: \n\n%s" % (stderr))
             except Exception, e:
                 pass
 
+            app.logger.debug("POSTPROCESSOR DIRLIST is now:\n\n%s" % (os.listdir(".")))
             for root, dirs, files_local in os.walk(tempdir, topdown=False):
                 for name in files_local:
                     current_tempfile = os.path.join(root, name)
                     app.logger.debug("POSTPROCESSOR TEMPFILE '%s'" % (current_tempfile))
-                    if name == filename:
-                        continue
+                    try:
+                        if name == filename:
+                            app.logger.debug("Filename '%s' is the original file. Skipping.")
+                            continue
+                        if re.search(postprocessing_exclude_files_regex, name, re.IGNORECASE):
+                            app.logger.debug(
+                                "Filename '%s' matched against postprocessing exclude regex of '%s'. Skipping." % (
+                                filename, postprocessing_exclude_files_regex))
+                            files_skipped[postprocessor.key].append(name)
+                            continue
+                    except:
+                        pass
 
                     full_path_temp = os.path.join(file_store_path_root,
                                                   request.values[
@@ -165,7 +185,7 @@ def upload_file():
             shutil.rmtree(tempdir)
 
         db.session.commit()
-        return jsonify(files_added)
+        return jsonify({"files_added": files_added, "files_skipped": files_skipped})
 
     return jsonify({})
 

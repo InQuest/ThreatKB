@@ -22,6 +22,12 @@
                     <span class="error" ng-show="form.value.$error.maxlength">Must be at most 256 characters.</span>
                 </div>
 
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" class="form-control" name="description"
+                           ng-model="cfg_settings.description" ng-required="false"
+                           ng-maxlength="512" value="{{ cfg_settings.description }}"/>
+                </div>
 
                 <div class="form-group">
                     <label>Value</label>
@@ -61,6 +67,8 @@
             <tr>
                 <th>Key</th>
 
+                <th>Description</th>
+
                 <th>Value</th>
 
                 <th style="width: 120px;">Actions</th>
@@ -69,6 +77,8 @@
             <tbody>
             <tr ng-repeat="cfg_setting in cfg_settings | toArray:false | filter:search track by $index">
                 <td ng-if="cfg_setting.key">{{ cfg_setting.key }}</td>
+
+                <td ng-if="cfg_setting.key">{{ cfg_setting.description }}</td>
 
                 <td ng-if="cfg_setting.key">{{ cfg_setting.value }}</td>
 

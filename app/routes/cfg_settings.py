@@ -39,6 +39,7 @@ def create_cfg_settings():
     entity = cfg_settings.Cfg_settings(
         key=request.json['key']
         , value=request.json['value']
+        , description=request.json['description']
         , public=request.json.get('public', True),
     )
     db.session.add(entity)
@@ -61,6 +62,7 @@ def update_cfg_settings(key):
     entity = cfg_settings.Cfg_settings(
         key=key,
         value=request.json['value'],
+        description=request.json['description'],
         public=request.json.get('public', True),
     )
     db.session.merge(entity)

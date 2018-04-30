@@ -9,6 +9,7 @@ class Cfg_settings(db.Model):
                               onupdate=db.func.current_timestamp())
     public = db.Column(db.Boolean, index=True, default=True)
     value = db.Column(db.String(2048))
+    description = db.Column(db.String(512))
 
     def to_dict(self):
         return dict(
@@ -16,6 +17,7 @@ class Cfg_settings(db.Model):
             date_modified=self.date_modified.isoformat(),
             key=self.key,
             value=self.value,
+            description=self.description
         )
 
     def __repr__(self):
@@ -23,15 +25,24 @@ class Cfg_settings(db.Model):
 
     @staticmethod
     def get_private_setting(key):
-        setting = db.session.query(Cfg_settings).filter(Cfg_settings.public == False).filter(
-            Cfg_settings.key == key).first()
-        return setting.value if setting else None
+        try:
+            setting = db.session.query(Cfg_settings).filter(Cfg_settings.public == False).filter(
+                Cfg_settings.key == key).first()
+            return setting.value if setting else None
+        except:
+            return None
 
     @staticmethod
     def get_setting(key):
-        setting = db.session.query(Cfg_settings).filter(Cfg_settings.key == key).first()
-        return setting.value if setting else None
+        try:
+            setting = db.session.query(Cfg_settings).filter(Cfg_settings.key == key).first()
+            return setting.value if setting else None
+        except:
+            return None
 
     @staticmethod
     def get_settings(key_like):
-        return db.session.query(Cfg_settings).filter(Cfg_settings.key.like(key_like)).all()
+        try:
+            return db.session.query(Cfg_settings).filter(Cfg_settings.key.like(key_like)).all()
+        except:
+            return None

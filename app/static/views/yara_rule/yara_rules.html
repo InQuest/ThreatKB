@@ -101,19 +101,25 @@
 
                 <label>Strings Editor</label>
                 <span class="error text-danger" ng-if="!yara_rule.strings">*</span>
+                <span class="pull-right">Wrap&nbsp;<input type="checkbox" ng-checked="wrap_editor"
+                                                          ng-model="wrap_editor"
+                                                          ng-change="change_wrap_editor()"></span>
                 <ui-codemirror ui-codemirror-opts="editor_options" ng-model="yara_rule.strings"></ui-codemirror>
                 <BR>
 
                 <label>Conditions Editor</label>
                 <span class="error text-danger" ng-if="!yara_rule.condition">*</span>
+                <span class="pull-right">Wrap&nbsp;<input type="checkbox" ng-checked="wrap_editor"
+                                                          ng-model="wrap_editor"
+                                                          ng-change="change_wrap_editor()"></span>
                 <ui-codemirror ui-codemirror-opts="editor_options" ng-model="yara_rule.condition"></ui-codemirror>
                 <BR>
 
                 <div class="form-group">
                     <label>State:</label>
                     <span class="error text-danger">*</span>
-                    <ui-select ng-model="yara_rule.state" ng-required="true">
-                        <ui-select-match placeholder="Select a state..">
+                    <ui-select ng-model="yara_rule.state" ng-required="true" on-select="">
+                        <ui-select-match placeholder="Select a state or press delete to clear..">
                             <span ng-bind="$select.selected.state || yara_rule.state"></span>
                         </ui-select-match>
                         <ui-select-choices repeat="state in (cfg_states | filter: $select.search) track by state.id">
@@ -127,7 +133,7 @@
                     <label>Category:</label>
                     <span class="error text-danger">*</span>
                     <ui-select ng-model="yara_rule.category" ng-required="true">
-                        <ui-select-match placeholder="Select a Category ...">
+                        <ui-select-match placeholder="Select a category or press delete to clear...">
                             <span ng-bind="$select.selected.category || yara_rule.category"></span>
                         </ui-select-match>
                         <ui-select-choices
@@ -194,7 +200,7 @@
                     <span class="error text-danger" ng-if="m.required">*</span>
                     <ui-select ng-model="yara_rule.metadata_values[m.key].value"
                                on-select="update_selected_metadata(m, $select.selected)" ng-required="m.required">
-                        <ui-select-match placeholder="Select an option ...">
+                        <ui-select-match placeholder="Select an option or press delete to clear...">
                             <small><span
                                     ng-bind="$select.selected.choice || yara_rule.metadata_values[m.key].value"></span>
                             </small>
@@ -211,7 +217,7 @@
                     <span class="error text-danger" ng-if="m.required">*</span>
                     <ui-select ng-model="m.default"
                                on-select="update_selected_metadata(m, $select.selected)" ng-required="m.required">
-                        <ui-select-match placeholder="Select an option ...">
+                        <ui-select-match placeholder="Select an option or press delete to clear...">
                             <small><span ng-bind="$select.selected.choice || m.default"></span></small>
                         </ui-select-match>
                         <ui-select-choices
@@ -258,21 +264,11 @@
                                     <li class="list-group-item justify-content-between"
                                         ng-repeat="comment in yara_rule.comments | orderBy:'-date_created'">
                                         <div>
-                                            <pre>{{ comment.comment }}</pre>
+                                            <pre style="word-break: normal; white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word;">{{ comment.comment }}</pre>
                                             <span>{{ comment.user.email }}&nbsp;<small>{{ pretty_date(comment.date_created) }}</small></span>
                                         </div>
                                     </li>
                                 </ul>
-                            </div>
-                        </uib-accordion>
-                    </div>
-
-                    <div>
-                        <uib-accordion>
-                            <div uib-accordion-group class="panel-default"
-                                 heading="{{ revision.revision }} @ {{ revision.date_created }} by {{ revision.user.email }}"
-                                 ng-repeat="revision in yara_rule.revisions">
-                                <pre>{{ revision.rule_json | json:4}}</pre>
                             </div>
                         </uib-accordion>
                     </div>
@@ -333,24 +329,40 @@
                 </div>
 
                 <div>
-                    <label>Revisions</label>
-                    <div>
+                    <label>Revisions ({{ yara_rule.revisions.length }})</label>
+                    <div style="padding-top:3px;">
                         <uib-accordion>
                             <div uib-accordion-group class="panel-default"
-                                 heading="{{ revision.revision }} @ {{ revision.date_created }} by {{ revision.user.email }}"
-                                 ng-repeat="revision in yara_rule.revisions">
-                                <pre>{{ revision.rule_json | json:4}}</pre>
+                                 heading="See revisions">
+                                <ul class="list-group">
+                                    <li class="list-group-item justify-content-between"
+                                    >
+                                        <div>
+                                            <uib-accordion>
+                                                <div uib-accordion-group class="panel-default"
+                                                     heading="{{ revision.revision }} @ {{ revision.date_created }} by {{ revision.user.email }}"
+                                                     ng-repeat="revision in yara_rule.revisions | orderBy:'-date_created'">
+                                                    <pre>{{ revision.rule_json | json:4}}</pre>
+                                                </div>
+                                            </uib-accordion>
+                                        </div>
+                                    </li>
+                                </ul>
                             </div>
                         </uib-accordion>
                     </div>
+
                 </div>
             </div>
 
             <div class="modal-footer">
-                <div class="pull-left" style="width:250px; padding-right:4px;">
+                <button type="button" class="btn btn-danger pull-left" ng-click="merge_signature()">Merge This Into
+                </button>
+
+                <div class="pull-left" style="width:350px; padding-right:4px; padding-left:4px;">
                     <ui-select ng-model="selected_signature"
                                on-select="update_selected_signature($select.selected)">
-                        <ui-select-match placeholder="Select a signature ...">
+                        <ui-select-match placeholder="Select a signature or press delete to clear...">
                             <small><span ng-bind="$select.selected.name || row.entity.name"></span></small>
                         </ui-select-match>
                         <ui-select-choices
@@ -360,7 +372,7 @@
                     </ui-select>
                 </div>
 
-                <button type="button" class="btn btn-danger pull-left" ng-click="merge_signature()">Merge</button>
+
                 <div class="pull-right">
                     <button type="button" class="btn btn-default" ng-click="cancel()">Cancel
                     </button>

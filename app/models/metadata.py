@@ -109,9 +109,9 @@ class MetadataMapping(db.Model):
             id=self.id,
             value=value,
             metadata=self.metadata_object.to_dict(),
-            date_created=self.date_created.isoformat(),
-            date_modified=self.date_modified.isoformat(),
-            created_user=self.created_user.to_dict()
+            # date_created=self.date_created.isoformat(),
+            # date_modified=self.date_modified.isoformat(),
+            # created_user=self.created_user.to_dict()
         )
 
     def __repr__(self):

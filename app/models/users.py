@@ -1,4 +1,4 @@
-from itsdangerous import (TimedJSONWebSignatureSerializer
+from itsdangerous import (JSONWebSignatureSerializer
                           as Serializer, BadSignature)
 
 from app import db
@@ -39,12 +39,12 @@ class KBUser(db.Model):
     def to_dict(self):
         return dict(
             email=self.email,
-            registered_on=self.registered_on.isoformat(),
+            # registered_on=self.registered_on.isoformat(),
             admin=self.admin,
             active=self.active,
             id=self.id,
-            first_name=self.first_name,
-            last_name=self.last_name
+            # first_name=self.first_name,
+            #last_name=self.last_name
         )
 
     def generate_auth_token(self, s_key):

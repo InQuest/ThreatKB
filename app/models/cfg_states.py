@@ -9,6 +9,8 @@ class Cfg_states(db.Model):
 
     state = db.Column(db.String(32))
     is_release_state = db.Column(db.Integer, default=0)
+    is_retired_state = db.Column(db.Integer, default=0)
+    is_staging_state = db.Column(db.Integer, default=0)
 
     def to_dict(self):
         from app.models import yara_rule, c2dns, c2ip, tasks
@@ -16,6 +18,8 @@ class Cfg_states(db.Model):
             state=self.state,
             id=self.id,
             is_release_state=self.is_release_state,
+            is_retired_state=self.is_retired_state,
+            is_staging_state=self.is_staging_state,
             sig_count=db.session.query(yara_rule.Yara_rule).filter(yara_rule.Yara_rule.state == self.state).count(),
             dns_count=db.session.query(c2dns.C2dns).filter(c2dns.C2dns.state == self.state).count(),
             ip_count=db.session.query(c2ip.C2ip).filter(c2ip.C2ip.state == self.state).count(),

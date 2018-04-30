@@ -1,5 +1,5 @@
 // Declare app level module which depends on filters, and services
-angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize', 'ui.select', 'ngTagsInput',
+angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap', 'ngSanitize', 'ui.select', 'ngTagsInput',
     'angular-growl', 'angular-toArrayFilter', 'ui.codemirror', 'ngFileUpload', 'ngFileSaver', 'ngPassword',
     'ngMessages', 'blockUI', 'ui.grid', 'ui.grid.saveState', 'ui.grid.autoResize', 'ui.grid.pagination',
     'ngclipboard', 'cfp.hotkeys'])
@@ -23,7 +23,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                         return AuthService.getOwnershipData();
                     }],
                     resolvedReleasesLatest: ['Release', function (Release) {
-                        return Release.get_latest_releases();
+                        return Release.get_latest_releases(3);
                     }],
                     resolvedVersion: ['Version', function (Version) {
                         return Version.get_version();
@@ -158,13 +158,6 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                 controller: 'Yara_ruleController',
                 access: {restricted: true, admin: false},
                 resolve: {
-                    resolvedYara_rule: ['Yara_rule', function (Yara_rule) {
-                        return Yara_rule.resource.query({
-                            page_number: 0,
-                            page_size: 25,
-                            include_yara_string: 1
-                        });
-                    }],
                     openModalForId: [function () {
                         return null;
                     }]
@@ -179,7 +172,8 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ui.bootstrap', 'ngSanitize
                         return Yara_rule.resource.query({
                             page_number: 0,
                             page_size: 25,
-                            include_yara_string: 1
+                            include_yara_string: 1,
+                            short: 0
                         });
                     }],
                     openModalForId: ['$route', function ($route) {

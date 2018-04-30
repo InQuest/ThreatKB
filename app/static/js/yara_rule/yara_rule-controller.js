@@ -1,10 +1,8 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('Yara_ruleController', ['$scope', '$timeout', '$filter', '$http', '$uibModal', 'resolvedYara_rule', 'Yara_rule', 'Cfg_states', 'CfgCategoryRangeMapping', 'Users', 'growl', 'openModalForId', 'uiGridConstants', 'FileSaver', 'Blob',
-        function ($scope, $timeout, $filter, $http, $uibModal, resolvedYara_rule, Yara_rule, Cfg_states, CfgCategoryRangeMapping, Users, growl, openModalForId, uiGridConstants, FileSaver, Blob) {
-
-            $scope.yara_rules = resolvedYara_rule;
+    .controller('Yara_ruleController', ['$scope', '$timeout', '$filter', '$http', '$uibModal', 'Yara_rule', 'Cfg_states', 'CfgCategoryRangeMapping', 'Users', 'growl', 'openModalForId', 'uiGridConstants', 'FileSaver', 'Blob',
+        function ($scope, $timeout, $filter, $http, $uibModal, Yara_rule, Cfg_states, CfgCategoryRangeMapping, Users, growl, openModalForId, uiGridConstants, FileSaver, Blob) {
 
             $scope.cfg_states = Cfg_states.query();
 
@@ -127,7 +125,8 @@ angular.module('ThreatKB')
                                 paginationOptions.searches[column.colDef.field] = column.filters[0].term
                             }
                         }
-                        getPage()
+
+                        getPage();
                     });
                     $scope.gridApi.core.on.sortChanged($scope, function (grid, sortColumns) {
                         if (sortColumns.length === 0) {
@@ -224,9 +223,9 @@ angular.module('ThreatKB')
                             + '</small>'
                             + '</button>'
                             + '&nbsp;'
-                            + '<button ng-click="grid.appScope.delete(row.entity.id)"'
+                            + '<button confirmed-click="grid.appScope.delete(row.entity.id)"'
                             + ' ng-confirm-click="Are you sure you want to '
-                            + 'inactivate this signature ({{ row.entity.name }})?" class="btn btn-sm btn-danger">'
+                            + 'inactivate this signature?" class="btn btn-sm btn-danger">'
                             + '<small>'
                             + '<span class="glyphicon glyphicon-remove-circle"></span>'
                             + '</small>'
@@ -251,6 +250,8 @@ angular.module('ThreatKB')
                 url += 'page_number=' + (paginationOptions.pageNumber - 1);
                 url += '&page_size=' + paginationOptions.pageSize;
                 url += '&include_yara_string=1';
+                url += '&short=1';
+
                 switch (paginationOptions.sort_dir) {
                     case uiGridConstants.ASC:
                         url += '&sort_dir=ASC';
@@ -276,9 +277,12 @@ angular.module('ThreatKB')
                         for (var i = 0; i < $scope.gridOptions.data.length; i++) {
                             $scope.checked_indexes.push(false);
                         }
+                        $scope.gridApi.core.refresh();
                     }, function (error) {
                     });
             };
+
+            getPage();
 
             $scope.getTableHeight = function () {
                 var rowHeight = $scope.gridOptions.rowHeight;
@@ -327,6 +331,8 @@ angular.module('ThreatKB')
                     Yara_rule.resource.update({id: id}, $scope.yara_rule, function () {
                         //$scope.yara_rules = Yara_rule.resource.query();
                         getPage();
+                    }, function (err) {
+                        growl.error(err.data);
                     });
                 } else {
                     $scope.yara_rule.metadata_values = {};
@@ -372,6 +378,8 @@ angular.module('ThreatKB')
                     Yara_rule.resource.save($scope.yara_rule, function () {
                         //$scope.yara_rules = Yara_rule.resource.query();
                         getPage();
+                    }, function (err) {
+                        growl.error(err.data);
                     });
                 }
             };
@@ -383,16 +391,7 @@ angular.module('ThreatKB')
                     "last_revision_date": "",
                     "state": "",
                     "name": "",
-                    "test_status": "",
-                    "confidence": "",
-                    "severity": "",
-                    "description": "",
                     "category": "",
-                    "file_type": "",
-                    "subcategory1": "",
-                    "subcategory2": "",
-                    "subcategory3": "",
-                    "reference_link": "",
                     "condition": "",
                     "strings": "",
                     "eventid": "",
@@ -434,16 +433,18 @@ angular.module('ThreatKB')
                         $scope.yara_rule = entity;
                         $scope.save(id);
                     }
+                }, function () {
+                    getPage();
                 });
             };
 
-            getPage();
+            //getPage();
             if (openModalForId !== null) {
                 $scope.update(openModalForId);
             }
         }])
-    .controller('Yara_ruleSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'yara_rule', 'yara_rules', 'metadata', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags', 'Yara_rule', 'Cfg_settings', 'Bookmarks', 'hotkeys',
-        function ($scope, $http, $uibModalInstance, $location, yara_rule, yara_rules, metadata, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags, Yara_rule, Cfg_settings, Bookmarks, hotkeys) {
+    .controller('Yara_ruleSaveController', ['$scope', '$http', '$cookies', '$uibModalInstance', '$location', 'yara_rule', 'yara_rules', 'metadata', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags', 'Yara_rule', 'Cfg_settings', 'Bookmarks', 'hotkeys',
+        function ($scope, $http, $cookies, $uibModalInstance, $location, yara_rule, yara_rules, metadata, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags, Yara_rule, Cfg_settings, Bookmarks, hotkeys) {
 
             $scope.yara_rule = yara_rule;
             $scope.yara_rules = yara_rules;
@@ -453,13 +454,40 @@ angular.module('ThreatKB')
             $scope.Files = Files;
             $scope.selected_signature = null;
 
+            $scope.wrap_editor = ($cookies.get("wrap_editor") == "true");
+
+            if ($scope.wrap_editor == null) {
+                $scope.wrap_editor = false;
+                var expireDate = new Date();
+                expireDate.setDate(expireDate.getDate() + 365);
+                $cookies.put("wrap_editor", $scope.wrap_editor, {expires: expireDate});
+            }
+
+            $scope.change_wrap_editor = function () {
+                $scope.editor_options.lineWrapping = $scope.wrap_editor;
+                var expireDate = new Date();
+                expireDate.setDate(expireDate.getDate() + 365);
+                $cookies.put("wrap_editor", $scope.wrap_editor, {expires: expireDate});
+            };
+
+            $scope.save_artifact = function () {
+                Yara_rule.resource.update({id: $scope.yara_rule.id}, $scope.yara_rule,
+                    function (data) {
+                        if (!data) {
+                            growl.error(error, {ttl: -1});
+                        } else {
+                            growl.info("Successfully saved signature '" + $scope.yara_rule.name + "'.", {ttl: 2000});
+                        }
+                    });
+            };
+
             hotkeys.bindTo($scope)
                 .add({
                     combo: 'ctrl+s',
                     description: 'Save',
                     allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
                     callback: function () {
-                        $scope.ok();
+                        $scope.save_artifact();
                     }
                 }).add({
                 combo: 'ctrl+x',
@@ -467,6 +495,14 @@ angular.module('ThreatKB')
                 allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
                 callback: function () {
                     $scope.cancel();
+                }
+            }).add({
+                combo: 'ctrl+w',
+                description: 'Toggle word wrap',
+                allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
+                callback: function () {
+                    $scope.wrap_editor = !$scope.wrap_editor;
+                    $scope.change_wrap_editor();
                 }
             });
 
@@ -511,7 +547,14 @@ angular.module('ThreatKB')
             };
 
             $scope.getPermalink = function (id) {
-                return $location.absUrl() + "/" + id;
+                var location = $location.absUrl();
+                var last_spot = location.split("/")[location.split("/").length - 1]
+                if (isNaN(parseInt(last_spot, 10))) {
+                    return $location.absUrl() + "/" + id;
+                } else if (!isNaN(parseInt(last_spot, 10)) && last_spot != id) {
+                    return $location.absUrl().replace(/\/[0-9]+$/, "/" + id)
+                }
+                return $location.absUrl();
             };
 
             $scope.cfg_states = Cfg_states.query();
@@ -529,7 +572,7 @@ angular.module('ThreatKB')
 
             $scope.editor_options = {
                 lineNumbers: true,
-                lineWrapping: false,
+                lineWrapping: $scope.wrap_editor,
                 mode: 'yara'
             };
 
@@ -578,7 +621,7 @@ angular.module('ThreatKB')
                                     entity_type: Files.ENTITY_MAPPING.SIGNATURE,
                                     entity_id: id
                                 });
-                                growl.info('Success ' + JSON.stringify(resp.data, null, 2), {ttl: 3000});
+                                growl.info('Success ' + JSON.stringify(resp.data, null, 2));
                             }, function (resp) {
                                 console.log('Error status: ' + resp.status);
                                 growl.error(resp);

@@ -27,8 +27,11 @@ angular.module('ThreatKB')
             })
         };
 
-        function get_latest_releases() {
-            return $http.get('/ThreatKB/releases/latest', {
+        function get_latest_releases(count) {
+            if (!count) {
+                count = 3
+            }
+            return $http.get('/ThreatKB/releases/latest?count=' + count, {
                 cache: false,
             }).then(function (response) {
                 return response.data;

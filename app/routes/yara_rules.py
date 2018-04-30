@@ -2,6 +2,7 @@ from app import app, db, auto, ENTITY_MAPPING
 from app.models import yara_rule, cfg_states, comments
 from flask import abort, jsonify, request, Response, json
 from flask.ext.login import current_user, login_required
+import distutils
 
 from app.models.users import KBUser
 from app.models.metadata import Metadata, MetadataMapping, MetadataChoices
@@ -71,6 +72,8 @@ def get_all_yara_rules():
     Return: list of yara_rule artifact dictionaries"""
     include_inactive = request.args.get("include_inactive", False)
     include_yara_string = request.args.get("include_yara_string", False)
+    short = distutils.util.strtobool(request.args.get("short", "false"))
+
     if include_yara_string:
         include_yara_string = True
 
@@ -125,7 +128,7 @@ def get_all_yara_rules():
     filtered_entities = filtered_entities.all()
 
     response_dict = dict()
-    response_dict['data'] = [entity.to_dict(include_yara_string) for entity in filtered_entities]
+    response_dict['data'] = [entity.to_dict(include_yara_string, short) for entity in filtered_entities]
     response_dict['total_count'] = total_count
 
     return Response(json.dumps(response_dict), mimetype='application/json')
@@ -138,6 +141,8 @@ def get_yara_rule(id):
     """Return yara_rule artifact associated with the given id
     Return: yara_rule artifact dictionary"""
     include_yara_string = request.args.get("include_yara_string", False)
+    short = distutils.util.strtobool(request.args.get("short", "false"))
+
     if include_yara_string:
         include_yara_string = True
 
@@ -147,7 +152,7 @@ def get_yara_rule(id):
     if not current_user.admin and entity.owner_user_id != current_user.id:
         abort(403)
 
-    return_dict = entity.to_dict(include_yara_string)
+    return_dict = entity.to_dict(include_yara_string, short)
     return_dict["bookmarked"] = True if is_bookmarked(ENTITY_MAPPING["SIGNATURE"], id, current_user.id) \
         else False
 
@@ -162,6 +167,13 @@ def create_yara_rule():
     From Data: name (str), state(str), category (str), condition (str), strings (str)
     Return: yara_rule artifact dictionary"""
     new_sig_id = 0
+
+    release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
+    draft_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_staging_state > 0).first()
+
+    if not release_state or not draft_state:
+        raise Exception("You must set a release, draft, and retirement state before modifying signatures")
+
     if request.json['category'] and 'category' in request.json['category']:
         new_sig_id = request.json['category']['current'] + 1
 
@@ -176,6 +188,10 @@ def create_yara_rule():
         , modified_user_id=current_user.id
         , owner_user_id=current_user.id
     )
+
+    if entity.state == release_state:
+        entity.state = draft_state.state
+
     db.session.add(entity)
     db.session.commit()
 
@@ -218,16 +234,25 @@ def update_yara_rule(id):
     do_not_bump_revision = request.json.get("do_not_bump_revision", False)
 
     entity = yara_rule.Yara_rule.query.get(id)
+
     if not entity:
         abort(404)
     if not current_user.admin and entity.owner_user_id != current_user.id:
         abort(403)
 
+    release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
+    draft_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_staging_state > 0).first()
+    old_state = entity.state
+
+    if not release_state or not draft_state:
+        raise Exception("You must set a release, draft, and retirement state before modifying signatures")
+
     if not do_not_bump_revision:
         db.session.add(yara_rule.Yara_rule_history(date_created=entity.creation_date, revision=entity.revision,
                                                    rule_json=json.dumps(entity.to_revision_dict()),
                                                    user_id=current_user.id,
-                                                   yara_rule_id=entity.id))
+                                                   yara_rule_id=entity.id,
+                                                   state=entity.state))
 
     if not entity.revision:
         entity.revision = 1
@@ -244,6 +269,7 @@ def update_yara_rule(id):
 
         if temp_sig_id > request.json['category']['range_max']:
             abort(400)
+
     entity = yara_rule.Yara_rule(
         state=request.json['state']['state'] if request.json['state'] and 'state' in request.json['state'] else
         request.json['state'],
@@ -259,6 +285,10 @@ def update_yara_rule(id):
             .json["owner_user"].get("id", None) else None,
         revision=entity.revision if do_not_bump_revision else entity.revision + 1
     )
+
+    if old_state == release_state.state and entity.state == release_state.state and not do_not_bump_revision:
+        entity.state = draft_state.state
+
     db.session.merge(entity)
     db.session.commit()
 

@@ -46,14 +46,47 @@ def extract_yara_rules(text):
                         re.MULTILINE | re.DOTALL)
     yara_rules = re.compile(parse_regex, re.MULTILINE | re.DOTALL).findall(yara_rules)
     extracted = []
-    for yara_rule in yara_rules:
+    for yara_rule_original in yara_rules:
         try:
-            extracted.append(parse_yara_rules_text(yara_rule)[0])
+            yara_rule_to_parse = re.sub(r'//[^\n]*', "", yara_rule_original, re.MULTILINE)
+            yara_rule_to_parse = re.sub(r'(^|\n)[\s\t]*//*', "", yara_rule_to_parse)
+            parsed_rule = parse_yara_rules_text(yara_rule_to_parse)[0]
+
+            strings, condition = get_strings_and_conditions(yara_rule_original)
+            extracted.append({"parsed_rule": parsed_rule, "strings": strings, "condition": condition})
         except Exception, e:
             pass
 
     return extracted
 
+
+#####################################################################
+
+def get_strings_and_conditions(rule):
+    segment_headers = \
+        {
+            "strings": "^\s*strings:\s*\r?\n?",
+            "condition": "^\s*condition:\s*\r?\n?",
+        }
+    segments = \
+        {
+            "strings": [],
+            "condition": [],
+        }
+    SEGMENT = None
+    for line in rule.splitlines():
+        segment_change = False
+        for header, rx in segment_headers.items():
+            if re.match(rx, line):
+                SEGMENT = header
+                segment_change = True
+        if SEGMENT and not segment_change:
+            segments[SEGMENT].append(line)
+
+    segments["strings"][-1] = segments["strings"][-1].rstrip(" }") if not "=" in segments["strings"][-1] else \
+    segments["strings"][-1]
+    segments["condition"][-1] = segments["condition"][-1].rstrip(" }")
+    return "\n".join(segments["strings"]), "\n".join(segments["condition"])
 
 #####################################################################
 
@@ -70,9 +103,12 @@ def extract_artifacts(do_extract_ip, do_extract_dns, do_extract_signature, text)
         output.extend([{"type": "DNS", "artifact": hostname} for hostname in list(unique_everseen(dns))])
     if do_extract_signature:
         for yara_rule in yara_rules:
-            if not yara_rule["rule_name"] in temp:
-                temp.append(yara_rule["rule_name"])
-                output.append({"type": "YARA_RULE", "artifact": yara_rule["rule_name"], "rule": yara_rule})
+            yr = yara_rule["parsed_rule"]  # hacky
+            if not yr["rule_name"] in temp:
+                temp.append(yr["rule_name"])
+                output.append(
+                    {"type": "YARA_RULE", "artifact": yr["rule_name"], "rule": yr, "strings": yara_rule["strings"],
+                     "condition": yara_rule["condition"]})
     return output
 
 
@@ -88,6 +124,13 @@ def parse_yara_rules_text(text):
     return parseString(text)
 
 
+#####################################################################
+# All code below this point was taken from the Plyara project.
+# Huge thank you to the Plyara team for awesome project!
+#
+# https://github.com/8u1a/plyara
+# https://github.com/8u1a/plyara/blob/master/LICENSE
+#
 #####################################################################
 
 class ElementTypes:

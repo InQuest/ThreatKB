@@ -4,6 +4,7 @@ from app import app, db, admin_only, auto
 from app.models import releases, cfg_settings
 import tempfile
 import uuid
+import distutils
 
 @app.route('/ThreatKB/releases', methods=['GET'])
 @auto.doc()
@@ -13,7 +14,7 @@ def get_all_releases():
     """Return all releases in ThreatKB
     Return: list of release dictionaries"""
     entities = releases.Release.query.filter_by().all()
-    return Response(json.dumps([entity.to_dict() for entity in entities]), mimetype="application/json")
+    return Response(json.dumps([entity.to_small_dict() for entity in entities]), mimetype="application/json")
 
 
 @app.route('/ThreatKB/releases/<int:release_id>', methods=['GET'])
@@ -41,8 +42,7 @@ def get_releases_latest():
 
     settings_count = cfg_settings.Cfg_settings.get_setting("DASHBOARD_RELEASES_COUNT")
     count = request.args.get("count", None)
-    if not count:
-        count = settings_count
+    short = distutils.util.strtobool(request.args.get("short", "True"))
 
     try:
         count = int(count)
@@ -55,9 +55,12 @@ def get_releases_latest():
     if not entities:
         entities = []
     elif current_user.admin:
-        entities = [entity.to_small_dict() for entity in entities]
+        entities = [entity.to_small_dict() if short else entity.to_dict() for entity in entities]
     else:
-        entities = [entity.to_small_dict() for entity in entities]
+        entities = [entity.to_small_dict() if short else entity.to_dict() for entity in entities]
+
+    if len(entities) == 1:
+        entities = entities[0]
 
     return Response(json.dumps(entities), mimetype="application/json")
 
