@@ -1,4 +1,4 @@
-# NOTE: THIS REPO IS IN A PRE-RELEASE STATE
+# NOTE: THIS REPO IS IN AN ALPHA STATE
 
   * [Setup and run ThreatKB](#setup-and-run-threatkb)
     + [Pre-requisites](#pre-requisites)
