@@ -200,7 +200,7 @@ def create_yara_rule():
         update_cfg_category_range_mapping_current(request.json['category']['id'], new_sig_id)
 
     dirty = False
-    for name, value_dict in request.json["metadata_values"].iteritems():
+    for name, value_dict in request.json.get("metadata_values", {}).iteritems():
         if not name or not value_dict:
             continue
 
@@ -293,7 +293,7 @@ def update_yara_rule(id):
     db.session.commit()
 
     dirty = False
-    for name, value_dict in request.json["metadata_values"].iteritems():
+    for name, value_dict in request.json.get("metadata_values", {}).iteritems():
         if not name or not value_dict:
             continue
 

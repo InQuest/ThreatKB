@@ -127,7 +127,7 @@ def create_c2ip():
     entity.tags = create_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
 
     dirty = False
-    for name, value_dict in request.json["metadata_values"].iteritems():
+    for name, value_dict in request.json.get("metadata_values", {}).iteritems():
         if not name or not value_dict:
             continue
 
@@ -189,7 +189,7 @@ def update_c2ip(id):
     delete_tags_mapping(entity.__tablename__, entity.id, request.json['removedTags'])
 
     dirty = False
-    for name, value_dict in request.json["metadata_values"].iteritems():
+    for name, value_dict in request.json.get("metadata_values", {}).iteritems():
         if not name or not value_dict:
             continue
 
