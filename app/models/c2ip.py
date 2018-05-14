@@ -28,7 +28,6 @@ class C2ip(db.Model):
     state = db.Column(db.String(32), index=True)
     expiration_type = db.Column(db.String(32))
     expiration_timestamp = db.Column(db.DateTime(timezone=True))
-    description = db.Column(db.String(512))
 
     created_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
     created_user = db.relationship('KBUser', foreign_keys=created_user_id,
@@ -77,7 +76,6 @@ class C2ip(db.Model):
             asn=self.asn,
             country=self.country,
             state=self.state,
-            description=self.description,
             expiration_type=self.expiration_type,
             expiration_timestamp=self.expiration_timestamp.isoformat() if self.expiration_timestamp else None,
             id=self.id,
@@ -90,20 +88,6 @@ class C2ip(db.Model):
             comments=[comment.to_dict() for comment in self.comments],
             metadata=Metadata.get_metadata_dict("IP"),
             metadata_values=metadata_values_dict,
-        )
-
-    def to_release_dict(self):
-        return dict(
-            date_created=self.date_created.isoformat(),
-            date_modified=self.date_modified.isoformat(),
-            ip=self.ip,
-            asn=self.asn,
-            country=self.country,
-            state=self.state,
-            description=self.description,
-            expiration_type=self.expiration_type,
-            expiration_timestamp=self.expiration_timestamp.isoformat() if self.expiration_timestamp else None,
-            id=self.id
         )
 
     @classmethod

@@ -241,8 +241,10 @@ class Release(db.Model):
         ips = []
         for ip in self.release_data_dict["IP"]["IP"].values():
             output = "%s,%s" % (parser.parse(ip.get("date_created")).strftime("%m/%d/%Y"), ip.get("ip"))
-            if "description" in ip.keys() and ip["description"]:
-                output += "," + ip["description"]
+            if "description" in ip["metadata_values"].keys():
+                output += "," + ip["metadata_values"]["description"]["value"]
+            elif "Description" in ip["metadata_values"].keys():
+                output += "," + ip["metadata_values"]["Description"]["value"]
             ips.append(output + "\n")
 
         ips.sort()
@@ -250,8 +252,10 @@ class Release(db.Model):
         dns = []
         for d in self.release_data_dict["DNS"]["DNS"].values():
             output = "%s,%s" % (parser.parse(d.get("date_created")).strftime("%m/%d/%Y"), d.get("domain_name"))
-            if "description" in d.keys() and d["description"]:
-                output += "," + d["description"]
+            if "description" in d["metadata_values"].keys():
+                output += "," + d["metadata_values"]["description"]["value"]
+            elif "Description" in d["metadata_values"].keys():
+                output += "," + d["metadata_values"]["Description"]["value"]
             dns.append(output + "\n")
 
         dns.sort()
