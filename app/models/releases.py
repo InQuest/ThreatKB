@@ -267,10 +267,10 @@ class Release(db.Model):
             z.writestr("%s/%s.yar" % (signature_directory, category), rules.encode("utf-8"))
 
         if ips:
-            z.writestr(ip_text_filename, "\n".join(ips))
+            z.writestr(ip_text_filename, "\n".join([ip.encode("utf-8") for ip in ips]))
 
         if dns:
-            z.writestr(dns_text_filename, "\n".join(dns))
+            z.writestr(dns_text_filename, "\n".join([d.encode("utf-8") for d in dns]))
 
         return memzip
 
