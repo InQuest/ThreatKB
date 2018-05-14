@@ -79,6 +79,13 @@
                 </div>
 
                 <div class="form-group">
+                    <label>Description</label>
+                    <input class="form-control" name="description"
+                           ng-model="c2ip.description" ng-required="false"
+                           ng-maxlength="512"/>
+                </div>
+
+                <div class="form-group">
                     <label>ASN</label>
                     <span class="error" ng-show="form.asn.$error.minlength">Must be at least  characters.</span>
                     <span class="error" ng-show="form.asn.$error.maxlength">Must be at most 128 characters.</span>

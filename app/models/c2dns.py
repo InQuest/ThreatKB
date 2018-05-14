@@ -24,6 +24,7 @@ class C2dns(db.Model):
     match_type = db.Column(db.Enum('exact', 'wildcard'))
     expiration_type = db.Column(db.String(32))
     expiration_timestamp = db.Column(db.DateTime(timezone=True))
+    description = db.Column(db.String(512))
 
     created_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
     created_user = db.relationship('KBUser', foreign_keys=created_user_id,
@@ -73,6 +74,7 @@ class C2dns(db.Model):
             match_type=self.match_type,
             expiration_type=self.expiration_type,
             expiration_timestamp=self.expiration_timestamp.isoformat() if self.expiration_timestamp else None,
+            description=self.description,
             id=self.id,
             tags=tags_mapping.get_tags_for_source(self.__tablename__, self.id),
             addedTags=[],
@@ -84,6 +86,19 @@ class C2dns(db.Model):
                       Comments.query.filter_by(entity_id=self.id).filter_by(entity_type=ENTITY_MAPPING["DNS"]).all()],
             metadata=Metadata.get_metadata_dict("DNS"),
             metadata_values=metadata_values_dict,
+        )
+
+    def to_release_dict(self):
+        return dict(
+            date_created=self.date_created.isoformat(),
+            date_modified=self.date_modified.isoformat(),
+            state=self.state,
+            domain_name=self.domain_name,
+            match_type=self.match_type,
+            expiration_type=self.expiration_type,
+            description=self.description,
+            expiration_timestamp=self.expiration_timestamp.isoformat() if self.expiration_timestamp else None,
+            id=self.id
         )
 
     @classmethod

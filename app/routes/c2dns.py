@@ -106,6 +106,7 @@ def create_c2dns():
         domain_name=request.json['domain_name']
         , match_type=request.json['match_type']
         , expiration_type=request.json['expiration_type']
+        , description=request.json['description']
         , expiration_timestamp=parser.parse(request.json['expiration_timestamp']) if request.json.get("expiration_type",
                                                                                                       None) else None
         , state=verify_state(request.json['state']['state'])
@@ -168,6 +169,7 @@ def update_c2dns(id):
         else verify_state(request.json['state']),
         domain_name=request.json['domain_name'],
         match_type=request.json['match_type'],
+        description=request.json['description'],
         expiration_type=request.json['expiration_type'],
         expiration_timestamp=parser.parse(request.json['expiration_timestamp']) if request.json.get(
             "expiration_timestamp", None) else None,
