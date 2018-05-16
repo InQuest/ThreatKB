@@ -1,4 +1,5 @@
 from app import app, db, auto, ENTITY_MAPPING
+from app.routes import test_yara_rule
 from app.models import yara_rule, cfg_states, comments
 from flask import abort, jsonify, request, Response, json
 from flask.ext.login import current_user, login_required
@@ -288,6 +289,12 @@ def update_yara_rule(id):
 
     if old_state == release_state.state and entity.state == release_state.state and not do_not_bump_revision:
         entity.state = draft_state.state
+
+    if entity.state == release_state.state:
+        try:
+            test_yara_rule.get_yara_rule(entity)
+        except Exception, e:
+            raise Exception("Rule did not compile. Message is %s" % e.message)
 
     db.session.merge(entity)
     db.session.commit()
