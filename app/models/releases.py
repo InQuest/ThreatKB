@@ -17,6 +17,9 @@ class Release(db.Model):
     is_test_release = db.Column(db.Integer, default=0)
     date_created = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp())
     _release_data = db.Column(db.LargeBinary, nullable=False)
+    num_signatures = db.Column(db.Integer)
+    num_ips = db.Column(db.Integer)
+    num_dns = db.Column(db.Integer)
 
     created_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
     created_user = db.relationship('KBUser', foreign_keys=created_user_id,
@@ -44,12 +47,9 @@ class Release(db.Model):
             is_test_release=self.is_test_release,
             date_created=self.date_created.isoformat(),
             created_user=self.created_user.to_dict(),
-            num_signatures=len(self.release_data_dict["Signatures"]["Signatures"]) if self.release_data_dict.get(
-                "Signatures", None) and self.release_data_dict["Signatures"].get("Signatures", None) else 0,
-            num_ips=len(self.release_data_dict["IP"]["IP"]) if self.release_data_dict.get("IP", None) and
-                                                               self.release_data_dict["IP"].get("IP", None) else 0,
-            num_dns=len(self.release_data_dict["DNS"]["DNS"]) if self.release_data_dict.get("DNS", None) and
-                                                                 self.release_data_dict["DNS"].get("DNS", None) else 0
+            num_signatures=self.num_signatures or 0,
+            num_ips=self.num_ips or 0,
+            num_dns=self.num_dns or 0
         )
 
     def to_dict(self):

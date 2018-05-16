@@ -13,7 +13,7 @@ import distutils
 def get_all_releases():
     """Return all releases in ThreatKB
     Return: list of release dictionaries"""
-    entities = releases.Release.query.filter_by().all()
+    entities = releases.Release.query.options(db.defer("_release_data")).filter_by().all()
     return Response(json.dumps([entity.to_small_dict() for entity in entities]), mimetype="application/json")
 
 
@@ -123,6 +123,16 @@ def create_release():
     )
 
     release.release_data = release.get_release_data()
+    release.num_signatures = len(
+        release.release_data_dict["Signatures"]["Signatures"]) if release.release_data_dict.get("Signatures", None) and \
+                                                                  release.release_data_dict["Signatures"].get(
+                                                                      "Signatures", None) else 0
+    release.num_dns = len(release.release_data_dict["IP"]["IP"]) if release.release_data_dict.get("IP", None) and \
+                                                                    release.release_data_dict["IP"].get("IP",
+                                                                                                        None) else 0
+    release.num_ips = len(release.release_data_dict["DNS"]["DNS"]) if release.release_data_dict.get("DNS", None) and \
+                                                                      release.release_data_dict["DNS"].get("DNS",
+                                                                                                           None) else 0
     release.created_user = current_user
     db.session.merge(release)
     db.session.commit()
