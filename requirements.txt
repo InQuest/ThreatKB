@@ -1,3 +1,4 @@
+git+https://github.com/plyara/plyara-fork.git@bytestring-regex-fix#egg=plyara
 docker-compose
 alembic==0.9.4
 amqp==2.2.1
