@@ -86,6 +86,25 @@ class C2dns(db.Model):
             metadata_values=metadata_values_dict,
         )
 
+    def to_release_dict(self, metadata_cache, user_cache):
+        return dict(
+            date_created=self.date_created.isoformat(),
+            date_modified=self.date_modified.isoformat(),
+            state=self.state,
+            domain_name=self.domain_name,
+            match_type=self.match_type,
+            expiration_type=self.expiration_type,
+            expiration_timestamp=self.expiration_timestamp.isoformat() if self.expiration_timestamp else None,
+            id=self.id,
+            addedTags=[],
+            removedTags=[],
+            created_user=user_cache[self.created_user_id],
+            modified_user=user_cache[self.modified_user_id],
+            owner_user=user_cache[self.owner_user_id] if self.owner_user_id else None,
+            metadata=metadata_cache["DNS"][self.id]["metadata"],
+            metadata_values=metadata_cache["DNS"][self.id]["metadata_values"],
+        )
+
     @classmethod
     def get_c2dns_from_hostname(cls, hostname):
         c2dns = C2dns()

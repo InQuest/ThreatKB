@@ -52,6 +52,13 @@ class KBUser(db.Model):
         return s.dumps({'id': self.id})
 
     @staticmethod
+    def get_user_cache():
+        users = {}
+        for user in db.session.query(KBUser).filter(KBUser.active > 0).all():
+            users[user.id] = user.to_dict()
+        return users
+
+    @staticmethod
     def verify_auth_token(token, s_key):
         s = Serializer(s_key)
         try:

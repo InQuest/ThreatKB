@@ -133,6 +133,26 @@ class Yara_rule(db.Model):
         del dict["files"]
         return dict
 
+    def to_release_dict(self, metadata_cache, user_cache):
+        return dict(
+            creation_date=self.creation_date.isoformat(),
+            last_revision_date=self.last_revision_date.isoformat(),
+            state=self.state,
+            name=self.name,
+            category=self.category,
+            eventid=self.eventid,
+            id=self.id,
+            addedTags=[],
+            removedTags=[],
+            created_user=user_cache[self.created_user_id],
+            modified_user=user_cache[self.modified_user_id],
+            owner_user=user_cache[self.owner_user_id] if self.owner_user_id else None,
+            revision=self.revision,
+            metadata=metadata_cache["SIGNATURE"][self.id]["metadata"],
+            metadata_values=metadata_cache["SIGNATURE"][self.id]["metadata_values"],
+            condition="condition:\n\t%s" % self.condition,
+            strings="strings:\n\t%s" % self.strings
+        )
 
     def __repr__(self):
         return '<Yara_rule %r>' % (self.id)

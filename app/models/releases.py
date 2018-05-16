@@ -1,5 +1,5 @@
 from app import db
-from app.models import c2dns, c2ip, yara_rule, cfg_settings, cfg_states
+from app.models import c2dns, c2ip, yara_rule, cfg_settings, cfg_states, metadata, users
 from sqlalchemy import and_
 from dateutil import parser
 from datetime import datetime
@@ -91,14 +91,32 @@ class Release(db.Model):
             .filter(and_(yara_rule.Yara_rule.state == release_state.state, yara_rule.Yara_rule.active > 0))\
             .all()
 
+        metadata_cache = metadata.Metadata.get_metadata_cache()
+        user_cache = users.KBUser.get_user_cache()
+
         release_data = {
-            "Signatures": {"Signatures": {entity.to_release_dict()["id"]: entity.to_release_dict() for entity in yr},
+            "Signatures": {"Signatures": {
+            entity.to_release_dict(metadata_cache, user_cache)["id"]: entity.to_release_dict(metadata_cache, user_cache)
+            for entity in yr},
                            "Added": [],
                            "Removed": [], "Modified": []},
-            "DNS": {"DNS": {entity.to_dict()["id"]: entity.to_dict() for entity in dns}, "Added": [], "Removed": [],
+            "DNS": {"DNS": {
+            entity.to_release_dict(metadata_cache, user_cache)["id"]: entity.to_release_dict(metadata_cache, user_cache)
+            for entity in dns}, "Added": [], "Removed": [],
                     "Modified": []},
-            "IP": {"IP": {entity.to_dict()["id"]: entity.to_dict() for entity in ip}, "Added": [], "Removed": [],
+            "IP": {"IP": {
+            entity.to_release_dict(metadata_cache, user_cache)["id"]: entity.to_release_dict(metadata_cache, user_cache)
+            for entity in ip}, "Added": [], "Removed": [],
                    "Modified": []}}
+
+        # release_data = {
+        #     "Signatures": {"Signatures": {entity.to_dict()["id"]: entity.to_dict() for entity in yr},
+        #                    "Added": [],
+        #                    "Removed": [], "Modified": []},
+        #     "DNS": {"DNS": {entity.to_dict()["id"]: entity.to_dict() for entity in dns}, "Added": [], "Removed": [],
+        #             "Modified": []},
+        #     "IP": {"IP": {entity.to_dict()["id"]: entity.to_dict() for entity in ip}, "Added": [], "Removed": [],
+        #            "Modified": []}}
 
         staging_yr = yara_rule.Yara_rule.query \
             .filter(and_(yara_rule.Yara_rule.state == staging_state.state, yara_rule.Yara_rule.active > 0)) \
@@ -245,7 +263,7 @@ class Release(db.Model):
                 output += "," + ip["metadata_values"]["description"]["value"]
             elif "Description" in ip["metadata_values"].keys():
                 output += "," + ip["metadata_values"]["Description"]["value"]
-            ips.append(output + "\n")
+            ips.append(output)
 
         ips.sort()
 
@@ -256,7 +274,7 @@ class Release(db.Model):
                 output += "," + d["metadata_values"]["description"]["value"]
             elif "Description" in d["metadata_values"].keys():
                 output += "," + d["metadata_values"]["Description"]["value"]
-            dns.append(output + "\n")
+            dns.append(output)
 
         dns.sort()
 

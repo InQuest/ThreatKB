@@ -90,6 +90,28 @@ class C2ip(db.Model):
             metadata_values=metadata_values_dict,
         )
 
+    def to_release_dict(self, metadata_cache, user_cache):
+        return dict(
+            date_created=self.date_created.isoformat(),
+            date_modified=self.date_modified.isoformat(),
+            ip=self.ip,
+            asn=self.asn,
+            country=self.country,
+            state=self.state,
+            expiration_type=self.expiration_type,
+            expiration_timestamp=self.expiration_timestamp.isoformat() if self.expiration_timestamp else None,
+            id=self.id,
+            tags=tags_mapping.get_tags_for_source(self.__tablename__, self.id),
+            addedTags=[],
+            removedTags=[],
+            created_user=user_cache[self.created_user_id],
+            modified_user=user_cache[self.modified_user_id],
+            owner_user=user_cache[self.owner_user_id] if self.owner_user_id else None,
+            metadata=metadata_cache["IP"][self.id]["metadata"],
+            metadata_values=metadata_cache["IP"][self.id]["metadata_values"],
+
+        )
+
     @classmethod
     def get_c2ip_from_ip(cls, ip):
         geo_ip = get_geo_for_ip(str(ip))
