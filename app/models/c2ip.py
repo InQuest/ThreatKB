@@ -101,7 +101,6 @@ class C2ip(db.Model):
             expiration_type=self.expiration_type,
             expiration_timestamp=self.expiration_timestamp.isoformat() if self.expiration_timestamp else None,
             id=self.id,
-            tags=tags_mapping.get_tags_for_source(self.__tablename__, self.id),
             addedTags=[],
             removedTags=[],
             created_user=user_cache[self.created_user_id],

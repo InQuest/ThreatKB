@@ -127,12 +127,6 @@ class Yara_rule(db.Model):
         del dict["addedTags"]
         return dict
 
-    def to_release_dict(self):
-        dict = self.to_dict()
-        del dict["revisions"]
-        del dict["files"]
-        return dict
-
     def to_release_dict(self, metadata_cache, user_cache):
         return dict(
             creation_date=self.creation_date.isoformat(),
