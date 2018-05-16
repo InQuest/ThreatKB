@@ -49,7 +49,8 @@ def get_releases_latest():
     except:
         count = 1
 
-    entities = releases.Release.query.filter(releases.Release.is_test_release == 0).order_by(
+    entities = releases.Release.query.options(db.defer("_release_data")).filter(
+        releases.Release.is_test_release == 0).order_by(
         releases.Release.id.desc()).limit(count)
 
     if not entities:
