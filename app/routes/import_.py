@@ -4,6 +4,7 @@ from app import app, db, admin_only, auto, ENTITY_MAPPING
 from app.models import c2ip, c2dns, yara_rule, cfg_states, cfg_settings, comments
 from app.utilities import extract_artifacts
 import json
+import distutils
 
 
 #####################################################################
@@ -43,7 +44,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                     if shared_owner:
                         ip.owner_user_id = shared_owner
 
-                    if artifact["metadata"]:
+                    if artifact.get("metadata"):
                         metadata_to_save_ip.append((ip, artifact["metadata"]))
 
                     db.session.add(ip)
@@ -69,7 +70,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                     if shared_owner:
                         dns.owner_user_id = shared_owner
 
-                    if artifact["metadata"]:
+                    if artifact.get("metadata", None):
                         metadata_to_save_dns.append((dns, artifact["metadata"]))
 
                     db.session.add(dns)
@@ -136,6 +137,44 @@ def import_artifacts():
     extract_dns = request.json.get('extract_dns', True)
     extract_signature = request.json.get('extract_signature', True)
     metadata_field_mapping = request.json.get('metadata_field_mapping', {})
+
+    if not shared_owner:
+        shared_owner = int(current_user.id)
+
+    if not import_text:
+        abort(404)
+
+    artifacts = extract_artifacts(do_extract_ip=extract_ip, do_extract_dns=extract_dns,
+                                  do_extract_signature=extract_signature, text=import_text)
+
+    if autocommit:
+        artifacts = save_artifacts(extract_ip=extract_ip, extract_dns=extract_dns, extract_signature=extract_signature,
+                                   artifacts=artifacts, shared_reference=shared_reference, shared_state=shared_state,
+                                   shared_owner=shared_owner, metadata_field_mapping=metadata_field_mapping)
+
+    return jsonify({"artifacts": artifacts})
+
+
+#####################################################################
+
+@app.route('/ThreatKB/import_by_file', methods=['POST'])
+@auto.doc()
+@login_required
+def import_artifacts_by_filek():
+    """Import data into ThreatKB as a 2-step process. The first is extraction and the second is committing. These phases can be completed by one single call to this endpoints or by calling this endpoint for extraction and /ThreatKB/import/commit for committing.
+    From Data: import_text (str),
+    Optional Arguments: autocommit (int), shared_state (str), shared_reference (str), shared_owner (int)
+    Return: list of artifact dictionaries [{"type":"IP": "artifact": {}}, {"type":"DNS": "artifact": {}}, ...]"""
+    autocommit = distutils.util.strtobool(request.values.get("autocommit", 0))
+    import_text = request.files['file'].stream.read()
+    import_text = import_text.strip()
+    shared_state = request.values.get('shared_state', None)
+    shared_reference = request.values.get("shared_reference", None) or None
+    shared_owner = request.values.get("shared_owner", None) or None
+    extract_ip = distutils.util.strtobool(request.values.get('extract_ip', True))
+    extract_dns = distutils.util.strtobool(request.values.get('extract_dns', True))
+    extract_signature = distutils.util.strtobool(request.values.get('extract_signature', True))
+    metadata_field_mapping = request.values.get('metadata_field_mapping', {})
 
     if not shared_owner:
         shared_owner = int(current_user.id)
