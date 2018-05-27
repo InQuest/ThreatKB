@@ -244,6 +244,8 @@ class Release(db.Model):
         signature_directory = cfg_settings.Cfg_settings.query.filter_by(key="EXPORT_DIRECTORY_SIGNATURE").first()
         signature_directory = signature_directory.value if signature_directory else "signatures"
 
+        date_format = "%Y-%m-%d"
+
         if not release_state:
             raise Exception("You need to specify a production release state first.")
 
@@ -258,7 +260,7 @@ class Release(db.Model):
 
         ips = []
         for ip in self.release_data_dict["IP"]["IP"].values():
-            output = "%s,%s" % (parser.parse(ip.get("date_created")).strftime("%m/%d/%Y"), ip.get("ip"))
+            output = "%s,%s" % (parser.parse(ip.get("date_created")).strftime(date_format), ip.get("ip"))
             if "description" in ip["metadata_values"].keys():
                 output += "," + ip["metadata_values"]["description"]["value"]
             elif "Description" in ip["metadata_values"].keys():
@@ -269,7 +271,7 @@ class Release(db.Model):
 
         dns = []
         for d in self.release_data_dict["DNS"]["DNS"].values():
-            output = "%s,%s" % (parser.parse(d.get("date_created")).strftime("%m/%d/%Y"), d.get("domain_name"))
+            output = "%s,%s" % (parser.parse(d.get("date_created")).strftime(date_format), d.get("domain_name"))
             if "description" in d["metadata_values"].keys():
                 output += "," + d["metadata_values"]["description"]["value"]
             elif "Description" in d["metadata_values"].keys():
