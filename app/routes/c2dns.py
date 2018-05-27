@@ -108,7 +108,9 @@ def create_c2dns():
         , expiration_type=request.json['expiration_type']
         , expiration_timestamp=parser.parse(request.json['expiration_timestamp']) if request.json.get("expiration_type",
                                                                                                       None) else None
-        , state=verify_state(request.json['state']['state'])
+        ,
+        state=verify_state(request.json['state']['state']) if request.json['state'] and 'state' in request.json['state']
+        else verify_state(request.json['state'])
         , created_user_id=current_user.id
         , modified_user_id=current_user.id
         , owner_user_id=current_user.id
@@ -126,27 +128,7 @@ def create_c2dns():
 
     entity.tags = create_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
 
-    dirty = False
-    for name, value_dict in request.json.get("metadata_values", {}).iteritems():
-        if not name or not value_dict:
-            continue
-
-        m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
-            Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["DNS"]).filter(
-            MetadataMapping.artifact_id == entity.id).first()
-        if m:
-            m.value = value_dict["value"]
-            db.session.add(m)
-            dirty = True
-        else:
-            m = db.session.query(Metadata).filter(Metadata.key == name).filter(
-                Metadata.artifact_type == ENTITY_MAPPING["DNS"]).first()
-            db.session.add(MetadataMapping(value=value_dict["value"], metadata_id=m.id, artifact_id=entity.id,
-                                           created_user_id=current_user.id))
-            dirty = True
-
-    if dirty:
-        db.session.commit()
+    entity.save_metadata(request.json.get("metadata_values", {}))
 
     return jsonify(entity.to_dict()), 201
 
@@ -187,27 +169,7 @@ def update_c2dns(id):
     create_tags_mapping(entity.__tablename__, entity.id, request.json['addedTags'])
     delete_tags_mapping(entity.__tablename__, entity.id, request.json['removedTags'])
 
-    dirty = False
-    for name, value_dict in request.json.get("metadata_values", {}).iteritems():
-        if not name or not value_dict:
-            continue
-
-        m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
-            Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["DNS"]).filter(
-            MetadataMapping.artifact_id == entity.id).first()
-        if m:
-            m.value = value_dict["value"]
-            db.session.add(m)
-            dirty = True
-        else:
-            m = db.session.query(Metadata).filter(Metadata.key == name).filter(
-                Metadata.artifact_type == ENTITY_MAPPING["DNS"]).first()
-            db.session.add(MetadataMapping(value=value_dict["value"], metadata_id=m.id, artifact_id=entity.id,
-                                           created_user_id=current_user.id))
-            dirty = True
-
-    if dirty:
-        db.session.commit()
+    entity.save_metadata(request.json.get("metadata_values", {}))
 
     entity = c2dns.C2dns.query.get(entity.id)
     return jsonify(entity.to_dict()), 200

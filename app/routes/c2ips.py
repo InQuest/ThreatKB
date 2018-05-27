@@ -126,27 +126,7 @@ def create_c2ip():
 
     entity.tags = create_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
 
-    dirty = False
-    for name, value_dict in request.json.get("metadata_values", {}).iteritems():
-        if not name or not value_dict:
-            continue
-
-        m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
-            Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["IP"]).filter(
-            MetadataMapping.artifact_id == entity.id).first()
-        if m:
-            m.value = value_dict["value"]
-            db.session.add(m)
-            dirty = True
-        else:
-            m = db.session.query(Metadata).filter(Metadata.key == name).filter(
-                Metadata.artifact_type == ENTITY_MAPPING["IP"]).first()
-            db.session.add(MetadataMapping(value=value_dict["value"], metadata_id=m.id, artifact_id=entity.id,
-                                           created_user_id=current_user.id))
-            dirty = True
-
-    if dirty:
-        db.session.commit()
+    entity.save_metadata(request.json.get("metadata_values", {}))
 
     return jsonify(entity.to_dict()), 201
 
@@ -188,27 +168,7 @@ def update_c2ip(id):
     create_tags_mapping(entity.__tablename__, entity.id, request.json['addedTags'])
     delete_tags_mapping(entity.__tablename__, entity.id, request.json['removedTags'])
 
-    dirty = False
-    for name, value_dict in request.json.get("metadata_values", {}).iteritems():
-        if not name or not value_dict:
-            continue
-
-        m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
-            Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["IP"]).filter(
-            MetadataMapping.artifact_id == entity.id).first()
-        if m:
-            m.value = value_dict["value"]
-            db.session.add(m)
-            dirty = True
-        else:
-            m = db.session.query(Metadata).filter(Metadata.key == name).filter(
-                Metadata.artifact_type == ENTITY_MAPPING["IP"]).first()
-            db.session.add(MetadataMapping(value=value_dict["value"], metadata_id=m.id, artifact_id=entity.id,
-                                           created_user_id=current_user.id))
-            dirty = True
-
-    if dirty:
-        db.session.commit()
+    entity.save_metadata(request.json.get("metadata_values", {}))
 
     entity = c2ip.C2ip.query.get(entity.id)
     return jsonify(entity.to_dict()), 200

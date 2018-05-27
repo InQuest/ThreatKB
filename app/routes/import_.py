@@ -14,6 +14,8 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
     return_artifacts = []
     duplicate_artifacts = []
     fields_to_add = {}
+    metadata_to_save_ip = []
+    metadata_to_save_dns = []
 
     if not cfg_states.Cfg_states.query.filter_by(state=default_state).first():
         db.session.add(cfg_states.Cfg_states(state=default_state))
@@ -41,9 +43,12 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                     if shared_owner:
                         ip.owner_user_id = shared_owner
 
+                    if artifact["metadata"]:
+                        metadata_to_save_ip.append((ip, artifact["metadata"]))
+
                     db.session.add(ip)
                     return_artifacts.append(ip)
-            elif artifact["type"].lower() == "dns" and extract_dns:
+            elif artifact["type"].lower() in ["dns", "domain_name"] and extract_dns:
                 old_dns = c2dns.C2dns.query.filter(c2dns.C2dns.domain_name == artifact["artifact"]).first()
                 if old_dns:
                     message = "System comment: duplicate DNS '%s' found at '%s' by '%s'" % (
@@ -63,6 +68,9 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                         dns.state = shared_state
                     if shared_owner:
                         dns.owner_user_id = shared_owner
+
+                    if artifact["metadata"]:
+                        metadata_to_save_dns.append((dns, artifact["metadata"]))
 
                     db.session.add(dns)
                     return_artifacts.append(dns)
@@ -87,9 +95,22 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
         for yr, fields in fields_to_add.iteritems():
             for field in fields:
                 field.artifact_id = yr.id
-
                 field.created_user_id = current_user.id
                 db.session.add(field)
+        db.session.commit()
+
+    if metadata_to_save_ip:
+        for metadata_to_save in metadata_to_save_ip:
+            artifact, metadata = metadata_to_save
+            for m in c2ip.C2ip.get_metadata_to_save(artifact, metadata):
+                db.session.add(m)
+        db.session.commit()
+
+    if metadata_to_save_dns:
+        for metadata_to_save in metadata_to_save_dns:
+            artifact, metadata = metadata_to_save
+            for m in c2dns.C2dns.get_metadata_to_save(artifact, metadata):
+                db.session.add(m)
         db.session.commit()
 
     return {"committed": [artifact.to_dict() for artifact in return_artifacts],

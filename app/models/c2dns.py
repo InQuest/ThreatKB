@@ -3,6 +3,7 @@ import re
 from ipaddr import IPAddress, IPNetwork
 from sqlalchemy.event import listens_for
 
+import app
 from app import db, current_user, ENTITY_MAPPING
 from app.models.whitelist import Whitelist
 from app.models.metadata import Metadata, MetadataMapping
@@ -57,6 +58,49 @@ class C2dns(db.Model):
             .filter(Metadata.artifact_type == ENTITY_MAPPING["DNS"])\
             .filter(MetadataMapping.artifact_id == self.id)\
             .all()
+
+    def save_metadata(self, metadata):
+        for name, val in metadata.iteritems():
+            val = val if not type(val) == dict else val["value"]
+
+            m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
+                Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["DNS"]).filter(
+                MetadataMapping.artifact_id == self.id).first()
+            if m:
+                m.value = val
+                db.session.add(m)
+                dirty = True
+            else:
+                m = db.session.query(Metadata).filter(Metadata.key == name).filter(
+                    Metadata.artifact_type == ENTITY_MAPPING["DNS"]).first()
+                db.session.add(MetadataMapping(value=val, metadata_id=m.id, artifact_id=self.id,
+                                               created_user_id=current_user.id))
+
+        try:
+            db.session.commit()
+        except Exception, e:
+            app.logger.exception(e)
+
+    @staticmethod
+    def get_metadata_to_save(artifact, metadata):
+        metadata_to_save = []
+
+        for name, val in metadata.iteritems():
+            val = val if not type(val) == dict else val["value"]
+
+            m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
+                Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["DNS"]).filter(
+                MetadataMapping.artifact_id == artifact.id).first()
+            if m:
+                m.value = val
+                metadata_to_save.append(m)
+            else:
+                m = db.session.query(Metadata).filter(Metadata.key == name).filter(
+                    Metadata.artifact_type == ENTITY_MAPPING["DNS"]).first()
+                if m:
+                    metadata_to_save.append(MetadataMapping(value=val, metadata_id=m.id, artifact_id=artifact.id,
+                                                            created_user_id=current_user.id))
+        return metadata_to_save
 
     def to_dict(self):
         metadata_values_dict = {}
