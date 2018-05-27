@@ -27,6 +27,7 @@ class Yara_rule(db.Model):
     category = db.Column(db.String(32), index=True)
     condition = db.Column(db.String(2048))
     strings = db.Column(db.String(30000))
+    imports = db.Column(db.String(512))
     active = db.Column(db.Boolean, nullable=False, default=True)
     eventid = db.Column(db.Integer(unsigned=True), index=True, nullable=False)
 
@@ -100,7 +101,8 @@ class Yara_rule(db.Model):
             metadata=Metadata.get_metadata_dict("SIGNATURE"),
             metadata_values=metadata_values_dict,
             condition="condition:\n\t%s" % self.condition,
-            strings="strings:\n\t%s" % self.strings
+            strings="strings:\n\t%s" % self.strings,
+            imports=self.imports
         )
 
         if not short:
