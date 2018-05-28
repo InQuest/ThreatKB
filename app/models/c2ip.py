@@ -107,8 +107,13 @@ class C2ip(db.Model):
             created_user=user_cache[self.created_user_id],
             modified_user=user_cache[self.modified_user_id],
             owner_user=user_cache[self.owner_user_id] if self.owner_user_id else None,
-            metadata=metadata_cache["IP"][self.id]["metadata"],
-            metadata_values=metadata_cache["IP"][self.id]["metadata_values"],
+            metadata=metadata_cache["IP"][self.id]["metadata"] if metadata_cache["IP"].get(self.id, None) and
+                                                                  metadata_cache["IP"][self.id].get("metadata",
+                                                                                                    None) else {},
+            metadata_values=metadata_cache["IP"][self.id]["metadata_values"] if metadata_cache["IP"].get(self.id,
+                                                                                                         None) and
+                                                                                metadata_cache["IP"][self.id].get(
+                                                                                    "metadata_values", None) else {},
 
         )
 

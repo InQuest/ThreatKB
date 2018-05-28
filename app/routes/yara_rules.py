@@ -188,6 +188,7 @@ def create_yara_rule():
         , created_user_id=current_user.id
         , modified_user_id=current_user.id
         , owner_user_id=current_user.id
+        , imports=yara_rule.Yara_rule.get_imports_from_string(request.json.get("imports", None))
     )
 
     if entity.state == release_state:
@@ -284,7 +285,8 @@ def update_yara_rule(id):
         modified_user_id=current_user.id,
         owner_user_id=request.json['owner_user']['id'] if request.json.get("owner_user", None) and request
             .json["owner_user"].get("id", None) else None,
-        revision=entity.revision if do_not_bump_revision else entity.revision + 1
+        revision=entity.revision if do_not_bump_revision else entity.revision + 1,
+        imports=yara_rule.Yara_rule.get_imports_from_string(request.json.get("imports", None))
     )
 
     if old_state == release_state.state and entity.state == release_state.state and not do_not_bump_revision:

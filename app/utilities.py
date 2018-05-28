@@ -40,20 +40,22 @@ def extract_dns_text(text):
 #####################################################################
 
 def extract_yara_rules_text(text):
+    imports = Yara_rule.get_imports_from_string(text)
     split_regex = cfg_settings.Cfg_settings.get_setting(key="IMPORT_SIG_SPLIT_REGEX")
     split_regex = split_regex if split_regex else "\n[\t\s]*\}[\s\t]*(rule[\t\s][^\r\n]+(?:\{|[\r\n][\r\n\s\t]*\{))"
     parse_regex = cfg_settings.Cfg_settings.get_setting(key="IMPORT_SIG_PARSE_REGEX")
     parse_regex = parse_regex if parse_regex else r"^[\t\s]*rule[\t\s][^\r\n]+(?:\{|[\r\n][\r\n\s\t]*\{).*?condition:.*?\r?\n?[\t\s]*\}[\s\t]*(?:$|\r?\n)"
 
-    yara_rules = re.sub(split_regex, "}\r?\n\\1", text, re.MULTILINE | re.DOTALL)
+    yara_rules = re.sub(split_regex, "}\n\\1", text, re.MULTILINE | re.DOTALL)
     yara_rules = re.compile(parse_regex, re.MULTILINE | re.DOTALL).findall(yara_rules)
     extracted = []
     for yara_rule_original in yara_rules:
         try:
-            parsed_rule = parse_yara_rules_text(yara_rule_original)[0]
+            parsed_rule = parse_yara_rules_text(yara_rule_original.strip())[0]
 
             strings, condition = get_strings_and_conditions(yara_rule_original)
-            extracted.append({"parsed_rule": parsed_rule, "strings": strings, "condition": condition})
+            extracted.append(
+                {"parsed_rule": parsed_rule, "strings": strings, "condition": condition, "imports": imports})
         except Exception, e:
             pass
 
@@ -151,7 +153,7 @@ def extract_artifacts_text(do_extract_ip, do_extract_dns, do_extract_signature, 
                 temp.append(yr["rule_name"])
                 output.append(
                     {"type": "YARA_RULE", "artifact": yr["rule_name"], "rule": yr, "strings": yara_rule["strings"],
-                     "condition": yara_rule["condition"]})
+                     "condition": yara_rule["condition"], "imports": yara_rule["imports"]})
 
     return output
 

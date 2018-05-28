@@ -400,7 +400,8 @@ angular.module('ThreatKB')
                     "addedTags": [],
                     "removedTags": [],
                     "comments": [],
-                    "files": []
+                    "files": [],
+                    "imports": ""
                 };
             };
 

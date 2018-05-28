@@ -9,6 +9,7 @@ from sqlalchemy.event import listens_for
 from dateutil import parser
 import datetime
 import json
+import re
 import distutils
 
 from flask import abort
@@ -144,22 +145,39 @@ class Yara_rule(db.Model):
             modified_user=user_cache[self.modified_user_id],
             owner_user=user_cache[self.owner_user_id] if self.owner_user_id else None,
             revision=self.revision,
-            metadata=metadata_cache["SIGNATURE"][self.id]["metadata"],
-            metadata_values=metadata_cache["SIGNATURE"][self.id]["metadata_values"],
+            metadata=metadata_cache["SIGNATURE"][self.id]["metadata"] if metadata_cache["SIGNATURE"].get(self.id,
+                                                                                                         None) and
+                                                                         metadata_cache["SIGNATURE"][self.id].get(
+                                                                             "metadata", None) else {},
+            metadata_values=metadata_cache["SIGNATURE"][self.id]["metadata_values"] if metadata_cache["SIGNATURE"].get(
+                self.id, None) and metadata_cache["SIGNATURE"][self.id].get("metadata_values", None) else {},
             condition="condition:\n\t%s" % self.condition,
-            strings="strings:\n\t%s" % self.strings
+            strings="strings:\n\t%s" % self.strings,
+            imports=self.imports
         )
 
     def __repr__(self):
         return '<Yara_rule %r>' % (self.id)
 
     @staticmethod
-    def to_yara_rule_string(yara_dict):
+    def get_imports_from_string(imports_string):
+        if not imports_string:
+            return ""
+        return "\n".join([imp.strip() for imp in
+                          set(re.findall(r'^import[\t\s]+\"[A-Za-z0-9_]+\"[\t\s]*$', imports_string, re.MULTILINE))])
+
+    @staticmethod
+    def to_yara_rule_string(yara_dict, include_imports=True):
         yr = Yara_rule()
         metadata_field_mapping = [attr for attr in dir(yr) if
                                   not callable(getattr(yr, attr)) and not attr.startswith("__")]
 
-        yara_rule_text = "rule %s\n{\n\n" % (yara_dict.get("name"))
+        yara_rule_text = ""
+
+        if yara_dict.get("imports", None) and include_imports:
+            yara_rule_text = yara_dict.get("imports") + "\n\n"
+
+        yara_rule_text += "rule %s\n{\n\n" % (yara_dict.get("name"))
         yara_rule_text += "\tmeta:\n"
         metadata_strings = []
         for field in metadata_field_mapping:
@@ -206,6 +224,7 @@ class Yara_rule(db.Model):
     def get_yara_rule_from_yara_dict(cls, yara_dict, metadata_field_mapping={}):
         condition = yara_dict["condition"]
         strings = yara_dict["strings"]
+        imports = yara_dict["imports"]
         yara_dict = yara_dict["rule"]
 
         metadata_fields = {entity.key.lower(): entity for entity in
@@ -262,6 +281,7 @@ class Yara_rule(db.Model):
         #     yara_dict["strings"]])
         yara_rule.condition = "\n" + condition
         yara_rule.strings = "\n" + strings
+        yara_rule.imports = imports
 
         if not yara_rule.category:
             yara_rule.category = CfgCategoryRangeMapping.DEFAULT_CATEGORY

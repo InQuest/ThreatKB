@@ -283,7 +283,14 @@ class Release(db.Model):
         memzip = StringIO.StringIO()
         z = zipfile.ZipFile(memzip, mode="w", compression=zipfile.ZIP_DEFLATED)
         for category, rules in combined_rules.iteritems():
-            rules = "\n\n".join([yara_rule.Yara_rule.to_yara_rule_string(signature) for signature in rules])
+            imports = []
+            for rule in rules:
+                if rule.get("imports", None):
+                    imports.extend(rule["imports"].split("\n"))
+            imports = "\n".join(set(imports))
+            rules = "\n\n".join(
+                [yara_rule.Yara_rule.to_yara_rule_string(signature, include_imports=False) for signature in rules])
+            rules = "%s\n\n%s" % (imports, rules)
             z.writestr("%s/%s.yar" % (signature_directory, category), rules.encode("utf-8"))
 
         if ips:

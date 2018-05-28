@@ -98,7 +98,6 @@
                            ng-maxlength="128"/>
                 </div>
 
-
                 <label>Strings Editor</label>
                 <span class="error text-danger" ng-if="!yara_rule.strings">*</span>
                 <span class="pull-right">Wrap&nbsp;<input type="checkbox" ng-checked="wrap_editor"
@@ -113,6 +112,12 @@
                                                           ng-model="wrap_editor"
                                                           ng-change="change_wrap_editor()"></span>
                 <ui-codemirror ui-codemirror-opts="editor_options" ng-model="yara_rule.condition"></ui-codemirror>
+                <BR>
+
+                <label>Imports</label>
+                <span class="error text-danger" ng-if="!yara_rule.imports">*</span>
+                <textarea class="form-control" ng-model="yara_rule.imports" rows="2"
+                          ng-required="false"></textarea>
                 <BR>
 
                 <div class="form-group">
