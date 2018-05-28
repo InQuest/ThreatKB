@@ -202,16 +202,30 @@ class Yara_rule(db.Model):
             pass
 
         yara_rule_text += "".join(sorted(metadata_strings))
+        formatted_strings = ""
 
         if not "strings:" in yara_dict["strings"]:
-            yara_rule_text += "\n\tstrings:\n\t\t%s" % (yara_dict["strings"])
+            formatted_strings = "\n\tstrings:\n\t\t"
+            formatted_strings += "\n\t\t".join([line.strip() for line in yara_dict["strings"].split("\n")])
+            # yara_rule_text += "\n\tstrings:\n\t\t%s" % (yara_dict["strings"])
         else:
-            yara_rule_text += "\n\t%s" % (yara_dict["strings"])
+            formatted_strings = "\n\tstrings:\n\t\t"
+            formatted_strings += "\n\t\t".join([line.strip() for line in yara_dict["strings"].split("\n")[1:]])
+            # yara_rule_text += "\n\t%s" % (yara_dict["strings"])
+
+        yara_rule_text += formatted_strings
+        formatted_condition = ""
 
         if not "condition" in yara_dict["condition"]:
-            yara_rule_text += "\n\tcondition:\n\t\t%s\n\n}" % (yara_dict["condition"])
+            formatted_condition = "\n\tstrings:\n\t\t"
+            formatted_condition += "\n\t\t".join([line.strip() for line in yara_dict["condition"].split("\n")])
+            #yara_rule_text += "\n\tcondition:\n\t\t%s\n\n}" % (yara_dict["condition"])
         else:
-            yara_rule_text += "\n\t%s\n\n}" % (yara_dict["condition"])
+            formatted_condition = "\n\tcondition:\n\t\t"
+            formatted_condition += "\n\t\t".join([line.strip() for line in yara_dict["condition"].split("\n")[1:]])
+            # yara_rule_text += "\n\t%s\n\n}" % (yara_dict["condition"])
+
+        yara_rule_text += formatted_condition + "\n}\n"
 
         return yara_rule_text
 
