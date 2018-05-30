@@ -85,10 +85,14 @@ def get_strings_and_conditions(rule):
         if SEGMENT and not segment_change:
             segments[SEGMENT].append(line)
 
-    segments["strings"][-1] = segments["strings"][-1].rstrip(" }") if not "=" in segments["strings"][-1] else \
-    segments["strings"][-1]
-    segments["condition"][-1] = segments["condition"][-1].rstrip(" }")
-    return "\n".join(segments["strings"]), "\n".join(segments["condition"])
+    if segments.get("strings", None):
+        segments["strings"][-1] = segments["strings"][-1].rstrip(" }") if not "=" in segments["strings"][-1] else \
+            segments["strings"][-1]
+
+    if segments.get("condition", None):
+        segments["condition"][-1] = segments["condition"][-1].rstrip(" }")
+
+    return "\n".join(segments["strings"]) if segments.get("strings", None) else "", "\n".join(segments["condition"])
 
 #####################################################################
 
@@ -179,3 +183,5 @@ def parse_yara_rules_file(filename):
 
 def parse_yara_rules_text(text):
     return Plyara().parse_string(text)
+
+#####################################################################
