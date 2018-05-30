@@ -46,7 +46,7 @@ def extract_yara_rules_text(text):
     parse_regex = cfg_settings.Cfg_settings.get_setting(key="IMPORT_SIG_PARSE_REGEX")
     parse_regex = parse_regex if parse_regex else r"^[\t\s]*rule[\t\s][^\r\n]+(?:\{|[\r\n][\r\n\s\t]*\{).*?condition:.*?\r?\n?[\t\s]*\}[\s\t]*(?:$|\r?\n)"
 
-    yara_rules = re.sub(split_regex, "}\n\\1", text, re.MULTILINE | re.DOTALL)
+    yara_rules = re.sub(split_regex, "\n}\n\\1", text, re.MULTILINE | re.DOTALL)
     yara_rules = re.compile(parse_regex, re.MULTILINE | re.DOTALL).findall(yara_rules)
     extracted = []
     for yara_rule_original in yara_rules:
