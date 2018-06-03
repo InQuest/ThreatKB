@@ -71,8 +71,8 @@ class C2ip(db.Model):
             metadata_values_dict[key] = {}
 
         return dict(
-            date_created=self.date_created.isoformat(),
-            date_modified=self.date_modified.isoformat(),
+            date_created=self.date_created.isoformat() if self.date_created else None,
+            date_modified=self.date_modified.isoformat() if self.date_modified else None,
             ip=self.ip,
             asn=self.asn,
             country=self.country,
@@ -93,8 +93,8 @@ class C2ip(db.Model):
 
     def to_release_dict(self, metadata_cache, user_cache):
         return dict(
-            date_created=self.date_created.isoformat(),
-            date_modified=self.date_modified.isoformat(),
+            date_created=self.date_created.isoformat() if self.date_created else None,
+            date_modified=self.date_modified.isoformat() if self.date_modified else None,
             ip=self.ip,
             asn=self.asn,
             country=self.country,
@@ -161,7 +161,13 @@ class C2ip(db.Model):
         return metadata_to_save
 
     @classmethod
-    def get_c2ip_from_ip(cls, ip):
+    def get_c2ip_from_ip(cls, ip, metadata_field_mapping):
+        artifact = None
+
+        if type(ip) is dict:
+            artifact = ip
+            ip = ip["artifact"]
+
         geo_ip = get_geo_for_ip(str(ip))
 
         c2ip = C2ip()
@@ -169,6 +175,14 @@ class C2ip(db.Model):
         c2ip.asn = geo_ip["asn"]
         c2ip.country = geo_ip["country_code"]
         c2ip.city = geo_ip["city"]
+
+        if artifact and metadata_field_mapping:
+            for key, val in metadata_field_mapping.iteritems():
+                try:
+                    setattr(c2ip, val, artifact["metadata"][key])
+                except:
+                    pass
+
         return c2ip
 
     def __repr__(self):

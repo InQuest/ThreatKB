@@ -110,8 +110,8 @@ class C2dns(db.Model):
             metadata_values_dict[key] = {}
 
         return dict(
-            date_created=self.date_created.isoformat(),
-            date_modified=self.date_modified.isoformat(),
+            date_created=self.date_created.isoformat() if self.date_created else None,
+            date_modified=self.date_modified.isoformat() if self.date_modified else None,
             state=self.state,
             domain_name=self.domain_name,
             match_type=self.match_type,
@@ -132,8 +132,8 @@ class C2dns(db.Model):
 
     def to_release_dict(self, metadata_cache, user_cache):
         return dict(
-            date_created=self.date_created.isoformat(),
-            date_modified=self.date_modified.isoformat(),
+            date_created=self.date_created.isoformat() if self.date_created else None,
+            date_modified=self.date_modified.isoformat() if self.date_modified else None,
             state=self.state,
             domain_name=self.domain_name,
             match_type=self.match_type,
@@ -155,9 +155,22 @@ class C2dns(db.Model):
         )
 
     @classmethod
-    def get_c2dns_from_hostname(cls, hostname):
+    def get_c2dns_from_hostname(cls, hostname, metadata_field_mapping):
+        artifact = None
+        if type(hostname) is dict:
+            artifact = hostname
+            hostname = hostname["artifact"]
+
         c2dns = C2dns()
         c2dns.domain_name = hostname
+
+        if artifact and metadata_field_mapping:
+            for key, val in metadata_field_mapping.iteritems():
+                try:
+                    setattr(c2dns, val, artifact["metadata"][key])
+                except:
+                    pass
+
         return c2dns
 
     def __repr__(self):

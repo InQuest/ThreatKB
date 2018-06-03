@@ -35,7 +35,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                                           entity_id=old_ip.id, user_id=current_user.id))
                     duplicate_artifacts.append(artifact)
                 else:
-                    ip = c2ip.C2ip.get_c2ip_from_ip(artifact["artifact"])
+                    ip = c2ip.C2ip.get_c2ip_from_ip(artifact, metadata_field_mapping)
                     ip.created_user_id, ip.modified_user_id = current_user.id, current_user.id
                     ip.state = default_state if not shared_state else shared_state
                     if shared_reference:
@@ -60,7 +60,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                                           entity_id=old_dns.id, user_id=current_user.id))
                     duplicate_artifacts.append(artifact)
                 else:
-                    dns = c2dns.C2dns.get_c2dns_from_hostname(artifact["artifact"])
+                    dns = c2dns.C2dns.get_c2dns_from_hostname(artifact, metadata_field_mapping)
                     dns.created_user_id, dns.modified_user_id = current_user.id, current_user.id
                     dns.state = default_state if not shared_state else shared_state
                     if shared_reference:
