@@ -24,10 +24,12 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('cfg_states',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('state', sa.String(length=32), nullable=True),
-    sa.PrimaryKeyConstraint('id')
-    )
+                    sa.Column('id', sa.Integer(), nullable=False),
+                    sa.Column('state', sa.String(length=32), nullable=True),
+                    sa.Column('is_release_state', sa.Integer(), nullable=True),
+                    sa.Column('is_retired_state', sa.Integer(), nullable=True),
+                    sa.PrimaryKeyConstraint('id')
+                    )
     op.create_table('tags_mapping',
                     sa.Column('id', sa.Integer(), nullable=False),
                     sa.Column('source_table', sa.Enum('c2dns', 'c2ip', 'yara_rule', 'tasks'), nullable=True),
