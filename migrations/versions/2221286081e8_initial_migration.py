@@ -28,6 +28,7 @@ def upgrade():
                     sa.Column('state', sa.String(length=32), nullable=True),
                     sa.Column('is_release_state', sa.Integer(), nullable=True),
                     sa.Column('is_retired_state', sa.Integer(), nullable=True),
+                    sa.Column('is_staging_state', sa.Integer(), nullable=True),
                     sa.PrimaryKeyConstraint('id')
                     )
     op.create_table('tags_mapping',
