@@ -161,6 +161,7 @@ angular.module('ThreatKB')
                                     }
                                 }
                             });
+                            $('[role="rowgroup"]').css('overflow', 'auto');     // Force "rowgroup" container to hide horizontal scroll when not needed and allow for height to be precisely calculated
                         }, 500);
                     });
                 },
@@ -277,6 +278,7 @@ angular.module('ThreatKB')
                         for (var i = 0; i < $scope.gridOptions.data.length; i++) {
                             $scope.checked_indexes.push(false);
                         }
+                        $scope.gridApi.grid.gridHeight = parseInt($scope.getTableHeight().height);  // Re-apply table height calculation, based on new data
                         $scope.gridApi.core.refresh();
                     }, function (error) {
                     });
