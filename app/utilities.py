@@ -169,7 +169,11 @@ def extract_artifacts(do_extract_ip, do_extract_dns, do_extract_signature, text)
         import_objects = json.loads(str(text).encode("string_escape"))
         return extract_artifacts_json(do_extract_ip, do_extract_dns, do_extract_signature, import_objects)
     except ValueError, e:
-        return extract_artifacts_text(do_extract_ip, do_extract_dns, do_extract_signature, text)
+        try:
+            import_objects = json.loads(str(text))
+            return extract_artifacts_json(do_extract_ip, do_extract_dns, do_extract_signature, import_objects)
+        except ValueError, e:
+            return extract_artifacts_text(do_extract_ip, do_extract_dns, do_extract_signature, text)
 
     return output
 
