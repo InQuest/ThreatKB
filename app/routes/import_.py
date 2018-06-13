@@ -105,7 +105,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
         metadata_cache = Metadata.get_metadata_cache()
         for metadata_to_save in metadata_to_save_ip:
             artifact, metadata = metadata_to_save
-            for m in c2ip.C2ip.get_metadata_to_save(artifact, metadata):
+            for m in c2ip.C2ip.get_metadata_to_save(artifact, metadata, metadata_cache):
                 db.session.add(m)
         db.session.commit()
 
@@ -113,7 +113,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
         metadata_cache = Metadata.get_metadata_cache()
         for metadata_to_save in metadata_to_save_dns:
             artifact, metadata = metadata_to_save
-            for m in c2dns.C2dns.get_metadata_to_save(artifact, metadata):
+            for m in c2dns.C2dns.get_metadata_to_save(artifact, metadata, metadata_cache):
                 db.session.add(m)
         db.session.commit()
 

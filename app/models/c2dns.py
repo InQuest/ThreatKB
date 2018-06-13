@@ -84,13 +84,18 @@ class C2dns(db.Model):
     @staticmethod
     def get_metadata_to_save(artifact, metadata, metadata_cache={}, user_cache={}):
         metadata_to_save = []
+        metas = {}
+
+        for meta in db.session.query(Metadata).all():
+            if not meta.type_ in metas.keys():
+                metas[meta.artifact_type] = {}
+            metas[meta.artifact_type][meta.key] = meta
 
         for name, val in metadata.iteritems():
             val = val if not type(val) == dict else val["value"]
 
             if metadata_cache:
-                values = metadata_cache["DNS"][artifact.id].get("metadata_values")
-                m = values.get(name, None)
+                m = metadata_cache["DNS"].get(artifact.id, {}).get("metadata_values", {}).get(name, None)
             else:
                 m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
                     Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["DNS"]).filter(
@@ -100,8 +105,9 @@ class C2dns(db.Model):
                 m.value = val
                 metadata_to_save.append(m)
             else:
-                m = db.session.query(Metadata).filter(Metadata.key == name).filter(
-                    Metadata.artifact_type == ENTITY_MAPPING["DNS"]).first()
+                m = metas.get(ENTITY_MAPPING["DNS"], {}).get(name, None)
+                # m = db.session.query(Metadata).filter(Metadata.key == name).filter(
+                #    Metadata.artifact_type == ENTITY_MAPPING["DNS"]).first()
                 if m:
                     metadata_to_save.append(MetadataMapping(value=val, metadata_id=m.id, artifact_id=artifact.id,
                                                             created_user_id=current_user.id))
