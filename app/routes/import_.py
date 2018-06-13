@@ -1,7 +1,8 @@
 from flask import abort, jsonify, request
 from flask.ext.login import login_required, current_user
 from app import app, db, admin_only, auto, ENTITY_MAPPING
-from app.models import c2ip, c2dns, yara_rule, cfg_states, cfg_settings, comments
+from app.models import c2ip, c2dns, yara_rule, cfg_states, cfg_settings, comments, metadata
+from app.models.metadata import Metadata
 from app.utilities import extract_artifacts
 import json
 import distutils
@@ -101,6 +102,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
         db.session.commit()
 
     if metadata_to_save_ip:
+        metadata_cache = Metadata.get_metadata_cache()
         for metadata_to_save in metadata_to_save_ip:
             artifact, metadata = metadata_to_save
             for m in c2ip.C2ip.get_metadata_to_save(artifact, metadata):
@@ -108,6 +110,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
         db.session.commit()
 
     if metadata_to_save_dns:
+        metadata_cache = Metadata.get_metadata_cache()
         for metadata_to_save in metadata_to_save_dns:
             artifact, metadata = metadata_to_save
             for m in c2dns.C2dns.get_metadata_to_save(artifact, metadata):

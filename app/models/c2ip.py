@@ -140,15 +140,20 @@ class C2ip(db.Model):
             app.logger.exception(e)
 
     @staticmethod
-    def get_metadata_to_save(artifact, metadata):
+    def get_metadata_to_save(artifact, metadata, metadata_cache={}, user_cache={}):
         metadata_to_save = []
 
         for name, val in metadata.iteritems():
             val = val if not type(val) == dict else val["value"]
 
-            m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
-                Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["IP"]).filter(
-                MetadataMapping.artifact_id == artifact.id).first()
+            if metadata_cache:
+                values = metadata_cache["IP"][artifact.id].get("metadata_values")
+                m = values.get(name, None)
+            else:
+                m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
+                    Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["IP"]).filter(
+                    MetadataMapping.artifact_id == artifact.id).first()
+
             if m:
                 m.value = val
                 metadata_to_save.append(m)
