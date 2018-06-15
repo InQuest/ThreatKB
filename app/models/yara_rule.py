@@ -204,14 +204,17 @@ class Yara_rule(db.Model):
         yara_rule_text += "".join(sorted(metadata_strings))
         formatted_strings = ""
 
-        if yara_dict["strings"] and not "strings:" in yara_dict["strings"]:
+        if yara_dict["strings"] and yara_dict["strings"].strip() and not "strings:" in yara_dict["strings"]:
             formatted_strings = "\n\tstrings:\n\t\t"
             formatted_strings += "\n\t\t".join([line.strip() for line in yara_dict["strings"].split("\n")])
             # yara_rule_text += "\n\tstrings:\n\t\t%s" % (yara_dict["strings"])
         else:
-            formatted_strings = "\n\tstrings:\n\t\t"
-            formatted_strings += "\n\t\t".join([line.strip() for line in yara_dict["strings"].split("\n")[1:]])
-            # yara_rule_text += "\n\t%s" % (yara_dict["strings"])
+            if not yara_dict["strings"] or not yara_dict["strings"].strip():
+                formatted_strings += ""
+            else:
+                formatted_strings = "\n\tstrings:\n\t\t"
+                formatted_strings += "\n\t\t".join([line.strip() for line in yara_dict["strings"].split("\n")[1:]])
+                # yara_rule_text += "\n\t%s" % (yara_dict["strings"])
 
         yara_rule_text += formatted_strings
         formatted_condition = ""
