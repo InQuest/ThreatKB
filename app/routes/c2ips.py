@@ -3,7 +3,7 @@ from app.models import c2ip
 from flask import abort, jsonify, request, Response, json
 from flask.ext.login import current_user, login_required
 from dateutil import parser
-from sqlalchemy import exc
+from sqlalchemy import exc, and_
 
 from app.models.users import KBUser
 from app.models.bookmarks import Bookmarks
@@ -33,7 +33,8 @@ def get_all_c2ips():
     sort_by = request.args.get('sort_by', False)
     sort_direction = request.args.get('sort_dir', 'ASC')
 
-    entities = c2ip.C2ip.query
+    entities = c2ip.C2ip.query.join(Metadata, Metadata.artifact_type == ENTITY_MAPPING["IP"]).join(MetadataMapping,
+                                                                                                   MetadataMapping.metadata_id == Metadata.id)
 
     if not current_user.admin:
         entities = entities.filter_by(owner_user_id=current_user.id)
@@ -51,8 +52,9 @@ def get_all_c2ips():
         try:
             column = getattr(c2ip.C2ip, column)
             entities = entities.filter(column.like("%" + str(value) + "%"))
-        except:
-            continue
+        except AttributeError, e:
+            entities = entities.filter(and_(MetadataMapping.artifact_id == c2ip.C2ip.id, Metadata.key == column,
+                                            MetadataMapping.value.like("%" + str(value) + "%")))
 
     filtered_entities = entities
     total_count = entities.count()
@@ -60,7 +62,7 @@ def get_all_c2ips():
     if sort_by:
         filtered_entities = filtered_entities.order_by("%s %s" % (sort_by, sort_direction))
     else:
-        filtered_entities = filtered_entities.order_by("date_created DESC")
+        filtered_entities = filtered_entities.order_by("c2ip.date_created DESC")
 
     if page_size:
         filtered_entities = filtered_entities.limit(int(page_size))

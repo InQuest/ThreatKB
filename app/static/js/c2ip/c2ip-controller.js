@@ -86,8 +86,12 @@ angular.module('ThreatKB')
                 columnDefs:
                     [
                         {field: 'ip', displayName: 'IP', enableSorting: true},
-                        {field: 'asn', displayName: 'ASN', enableSorting: true},
-                        {field: 'country', enableSorting: true},
+                        {
+                            field: 'description',
+                            displayName: 'Description',
+                            enableSorting: false,
+                            cellTemplate: '<div class="ui-grid-cell-contents">{{ row.entity.metadata_values.Description.value }}</div> '
+                        },
                         {
                             field: 'state',
                             displayName: 'State',

@@ -86,23 +86,11 @@ angular.module('ThreatKB')
                 columnDefs:
                     [
                         {field: 'domain_name'},
-                        {field: 'match_type', enableSorting: true},
-                        {field: 'expiration_type', enableSorting: true},
                         {
-                            field: 'state',
-                            displayName: 'State',
-                            enableSorting: true,
-                            cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.state"'
-                            + ' on-select="grid.appScope.save(row.entity)">'
-                            + '<ui-select-match placeholder="Select an state ...">'
-                            + '<small><span ng-bind="$select.selected.state || row.entity.state"></span></small>'
-                            + '</ui-select-match>'
-                            + '<ui-select-choices'
-                            + ' repeat="state in (grid.appScope.cfg_states | filter: $select.search) track by state.id">'
-                            + '<small><span ng-bind="state.state"></span></small>'
-                            + '</ui-select-choices>'
-                            + '</ui-select>'
-                            + '</div>'
+                            field: 'description',
+                            displayName: 'Description',
+                            enableSorting: false,
+                            cellTemplate: '<div class="ui-grid-cell-contents">{{ row.entity.metadata_values.Description.value }}</div> '
                         },
                         {
                             field: 'owner_user.email',
