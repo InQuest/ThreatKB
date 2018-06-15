@@ -13,6 +13,8 @@ from app.models import cfg_states
 
 from flask import abort
 
+import time
+
 class C2dns(db.Model):
     __tablename__ = "c2dns"
 
@@ -45,6 +47,9 @@ class C2dns(db.Model):
     tags = []
     addedTags = []
     removedTags = []
+
+    WHITELIST_CACHE = None
+    WHITELIST_CACHE_LAST_UPDATE = None
 
     @property
     def metadata_fields(self):
@@ -194,7 +199,13 @@ def run_against_whitelist(mapper, connect, target):
 
     abort_import = False
 
-    whitelists = Whitelist.query.all()
+    if not C2dns.WHITELIST_CACHE_LAST_UPDATE or not C2dns.WHITELIST_CACHE or (
+        time.time() - C2dns.WHITELIST_CACHE_LAST_UPDATE) > 60:
+        C2dns.WHITELIST_CACHE = Whitelist.query.all()
+        C2dns.WHITELIST_CACHE_LAST_UPDATE = time.time()
+
+    whitelists = C2dns.WHITELIST_CACHE
+
     for whitelist in whitelists:
         wa = str(whitelist.whitelist_artifact)
 
