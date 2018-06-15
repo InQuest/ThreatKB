@@ -102,7 +102,7 @@ class Yara_rule(db.Model):
             metadata=Metadata.get_metadata_dict("SIGNATURE"),
             metadata_values=metadata_values_dict,
             condition="condition:\n\t%s" % self.condition,
-            strings="strings:\n\t%s" % self.strings,
+            strings="strings:\n\t%s" % self.strings if self.strings and self.strings.strip() else "",
             imports=self.imports
         )
 
@@ -152,7 +152,7 @@ class Yara_rule(db.Model):
             metadata_values=metadata_cache["SIGNATURE"][self.id]["metadata_values"] if metadata_cache["SIGNATURE"].get(
                 self.id, None) and metadata_cache["SIGNATURE"][self.id].get("metadata_values", None) else {},
             condition="condition:\n\t%s" % self.condition,
-            strings="strings:\n\t%s" % self.strings,
+            strings="strings:\n\t%s" % self.strings if self.strings and self.strings.strip() else "",
             imports=self.imports
         )
 
@@ -204,7 +204,7 @@ class Yara_rule(db.Model):
         yara_rule_text += "".join(sorted(metadata_strings))
         formatted_strings = ""
 
-        if not "strings:" in yara_dict["strings"]:
+        if yara_dict["strings"] and not "strings:" in yara_dict["strings"]:
             formatted_strings = "\n\tstrings:\n\t\t"
             formatted_strings += "\n\t\t".join([line.strip() for line in yara_dict["strings"].split("\n")])
             # yara_rule_text += "\n\tstrings:\n\t\t%s" % (yara_dict["strings"])
@@ -231,6 +231,9 @@ class Yara_rule(db.Model):
 
     @staticmethod
     def make_yara_sane(text, type_):
+        if not text or not text.strip() or not text.strip("\t"):
+            return ""
+
         type_ = "%s:" if not type_.endswith(":") else type_
         return "\n\t".join([string.strip().strip("\t") for string in text.split("\n") if type_ not in string]).strip()
 
@@ -294,7 +297,7 @@ class Yara_rule(db.Model):
         #    ["%s = %s %s" % (r["name"], r["value"], " ".join(r["modifiers"]) if "modifiers" in r else "") for r in
         #     yara_dict["strings"]])
         yara_rule.condition = "\n" + condition
-        yara_rule.strings = "\n" + strings
+        yara_rule.strings = "\n" + strings if strings else ""
         yara_rule.imports = imports
 
         if not yara_rule.category:
