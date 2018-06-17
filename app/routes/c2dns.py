@@ -35,7 +35,8 @@ def get_all_c2dns():
     sort_direction = request.args.get('sort_dir', 'ASC')
 
     entities = c2dns.C2dns.query.join(Metadata, Metadata.artifact_type == ENTITY_MAPPING["DNS"]).join(MetadataMapping,
-                                                                                                      MetadataMapping.metadata_id == Metadata.id)
+                                                                                                      MetadataMapping.metadata_id == Metadata.id,
+                                                                                                      MetadataMapping.artifact_id == c2dns.C2dns.id)
 
     if not current_user.admin:
         entities = entities.filter_by(owner_user_id=current_user.id)
