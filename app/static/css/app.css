@@ -26,6 +26,15 @@ table td:last-child {
     text-align: right;
 }
 
+/* Make table TD cells left-align content */
+.ui-grid-header-cell .ui-grid-cell-contents {
+    text-align: center;
+}
+.ui-grid-row .ui-grid-cell-contents {
+    text-align: left;
+}
+/* /done */
+
 /* enable absolute positioning */
 .inner-addon {
     position: relative;

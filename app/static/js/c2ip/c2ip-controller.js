@@ -85,7 +85,12 @@ angular.module('ThreatKB')
                 rowHeight: 35,
                 columnDefs:
                     [
-                        {field: 'ip', displayName: 'IP', enableSorting: true},
+                        {
+                            field: 'ip',
+                            displayName: 'IP',
+                            width: '150',
+                            enableSorting: true
+                        },
                         {
                             field: 'description',
                             displayName: 'Description',
@@ -95,6 +100,7 @@ angular.module('ThreatKB')
                         {
                             field: 'state',
                             displayName: 'State',
+                            width: '180',
                             enableSorting: true,
                             cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.state"'
                             + ' on-select="grid.appScope.save(row.entity)">'
@@ -111,7 +117,7 @@ angular.module('ThreatKB')
                         {
                             field: 'owner_user.email',
                             displayName: 'Owner',
-                            width: '20%',
+                            width: '180',
                             enableSorting: false,
                             cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.owner_user"'
                             + ' on-select="grid.appScope.save(row.entity)">'
@@ -127,6 +133,7 @@ angular.module('ThreatKB')
                         },
                         {
                             name: 'Actions',
+                            width: '120',
                             enableFiltering: false,
                             enableColumnMenu: false,
                             enableSorting: false,
