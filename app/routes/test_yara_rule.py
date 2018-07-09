@@ -136,17 +136,18 @@ def test_yara_rule(yara_rule_entity, files_to_test, user, is_async=False):
 
 
 def get_yara_rule(yara_rule_entity):
-    rule_string = """
-    rule %s
-    {
-        strings:
-            %s
-        condition:
-            %s
-    }
-    """ % (yara_rule_entity.name,
-           yara_rule_entity.strings,
-           yara_rule_entity.condition)
+    rule_string = yara_rule_entity.to_dict(include_yara_rule_string=True)["yara_rule_string"]
+    # rule_string = """
+    # rule %s
+    # {
+    #     strings:
+    #         %s
+    #     condition:
+    #         %s
+    # }
+    # """ % (yara_rule_entity.name,
+    #        yara_rule_entity.strings,
+    #        yara_rule_entity.condition)
 
     rule_buffer = StringIO.StringIO()
 
