@@ -282,6 +282,7 @@ def update_yara_rule(id):
         strings=yara_rule.Yara_rule.make_yara_sane(request.json["strings"], "strings:"),
         eventid=temp_sig_id,
         id=id,
+        created_user_id=entity.created_user_id,
         modified_user_id=current_user.id,
         owner_user_id=request.json['owner_user']['id'] if request.json.get("owner_user", None) and request
             .json["owner_user"].get("id", None) else None,

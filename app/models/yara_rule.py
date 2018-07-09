@@ -77,7 +77,7 @@ class Yara_rule(db.Model):
             .filter(MetadataMapping.artifact_id == self.id) \
             .all()
 
-    def to_dict(self, include_yara_rule_string=None, short=False):
+    def to_dict(self, include_yara_rule_string=None, short=False, include_relationships=True):
         metadata_values_dict = {}
         metadata_keys = Metadata.get_metadata_keys("SIGNATURE")
         metadata_values_dict = {m["metadata"]["key"]: m for m in [entity.to_dict() for entity in self.metadata_values]}
@@ -95,9 +95,6 @@ class Yara_rule(db.Model):
             tags=tags_mapping.get_tags_for_source(self.__tablename__, self.id),
             addedTags=[],
             removedTags=[],
-            created_user=self.created_user.to_dict(),
-            modified_user=self.modified_user.to_dict(),
-            owner_user=self.owner_user.to_dict() if self.owner_user else None,
             revision=self.revision,
             metadata=Metadata.get_metadata_dict("SIGNATURE"),
             metadata_values=metadata_values_dict,
@@ -105,6 +102,11 @@ class Yara_rule(db.Model):
             strings="strings:\n\t%s" % self.strings if self.strings and self.strings.strip() else "",
             imports=self.imports
         )
+
+        if include_relationships:
+            yara_dict["created_user"] = self.created_user.to_dict()
+            yara_dict["modified_user"] = self.modified_user.to_dict()
+            yara_dict["owner_user"] = self.owner_user.to_dict() if self.owner_user else None
 
         if not short:
             revisions = Yara_rule_history.query.filter_by(yara_rule_id=self.id).all()
@@ -230,7 +232,7 @@ class Yara_rule(db.Model):
 
         yara_rule_text += formatted_condition + "\n}\n"
 
-        return yara_rule_text
+        return yara_rule_text.encode("utf-8")
 
     @staticmethod
     def make_yara_sane(text, type_):

@@ -136,7 +136,8 @@ def test_yara_rule(yara_rule_entity, files_to_test, user, is_async=False):
 
 
 def get_yara_rule(yara_rule_entity):
-    rule_string = yara_rule_entity.to_dict(include_yara_rule_string=True)["yara_rule_string"]
+    rule_string = yara_rule_entity.to_dict(include_yara_rule_string=True, include_relationships=False)[
+        "yara_rule_string"]
     # rule_string = """
     # rule %s
     # {
