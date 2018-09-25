@@ -150,49 +150,59 @@ class Release(db.Model):
         last_release_eventids = [long(release_id) for release_id in
                                  last_release["Signatures"]["Signatures"].keys()]
 
-        for signature in release_data["Signatures"]["Signatures"].values():
-            eventid = signature["id"]
-            if not eventid in last_release_eventids:
-                release_data["Signatures"]["Added"].append(signature)
-            else:
-                if parser.parse(signature["last_revision_date"]) > last_release_date:
-                    release_data["Signatures"]["Modified"].append(signature)
-                del last_release["Signatures"]["Signatures"][str(eventid)]
+        try:
+            for signature in release_data["Signatures"]["Signatures"].values():
+                eventid = signature["id"]
+                if not eventid in last_release_eventids:
+                    release_data["Signatures"]["Added"].append(signature)
+                else:
+                    if not signature["last_revision_date"] or parser.parse(
+                        signature["last_revision_date"]) > last_release_date:
+                        release_data["Signatures"]["Modified"].append(signature)
+                    del last_release["Signatures"]["Signatures"][str(eventid)]
 
-        for signature in last_release["Signatures"]["Signatures"].values():
-            release_data["Signatures"]["Removed"].append(signature)
+            for signature in last_release["Signatures"]["Signatures"].values():
+                release_data["Signatures"]["Removed"].append(signature)
+        except Exception, e:
+            raise Exception(e.message + "\nSignature: id=%s, description=%s" % (signature["id"], signature["name"]))
 
         ###### IPs ########
         release_ips = release_data["IP"]["IP"].keys()
         last_release_ips = [long(release_id) for release_id in last_release["IP"]["IP"].keys()]
 
-        for ip in release_data["IP"]["IP"].values():
-            ip_id = ip["id"]
-            if not ip_id in last_release_ips:
-                release_data["IP"]["Added"].append(ip)
-            else:
-                if parser.parse(ip["date_modified"]) > last_release_date:
-                    release_data["IP"]["Modified"].append(ip)
-                del last_release["IP"]["IP"][str(ip_id)]
+        try:
+            for ip in release_data["IP"]["IP"].values():
+                ip_id = ip["id"]
+                if not ip_id in last_release_ips:
+                    release_data["IP"]["Added"].append(ip)
+                else:
+                    if parser.parse(ip["date_modified"]) > last_release_date:
+                        release_data["IP"]["Modified"].append(ip)
+                    del last_release["IP"]["IP"][str(ip_id)]
 
-        for ip in last_release["IP"]["IP"].values():
-            release_data["IP"]["Removed"].append(ip)
+            for ip in last_release["IP"]["IP"].values():
+                release_data["IP"]["Removed"].append(ip)
+        except Exception, e:
+            raise Exception(e.message + "\n IP: id=%s,ip=%s" % (ip["id"], ip["ip"]))
 
         ###### DNS #######
         release_dns = release_data["DNS"]["DNS"].keys()
         last_release_dns = [long(release_id) for release_id in last_release["DNS"]["DNS"].keys()]
 
-        for dns in release_data["DNS"]["DNS"].values():
-            dns_id = dns["id"]
-            if not dns_id in last_release_dns:
-                release_data["DNS"]["Added"].append(dns)
-            else:
-                if parser.parse(dns["date_modified"]) > last_release_date:
-                    release_data["DNS"]["Modified"].append(dns)
-                del last_release["DNS"]["DNS"][str(dns_id)]
+        try:
+            for dns in release_data["DNS"]["DNS"].values():
+                dns_id = dns["id"]
+                if not dns_id in last_release_dns:
+                    release_data["DNS"]["Added"].append(dns)
+                else:
+                    if parser.parse(dns["date_modified"]) > last_release_date:
+                        release_data["DNS"]["Modified"].append(dns)
+                    del last_release["DNS"]["DNS"][str(dns_id)]
 
-        for ip in last_release["DNS"]["DNS"].values():
-            release_data["DNS"]["Removed"].append(ip)
+            for ip in last_release["DNS"]["DNS"].values():
+                release_data["DNS"]["Removed"].append(ip)
+        except Exception, e:
+            raise Exception(e.message + "\n DNS: id=%s,domain_name=%s" % (dns["id"], dns["domain_name"]))
 
         return json.dumps(release_data)
 
@@ -288,10 +298,16 @@ class Release(db.Model):
                 if rule.get("imports", None):
                     imports.extend(rule["imports"].split("\n"))
             imports = "\n".join(set(imports))
-            rules = "\n\n".join(
-                [yara_rule.Yara_rule.to_yara_rule_string(signature, include_imports=False) for signature in rules])
-            rules = "%s\n\n%s" % (imports, rules)
-            z.writestr("%s/%s.yar" % (signature_directory, category), rules.encode("utf-8"))
+            rules_string = ""
+            for signature in rules:
+                try:
+                    yara_string = yara_rule.Yara_rule.to_yara_rule_string(signature, include_imports=False)
+                    rules_string += yara_string.encode("utf-8", errors="ignore") + "\n\n"
+                except Exception, e:
+                    raise Exception(e.message + "\nYaraRule: id=%s,name=%s" % (signature["id"], signature["name"]))
+
+            rules = "%s\n\n%s" % (imports, rules_string)
+            z.writestr("%s/%s.yar" % (signature_directory, category), rules)
 
         if ips:
             z.writestr(ip_text_filename, "\n".join([ip.encode("utf-8") for ip in ips]))
