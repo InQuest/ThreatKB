@@ -8,6 +8,7 @@ from sqlalchemy.event import listens_for
 import StringIO
 import zipfile
 import zlib
+import re
 
 class Release(db.Model):
     __tablename__ = "releases"
@@ -302,7 +303,7 @@ class Release(db.Model):
             for signature in rules:
                 try:
                     yara_string = yara_rule.Yara_rule.to_yara_rule_string(signature, include_imports=False)
-                    rules_string += yara_string.encode("utf-8", errors="ignore") + "\n\n"
+                    rules_string += re.sub("[^\x00-\x7f]", "", yara_string) + "\n\n"
                 except Exception, e:
                     raise Exception(e.message + "\nYaraRule: id=%s,name=%s" % (signature["id"], signature["name"]))
 
