@@ -334,7 +334,7 @@ angular.module('ThreatKB')
                         $scope.save_artifact();
                     }
                 }).add({
-                combo: 'ctrl+x',
+                combo: 'ctrl+q',
                 description: 'Escape',
                 allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
                 callback: function () {
