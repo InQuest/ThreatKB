@@ -317,12 +317,16 @@ def generate_eventid(mapper, connect, target):
         if release_state and target.state == release_state.state:
             abort(403)
 
+    target.name = re.sub("[^A-Za-z0-9_]", "", target.name)
+
     if not target.eventid:
         target.eventid = CfgCategoryRangeMapping.get_next_category_eventid(target.category)
 
 
 @listens_for(Yara_rule, "before_update")
 def yara_rule_before_update(mapper, connect, target):
+    target.name = re.sub("[^A-Za-z0-9_]", "", target.name)
+
     if not current_user.admin:
         release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
         if release_state and target.state == release_state.state:

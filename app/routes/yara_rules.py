@@ -12,6 +12,7 @@ from app.routes.bookmarks import is_bookmarked, delete_bookmarks
 from app.routes.cfg_category_range_mapping import update_cfg_category_range_mapping_current
 from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
 
+import datetime
 
 @app.route('/ThreatKB/yara_rules/merge_signatures', methods=['POST'])
 @auto.doc()
@@ -285,6 +286,7 @@ def update_yara_rule(id):
         created_user_id=entity.created_user_id,
         creation_date=entity.creation_date,
         modified_user_id=current_user.id,
+        last_revision_date=datetime.datetime.now(),
         owner_user_id=request.json['owner_user']['id'] if request.json.get("owner_user", None) and request
             .json["owner_user"].get("id", None) else None,
         revision=entity.revision if do_not_bump_revision else entity.revision + 1,
