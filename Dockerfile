@@ -4,7 +4,7 @@ ADD . /opt/threatkb
 
 
 RUN apt-get update
-RUN apt-get install -y git libsqlite3-dev python2.7 python-pip npm libffi-dev libssl-dev mysql-client libmysqlclient-dev python-dev libpython-dev git yara
+RUN apt-get install -y git libsqlite3-dev python2.7 python-pip npm libffi-dev libssl-dev mysql-client libmysqlclient-dev python-dev libpython-dev git yara=3.4.0+dfsg-2build1
 RUN pip install virtualenv
 RUN npm install -g bower
 RUN ln -s /usr/bin/nodejs /usr/bin/node
