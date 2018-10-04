@@ -99,19 +99,21 @@ angular.module('ThreatKB').controller('ImportController',
                 var field_mapping = JSON.parse($scope.default_mapping.value);
                 Import.commit_artifacts(artifacts_to_commit, $scope.shared_reference, $scope.shared_state.state.state, $scope.shared_owner, $scope.extract_ip, $scope.extract_dns, $scope.extract_signature, field_mapping).then(function (data) {
                     blockUI.stop();
+                    var ttl = 3000;
                     var message = "";
                     if (data.committed) {
                         message = "Successfully committed " + data.committed.length + " artifacts.<BR><BR>";
                     }
                     if (data.duplicates) {
+                        ttl = -1;
                         message += "There were " + data.duplicates.length + " duplicates that were not committed.<BR><BR>";
                         for (var duplicate in data.duplicates) {
-                            message += data.duplicates[key].artifact + "<BR>";
+                            message += data.duplicates[duplicate].artifact + "<BR>";
                         }
                     }
 
                     growl.info(message, {
-                        ttl: 3000,
+                        ttl: ttl,
                         disableCountDown: true
                     });
                     $scope.clear();
