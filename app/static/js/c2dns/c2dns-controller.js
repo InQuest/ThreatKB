@@ -93,6 +93,22 @@ angular.module('ThreatKB')
                             cellTemplate: '<div class="ui-grid-cell-contents">{{ row.entity.metadata_values.Description.value }}</div> '
                         },
                         {
+                            field: 'state',
+                            displayName: 'State',
+                            enableSorting: true,
+                            cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.state"'
+                            + ' on-select="grid.appScope.save(row.entity)">'
+                            + '<ui-select-match placeholder="Select an state ...">'
+                            + '<small><span ng-bind="$select.selected.state || row.entity.state"></span></small>'
+                            + '</ui-select-match>'
+                            + '<ui-select-choices'
+                            + ' repeat="state in (grid.appScope.cfg_states | filter: $select.search) track by state.id">'
+                            + '<small><span ng-bind="state.state"></span></small>'
+                            + '</ui-select-choices>'
+                            + '</ui-select>'
+                            + '</div>'
+                        },
+                        {
                             field: 'owner_user.email',
                             displayName: 'Owner',
                             width: '20%',
