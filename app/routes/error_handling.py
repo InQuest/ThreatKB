@@ -20,7 +20,7 @@ def handle_exception(exception):
     stacktrace = "%s" % (
         re.sub(r'\"[^\"]+\/([^\"]+)', r"\1", traceback.format_exc().replace("\n", "<BR>").replace(" ", "&nbsp;")))
     err = Error(
-        stacktrace=stacktrace,
+        stacktrace=traceback.format_exc(),
         user_id=current_user.id,
         remote_addr=request.remote_addr,
         args=str(request.args.to_dict(flat=False)),

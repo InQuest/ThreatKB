@@ -1,0 +1,118 @@
+<div>
+
+    <script type="text/ng-template" id="errors-show.html">
+        <form name="form" role="form" novalidate
+              class="ng-scope ng-invalid ng-invalid-required ng-dirty"
+              ng-submit="ok()">
+
+            <div class="modal-header">
+                <button type="button" class="close"
+                        ng-click="cancel()">&times;
+                </button>
+                <h4 class="modal-title" id="myErrorLabel" ng-if="error.id">View Error</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>ID</label>
+                    <input type="text" class="form-control" name="id"
+                           ng-model="error.id" readonly
+                           value="{{ error.id }}"/>
+                </div>
+
+                <div class="form-group">
+                    <label>Timestamp</label>
+                    <input type="text" class="form-control" name="date_created"
+                           ng-model="error.date_created" readonly
+                           value="{{ error.date_created }}"/>
+                </div>
+
+                <div class="form-group">
+                    <label>Method</label>
+                    <input type="text" class="form-control" name="id"
+                           ng-model="error.method" readonly
+                           value="{{ error.method }}"/>
+                </div>
+
+                <div class="form-group">
+                    <label>Route</label>
+                    <input type="text" class="form-control" name="route"
+                           ng-model="error.route" readonly
+                           value="{{ error.route }}"/>
+                </div>
+
+
+                <div class="form-group">
+                    <label>Args</label>
+                    <textarea class="form-control" rows="6"
+                              ng-model="error.args" name="args" readonly></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Stacktrace</label>
+                    <textarea class="form-control" rows="16"
+                              ng-model="error.stacktrace" name="args" readonly></textarea>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" ng-click="cancel()">Cancel
+                </button>
+            </div>
+        </form>
+    </script>
+
+    <br>
+    <div class="container-fluid">
+
+        <div class="inner-addon left-addon col-md-4" style="padding-left:0px;">
+            <i class="glyphicon glyphicon-search"></i>
+            <input type="text" class="form-control" placeholder="Search" ng-model="search"/>
+        </div>
+    </div>
+
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Timestamp</th>
+
+                <th>User</th>
+
+                <th>Remote Address</th>
+
+                <th>Method</th>
+
+                <th>Route</th>
+
+                <th>
+                    <center>Actions</center>
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="error in errors | toArray:false | filter:search track by $index">
+                <td ng-if="error.id">{{ error.date_created }}</td>
+
+                <td ng-if="error.user.email">{{ error.user.email }}</td>
+
+                <td ng-if="error.id">{{ error.remote_addr }}</td>
+
+                <td ng-if="error.id">{{ error.method }}</td>
+
+                <td ng-if="error.id">{{ error.route }}</td>
+
+                <td ng-if="error.id" style="float:right">
+                    <center>
+                        <button type="submit"
+                                ng-click="show(error.id)"
+                                class="btn btn-sm">
+                            <small><span class="glyphicon glyphicon-eye-open"></span></small>
+                        </button>
+                    </center>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

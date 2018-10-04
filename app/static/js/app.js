@@ -113,6 +113,16 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                     }]
                 }
             })
+            .when('/errors', {
+                templateUrl: 'views/errors/errors.html',
+                controller: 'ErrorsController',
+                access: {restricted: true, admin: true},
+                resolve: {
+                    resolvedErrors: ['Errors', function (Errors) {
+                        return Errors.query();
+                    }]
+                }
+            })
             .when('/cfg_settings', {
                 templateUrl: 'views/cfg_settings/cfg_settings.html',
                 controller: 'Cfg_settingsController',
