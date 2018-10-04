@@ -1,7 +1,7 @@
-from app import app, auto
+from app import app, auto, db, current_user, request
 import traceback
 import re
-
+from app.models.errors import Error
 
 @app.errorhandler(409)
 def handle_409(err):
@@ -17,8 +17,20 @@ def handle_500(error):
 def handle_exception(exception):
     app.logger.exception(exception)
 
-    return "%s" % (
-    re.sub(r'\"[^\"]+\/([^\"]+)', r"\1", traceback.format_exc().replace("\n", "<BR>").replace(" ", "&nbsp;"))), 500
+    stacktrace = "%s" % (
+        re.sub(r'\"[^\"]+\/([^\"]+)', r"\1", traceback.format_exc().replace("\n", "<BR>").replace(" ", "&nbsp;")))
+    err = Error(
+        stacktrace=stacktrace,
+        user_id=current_user.id,
+        remote_addr=request.remote_addr,
+        args=str(request.args.to_dict(flat=False)),
+        method=request.method,
+        route=request.url_rule
+    )
+    db.session.add(err)
+    db.session.commit()
+
+    return stacktrace, 500
 
 
 @app.route('/ThreatKB/error', methods=["GET"])

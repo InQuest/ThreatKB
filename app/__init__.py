@@ -1,6 +1,6 @@
 import functools
 
-from flask import Flask, abort, jsonify
+from flask import Flask, abort, jsonify, request
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.bcrypt import Bcrypt
 from flask.ext.login import LoginManager

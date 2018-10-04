@@ -30,5 +30,6 @@ if __name__ == '__main__':
     from app.models import access_keys
     from app.models import whitelist
     from app.models import bookmarks
+    from app.models import errors
 
     manager.run()
