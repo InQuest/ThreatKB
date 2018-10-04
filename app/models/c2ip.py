@@ -123,7 +123,9 @@ class C2ip(db.Model):
 
     def save_metadata(self, metadata):
         for name, val in metadata.iteritems():
-            val = val if not type(val) == dict else val["value"]
+            val = val if not type(val) == dict else val.get("value", None)
+            if not val:
+                continue
 
             m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
                 Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["DNS"]).filter(
