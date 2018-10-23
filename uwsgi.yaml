@@ -1,0 +1,14 @@
+uwsgi:
+    uid:                  uwsgi
+    master:               1
+    workers:              10
+    auto-procname:        1
+    close-on-exec:        1
+    reaper:               1
+    max-requests:         1000
+    module:               app
+    callable:             app
+    virtualenv:           /opt/threatkb/env
+    python-path:          /opt/threatkb
+    ignore-sigpipe:       true
+    ignore-write-errors:  true
