@@ -19,7 +19,7 @@ services:
        - db
      image: threatkb:latest
      ports:
-       - "5000:5000"
+       - 5000:5000
      restart: always
      environment:
        THREATKB_USER: admin@inquest.net
