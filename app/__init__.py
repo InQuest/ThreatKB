@@ -23,6 +23,18 @@ celery = None
 
 app.config["SQLALCHEMY_ECHO"] = True
 
+ENTITY_MAPPING = {"SIGNATURE": 1, "DNS": 2, "IP": 3, "TASK": 4}
+
+def admin_only():
+    def wrapper(f):
+        @functools.wraps(f)
+        def wrapped(*args, **kwargs):
+            if not current_user.admin:
+                return abort(403)
+            return f(*args, **kwargs)
+        return wrapped
+    return wrapper
+
 from app.routes.version import *
 from app.routes.index import *
 from app.routes.authentication import *
@@ -71,14 +83,13 @@ from app.models import bookmarks
 from app.models import metadata
 from app.models import errors
 
-ENTITY_MAPPING = {"SIGNATURE": 1, "DNS": 2, "IP": 3, "TASK": 4}
 
-app.config["BROKER_URL"] = cfg_settings.Cfg_settings.get_private_setting("REDIS_BROKER_URL")
-app.config["TASK_SERIALIZER"] = cfg_settings.Cfg_settings.get_private_setting("REDIS_TASK_SERIALIZER")
-app.config["RESULT_SERIALIZER"] = cfg_settings.Cfg_settings.get_private_setting("REDIS_RESULT_SERIALIZER")
-app.config["ACCEPT_CONTENT"] = cfg_settings.Cfg_settings.get_private_setting("REDIS_ACCEPT_CONTENT")
-app.config["FILE_STORE_PATH"] = cfg_settings.Cfg_settings.get_private_setting("FILE_STORE_PATH")
-app.config["MAX_MILLIS_PER_FILE_THRESHOLD"] = cfg_settings.Cfg_settings.get_private_setting(
+app.config["BROKER_URL"] = Cfg_settings.get_private_setting("REDIS_BROKER_URL")
+app.config["TASK_SERIALIZER"] = Cfg_settings.get_private_setting("REDIS_TASK_SERIALIZER")
+app.config["RESULT_SERIALIZER"] = Cfg_settings.get_private_setting("REDIS_RESULT_SERIALIZER")
+app.config["ACCEPT_CONTENT"] = Cfg_settings.get_private_setting("REDIS_ACCEPT_CONTENT")
+app.config["FILE_STORE_PATH"] = Cfg_settings.get_private_setting("FILE_STORE_PATH")
+app.config["MAX_MILLIS_PER_FILE_THRESHOLD"] = Cfg_settings.get_private_setting(
     "MAX_MILLIS_PER_FILE_THRESHOLD")
 
 if app.config["MAX_MILLIS_PER_FILE_THRESHOLD"]:
@@ -105,7 +116,7 @@ def load_user_from_request(request):
     token = request.args.get('token')
     s_key = str(request.args.get('secret_key'))
     if token and s_key:
-        valid_token = access_keys.is_token_active(token)
+        valid_token = is_token_active(token)
         if valid_token:
             user = users.KBUser.verify_auth_token(str(token), s_key)
             if user:
@@ -117,15 +128,6 @@ def load_user_from_request(request):
 
     return None
 
-def admin_only():
-    def wrapper(f):
-        @functools.wraps(f)
-        def wrapped(*args, **kwargs):
-            if not current_user.admin:
-                return abort(403)
-            return f(*args, **kwargs)
-        return wrapped
-    return wrapper
 
 def generate_app():
 
@@ -226,10 +228,7 @@ def run(debug=False, port=0, host=''):
     import os
     port = port or int(os.getenv('LISTEN_PORT', 5000))
     host = host or os.getenv('LISTEN_ON', '127.0.0.1')
+    debug = debug or os.getenv("DEBUG", False)
 
-    app.run(debug=debug, port=port, host=host)
-
-
-if __name__ == '__main__':
     generate_app()
-    run(debug=False)
+    app.run(debug=debug, port=port, host=host)
