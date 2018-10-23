@@ -33,8 +33,8 @@ def get_all_c2ips():
     sort_by = request.args.get('sort_by', False)
     sort_direction = request.args.get('sort_dir', 'ASC')
 
-    entities = c2ip.C2ip.query.join(Metadata, Metadata.artifact_type == ENTITY_MAPPING["IP"]).join(MetadataMapping,
-                                                                                                   and_(
+    entities = c2ip.C2ip.query.outerjoin(Metadata, Metadata.artifact_type == ENTITY_MAPPING["IP"]).join(MetadataMapping,
+                                                                                                        and_(
                                                                                                        MetadataMapping.metadata_id == Metadata.id,
                                                                                                        MetadataMapping.artifact_id == c2ip.C2ip.id))
 
