@@ -128,10 +128,10 @@ def create_release():
         release.release_data_dict["Signatures"]["Signatures"]) if release.release_data_dict.get("Signatures", None) and \
                                                                   release.release_data_dict["Signatures"].get(
                                                                       "Signatures", None) else 0
-    release.num_dns = len(release.release_data_dict["IP"]["IP"]) if release.release_data_dict.get("IP", None) and \
+    release.num_ips = len(release.release_data_dict["IP"]["IP"]) if release.release_data_dict.get("IP", None) and \
                                                                     release.release_data_dict["IP"].get("IP",
                                                                                                         None) else 0
-    release.num_ips = len(release.release_data_dict["DNS"]["DNS"]) if release.release_data_dict.get("DNS", None) and \
+    release.num_dns = len(release.release_data_dict["DNS"]["DNS"]) if release.release_data_dict.get("DNS", None) and \
                                                                       release.release_data_dict["DNS"].get("DNS",
                                                                                                            None) else 0
     release.created_user = current_user
