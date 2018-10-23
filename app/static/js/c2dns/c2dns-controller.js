@@ -85,7 +85,10 @@ angular.module('ThreatKB')
                 rowHeight: 35,
                 columnDefs:
                     [
-                        {field: 'domain_name'},
+                        {
+                            field: 'domain_name',
+                            width: '320',
+                        },
                         {
                             field: 'description',
                             displayName: 'Description',
@@ -111,6 +114,7 @@ angular.module('ThreatKB')
                         {
                             field: 'owner_user.email',
                             displayName: 'Owner',
+                            width: '180',
                             width: '20%',
                             enableSorting: false,
                             cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.owner_user"'
@@ -127,6 +131,7 @@ angular.module('ThreatKB')
                         },
                         {
                             name: 'Actions',
+                            width: '120',
                             enableFiltering: false,
                             enableColumnMenu: false,
                             enableSorting: false,

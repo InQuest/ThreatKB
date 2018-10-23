@@ -2,7 +2,26 @@ body {
     margin-top: 60px;
     padding: 10px;
     background-color: #ECF0F1;
+    text-align: center;
 }
+
+/* Expand page content to 100% width up to 1900px width (issue #223) */
+body > .container {
+    display: inline-block;
+    margin-left: 0;
+    margin-right: 0;
+}
+@media (max-width: 1900px) {
+    body > .container {
+        width: 100%;
+    }
+}
+@media (min-width: 1901px) {
+    body > .container {
+        width: 1870px;
+    }
+}
+/* /done #223 */
 
 .center {
     margin: auto;
@@ -25,6 +44,15 @@ table td:last-child {
     align: right;
     text-align: right;
 }
+
+/* Make table TD cells left-align content */
+.ui-grid-header-cell .ui-grid-cell-contents {
+    text-align: center;
+}
+.ui-grid-row .ui-grid-cell-contents {
+    text-align: left;
+}
+/* /done */
 
 /* enable absolute positioning */
 .inner-addon {
