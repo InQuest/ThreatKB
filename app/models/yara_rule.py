@@ -11,6 +11,7 @@ import datetime
 import json
 import re
 import distutils
+import zlib
 
 from flask import abort
 
@@ -342,12 +343,27 @@ class Yara_rule_history(db.Model):
     revision = db.Column(db.Integer(unsigned=True))
     state = db.Column(db.String(32), index=True)
 
-    rule_json = db.Column(db.Text, nullable=False)
+    _rule_json = db.Column(db.LargeBinary, nullable=False)
 
     yara_rule_id = db.Column(db.Integer, db.ForeignKey("yara_rules.id"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
     user = db.relationship('KBUser', foreign_keys=user_id,
                            primaryjoin="KBUser.id==Yara_rule_history.user_id")
+
+    @property
+    def rule_json(self):
+        try:
+            return zlib.decompress(self._rule_json)
+        except:
+            return self._rule_json
+
+    @rule_json.setter
+    def rule_json(self, value):
+        self._rule_json = zlib.compress(value, 8)
+
+    @property
+    def release_data_dict(self):
+        return json.loads(self.release_data) if self.release_data else {}
 
     def to_dict(self):
         return dict(
