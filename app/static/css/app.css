@@ -149,3 +149,14 @@ span.glyphicon {
 }
 
 
+/* Bootstrap modal sizing overrides */
+@media (min-width: 768px) {
+    .modal-dialog {
+        width: auto;
+        margin: 10px;
+    }
+}
+@media (min-width: 992px) {
+    .modal-lg { width: 900px; }
+    .modal-dialog { margin: 30px auto; }
+}
