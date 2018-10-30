@@ -12,3 +12,5 @@ uwsgi:
     python-path:          /opt/threatkb
     ignore-sigpipe:       true
     ignore-write-errors:  true
+    http-timeout:       120
+    harakiri:             600
