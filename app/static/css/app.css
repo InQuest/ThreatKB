@@ -150,6 +150,7 @@ span.glyphicon {
 
 
 /* Bootstrap modal sizing overrides */
+.modal-dialog { text-align: left; }
 @media (min-width: 768px) {
     .modal-dialog {
         width: auto;
