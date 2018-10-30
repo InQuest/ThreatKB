@@ -14,13 +14,12 @@ RUN apt-get update && apt-get install -y docker-ce
 # Setup UWSGI install
 RUN /usr/sbin/useradd --system --no-log-init --no-create-home --shell /sbin/nologin --home-dir /var/run/uwsgi uwsgi
 
-
-# Install Python Dependencies
-RUN pip install virtualenv && virtualenv env && env/bin/pip install -r requirements.txt
-
 ADD . /opt/threatkb
 WORKDIR /opt/threatkb
 ADD uwsgi.yaml /etc/uwsgi.yaml
+
+# Install Python Dependencies
+RUN pip install virtualenv && virtualenv env && env/bin/pip install -r requirements.txt
 
 # Install Node Dependencies
 RUN npm install -g bower && ln -s /usr/bin/nodejs /usr/bin/node && bower install --allow-root
