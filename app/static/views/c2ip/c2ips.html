@@ -5,6 +5,9 @@
               class="ng-scope ng-invalid ng-invalid-required ng-dirty"
               ng-submit="ok()">
 
+            <a class="btn btn-sm btn-primary modal-fullscreen-button modal-fullscreen-button-abs-pos"
+               ng-click="toggleFullscreen()">Toggle full screen</a>
+
             <div class="modal-header">
                 <button type="button" class="close"
                         ng-click="cancel()">&times;
@@ -98,7 +101,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Expiration Type:</label>
+                    <label>Expiration Type</label>
                     <span class="error"
                           ng-show="form.expiration_type.$error.minlength">Must be at least  characters.</span>
                     <span class="error"
@@ -110,7 +113,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Expiration Timestamp:</label>
+                    <label>Expiration Timestamp</label>
 
                     <input class="form-control" name="expiration_timestamp"
                            ui-date="expiration_timestampDateOptions" ui-date-format="yy-mm-dd"
@@ -119,53 +122,53 @@
 
                 <!-- START DYNAMICALLY GENERATED CONTENT -->
                 <div class="form-group" ng-repeat="m in metadata[0].string" ng-if="c2ip.id">
-                    <label>{{ m.key }}:</label>
+                    <label>{{ m.key }}</label>
                     <span class="error text-danger" ng-if="m.required">*</span>
                     <input class="form-control" ng-model="c2ip.metadata_values[m.key].value"
                            ng-required="m.required"/>
                 </div>
 
                 <div class="form-group" ng-repeat="m in metadata[0].string" ng-if="!c2ip.id">
-                    <label>{{ m.key }}:</label>
+                    <label>{{ m.key }}</label>
                     <span class="error text-danger" ng-if="m.required">*</span>
                     <input class="form-control" ng-model="m.default" ng-required="m.required">
                 </div>
 
                 <div class="form-group" ng-repeat="m in metadata[0].integer" ng-if="c2ip.id">
-                    <label>{{ m.key }}:</label>
+                    <label>{{ m.key }}</label>
                     <span class="error text-danger" ng-if="m.required">*</span>
                     <input class="form-control" ng-model="c2ip.metadata_values[m.key].value" type="number"
                            ng-required="m.required"/>
                 </div>
 
                 <div class="form-group" ng-repeat="m in metadata[0].integer" ng-if="!c2ip.id">
-                    <label>{{ m.key }}:</label>
+                    <label>{{ m.key }}</label>
                     <span class="error text-danger" ng-if="m.required">*</span>
                     <input class="form-control" ng-model="m.default" type="number" ng-required="m.required">
                 </div>
 
                 <div class="form-group" ng-repeat="m in metadata[0].date" ng-if="c2ip.id">
-                    <label>{{ m.key }}:</label>
+                    <label>{{ m.key }}</label>
                     <span class="error text-danger" ng-if="m.required">*</span>
                     <input class="form-control" ng-model="c2ip.metadata_values[m.key].value" type="date"
                            ng-required="m.required" format-date/>
                 </div>
 
                 <div class="form-group" ng-repeat="m in metadata[0].date" ng-if="!c2ip.id">
-                    <label>{{ m.key }}:</label>
+                    <label>{{ m.key }}</label>
                     <span class="error text-danger" ng-if="m.required">*</span>
                     <input class="form-control" ng-model="m.default" type="date" ng-required="m.required" format-date>
                 </div>
 
                 <div class="form-group" ng-repeat="m in metadata[0].multiline_comment" ng-if="c2ip.id">
-                    <label>{{ m.key }}:</label>
+                    <label>{{ m.key }}</label>
                     <span class="error text-danger" ng-if="m.required">*</span>
                     <textarea class="form-control" ng-model="c2ip.metadata_values[m.key].value" rows="2"
                               ng-required="m.required"></textarea>
                 </div>
 
                 <div class="form-group" ng-repeat="m in metadata[0].multiline_comment" rows="2" ng-if="!c2ip.id">
-                    <label>{{ m.key }}:</label>
+                    <label>{{ m.key }}</label>
                     <span class="error text-danger" ng-if="m.required">*</span>
                     <textarea class="form-control" ng-model="m.default" ng-required="m.required"></textarea>
                 </div>
@@ -204,7 +207,7 @@
                 <!-- /START DYNAMICALLY GENERATED CONTENT -->
 
                 <div class="form-group">
-                    <label>Tags:</label>
+                    <label>Tags</label>
 
                     <tags-input ng-model="c2ip.tags" on-tag-added="addedTag($tag)" on-tag-removed="removedTag($tag)">
                         <auto-complete source="loadTags($query)"
@@ -216,6 +219,7 @@
                 </div>
 
                 <div class="form-group" ng-if="c2ip.id">
+                    <label>Comments ({{ c2ip.comments.length }})</label>
                     <div class="input-group">
                         <textarea class="form-control" placeholder="Add a comment..." rows="4"
                                   ng-model="c2ip.new_comment"></textarea>
@@ -226,9 +230,7 @@
                                     class="glyphicon glyphicon-plus"></span></button>
                         </span>
                     </div>
-
-                    <label>Comments ({{ c2ip.comments.length }})</label>
-                    <div style="padding-top:3px;">
+                    <div ng-if="c2ip.comments && c2ip.comments.length" style="padding-top:3px;">
                         <uib-accordion>
                             <div uib-accordion-group class="panel-default"
                                  heading="See comments">
@@ -244,7 +246,7 @@
                             </div>
                         </uib-accordion>
                     </div>
-
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" ng-click="cancel()">Cancel
