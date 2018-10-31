@@ -148,6 +148,24 @@ span.glyphicon {
     text-align: inherit;
 }
 
+/* Modal full-screen button */
+body.modals-full-screen .modal-dialog {
+    width: auto !important;
+    margin: 10px !important;
+}
+.modal-fullscreen-button {
+    display: none;
+}
+.modal-fullscreen-button.modal-fullscreen-button-abs-pos {
+    position: absolute;
+    right: 40px;
+    top: 10px;
+}
+@media (min-width: 992px) {
+    .modal-fullscreen-button {
+        display: inline-block;
+    } 
+}
 
 /* Bootstrap modal sizing overrides */
 .modal-dialog { text-align: left; }
