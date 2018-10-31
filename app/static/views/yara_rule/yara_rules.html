@@ -57,21 +57,21 @@
 
                 <div class="pull-right" ng-if="yara_rule.id"
                      style="margin: 0 35px 0 0;">
-                    <a>
-                        <button class="btn btn-primary" ng-if="yara_rule.id"
-                                title="Copy Yara Rule to clipboard" tooltip-placement="bottom"
-                                uib-tooltip="Copied Yara Rule!"
-                                tooltip-trigger="'outsideClick'"
-                                ngclipboard data-clipboard-text="{{ yara_rule.yara_rule_string }}">
-                            Copy To Clipboard
-                        </button>
-                    </a>
-                    <button ng-if="negTestDir.value" type="button" class="btn btn-primary"
+                    <button class="btn btn-sm  btn-primary" ng-if="yara_rule.id"
+                            title="Copy Yara Rule to clipboard" tooltip-placement="bottom"
+                            uib-tooltip="Copied Yara Rule!"
+                            tooltip-trigger="'outsideClick'"
+                            ngclipboard data-clipboard-text="{{ yara_rule.yara_rule_string }}">
+                        Copy To Clipboard
+                    </button>
+                    <button ng-if="negTestDir.value" type="button" class="btn btn-sm btn-primary"
                             ng-click="negTestSignature(yara_rule.id)">{{ testButtonTextNeg }}
                     </button>
-                    <button type="button" class="btn btn-primary"
+                    <button type="button" class="btn btn-sm  btn-primary"
                             ng-click="testSignature(yara_rule.id)">{{ testButtonTextPos }}
                     </button>
+                    <a class="btn btn-sm btn-primary modal-fullscreen-button"
+                       ng-click="toggleFullscreen()">Toggle full screen</a>
                 </div>
             </div>
             <div class="modal-body">
