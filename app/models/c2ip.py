@@ -151,7 +151,7 @@ class C2ip(db.Model):
         metas = {}
 
         for meta in db.session.query(Metadata).all():
-            if not meta.type_ in metas.keys():
+            if not meta.artifact_type in metas.keys():
                 metas[meta.artifact_type] = {}
             metas[meta.artifact_type][meta.key] = meta
 
@@ -189,9 +189,6 @@ class C2ip(db.Model):
 
         c2ip = C2ip()
         c2ip.ip = ip
-        c2ip.asn = geo_ip["asn"]
-        c2ip.country = geo_ip["country_code"]
-        c2ip.city = geo_ip["city"]
 
         if artifact and metadata_field_mapping:
             for key, val in metadata_field_mapping.iteritems():
@@ -199,6 +196,11 @@ class C2ip(db.Model):
                     setattr(c2ip, val, artifact["metadata"][key])
                 except:
                     pass
+
+        if not hasattr(c2ip, "asn"):
+            c2ip.asn = geo_ip["asn"]
+            c2ip.country = geo_ip["country_code"]
+            c2ip.city = geo_ip["city"]
 
         return c2ip
 
