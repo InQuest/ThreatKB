@@ -333,7 +333,7 @@ angular.module('ThreatKB').run(function ($rootScope, $location, AuthService) {
 
     $rootScope.toggleFullscreen = function () {
         angular.element(document.body).toggleClass('modals-full-screen')
-    }
+    };
 
     // Register listener to watch route changes.
     $rootScope.$on('$routeChangeStart', function (event, next, current) {
