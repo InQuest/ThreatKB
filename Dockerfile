@@ -16,9 +16,12 @@ RUN apt-get update && apt-get install -y docker-ce
 RUN /usr/sbin/useradd --system --no-log-init --no-create-home --shell /sbin/nologin --home-dir /var/run/uwsgi uwsgi
 COPY ./uwsgi.yaml /etc/uwsgi.yaml
 
+# Add Package Files
+COPY . /opt/threatkb
+
 # Install Code Dependencies
 WORKDIR /opt/threatkb
-COPY package.json .bowerrc bower.json Gruntfile.js requirements.txt ./
+# COPY package.json .bowerrc bower.json Gruntfile.js requirements.txt ./
 
 # Install Python Dependencies
 RUN pip install virtualenv && virtualenv env && env/bin/pip install -r requirements.txt
@@ -26,8 +29,6 @@ RUN pip install virtualenv && virtualenv env && env/bin/pip install -r requireme
 # Install Node Dependencies
 RUN npm install -g bower && ln -s /usr/bin/nodejs /usr/bin/node && bower install --allow-root
 
-# Add Package Files (Package files are added last to speed up builds)
-COPY . /opt/threatkb
 
 # Generate Version File
 RUN git log -1 --format="%H" > version
