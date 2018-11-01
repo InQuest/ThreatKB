@@ -18,7 +18,7 @@ COPY ./uwsgi.yaml /etc/uwsgi.yaml
 
 # Install Code Dependencies
 WORKDIR /opt/threatkb
-COPY package.json .bower.rc Gruntfile.js requirements.txt ./
+COPY package.json .bowerrc Gruntfile.js requirements.txt ./
 
 # Install Python Dependencies
 RUN pip install virtualenv && virtualenv env && env/bin/pip install -r requirements.txt
