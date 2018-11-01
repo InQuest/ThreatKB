@@ -331,10 +331,9 @@ angular.module('ThreatKB').run(function ($rootScope, $location, AuthService) {
             day_diff < 31 && Math.ceil(day_diff / 7) + " weeks ago";
     };
 
-    /*
     $rootScope.toggleFullscreen = function () {
         angular.element(document.body).toggleClass('modals-full-screen')
-    }*/
+    }
 
     // Register listener to watch route changes.
     $rootScope.$on('$routeChangeStart', function (event, next, current) {
