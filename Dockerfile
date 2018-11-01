@@ -17,7 +17,7 @@ RUN /usr/sbin/useradd --system --no-log-init --no-create-home --shell /sbin/nolo
 COPY ./uwsgi.yaml /etc/uwsgi.yaml
 
 # Add Package Files
-COPY . /opt/threatkb
+ADD . /opt/threatkb
 
 # Install Code Dependencies
 WORKDIR /opt/threatkb
