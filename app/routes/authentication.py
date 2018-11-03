@@ -201,8 +201,8 @@ def update_user(user_id):
         if 'password' in request.json else user.password,
         admin=request.json['admin'],
         active=request.json['active'],
-        first_name=request.json['first_name'],
-        last_name=request.json['last_name'],
+        first_name=request.json.get('first_name', ""),
+        last_name=request.json.get('last_name', ""),
         id=user.id
     )
 
