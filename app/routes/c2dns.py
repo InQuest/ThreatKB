@@ -11,7 +11,7 @@ from app.models.bookmarks import Bookmarks
 from app.models.cfg_states import verify_state
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
 from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
-
+import distutils
 
 @app.route('/ThreatKB/c2dns', methods=['GET'])
 @auto.doc()
@@ -33,6 +33,8 @@ def get_all_c2dns():
     page_size = request.args.get('page_size', False)
     sort_by = request.args.get('sort_by', False)
     sort_direction = request.args.get('sort_dir', 'ASC')
+    exclude_totals = request.args.get('exclude_totals', False)
+    include_metadata = distutils.util.strtobool(request.args.get('include_metadata', "true"))
 
     searches = json.loads(searches)
 
@@ -82,10 +84,13 @@ def get_all_c2dns():
     filtered_entities = filtered_entities.all()
 
     response_dict = dict()
-    response_dict['data'] = [entity.to_dict() for entity in filtered_entities]
+    response_dict['data'] = [entity.to_dict(include_metadata=include_metadata) for entity in filtered_entities]
     response_dict['total_count'] = total_count
 
-    return Response(json.dumps(response_dict), mimetype='application/json')
+    if exclude_totals:
+        return Response(json.dumps(response_dict['data']), mimetype="application/json")
+    else:
+        return Response(json.dumps(response_dict), mimetype='application/json')
 
 
 @app.route('/ThreatKB/c2dns/<int:id>', methods=['GET'])

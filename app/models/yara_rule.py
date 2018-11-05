@@ -80,13 +80,7 @@ class Yara_rule(db.Model):
             .filter(MetadataMapping.artifact_id == self.id) \
             .all()
 
-    def to_dict(self, include_yara_rule_string=None, short=False, include_relationships=True):
-        metadata_values_dict = {}
-        metadata_keys = Metadata.get_metadata_keys("SIGNATURE")
-        metadata_values_dict = {m["metadata"]["key"]: m for m in [entity.to_dict() for entity in self.metadata_values]}
-        for key in list(set(metadata_keys) - set(metadata_values_dict.keys())):
-            metadata_values_dict[key] = {}
-
+    def to_dict(self, include_yara_rule_string=None, short=False, include_relationships=True, include_metadata=True):
         yara_dict = dict(
             creation_date=self.creation_date.isoformat() if self.creation_date else None,
             last_revision_date=self.last_revision_date.isoformat() if self.last_revision_date else None,
@@ -101,12 +95,20 @@ class Yara_rule(db.Model):
             references=self.references,
             removedTags=[],
             revision=self.revision,
-            metadata=Metadata.get_metadata_dict("SIGNATURE"),
-            metadata_values=metadata_values_dict,
             condition="condition:\n\t%s" % self.condition,
             strings="strings:\n\t%s" % self.strings if self.strings and self.strings.strip() else "",
             imports=self.imports
         )
+
+        if include_metadata:
+            metadata_values_dict = {}
+            metadata_keys = Metadata.get_metadata_keys("SIGNATURE")
+            metadata_values_dict = {m["metadata"]["key"]: m for m in
+                                    [entity.to_dict() for entity in self.metadata_values]}
+            for key in list(set(metadata_keys) - set(metadata_values_dict.keys())):
+                metadata_values_dict[key] = {}
+            yara_dict.update(
+                dict(metadata=Metadata.get_metadata_dict("SIGNATURE"), metadata_values=metadata_values_dict))
 
         if include_relationships:
             yara_dict["created_user"] = self.created_user.to_dict()

@@ -6,7 +6,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 SQL_PROTOCOL = os.getenv('SQL_PROTOCOL', 'mysql')
 SQL_HOST = os.getenv('SQL_HOST', '192.168.56.103')
 SQL_PORT = os.getenv('SQL_PORT', '3306')
-SQL_DATABASE = os.getenv('SQL_DATABASE', 'threatkb_alpha_10312018')
+SQL_DATABASE = "threatkb_alpha_10312018"
 SQL_USERNAME = os.getenv('SQL_USERNAME', 'root')
 SQL_PASSWORD = os.getenv('SQL_PASSWORD', '98supratt')
 SQLALCHEMY_DATABASE_URI = '{protocol}://{username}:{password}@{hostname}:{port}/{database}?use_unicode=1&charset=utf8'.format(

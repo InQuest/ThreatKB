@@ -61,6 +61,7 @@
                     </li>
                     <li>
                 </ul>
+
                 <div class="btn-group pull-right" uib-dropdown ng-show="isLoggedIn()">
                     <button id="btn-append-to-single-button" type="button" class="btn btn-sm navbar-inverse"
                             style="padding-top:15px; border:0px;" uib-dropdown-toggle>
@@ -99,6 +100,22 @@
                     </ul>
                 </div>
 
+                <div ng-show="isLoggedIn()" style="margin-top:15px">
+                    <div class="col-sm-4">
+                        <ui-select ng-model="search_artifacts.selected" theme="selectize" title="Global search"
+                                   on-select="select_artifact(search_artifacts.selected)"
+                                   focus-on="search_focus">
+                            <ui-select-match placeholder="Global search..">
+                                {{ item.name }}</ui-select-match>
+                            <ui-select-choices repeat="item in search_artifacts | filter: $select.search"
+                                               refresh="refresh_search($select.search)"
+                                               minimum-input-length="4">
+                                <div ng-bind-html="item.name | highlight: $select.search">{{ item.name }}</div>
+                                <small ng-bind-html="item.type | highlight: $select.search"></small>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
                 <!-- /.navbar-collapse -->
             </div>
     </nav>
