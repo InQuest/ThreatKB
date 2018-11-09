@@ -93,9 +93,7 @@ angular.module('ThreatKB')
                         },
                         {
                             field: 'description',
-                            displayName: 'Description',
-                            enableSorting: false,
-                            cellTemplate: '<div class="ui-grid-cell-contents">{{ row.entity.metadata_values.Description.value }}</div> '
+                            enableSorting: true
                         },
                         {
                             field: 'state',

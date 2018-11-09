@@ -219,7 +219,7 @@ class Release(db.Model):
             entity.get("category", "category"),
             entity["metadata_values"].get("Confidence", {"value": "Confidence"})["value"],
             entity["metadata_values"].get("Severity", {"value": "Severity"})["value"],
-            entity["metadata_values"].get("Description", {"value": "Description"})["value"],
+            entity.get("description", "description"),
         ) for entity in self.release_data_dict["Signatures"]["Added"] if
                                 type(entity) == dict]) if \
             len(self.release_data_dict["Signatures"]["Added"]) > 0 else "NA"
@@ -237,7 +237,7 @@ class Release(db.Model):
             entity.get("category", "category"),
             entity["metadata_values"].get("Confidence", {"value": "Confidence"})["value"],
             entity["metadata_values"].get("Severity", {"value": "Severity"})["value"],
-            entity["metadata_values"].get("Description", {"value": "Description"})["value"],
+            entity.get("description", "description"),
         ) for entity in
                                 self.release_data_dict["Signatures"]["Modified"] if type(entity) == dict]) if \
             len(self.release_data_dict["Signatures"]["Modified"]) > 0 else "NA"
@@ -280,10 +280,8 @@ class Release(db.Model):
         ips = []
         for ip in self.release_data_dict["IP"]["IP"].values():
             output = "%s,%s" % (parser.parse(ip.get("date_created")).strftime(date_format), ip.get("ip"))
-            if "description" in ip["metadata_values"].keys():
-                output += "," + ip["metadata_values"]["description"]["value"]
-            elif "Description" in ip["metadata_values"].keys():
-                output += "," + ip["metadata_values"]["Description"]["value"]
+            if "description" in ip.keys():
+                output += "," + (ip.get("description", None) or "")
             ips.append(output)
 
         ips.sort()
@@ -291,10 +289,8 @@ class Release(db.Model):
         dns = []
         for d in self.release_data_dict["DNS"]["DNS"].values():
             output = "%s,%s" % (parser.parse(d.get("date_created")).strftime(date_format), d.get("domain_name"))
-            if "description" in d["metadata_values"].keys():
-                output += "," + d["metadata_values"]["description"]["value"]
-            elif "Description" in d["metadata_values"].keys():
-                output += "," + d["metadata_values"]["Description"]["value"]
+            if "description" in d.keys():
+                output += "," + (d.get("description", None) or "")
             dns.append(output)
 
         dns.sort()

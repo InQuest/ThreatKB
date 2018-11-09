@@ -182,6 +182,8 @@ def create_yara_rule():
     entity = yara_rule.Yara_rule(
         state=request.json['state']['state'] if 'state' in request.json['state'] else None
         , name=request.json['name']
+        , description=request.json.get("description", None)
+        , references=request.json.get("references", None)
         , category=request.json['category']['category'] if 'category' in request.json['category'] else None
         , condition=yara_rule.Yara_rule.make_yara_sane(request.json['condition'], "condition:")
         , strings=yara_rule.Yara_rule.make_yara_sane(request.json['strings'], "strings:")
@@ -277,6 +279,8 @@ def update_yara_rule(id):
         state=request.json['state']['state'] if request.json['state'] and 'state' in request.json['state'] else
         request.json['state'],
         name=request.json['name'],
+        description=request.json.get("description", None),
+        references=request.json.get("references", None),
         category=request.json['category']['category'] if request.json['category'] and 'category' in request
             .json['category'] else request.json['category'],
         condition=yara_rule.Yara_rule.make_yara_sane(request.json["condition"], "condition:"),

@@ -30,6 +30,8 @@ class Yara_rule(db.Model):
     condition = db.Column(db.String(2048))
     strings = db.Column(db.String(30000))
     imports = db.Column(db.String(512))
+    description = db.Column(db.TEXT())
+    references = db.Column(db.TEXT())
     active = db.Column(db.Boolean, nullable=False, default=True)
     eventid = db.Column(db.Integer(unsigned=True), index=True, nullable=False)
 
@@ -95,6 +97,8 @@ class Yara_rule(db.Model):
             id=self.id,
             tags=tags_mapping.get_tags_for_source(self.__tablename__, self.id),
             addedTags=[],
+            description=self.description,
+            references=self.references,
             removedTags=[],
             revision=self.revision,
             metadata=Metadata.get_metadata_dict("SIGNATURE"),
@@ -142,6 +146,8 @@ class Yara_rule(db.Model):
             category=self.category,
             eventid=self.eventid,
             id=self.id,
+            description=self.description,
+            references=self.references,
             addedTags=[],
             removedTags=[],
             created_user=user_cache[self.created_user_id],
@@ -186,7 +192,8 @@ class Yara_rule(db.Model):
         for field in metadata_field_mapping:
             if yara_dict.get(field, None) and not "metadata" in field and field in ["creation_date",
                                                                                     "last_revision_date", "revision",
-                                                                                    "name", "category", "eventid"]:
+                                                                                    "name", "category", "eventid",
+                                                                                    "description"]:
                 metadata_strings.append("\t\t%s = \"%s\"\n" % (
                 field.title() if not field.lower() == "eventid" else "EventID", yara_dict[field]))
 
