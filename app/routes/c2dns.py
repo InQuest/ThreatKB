@@ -34,16 +34,20 @@ def get_all_c2dns():
     sort_by = request.args.get('sort_by', False)
     sort_direction = request.args.get('sort_dir', 'ASC')
 
-    entities = c2dns.C2dns.query.outerjoin(Metadata, Metadata.artifact_type == ENTITY_MAPPING["DNS"]).join(
-        MetadataMapping,
-        and_(
-                                                                                                          MetadataMapping.metadata_id == Metadata.id,
-                                                                                                          MetadataMapping.artifact_id == c2dns.C2dns.id))
+    searches = json.loads(searches)
+
+    if not any([search_key in c2dns.C2dns.__table__.columns.keys() for search_key, val in searches.items()]):
+        entities = c2dns.C2dns.query.outerjoin(Metadata, Metadata.artifact_type == ENTITY_MAPPING["DNS"]).join(
+            MetadataMapping,
+            and_(
+                MetadataMapping.metadata_id == Metadata.id,
+                MetadataMapping.artifact_id == c2dns.C2dns.id))
+    else:
+        entities = c2dns.C2dns.query
 
     if not current_user.admin:
         entities = entities.filter_by(owner_user_id=current_user.id)
 
-    searches = json.loads(searches)
     for column, value in searches.items():
         if not value:
             continue
