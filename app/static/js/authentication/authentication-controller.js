@@ -6,6 +6,10 @@ angular.module('ThreatKB')
             $scope.user = AuthService.user;
             $scope.nav_image = Cfg_settings.get({key: "NAV_IMAGE"});
 
+            if ($scope.isLoggedIn) {
+                $location.path("/");
+            }
+
             $scope.login = function () {
                 // initial values
                 $scope.error = false;
