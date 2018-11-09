@@ -36,7 +36,7 @@ def get_all_c2ips():
     searches = json.loads(searches)
 
     if not any([search_key in c2ip.C2ip.__table__.columns.keys() for search_key, val in searches.items()]):
-        entities = c2ip.C2ip.query.outerjoin(Metadata, Metadata.artifact_type == ENTITY_MAPPING["DNS"]).join(
+        entities = c2ip.C2ip.query.outerjoin(Metadata, Metadata.artifact_type == ENTITY_MAPPING["IP"]).join(
             MetadataMapping,
             and_(
                 MetadataMapping.metadata_id == Metadata.id,
