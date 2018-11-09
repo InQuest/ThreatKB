@@ -52,6 +52,19 @@
                 </div>
 
                 <div class="form-group" ng-if="c2ip.date_created">
+                    <label>Owner</label>
+                    <ui-select ng-model="c2ip.owner_user">
+                        <ui-select-match placeholder="Select an owner ...">
+                            <small><span ng-bind="$select.selected.email || c2ip.owner_user.email"></span></small>
+                        </ui-select-match>
+                        <ui-select-choices
+                                repeat="person in (users | filter: $select.search) track by person.id">
+                            <small><span ng-bind="person.email"></span></small>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+
+                <div class="form-group" ng-if="c2ip.date_created">
                     <label>Date Created</label>
 
                     <label type="text" class="form-control" name="date_created"

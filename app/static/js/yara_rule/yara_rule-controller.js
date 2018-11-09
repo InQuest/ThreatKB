@@ -471,6 +471,8 @@ angular.module('ThreatKB')
             $scope.Files = Files;
             $scope.selected_signature = null;
 
+            $scope.users = Users.query();
+
             $scope.wrap_editor = ($cookies.get("wrap_editor") == "true");
 
             if ($scope.wrap_editor == null) {

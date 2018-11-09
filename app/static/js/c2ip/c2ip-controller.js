@@ -326,8 +326,8 @@ angular.module('ThreatKB')
                 $scope.update(openModalForId);
             }
         }])
-    .controller('C2ipSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'C2ip', 'c2ip', 'metadata', 'Comments', 'Cfg_states', 'Tags', 'growl', 'Bookmarks', 'hotkeys',
-        function ($scope, $http, $uibModalInstance, $location, C2ip, c2ip, metadata, Comments, Cfg_states, Tags, growl, Bookmarks, hotkeys) {
+    .controller('C2ipSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'C2ip', 'c2ip', 'metadata', 'Comments', 'Cfg_states', 'Tags', 'growl', 'Bookmarks', 'hotkeys', 'Users',
+        function ($scope, $http, $uibModalInstance, $location, C2ip, c2ip, metadata, Comments, Cfg_states, Tags, growl, Bookmarks, hotkeys, Users) {
             $scope.c2ip = c2ip;
             if (!$scope.c2ip.id) {
                 $scope.c2ip.metadata = metadata;
@@ -335,6 +335,8 @@ angular.module('ThreatKB')
             $scope.c2ip.new_comment = "";
             $scope.Comments = Comments;
             $scope.metadata = metadata;
+
+            $scope.users = Users.query();
 
             $scope.save_artifact = function () {
                 C2ip.update({id: $scope.c2ip.id}, $scope.c2ip,

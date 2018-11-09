@@ -98,6 +98,19 @@
                            ng-maxlength="128"/>
                 </div>
 
+                <div class="form-group" ng-if="yara_rule.last_revision_date">
+                    <label>Owner</label>
+                    <ui-select ng-model="yara_rule.owner_user">
+                        <ui-select-match placeholder="Select an owner ...">
+                            <small><span ng-bind="$select.selected.email || yara_rule.owner_user.email"></span></small>
+                        </ui-select-match>
+                        <ui-select-choices
+                                repeat="person in (users | filter: $select.search) track by person.id">
+                            <small><span ng-bind="person.email"></span></small>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+
                 <div class="form-group">
                     <label>Description</label>
                     <textarea class="form-control" placeholder="Enter description..." rows="6"

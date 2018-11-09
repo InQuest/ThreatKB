@@ -113,7 +113,6 @@ angular.module('ThreatKB')
                             field: 'owner_user.email',
                             displayName: 'Owner',
                             width: '180',
-                            width: '20%',
                             enableSorting: false,
                             cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.owner_user"'
                             + ' on-select="grid.appScope.save(row.entity)">'
@@ -323,8 +322,8 @@ angular.module('ThreatKB')
                 $scope.update(openModalForId);
             }
         }])
-    .controller('C2dnsSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'C2dns', 'c2dns', 'metadata', 'Cfg_states', 'Comments', 'Tags', 'growl', 'Bookmarks', 'hotkeys',
-        function ($scope, $http, $uibModalInstance, $location, C2dns, c2dns, metadata, Cfg_states, Comments, Tags, growl, Bookmarks, hotkeys) {
+    .controller('C2dnsSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'C2dns', 'c2dns', 'metadata', 'Cfg_states', 'Comments', 'Tags', 'growl', 'Bookmarks', 'hotkeys', 'Users',
+        function ($scope, $http, $uibModalInstance, $location, C2dns, c2dns, metadata, Cfg_states, Comments, Tags, growl, Bookmarks, hotkeys, Users) {
             $scope.c2dns = c2dns;
             $scope.c2dns.new_comment = "";
             $scope.Comments = Comments;
@@ -332,6 +331,8 @@ angular.module('ThreatKB')
             if (!$scope.c2dns.id) {
                 $scope.c2dns.metadata = metadata;
             }
+
+            $scope.users = Users.query();
 
             $scope.save_artifact = function () {
                 C2dns.update({id: $scope.c2dns.id}, $scope.c2dns,
