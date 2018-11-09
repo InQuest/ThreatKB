@@ -170,6 +170,11 @@ def create_yara_rule():
     Return: yara_rule artifact dictionary"""
     new_sig_id = 0
 
+    test_result, return_code, stdout, stderr = test_yara_rule.does_rule_compile(request.json)
+    if not test_result:
+        raise Exception(
+            "Could not save yara rule, it does not compile.\n\nerror_code=" + str(return_code) + "\n\n" + stderr)
+
     release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
     draft_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_staging_state > 0).first()
 
@@ -245,6 +250,11 @@ def update_yara_rule(id):
     if not current_user.admin and entity.owner_user_id != current_user.id:
         abort(403)
 
+    test_result, return_code, stdout, stderr = test_yara_rule.does_rule_compile(request.json)
+    if not test_result:
+        raise Exception(
+            "Could not save yara rule, it does not compile.\n\nerror_code=" + str(return_code) + "\n\n" + stderr)
+
     release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
     draft_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_staging_state > 0).first()
     old_state = entity.state
@@ -300,11 +310,11 @@ def update_yara_rule(id):
     if old_state == release_state.state and entity.state == release_state.state and not do_not_bump_revision:
         entity.state = draft_state.state
 
-    if entity.state == release_state.state:
-        try:
-            test_yara_rule.get_yara_rule(entity)
-        except Exception, e:
-            raise Exception("Rule did not compile. Message is %s" % e.message)
+    # if entity.state == release_state.state:
+    #     try:
+    #         test_yara_rule.get_yara_rule(entity)
+    #     except Exception, e:
+    #         raise Exception("Rule did not compile. Message is %s" % e.message)
 
     db.session.merge(entity)
     db.session.commit()

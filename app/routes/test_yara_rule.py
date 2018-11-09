@@ -21,7 +21,7 @@ from flask import abort, jsonify, request, json, Response
 from flask.ext.login import current_user, login_required
 
 from app.models.cfg_settings import Cfg_settings
-from app.models.yara_rule import Yara_testing_history
+from app.models.yara_rule import Yara_testing_history, Yara_rule
 
 
 @app.route('/ThreatKB/test_yara_rule/<int:rule_id>', methods=['GET'])
@@ -141,6 +141,21 @@ def test_yara_rule(yara_rule_entity, files_to_test, user, is_async=False):
                 errors_encountered=errors_encountered,
                 error_msgs=error_msgs)
 
+
+def does_rule_compile(yara_dict):
+    rule = Yara_rule.to_yara_rule_string(yara_dict, include_imports=True)
+    rule_temp_path = "/tmp/%s.yar" % (str(uuid.uuid4()).replace("-", "")[0:8])
+    with open(rule_temp_path, "w") as f:
+        f.write(rule)
+
+    yara_command = Cfg_settings.get_setting("SIGNATURE_TESTING_COMMAND")
+
+    command = yara_command.replace("RULE", rule_temp_path).replace("FILE_PATH", rule_temp_path)
+    proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc.wait()
+    stdout, stderr = proc.communicate()
+    return_code = proc.returncode
+    return (return_code == 0, return_code, stdout, stderr)
 
 def get_yara_rule(yara_rule_entity):
     rule_string = yara_rule_entity.to_dict(include_yara_rule_string=True, include_relationships=False)[

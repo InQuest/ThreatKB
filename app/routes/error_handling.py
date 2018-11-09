@@ -30,6 +30,8 @@ def handle_exception(exception):
     db.session.add(err)
     db.session.commit()
 
+    stacktrace += exception.message
+
     return stacktrace, 500
 
 
