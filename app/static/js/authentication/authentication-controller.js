@@ -77,6 +77,12 @@ angular.module('ThreatKB')
                 };
             };
 
+            $scope.delete = function (id) {
+                UserService.delete({id: id}, function () {
+                    $scope.users = UserService.query({include_inactive: 1});
+                });
+            };
+
             $scope.open = function (id) {
                 var userSave = $uibModal.open({
                     templateUrl: 'users-save.html',

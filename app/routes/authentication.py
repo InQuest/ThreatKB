@@ -71,6 +71,21 @@ def get_user_by_id(user_id):
     return jsonify(user.to_dict())
 
 
+@app.route('/ThreatKB/users/<int:user_id>', methods=['DELETE'])
+@auto.doc()
+@login_required
+@admin_only()
+def delete_user_by_id(user_id):
+    """Return the user associated with the given user id.
+    Return: user dictionary"""
+    user = KBUser.query.get(user_id)
+    if not user:
+        abort(404)
+
+    db.session.delete(user)
+    db.session.commit()
+    return jsonify(''), 204
+
 @app.route('/ThreatKB/users/me', methods=['GET'])
 @auto.doc()
 @login_required
