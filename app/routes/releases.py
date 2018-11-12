@@ -4,6 +4,7 @@ from app import app, db, admin_only, auto
 from app.models import releases, cfg_settings
 import tempfile
 import uuid
+import time
 import distutils
 
 @app.route('/ThreatKB/releases', methods=['GET'])
@@ -117,6 +118,10 @@ def create_release():
     """Create new release
     From Data: name (str), is_test_release (bool)
     Return: release dictionary"""
+    short = distutils.util.strtobool(request.args.get('short', "true"))
+
+    start_time = time.time()
+
     release = releases.Release(
         name=request.json.get("name", None),
         is_test_release=request.json.get("is_test_release", 0),
@@ -135,11 +140,12 @@ def create_release():
                                                                       release.release_data_dict["DNS"].get("DNS",
                                                                                                            None) else 0
     release.created_user = current_user
-    db.session.merge(release)
+    db.session.add(release)
     db.session.commit()
 
-    release = releases.Release.query.filter(release.id).first()
-    return jsonify(release.to_dict())
+    r = release.to_dict(short=short)
+    r["build_time_seconds"] = "{0:.2f}".format(time.time() - start_time)
+    return jsonify(r)
 
 
 @app.route('/ThreatKB/releases/<int:release_id>', methods=['DELETE'])

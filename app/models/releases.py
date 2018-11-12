@@ -53,12 +53,11 @@ class Release(db.Model):
             num_dns=self.num_dns or 0
         )
 
-    def to_dict(self):
-        return dict(
+    def to_dict(self, short=False):
+        r = dict(
             id=self.id,
             name=self.name,
             is_test_release=self.is_test_release,
-            release_data=self.release_data,
             date_created=self.date_created.isoformat(),
             created_user=self.created_user.to_dict(),
             num_signatures=len(self.release_data_dict["Signatures"]["Signatures"]) if self.release_data_dict.get(
@@ -68,6 +67,9 @@ class Release(db.Model):
             num_dns=len(self.release_data_dict["DNS"]["DNS"]) if self.release_data_dict.get("DNS", None) and
                                                                  self.release_data_dict["DNS"].get("DNS", None) else 0
         )
+        if not short:
+            r.update(dict(release_data=self.release_data))
+        return r
 
     def get_release_data(self):
         if self.release_data:
