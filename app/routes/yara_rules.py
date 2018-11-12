@@ -11,6 +11,7 @@ from app.models.bookmarks import Bookmarks
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
 from app.routes.cfg_category_range_mapping import update_cfg_category_range_mapping_current
 from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
+from app.models.cfg_settings import Cfg_settings
 
 import datetime
 
@@ -170,10 +171,12 @@ def create_yara_rule():
     Return: yara_rule artifact dictionary"""
     new_sig_id = 0
 
-    test_result, return_code, stdout, stderr = test_yara_rule.does_rule_compile(request.json)
-    if not test_result:
-        raise Exception(
-            "Could not save yara rule, it does not compile.\n\nerror_code=" + str(return_code) + "\n\n" + stderr)
+    compile_on_save = Cfg_settings.get_setting("COMPILE_YARA_RULE_ON_SAVE")
+    if compile_on_save and distutils.util.strtobool(compile_on_save):
+        test_result, return_code, stdout, stderr = test_yara_rule.does_rule_compile(request.json)
+        if not test_result:
+            raise Exception(
+                "Could not save yara rule, it does not compile.\n\nerror_code=" + str(return_code) + "\n\n" + stderr)
 
     release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
     draft_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_staging_state > 0).first()
@@ -250,10 +253,12 @@ def update_yara_rule(id):
     if not current_user.admin and entity.owner_user_id != current_user.id:
         abort(403)
 
-    test_result, return_code, stdout, stderr = test_yara_rule.does_rule_compile(request.json)
-    if not test_result:
-        raise Exception(
-            "Could not save yara rule, it does not compile.\n\nerror_code=" + str(return_code) + "\n\n" + stderr)
+    compile_on_save = Cfg_settings.get_setting("COMPILE_YARA_RULE_ON_SAVE")
+    if compile_on_save and distutils.util.strtobool(compile_on_save):
+        test_result, return_code, stdout, stderr = test_yara_rule.does_rule_compile(request.json)
+        if not test_result:
+            raise Exception(
+                "Could not save yara rule, it does not compile.\n\nerror_code=" + str(return_code) + "\n\n" + stderr)
 
     release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
     draft_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_staging_state > 0).first()
