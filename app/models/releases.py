@@ -284,6 +284,10 @@ class Release(db.Model):
             output = "%s,%s" % (parser.parse(ip.get("date_created")).strftime(date_format), ip.get("ip"))
             if "description" in ip.keys():
                 output += "," + (ip.get("description", None) or "")
+            elif "Description" in ip.get("metadata_values", {}):
+                output += "," + (ip["metadata_values"].get("Description", {}).get("value", None) or "")
+            elif "description" in ip.get("metadata_values", {}):
+                output += "," + (ip["metadata_values"].get("description", {}).get("value", None) or "")
             ips.append(output)
 
         ips.sort()
@@ -293,6 +297,11 @@ class Release(db.Model):
             output = "%s,%s" % (parser.parse(d.get("date_created")).strftime(date_format), d.get("domain_name"))
             if "description" in d.keys():
                 output += "," + (d.get("description", None) or "")
+            elif "Description" in d.get("metadata_values", {}):
+                output += "," + (d["metadata_values"].get("Description", {}).get("value", None) or "")
+            elif "description" in d.get("metadata_values", {}):
+                output += "," + (d["metadata_values"].get("description", {}).get("value", None) or "")
+
             dns.append(output)
 
         dns.sort()
