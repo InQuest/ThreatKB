@@ -10,6 +10,8 @@ from functools import wraps, update_wrapper
 from flask.ext.autodoc import Autodoc
 import datetime
 import logging
+import os
+import distutils
 
 
 app = Flask(__name__, static_url_path='')
@@ -24,7 +26,7 @@ login_manager.init_app(app)
 bcrypt = Bcrypt(app)
 celery = None
 
-app.config["SQLALCHEMY_ECHO"] = True
+app.config["SQLALCHEMY_ECHO"] = distutils.util.strtobool(os.getenv("SQLALCHEMY_ECHO", "1"))
 
 ENTITY_MAPPING = {"SIGNATURE": 1, "DNS": 2, "IP": 3, "TASK": 4}
 
