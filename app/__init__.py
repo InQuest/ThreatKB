@@ -5,7 +5,10 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.bcrypt import Bcrypt
 from flask.ext.login import LoginManager
 from flask_login import current_user
+from flask import make_response
+from functools import wraps, update_wrapper
 from flask.ext.autodoc import Autodoc
+import datetime
 import logging
 
 
@@ -25,6 +28,20 @@ app.config["SQLALCHEMY_ECHO"] = True
 
 ENTITY_MAPPING = {"SIGNATURE": 1, "DNS": 2, "IP": 3, "TASK": 4}
 
+
+def nocache(view):
+    @wraps(view)
+    def no_cache(*args, **kwargs):
+        response = make_response(view(*args, **kwargs))
+        response.headers['Last-Modified'] = datetime.datetime.now()
+        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '-1'
+        return response
+
+    return update_wrapper(no_cache, view)
+
+
 def admin_only():
     def wrapper(f):
         @functools.wraps(f)
@@ -34,6 +51,7 @@ def admin_only():
             return f(*args, **kwargs)
         return wrapped
     return wrapper
+
 
 from app.routes.version import *
 from app.routes.index import *

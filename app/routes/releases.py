@@ -1,6 +1,6 @@
 from flask import abort, jsonify, request, send_file, json, Response
 from flask.ext.login import login_required, current_user
-from app import app, db, admin_only, auto
+from app import app, db, admin_only, auto, nocache
 from app.models import releases, cfg_settings
 import tempfile
 import uuid
@@ -71,6 +71,7 @@ def get_releases_latest():
 @auto.doc()
 @login_required
 @admin_only()
+@nocache
 def generate_release_notes(release_id):
     """Generate and return release notes for release associated with release_id
     Return: release text file"""
@@ -92,6 +93,7 @@ def generate_release_notes(release_id):
 @auto.doc()
 @login_required
 @admin_only()
+@nocache
 def generate_artifact_export(release_id):
     """Generate and return artifact export zip file for the release associated with release_id
     Return: release zip file with a single file for all IPs, single file for all DNS, and consolidated category yara files"""
