@@ -53,7 +53,7 @@ By default Flask will listen on 127.0.0.1:5000, if you want to change this modif
 ### Running ThreatKB  
 It's best to run the application and it's Python virtualenv within a screen session to ensure ThreatKB continues to run.
   
-**Note:** Within screen, Ctrl+a+d will dettach your session and return you to your normal shell. To return to the  screen session, run `screen -list` and look for the "Inquest_ThreatKB" entry followed by its PID then use `screen -r InQuest_ThreatKB.<PID>` to reattach.
+**Note:** Within screen, Ctrl+a+d will detach your session and return you to your normal shell. To return to the  screen session, run `screen -list` and look for the "Inquest_ThreatKB" entry followed by its PID then use `screen -r InQuest_ThreatKB.<PID>` to reattach.
   
 1. Start a screen session for the application to run within:
     - `screen -t InQuest_ThreatKB`
@@ -75,7 +75,7 @@ It's best to run the application and it's Python virtualenv within a screen sess
 1. Hash your password for MySQL kb_users table:
     - `flask/bin/python hash_pass.py yourSecretPassword`
 2. Connect to MySQL instance and insert your admin user (replace values below as needed):
-    - `sql INSERT INTO kb_users (email, password, admin) VALUES ("user@domain.com", "<hashed password>, 1, 1);`
+    - `sql INSERT INTO kb_users (email, password, admin, active) VALUES ("user@domain.com", "<hashed password>", 1, 1);`
 
 
 ## Docker Installation  
