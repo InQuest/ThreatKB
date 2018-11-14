@@ -472,23 +472,8 @@ angular.module('ThreatKB')
                     resolve: {
                         yara_rule: function () {
                             return $scope.yara_rule;
-                        },
-                        yara_rules: function () {
-                            return $scope.yara_rules;
-                        },
-                        metadata: ['Metadata', function (Metadata) {
-                            return Metadata.query({
-                                filter: "signature",
-                                format: "dict"
-                            });
-                        }]
+                        }
                     }
-                });
-
-                yara_view.result.then(function (entity) {
-                    getPage();
-                }, function () {
-                    getPage();
                 });
             };
 
