@@ -33,8 +33,11 @@ def main():
         fixed_ips.append(updated_c2ip)
 
     for i in range(len(c2ips)):
-        print("IP: %s\tASN: %s->%s\tCountry: %s->%s" % (
-        c2ips[i].ip, c2ips[i].asn, fixed_ips[i].asn, c2ips[i].country, fixed_ips[i].country))
+        try:
+            print("IP: %s\tASN: %s->%s\tCountry: %s->%s" % (
+                c2ips[i].ip, c2ips[i].asn, fixed_ips[i].asn, c2ips[i].country, fixed_ips[i].country))
+        except:
+            pass
 
     response = ""
     while response not in ("Y", "N"):
