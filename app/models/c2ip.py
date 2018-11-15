@@ -256,6 +256,9 @@ def run_against_whitelist(mapper, connect, target):
     if abort_import:
         raise Exception('Failed Whitelist Validation')
 
+    # Verify the ip is well formed
+    IPAddress(new_ip)
+
     if not current_user.admin:
         release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
         if release_state and target.state == release_state.state:
