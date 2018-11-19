@@ -195,19 +195,17 @@ class Yara_rule(db.Model):
                                                                                     "name", "category", "eventid",
                                                                                     "description"]:
                 metadata_strings.append("\t\t%s = \"%s\"\n" % (
-                field.title() if not field.lower() == "eventid" else "EventID", yara_dict[field]))
+                    field.title() if not field.lower() == "eventid" else "EventID",
+                    str(yara_dict[field]).replace("\"", "'")))
 
         try:
             for type_, metalist in yara_dict["metadata"].iteritems():
                 for meta in metalist:
                     if meta["export_with_release"]:
-                        metadata_strings.append("\t\t%s = \"%s\"\n" % (meta["key"],
-                                                                       yara_dict["metadata_values"][meta["key"]][
-                                                                           "value"]
-                                                                       if "value" in yara_dict["metadata_values"][
-                                                                           meta["key"]]
-                                                                       else "NA")
-                                                )
+                        value = yara_dict["metadata_values"][meta["key"]]["value"] if "value" in \
+                                                                                      yara_dict["metadata_values"][
+                                                                                          meta["key"]] else "NA"
+                        metadata_strings.append("\t\t%s = \"%s\"\n" % (meta["key"], str(value).replace("\"", "'")))
         except Exception as e:
             pass
 
