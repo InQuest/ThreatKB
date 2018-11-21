@@ -36,7 +36,7 @@ def get_all_c2dns():
 
     searches = json.loads(searches)
 
-    if searches and not any(
+    if searches and any(
         [search_key in c2dns.C2dns.__table__.columns.keys() for search_key, val in searches.items()]):
         entities = c2dns.C2dns.query.outerjoin(Metadata, Metadata.artifact_type == ENTITY_MAPPING["DNS"]).join(
             MetadataMapping,
