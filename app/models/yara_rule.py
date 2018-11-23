@@ -194,6 +194,10 @@ class Yara_rule(db.Model):
                                                                                     "last_revision_date", "revision",
                                                                                     "name", "category", "eventid",
                                                                                     "description"]:
+                try:
+                    yara_dict[field] = re.sub("[^\x00-\x7F]", "", yara_dict[field])
+                except:
+                    pass
                 metadata_strings.append("\t\t%s = \"%s\"\n" % (
                     field.title() if not field.lower() == "eventid" else "EventID",
                     str(yara_dict[field]).replace("\"", "'")))
@@ -205,6 +209,10 @@ class Yara_rule(db.Model):
                         value = yara_dict["metadata_values"][meta["key"]]["value"] if "value" in \
                                                                                       yara_dict["metadata_values"][
                                                                                           meta["key"]] else "NA"
+                        try:
+                            value = re.sub("[^\x00-\x7F]", "", value)
+                        except:
+                            pass
                         metadata_strings.append("\t\t%s = \"%s\"\n" % (meta["key"], str(value).replace("\"", "'")))
         except Exception as e:
             pass
