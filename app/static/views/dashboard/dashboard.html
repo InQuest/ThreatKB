@@ -135,7 +135,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="cfg_state in cfg_states | toArray:false | filter:search track by $index">
+            <tr ng-repeat="cfg_state in cfg_states | toArray:false | filter:search:customSearch track by $index">
                 <td ng-if="cfg_state.state">{{ cfg_state.state }}</td>
 
                 <td ng-if="cfg_state.is_release_state && cfg_state.id">Yes</td>
@@ -172,7 +172,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="crm in cfg_category_range_mapping | toArray:false | filter:search track by $index">
+            <tr ng-repeat="crm in cfg_category_range_mapping | toArray:false | filter:search:customSearch track by $index">
                 <td ng-if="crm.category">{{ crm.category }}</td>
 
                 <td ng-if="crm.range_min">{{ crm.range_min }}</td>

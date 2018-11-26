@@ -6,6 +6,16 @@ angular.module('ThreatKB')
 
             $scope.errors = resolvedErrors;
 
+            $scope.customSearch = function(actual, expected) {
+                if (expected.length < 3) {
+                    return true;
+                } else if (typeof actual !== "object") {
+                    return actual.toString().toLowerCase().indexOf(expected.toString().toLowerCase()) !== -1;
+                } else {
+                    return false;
+                }
+            };
+
             $scope.create = function () {
                 $scope.clear();
                 $scope.open();

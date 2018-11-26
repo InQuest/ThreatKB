@@ -6,6 +6,16 @@ angular.module('ThreatKB')
 
             $scope.scripts = resolvedScripts;
 
+            $scope.customSearch = function(actual, expected) {
+                if (expected.length < 3) {
+                    return true;
+                } else if (typeof actual !== "object") {
+                    return actual.toString().toLowerCase().indexOf(expected.toString().toLowerCase()) !== -1;
+                } else {
+                    return false;
+                }
+            };
+
             $scope.run_script = function (id) {
                 $scope.script = Script.resource.get({id: id});
                 $scope.open(id);
@@ -57,7 +67,7 @@ angular.module('ThreatKB')
                     function (error) {
                         growl.error(error.data, {ttl: -1});
                     }
-                )
+                );
                 return false;
             };
 

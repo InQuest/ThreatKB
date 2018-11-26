@@ -72,7 +72,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="whitelist in whitelists | toArray:false | filter:search track by $index">
+            <tr ng-repeat="whitelist in whitelists | toArray:false | filter:search:customSearch track by $index">
                 <td ng-if="whitelist.id">{{ whitelist.id }}</td>
 
                 <td ng-if="whitelist.id">{{ whitelist.whitelist_artifact }}</td>

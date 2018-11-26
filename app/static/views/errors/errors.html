@@ -91,7 +91,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="error in errors | toArray:false | filter:search track by $index">
+            <tr ng-repeat="error in errors | toArray:false | filter:search:customSearch track by $index">
                 <td ng-if="error.id">{{ error.date_created }}</td>
 
                 <td ng-if="error.user.email">{{ error.user.email }}</td>

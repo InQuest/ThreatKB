@@ -9,8 +9,7 @@
                 <button type="button" class="close"
                         ng-click="cancel()">&times;
                 </button>
-                <h4 class="modal-title" id="myC2ipLabel" ng-if="!cfg_settings.id">Create Config Setting Artifact</h4>
-                <h4 class="modal-title" id="myC2ipLabel" ng-if="cfg_settings.id">Edit Config Artifact</h4>
+                <h4 class="modal-title" id="myC2ipLabel">{{ cfg_settings.id ? 'Edit' : 'Create' }} Config Setting Artifact</h4>
             </div>
             <div class="modal-body">
                 <div class="form-group">
@@ -75,7 +74,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="cfg_setting in cfg_settings | toArray:false | filter:search track by $index">
+            <tr ng-repeat="cfg_setting in cfg_settings | toArray:false | filter:search:customSearch track by $index">
                 <td ng-if="cfg_setting.key">{{ cfg_setting.key }}</td>
 
                 <td ng-if="cfg_setting.key">{{ cfg_setting.description }}</td>

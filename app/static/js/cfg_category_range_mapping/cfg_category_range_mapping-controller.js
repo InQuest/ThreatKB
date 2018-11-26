@@ -6,6 +6,16 @@ angular.module('ThreatKB')
 
             $scope.cfg_category_range_mapping = resolvedCfgCategoryRangeMapping;
 
+            $scope.customSearch = function(actual, expected) {
+                if (expected.length < 3) {
+                    return true;
+                } else if (typeof actual !== "object") {
+                    return actual.toString().toLowerCase().indexOf(expected.toString().toLowerCase()) !== -1;
+                } else {
+                    return false;
+                }
+            };
+
             $scope.create = function () {
                 $scope.clear();
                 $scope.open();
