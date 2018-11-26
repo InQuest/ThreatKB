@@ -26,11 +26,9 @@ def do_search():
 
     results = {"tasks": [], "ips": [], "dns": [], "signatures": []}
 
-    signatures = yara_rule.Yara_rule.query.join(metadata.MetadataMapping,
-                                                metadata.MetadataMapping.metadata_id == ENTITY_MAPPING["SIGNATURE"])
-    ips = c2ip.C2ip.query.join(metadata.MetadataMapping, metadata.MetadataMapping.metadata_id == ENTITY_MAPPING["IP"])
-    dns = c2dns.C2dns.query.join(metadata.MetadataMapping,
-                                 metadata.MetadataMapping.metadata_id == ENTITY_MAPPING["DNS"])
+    signatures = yara_rule.Yara_rule.query
+    ips = c2ip.C2ip.query
+    dns = c2dns.C2dns.query
     task = tasks.Tasks.query
 
     if tag:
@@ -65,18 +63,22 @@ def do_search():
             or_(yara_rule.Yara_rule.name.like("%" + all + "%"), yara_rule.Yara_rule.category.like("%" + all + "%"),
                 yara_rule.Yara_rule.state.like("%" + all + "%"), yara_rule.Yara_rule.strings.like("%" + all + "%"),
                 yara_rule.Yara_rule.condition.like("%" + all + "%"),
-                and_(metadata.MetadataMapping.artifact_id == yara_rule.Yara_rule.id,
-                     metadata.MetadataMapping.value.like("%" + all + "%")),
+                yara_rule.Yara_rule.description.like("%" + all + "%"),
+                yara_rule.Yara_rule.references.like("%" + all + "%"),
                 (yara_rule.Yara_rule.eventid == int(all) if all.isdigit() else False)))
 
-        ips = ips.filter(or_(c2ip.C2ip.state.like("%" + all + "%"), c2ip.C2ip.ip.like("%" + all + "%"),
-                             c2ip.C2ip.asn.like("%" + all + "%"), c2ip.C2ip.country.like("%" + all + "%"),
-                             c2ip.C2ip.state.like("%" + all + "%"),
-                             and_(metadata.MetadataMapping.artifact_id == c2ip.C2ip.id,
-                                  metadata.MetadataMapping.value.like("%" + all + "%"))))
-        dns = dns.filter(or_(c2dns.C2dns.state.like("%" + all + "%"), c2dns.C2dns.domain_name.like("%" + all + "%"),
-                             and_(metadata.MetadataMapping.artifact_id == c2dns.C2dns.id,
-                                  metadata.MetadataMapping.value.like("%" + all + "%"))))
+        ips = ips.filter(or_(c2ip.C2ip.state.like("%" + all + "%"),
+                             c2ip.C2ip.ip.like("%" + all + "%"),
+                             c2ip.C2ip.asn.like("%" + all + "%"),
+                             c2ip.C2ip.country.like("%" + all + "%"),
+                             c2ip.C2ip.description.like("%" + all + "%"),
+                             c2ip.C2ip.references.like("%" + all + "%"),
+                             c2ip.C2ip.state.like("%" + all + "%"), ))
+        dns = dns.filter(or_(c2dns.C2dns.state.like("%" + all + "%"),
+                             c2dns.C2dns.domain_name.like("%" + all + "%"),
+                             c2dns.C2dns.description.like("%" + all + "%"),
+                             c2dns.C2dns.references.like("%" + all + "%"),
+                             ))
         task = task.filter(or_(tasks.Tasks.state.like("%" + all + "%"), tasks.Tasks.title.like("%" + all + "%"),
                                tasks.Tasks.final_artifact.like("%" + all + "%")))
 
