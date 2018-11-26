@@ -90,6 +90,13 @@ angular.module('ThreatKB')
                             width: '320',
                         },
                         {
+                            field: 'date_created',
+                            displayName: "Created Date",
+                            enableSorting: true,
+                            width: '180',
+                            cellFilter: 'date:\'yyyy-MM-dd HH:mm:ss\''
+                        },
+                        {
                             field: 'description',
                             enableSorting: true
                         },

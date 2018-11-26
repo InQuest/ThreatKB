@@ -88,8 +88,15 @@ angular.module('ThreatKB')
                         {
                             field: 'ip',
                             displayName: 'IP',
-                            width: '150',
+                            width: '220',
                             enableSorting: true
+                        },
+                        {
+                            field: 'date_created',
+                            displayName: "Created Date",
+                            enableSorting: true,
+                            width: '180',
+                            cellFilter: 'date:\'yyyy-MM-dd HH:mm:ss\''
                         },
                         {
                             field: 'description',

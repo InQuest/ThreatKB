@@ -1,12 +1,14 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('Yara_ruleController', ['$scope', '$timeout', '$filter', '$http', '$uibModal', 'Yara_rule', 'Cfg_states', 'CfgCategoryRangeMapping', 'Users', 'growl', 'openModalForId', 'uiGridConstants', 'FileSaver', 'Blob',
-        function ($scope, $timeout, $filter, $http, $uibModal, Yara_rule, Cfg_states, CfgCategoryRangeMapping, Users, growl, openModalForId, uiGridConstants, FileSaver, Blob) {
+    .controller('Yara_ruleController', ['$scope', '$timeout', '$filter', '$http', '$uibModal', 'Yara_rule', 'Cfg_states', 'CfgCategoryRangeMapping', 'Users', 'growl', 'openModalForId', 'uiGridConstants', 'FileSaver', 'Blob', 'Cfg_settings',
+        function ($scope, $timeout, $filter, $http, $uibModal, Yara_rule, Cfg_states, CfgCategoryRangeMapping, Users, growl, openModalForId, uiGridConstants, FileSaver, Blob, Cfg_settings) {
 
             $scope.cfg_states = Cfg_states.query();
 
             $scope.users = Users.query();
+
+            //$scope.start_filter_requests_length = Cfg_settings.get({key: "START_FILTER_REQUESTS_LENGTH"});
 
             $scope.clear_checked = function () {
                 $scope.checked_indexes = [];
@@ -118,15 +120,20 @@ angular.module('ThreatKB')
                     $scope.gridApi.core.on.filterChanged($scope, function () {
                         var grid = this.grid;
                         paginationOptions.searches = {};
+                        var trigger_refresh = false;
 
                         for (var i = 0; i < grid.columns.length; i++) {
                             var column = grid.columns[i];
-                            if (column.filters[0].term !== undefined && column.filters[0].term !== null && column.filters[0].term !== "") {
+                            if (column.filters[0].term !== undefined && column.filters[0].term !== null && column.filters[0].term !== "") { //&& column.filters[0].term.length >= parseInt($scope.start_filter_requests_length.value)) {
+                                trigger_refresh = true;
                                 paginationOptions.searches[column.colDef.field] = column.filters[0].term
                             }
                         }
 
-                        getPage();
+                        if (trigger_refresh) {
+
+                            getPage();
+                        }
                     });
                     $scope.gridApi.core.on.sortChanged($scope, function (grid, sortColumns) {
                         if (sortColumns.length === 0) {
@@ -185,6 +192,13 @@ angular.module('ThreatKB')
                         {
                             field: 'name',
                             enableSorting: true
+                        },
+                        {
+                            field: 'creation_date',
+                            displayName: "Created Date",
+                            enableSorting: true,
+                            width: '180',
+                            cellFilter: 'date:\'yyyy-MM-dd HH:mm:ss\''
                         },
                         {
                             field: 'category',
