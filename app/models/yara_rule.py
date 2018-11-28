@@ -193,7 +193,7 @@ class Yara_rule(db.Model):
             if yara_dict.get(field, None) and not "metadata" in field and field in ["creation_date",
                                                                                     "last_revision_date", "revision",
                                                                                     "name", "category", "eventid",
-                                                                                    "description"]:
+                                                                                    "description", "references"]:
                 try:
                     yara_dict[field] = re.sub("[^\x00-\x7F]", "", yara_dict[field])
                 except:
