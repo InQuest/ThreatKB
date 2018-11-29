@@ -8,7 +8,7 @@ angular.module('ThreatKB')
 
             $scope.users = Users.query();
 
-            //$scope.start_filter_requests_length = Cfg_settings.get({key: "START_FILTER_REQUESTS_LENGTH"});
+            $scope.start_filter_requests_length = Cfg_settings.get({key: "START_FILTER_REQUESTS_LENGTH"});
 
             $scope.clear_checked = function () {
                 $scope.checked_indexes = [];
@@ -121,7 +121,7 @@ angular.module('ThreatKB')
 
                         for (var i = 0; i < grid.columns.length; i++) {
                             var column = grid.columns[i];
-                            if (column.filters[0].term !== undefined && column.filters[0].term !== null && column.filters[0].term.length >= 3) { //&& column.filters[0].term.length >= parseInt($scope.start_filter_requests_length.value)) {
+                            if (column.filters[0].term !== undefined && column.filters[0].term !== null && column.filters[0].term.length >= parseInt($scope.start_filter_requests_length.value)) {
                                 trigger_refresh = true;
                                 paginationOptions.searches[column.colDef.field] = column.filters[0].term
                             }
