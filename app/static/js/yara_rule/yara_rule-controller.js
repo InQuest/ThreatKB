@@ -370,7 +370,11 @@ angular.module('ThreatKB')
                         //$scope.yara_rules = Yara_rule.resource.query();
                         getPage();
                     }, function (err) {
-                        growl.error(err.data);
+                        var timeout = 10000;
+                        growl.error(err.data + ". Refreshing page in " + (timeout / 1000) + " seconds", {ttl: timeout});
+                        setTimeout(function () {
+                            getPage();
+                        }, timeout);
                     });
                 } else {
                     $scope.yara_rule.metadata_values = {};
@@ -414,7 +418,6 @@ angular.module('ThreatKB')
                     }
 
                     Yara_rule.resource.save($scope.yara_rule, function () {
-                        //$scope.yara_rules = Yara_rule.resource.query();
                         getPage();
                     }, function (err) {
                         growl.error(err.data);

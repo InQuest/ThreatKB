@@ -27,7 +27,7 @@ def upgrade():
         [
             {"key": "COMPILE_YARA_RULE_ON_SAVE", "value": "1", "public": True, "date_created": date_created,
              "date_modified": date_modified,
-             "description": "If true, don't save yara rule changes unless they compile."},
+             "description": "If true, don't save yara rule changes if they are in the draft or release state unless they compile."},
         ]
     )
 
