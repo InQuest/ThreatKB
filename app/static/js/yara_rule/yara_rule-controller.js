@@ -23,10 +23,7 @@ angular.module('ThreatKB')
             };
 
             $scope.disable_multi_actions = function () {
-                if ($scope.checked_counter < 1) {
-                    return true;
-                }
-                return false;
+                return $scope.checked_counter < 1;
             };
             $scope.get_index_from_row = function (row) {
                 for (var i = 0; i < row.grid.rows.length; i++) {
@@ -78,7 +75,7 @@ angular.module('ThreatKB')
                         }
                         return output;
                     }
-                })
+                });
                 growl.info("Successfully copied " + $scope.checked_counter + " signatures to clipboard.", {ttl: 3})
             };
 
@@ -163,7 +160,7 @@ angular.module('ThreatKB')
                             $(":input[type=text]").each(function (i) {
                                 if ($(this).hasClass("ui-grid-filter-input")) {
                                     $(this).attr("tabindex", i + 1);
-                                    if ((i + 1) == 1) {
+                                    if ((i + 1) === 1) {
                                         $(this).focus();
                                     }
                                 }
@@ -246,6 +243,12 @@ angular.module('ThreatKB')
                             enableColumnMenu: false,
                             enableSorting: false,
                             cellTemplate: '<div style="text-align: center;">'
+                            + '<button type="button" ng-click="grid.appScope.viewRule(row.entity.id)"'
+                            + ' class="btn btn-sm">'
+                            + '<small><span class="glyphicon glyphicon-eye-open"></span>'
+                            + '</small>'
+                            + '</button>'
+                            + '&nbsp;'
                             + '<button type="button" ng-click="grid.appScope.update(row.entity.id)"'
                             + ' class="btn btn-sm">'
                             + '<small><span class="glyphicon glyphicon-pencil"></span>'
@@ -324,7 +327,7 @@ angular.module('ThreatKB')
 
             $scope.create = function () {
                 $scope.clear();
-                $scope.open();
+                $scope.edit();
             };
 
             $scope.update = function (id) {
@@ -332,7 +335,12 @@ angular.module('ThreatKB')
                 $scope.cfg_states = Cfg_states.query();
                 $scope.users = Users.query();
                 $scope.cfg_category_range_mapping = CfgCategoryRangeMapping.query();
-                $scope.open(id);
+                $scope.edit(id);
+            };
+
+            $scope.viewRule = function (id) {
+                $scope.yara_rule = Yara_rule.resource.get({id: id, include_yara_string: 1});
+                $scope.view(id);
             };
 
             $scope.delete = function (id) {
@@ -435,7 +443,7 @@ angular.module('ThreatKB')
                 };
             };
 
-            $scope.open = function (id) {
+            $scope.edit = function (id) {
                 var yara_ruleSave = $uibModal.open({
                     templateUrl: 'yara_rule-save.html',
                     controller: 'Yara_ruleSaveController',
@@ -453,7 +461,7 @@ angular.module('ThreatKB')
                                 filter: "signature",
                                 format: "dict"
                             });
-                        }],
+                        }]
                     }
                 });
 
@@ -466,6 +474,20 @@ angular.module('ThreatKB')
                     }
                 }, function () {
                     getPage();
+                });
+            };
+
+            $scope.view = function (id) {
+                var yara_view = $uibModal.open({
+                    templateUrl: 'yara_rule-view.html',
+                    controller: 'Yara_ruleViewController',
+                    size: 'lg',
+                    backdrop: 'static',
+                    resolve: {
+                        yara_rule: function () {
+                            return $scope.yara_rule;
+                        }
+                    }
                 });
             };
 
@@ -487,7 +509,7 @@ angular.module('ThreatKB')
 
             $scope.users = Users.query();
 
-            $scope.wrap_editor = ($cookies.get("wrap_editor") == "true");
+            $scope.wrap_editor = ($cookies.get("wrap_editor") === "true");
 
             if ($scope.wrap_editor == null) {
                 $scope.wrap_editor = false;
@@ -584,7 +606,7 @@ angular.module('ThreatKB')
                 var last_spot = location.split("/")[location.split("/").length - 1]
                 if (isNaN(parseInt(last_spot, 10))) {
                     return $location.absUrl() + "/" + id;
-                } else if (!isNaN(parseInt(last_spot, 10)) && last_spot != id) {
+                } else if (!isNaN(parseInt(last_spot, 10)) && last_spot !== id) {
                     return $location.absUrl().replace(/\/[0-9]+$/, "/" + id)
                 }
                 return $location.absUrl();
@@ -765,4 +787,18 @@ angular.module('ThreatKB')
                 $uibModalInstance.close($scope.selected_signature);
             };
 
-        }]);
+        }])
+    .controller('Yara_ruleViewController', ['$scope', '$uibModalInstance', 'yara_rule',
+        function ($scope, $uibModalInstance, yara_rule) {
+
+            $scope.yara_rule = yara_rule;
+
+            $scope.ok = function () {
+                $uibModalInstance.close($scope.yara_rule);
+            };
+
+            $scope.cancel = function () {
+                $uibModalInstance.dismiss('cancel');
+            };
+
+    }]);
