@@ -283,8 +283,9 @@ angular.module('ThreatKB')
                 var url = '/ThreatKB/yara_rules?';
                 url += 'page_number=' + (paginationOptions.pageNumber - 1);
                 url += '&page_size=' + paginationOptions.pageSize;
-                url += '&include_yara_string=1';
+                url += '&include_yara_string=0';
                 url += '&short=1';
+                url += '&include_metadata=0';
 
                 switch (paginationOptions.sort_dir) {
                     case uiGridConstants.ASC:

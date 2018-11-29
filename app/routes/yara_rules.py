@@ -74,8 +74,9 @@ def get_all_yara_rules():
 
     Return: list of yara_rule artifact dictionaries"""
     include_inactive = request.args.get("include_inactive", False)
-    include_yara_string = request.args.get("include_yara_string", False)
-    short = distutils.util.strtobool(request.args.get("short", "false"))
+    include_yara_string = bool(distutils.util.strtobool(request.args.get("include_yara_string", False)))
+    short = bool(distutils.util.strtobool(request.args.get("short", "false")))
+    include_metadata = bool(distutils.util.strtobool(request.args.get('include_metadata', "true")))
 
     if include_yara_string:
         include_yara_string = True
@@ -86,6 +87,7 @@ def get_all_yara_rules():
     page_size = request.args.get('page_size', False)
     sort_by = request.args.get('sort_by', False)
     sort_direction = request.args.get('sort_dir', 'ASC')
+    exclude_totals = request.args.get('exclude_totals', False)
 
     entities = yara_rule.Yara_rule.query
 
@@ -131,10 +133,16 @@ def get_all_yara_rules():
     filtered_entities = filtered_entities.all()
 
     response_dict = dict()
-    response_dict['data'] = [entity.to_dict(include_yara_string, short) for entity in filtered_entities]
+    response_dict['data'] = [
+        entity.to_dict(include_yara_rule_string=include_yara_string, short=short, include_metadata=include_metadata) for
+        entity in
+        filtered_entities]
     response_dict['total_count'] = total_count
 
-    return Response(json.dumps(response_dict), mimetype='application/json')
+    if exclude_totals:
+        return Response(json.dumps(response_dict['data']), mimetype="application/json")
+    else:
+        return Response(json.dumps(response_dict), mimetype='application/json')
 
 
 @app.route('/ThreatKB/yara_rules/<int:id>', methods=['GET'])

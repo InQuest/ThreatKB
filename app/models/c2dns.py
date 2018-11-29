@@ -122,14 +122,8 @@ class C2dns(db.Model):
                                                             created_user_id=current_user.id))
         return metadata_to_save
 
-    def to_dict(self):
-        metadata_values_dict = {}
-        metadata_keys = Metadata.get_metadata_keys("DNS")
-        metadata_values_dict = {m["metadata"]["key"]: m for m in [entity.to_dict() for entity in self.metadata_values]}
-        for key in list(set(metadata_keys) - set(metadata_values_dict.keys())):
-            metadata_values_dict[key] = {}
-
-        return dict(
+    def to_dict(self, include_metadata=True):
+        d = dict(
             date_created=self.date_created.isoformat() if self.date_created else None,
             date_modified=self.date_modified.isoformat() if self.date_modified else None,
             state=self.state,
@@ -148,9 +142,18 @@ class C2dns(db.Model):
             owner_user=self.owner_user.to_dict() if self.owner_user else None,
             comments=[comment.to_dict() for comment in
                       Comments.query.filter_by(entity_id=self.id).filter_by(entity_type=ENTITY_MAPPING["DNS"]).all()],
-            metadata=Metadata.get_metadata_dict("DNS"),
-            metadata_values=metadata_values_dict,
         )
+
+        if include_metadata:
+            metadata_values_dict = {}
+            metadata_keys = Metadata.get_metadata_keys("DNS")
+            metadata_values_dict = {m["metadata"]["key"]: m for m in
+                                    [entity.to_dict() for entity in self.metadata_values]}
+            for key in list(set(metadata_keys) - set(metadata_values_dict.keys())):
+                metadata_values_dict[key] = {}
+            d.update(dict(metadata=Metadata.get_metadata_dict("DNS"), metadata_values=metadata_values_dict))
+
+        return d
 
     def to_release_dict(self, metadata_cache, user_cache):
         return dict(

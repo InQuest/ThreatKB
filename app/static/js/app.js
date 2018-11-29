@@ -47,7 +47,9 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                     resolvedC2dns: ['C2dns', function (C2dns) {
                         return C2dns.query({
                             page_number: 0,
-                            page_size: 25
+                            page_size: 25,
+                            include_metadata: 0,
+                            short: 1
                         });
                     }],
                     openModalForId: [function () {
@@ -79,7 +81,9 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                     resolvedC2ip: ['C2ip', function (C2ip) {
                         return C2ip.query({
                             page_number: 0,
-                            page_size: 25
+                            page_size: 25,
+                            include_metadata: 0,
+                            short: 1
                         });
                     }],
                     openModalForId: [function () {
@@ -182,8 +186,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                         return Yara_rule.resource.query({
                             page_number: 0,
                             page_size: 25,
-                            include_yara_string: 1,
-                            short: 0
+                            include_yara_string: 1
                         });
                     }],
                     openModalForId: ['$route', function ($route) {
