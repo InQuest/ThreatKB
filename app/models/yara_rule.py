@@ -239,7 +239,7 @@ class Yara_rule(db.Model):
         formatted_condition = ""
 
         if not "condition" in yara_dict["condition"]:
-            formatted_condition = "\n\tstrings:\n\t\t"
+            formatted_condition = "\n\tcondition:\n\t\t"
             formatted_condition += "\n\t\t".join([line.strip() for line in yara_dict["condition"].split("\n")])
             #yara_rule_text += "\n\tcondition:\n\t\t%s\n\n}" % (yara_dict["condition"])
         else:
