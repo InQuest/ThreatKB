@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('C2dnsController', ['$scope', '$timeout', '$filter', '$http', '$uibModal', 'resolvedC2dns', 'C2dns', 'Cfg_states', 'growl', 'Users', 'openModalForId', 'uiGridConstants',
-        function ($scope, $timeout, $filter, $http, $uibModal, resolvedC2dns, C2dns, Cfg_states, growl, Users, openModalForId, uiGridConstants) {
+    .controller('C2dnsController', ['$scope', '$timeout', '$filter', '$http', '$uibModal', 'resolvedC2dns', 'C2dns', 'Cfg_states', 'growl', 'Users', 'openModalForId', 'uiGridConstants', 'Cfg_settings',
+        function ($scope, $timeout, $filter, $http, $uibModal, resolvedC2dns, C2dns, Cfg_states, growl, Users, openModalForId, uiGridConstants, Cfg_settings) {
 
             $scope.c2dns = resolvedC2dns;
 
