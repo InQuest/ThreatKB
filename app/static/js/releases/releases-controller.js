@@ -8,6 +8,10 @@ angular.module('ThreatKB')
 
             $scope.block_message = "Generating release. This could take up to a minute...";
 
+            $scope.customSearch = function(input) {
+                return typeof input === 'object' ? false : angular.equals(input.toLowerCase(),$scope.searchText.toLowerCase());
+            };
+
             $scope.create = function () {
                 $scope.clear();
                 $scope.open();

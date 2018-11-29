@@ -122,7 +122,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="script in scripts | toArray:false | filter:search track by $index">
+            <tr ng-repeat="script in scripts | toArray:false | filter:search:customSearch track by $index">
                 <td ng-if="script.id">{{ script.name }}</td>
 
                 <td ng-if="script.id">{{ script.description }}</td>

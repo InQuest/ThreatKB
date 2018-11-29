@@ -67,7 +67,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="release in releases | orderBy:'-date_created' | filter:{name:search} track by $index "
+            <tr ng-repeat="release in releases | orderBy:'-date_created' | filter:{name:search}:customSearch track by $index "
                 ng-if="release.date_created">
                 <td>{{ release.name }}</td>
 

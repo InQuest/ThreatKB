@@ -6,6 +6,16 @@ angular.module('ThreatKB')
 
             $scope.files = resolvedFiles;
 
+            $scope.customSearch = function(actual, expected) {
+                if (expected.length < 3) {
+                    return true;
+                } else if (typeof actual !== "object") {
+                    return actual.toString().toLowerCase().indexOf(expected.toString().toLowerCase()) !== -1;
+                } else {
+                    return false;
+                }
+            };
+
             $scope.delete = function (id) {
                 Files.resource.delete({id: id}, function () {
                     $scope.files = Files.resource.query();

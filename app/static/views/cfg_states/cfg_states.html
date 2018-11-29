@@ -10,8 +10,7 @@
                         ng-click="cancel()">&times;
                 </button>
 
-                <h4 class="modal-title" id="myC2ipLabel" ng-if="!cfg_states.id">Create State</h4>
-                <h4 class="modal-title" id="myC2ipLabel" ng-if="cfg_states.id">Edit State</h4>
+                <h4 class="modal-title" id="myC2ipLabel">{{ cfg_states.id ? 'Edit' : 'Create' }} State</h4>
 
             </div>
             <div class="modal-body">
@@ -99,7 +98,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="cfg_state in cfg_states | toArray:false | filter:search track by $index">
+            <tr ng-repeat="cfg_state in cfg_states | toArray:false | filter:search:customSearch track by $index">
                 <td ng-if="cfg_state.id">{{ cfg_state.id }}</td>
 
                 <td ng-if="cfg_state.state">{{ cfg_state.state }}</td>

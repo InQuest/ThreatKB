@@ -131,7 +131,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="user in users | toArray:false | filter:search track by $index">
+            <tr ng-repeat="user in users | toArray:false | filter:search:customSearch track by $index">
                 <td ng-if="user.id">{{ user.id }}</td>
 
                 <td ng-if="user.id">{{ user.email }}</td>

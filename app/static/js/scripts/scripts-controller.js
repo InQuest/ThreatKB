@@ -6,6 +6,16 @@ angular.module('ThreatKB')
 
             $scope.scripts = resolvedScripts;
 
+            $scope.customSearch = function(actual, expected) {
+                if (expected.length < 3) {
+                    return true;
+                } else if (typeof actual !== "object") {
+                    return actual.toString().toLowerCase().indexOf(expected.toString().toLowerCase()) !== -1;
+                } else {
+                    return false;
+                }
+            };
+
             $scope.create = function () {
                 $scope.clear();
                 $scope.open();
@@ -112,7 +122,7 @@ angular.module('ThreatKB')
 
             $scope.change = function (interpreter) {
                 $scope.script.interpreter = interpreter;
-            }
+            };
 
             $scope.ok = function () {
                 $uibModalInstance.close($scope.script);

@@ -6,6 +6,16 @@ angular.module('ThreatKB')
 
             $scope.cfg_states = resolvedCfg_states;
 
+            $scope.customSearch = function(actual, expected) {
+                if (expected.length < 3) {
+                    return true;
+                } else if (typeof actual !== "object") {
+                    return actual.toString().toLowerCase().indexOf(expected.toString().toLowerCase()) !== -1;
+                } else {
+                    return false;
+                }
+            };
+
             $scope.create = function () {
                 $scope.clear();
                 $scope.open();
@@ -93,7 +103,7 @@ angular.module('ThreatKB')
                 $scope.cfg_states.is_staging_state = false;
                 $scope.cfg_states.is_release_state = false;
                 $scope.cfg_states.is_retired_state = false;
-            }
+            };
 
             $scope.set_as_staging_state = function () {
                 if ($scope.cfg_states.is_staging_state) {
