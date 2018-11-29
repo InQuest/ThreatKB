@@ -38,14 +38,18 @@ angular.module('ThreatKB')
                     $scope.gridApi.core.on.filterChanged($scope, function () {
                         var grid = this.grid;
                         paginationOptions.searches = {};
+                        var trigger_refresh = false;
 
                         for (var i = 0; i < grid.columns.length; i++) {
                             var column = grid.columns[i];
                             if (column.filters[0].term !== undefined && column.filters[0].term !== null && column.filters[0].term.length >= parseInt($scope.start_filter_requests_length.value)) {
+                                trigger_refresh = true;
                                 paginationOptions.searches[column.colDef.field] = column.filters[0].term
                             }
                         }
-                        getPage()
+                        if (trigger_refresh) {
+                            getPage();
+                        }
                     });
                     $scope.gridApi.core.on.sortChanged($scope, function (grid, sortColumns) {
                         if (sortColumns.length === 0) {
