@@ -200,7 +200,8 @@ class Yara_rule(db.Model):
                     pass
                 metadata_strings.append("\t\t%s = \"%s\"\n" % (
                     field.title() if not field.lower() == "eventid" else "EventID",
-                    str(yara_dict[field]).replace("\"", "'")))
+                    str(yara_dict[field]).replace("\"", "'") if not field.lower() == "references" else str(
+                        yara_dict[field]).replace("\"", "'").replace("\n", ",")))
 
         try:
             for type_, metalist in yara_dict["metadata"].iteritems():
