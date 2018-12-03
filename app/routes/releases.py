@@ -41,7 +41,6 @@ def get_releases_latest():
     From Data: count (int)
     Return: list of release dictionaries"""
 
-    settings_count = cfg_settings.Cfg_settings.get_setting("DASHBOARD_RELEASES_COUNT")
     count = request.args.get("count", None)
     short = distutils.util.strtobool(request.args.get("short", "True"))
 

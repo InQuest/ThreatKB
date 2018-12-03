@@ -22,8 +22,10 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                     resolvedOwnershipData: ['AuthService', function (AuthService) {
                         return AuthService.getOwnershipData();
                     }],
-                    resolvedReleasesLatest: ['Release', function (Release) {
-                        return Release.get_latest_releases(3);
+                    resolvedReleasesLatest: ['Release', 'Cfg_settings', function (Release, Cfg_settings) {
+                        return Cfg_settings.get({key: "DASHBOARD_RELEASES_COUNT"}).$promise.then(function (release_count) {
+                            return Release.get_latest_releases(release_count.value);
+                        });
                     }],
                     resolvedVersion: ['Version', function (Version) {
                         return Version.get_version();

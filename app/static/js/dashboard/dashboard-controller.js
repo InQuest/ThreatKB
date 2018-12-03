@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('DashboardController', ['$scope', '$location', 'resolvedCfgCategoryRangeMapping', 'resolvedCfg_states', 'resolvedOwnershipData', 'resolvedReleasesLatest', 'resolvedBookmarks', 'resolvedVersion',
-        function ($scope, $location, resolvedCfgCategoryRangeMapping, resolvedCfg_states, resolvedOwnershipData, resolvedReleasesLatest, resolvedBookmarks, resolvedVersion) {
+    .controller('DashboardController', ['$scope', '$location', 'resolvedCfgCategoryRangeMapping', 'resolvedReleasesLatest', 'resolvedCfg_states', 'resolvedOwnershipData', 'resolvedBookmarks', 'resolvedVersion', 'Release',
+        function ($scope, $location, resolvedCfgCategoryRangeMapping, resolvedReleasesLatest, resolvedCfg_states, resolvedOwnershipData, resolvedBookmarks, resolvedVersion, Release) {
             $scope.bookmarks = resolvedBookmarks;
             $scope.cfg_category_range_mapping = resolvedCfgCategoryRangeMapping;
             $scope.cfg_states = resolvedCfg_states;
