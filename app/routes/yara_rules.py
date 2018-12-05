@@ -6,14 +6,15 @@ from flask.ext.login import current_user, login_required
 import distutils
 
 from app.models.users import KBUser
-from app.models.metadata import Metadata, MetadataMapping, MetadataChoices
-from app.models.bookmarks import Bookmarks
+from app.models.metadata import Metadata, MetadataMapping
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
 from app.routes.cfg_category_range_mapping import update_cfg_category_range_mapping_current
 from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
+from app.routes.comments import create_comment
 from app.models.cfg_settings import Cfg_settings
 
 import datetime
+
 
 @app.route('/ThreatKB/yara_rules/merge_signatures', methods=['POST'])
 @auto.doc()
@@ -225,6 +226,13 @@ def create_yara_rule():
     db.session.commit()
 
     entity.tags = create_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
+
+    if request.json['new_comment']:
+        create_comment(request.json['new_comment'],
+                       ENTITY_MAPPING["SIGNATURE"],
+                       entity.id,
+                       current_user.id)
+
     if new_sig_id > 0:
         update_cfg_category_range_mapping_current(request.json['category']['id'], new_sig_id)
 

@@ -44,15 +44,23 @@ def create_comments():
     """Create comment
     From Data: comment (str), entity_type (int) {"SIGNATURE": 1, "DNS": 2, "IP": 3, "TASK": 4}, entity_id
     Return: comment dictionary"""
+
+    return create_comment(request.json['comment'],
+                          request.json['entity_type'],
+                          request.json['entity_id'],
+                          current_user.id), 201
+
+
+def create_comment(comment, entity_type, entity_id, user_id):
     entity = comments.Comments(
-        comment=request.json['comment']
-        , entity_type=request.json['entity_type']
-        , entity_id=request.json['entity_id']
-        , user_id=current_user.id
+        comment=comment,
+        entity_type=entity_type,
+        entity_id=entity_id,
+        user_id=user_id
     )
     db.session.add(entity)
     db.session.commit()
-    return jsonify(entity.to_dict()), 201
+    return jsonify(entity.to_dict())
 
 
 @app.route('/ThreatKB/comments/<int:id>', methods=['DELETE'])

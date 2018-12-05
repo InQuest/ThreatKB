@@ -6,12 +6,13 @@ from dateutil import parser
 from sqlalchemy import exc, and_
 
 from app.models.users import KBUser
-from app.models.bookmarks import Bookmarks
-from app.models.metadata import Metadata, MetadataMapping, MetadataChoices
+from app.models.metadata import Metadata, MetadataMapping
 from app.models.cfg_states import verify_state
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
 from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
+from app.routes.comments import create_comment
 import distutils
+
 
 @app.route('/ThreatKB/c2ips', methods=['GET'])
 @auto.doc()
@@ -61,7 +62,7 @@ def get_all_c2ips():
         try:
             column = getattr(c2ip.C2ip, column)
             entities = entities.filter(column.like("%" + str(value) + "%"))
-        except AttributeError, e:
+        except AttributeError as e:
             entities = entities.filter(and_(MetadataMapping.artifact_id == c2ip.C2ip.id, Metadata.key == column,
                                             MetadataMapping.value.like("%" + str(value) + "%")))
 
@@ -141,6 +142,12 @@ def create_c2ip():
         abort(412, description="Whitelist validation failed.")
 
     entity.tags = create_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
+
+    if request.json['new_comment']:
+        create_comment(request.json['new_comment'],
+                       ENTITY_MAPPING["IP"],
+                       entity.id,
+                       current_user.id)
 
     entity.save_metadata(request.json.get("metadata_values", {}))
 
