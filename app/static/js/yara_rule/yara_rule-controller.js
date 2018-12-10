@@ -348,7 +348,6 @@ angular.module('ThreatKB')
 
             $scope.delete = function (id) {
                 Yara_rule.resource.delete({id: id}, function () {
-                    //$scope.yara_rules = Yara_rule.resource.query();
                     getPage();
                 });
             };
@@ -370,7 +369,6 @@ angular.module('ThreatKB')
 
                 if (typeof(id) === "number") {
                     Yara_rule.resource.update({id: id}, $scope.yara_rule, function () {
-                        //$scope.yara_rules = Yara_rule.resource.query();
                         getPage();
                     }, function (err) {
                         var timeout = 10000;
@@ -378,6 +376,7 @@ angular.module('ThreatKB')
                         setTimeout(function () {
                             getPage();
                         }, timeout);
+                        $scope.openYaraModal(id);
                     });
                 } else {
                     $scope.yara_rule.metadata_values = {};
@@ -424,6 +423,7 @@ angular.module('ThreatKB')
                         getPage();
                     }, function (err) {
                         growl.error(err.data);
+                        $scope.openYaraModal(id);
                     });
                 }
             };
@@ -449,7 +449,7 @@ angular.module('ThreatKB')
                 };
             };
 
-            $scope.edit = function (id) {
+            $scope.openYaraModal = function(id) {
                 var yara_ruleSave = $uibModal.open({
                     templateUrl: 'yara_rule-save.html',
                     controller: 'Yara_ruleSaveController',
@@ -481,6 +481,10 @@ angular.module('ThreatKB')
                 }, function () {
                     getPage();
                 });
+            };
+
+            $scope.edit = function (id) {
+                $scope.openYaraModal(id);
             };
 
             $scope.view = function (id) {
