@@ -18,7 +18,7 @@ angular.module('ThreatKB')
                         return $q.reject(error.data);
                     }
                 );
-        };
+        }
 
         return {
             resource: $resource('ThreatKB/yara_rules/:id', {}, {
