@@ -1,6 +1,6 @@
 from app import app, db, bcrypt, admin_only, auto
 from app.models.users import KBUser
-from app.models import yara_rule, c2dns, c2ip, tasks, users
+from app.models import yara_rule, c2dns, c2ip, tasks, users, access_keys
 from flask import request, jsonify, session, json, abort, send_file, Response
 from flask.ext.login import current_user, login_required
 import flask_login
@@ -82,7 +82,8 @@ def delete_user_by_id(user_id):
     if not user:
         abort(404)
 
-    db.session.delete(user)
+    user.active = 0
+    db.session.add(user)
     db.session.commit()
     return jsonify(''), 204
 

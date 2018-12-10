@@ -39,7 +39,7 @@ class KBUser(db.Model):
     def to_dict(self):
         return dict(
             email=self.email,
-            # registered_on=self.registered_on.isoformat(),
+            registered_on=self.registered_on.isoformat(),
             admin=self.admin,
             active=self.active,
             id=self.id,
