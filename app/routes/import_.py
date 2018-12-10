@@ -1,17 +1,16 @@
 from flask import abort, jsonify, request
 from flask.ext.login import login_required, current_user
 from app import app, db, admin_only, auto, ENTITY_MAPPING
-from app.models import c2ip, c2dns, yara_rule, cfg_states, cfg_settings, comments, metadata
+from app.models import c2ip, c2dns, yara_rule, cfg_states, comments
 from app.models.metadata import Metadata
 from app.utilities import extract_artifacts
-import json
 import distutils
 
 
 #####################################################################
 
-def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared_reference=None, shared_state=None,
-                   shared_owner=None, metadata_field_mapping={}):
+def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared_reference=None,
+                   shared_description=None, shared_state=None, shared_owner=None, metadata_field_mapping={}):
     default_state = "Imported"
     return_artifacts = []
     duplicate_artifacts = []
@@ -47,6 +46,9 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                     if shared_reference:
                         ip.reference_link = shared_reference
 
+                    if shared_description:
+                        ip.description = shared_description
+
                     if shared_owner:
                         ip.owner_user_id = shared_owner
 
@@ -72,6 +74,8 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                     dns.state = default_state if not shared_state else shared_state
                     if shared_reference:
                         dns.reference_link = shared_reference
+                    if shared_description:
+                        dns.description = shared_description
                     if shared_state:
                         dns.state = shared_state
                     if shared_owner:
@@ -88,15 +92,17 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                 yr.state = default_state if not shared_state else shared_state
                 if shared_reference:
                     yr.reference_link = shared_reference
+                if shared_description:
+                    yr.description = shared_description
                 if shared_owner:
                     yr.owner_user_id = shared_owner
 
                 db.session.add(yr)
                 return_artifacts.append(yr)
                 fields_to_add[yr] = fta
-        except Exception, e:
+        except Exception as e:
             app.logger.exception(e)
-            app.logger.error("Failed to commit artifacts '%s'" % (artifact))
+            app.logger.error("Failed to commit artifacts '%s'" % artifact)
 
     db.session.commit()
     if fields_to_add:
@@ -135,12 +141,13 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
 def import_artifacts():
     """Import data into ThreatKB as a 2-step process. The first is extraction and the second is committing. These phases can be completed by one single call to this endpoints or by calling this endpoint for extraction and /ThreatKB/import/commit for committing.
     From Data: import_text (str),
-    Optional Arguments: autocommit (int), shared_state (str), shared_reference (str), shared_owner (int)
+    Optional Arguments: autocommit (int), shared_state (str), shared_reference (str), shared_description(str), shared_owner (int)
     Return: list of artifact dictionaries [{"type":"IP": "artifact": {}}, {"type":"DNS": "artifact": {}}, ...]"""
     autocommit = request.json.get("autocommit", 0)
     import_text = request.json.get('import_text', None)
     shared_state = request.json.get('shared_state', None)
     shared_reference = request.json.get("shared_reference", None)
+    shared_description = request.json.get("shared_description", None)
     shared_owner = request.json.get("shared_owner", None)
     extract_ip = request.json.get('extract_ip', True)
     extract_dns = request.json.get('extract_dns', True)
@@ -158,7 +165,8 @@ def import_artifacts():
 
     if autocommit:
         artifacts = save_artifacts(extract_ip=extract_ip, extract_dns=extract_dns, extract_signature=extract_signature,
-                                   artifacts=artifacts, shared_reference=shared_reference, shared_state=shared_state,
+                                   artifacts=artifacts, shared_reference=shared_reference,
+                                   shared_description=shared_description, shared_state=shared_state,
                                    shared_owner=shared_owner, metadata_field_mapping=metadata_field_mapping)
 
     return jsonify({"artifacts": artifacts})
@@ -172,13 +180,14 @@ def import_artifacts():
 def import_artifacts_by_filek():
     """Import data into ThreatKB as a 2-step process. The first is extraction and the second is committing. These phases can be completed by one single call to this endpoints or by calling this endpoint for extraction and /ThreatKB/import/commit for committing.
     From Data: import_text (str),
-    Optional Arguments: autocommit (int), shared_state (str), shared_reference (str), shared_owner (int)
+    Optional Arguments: autocommit (int), shared_state (str), shared_reference (str), shared_description(str), shared_owner (int)
     Return: list of artifact dictionaries [{"type":"IP": "artifact": {}}, {"type":"DNS": "artifact": {}}, ...]"""
     autocommit = distutils.util.strtobool(request.values.get("autocommit", 0))
     import_text = request.files['file'].stream.read()
     import_text = import_text.strip()
     shared_state = request.values.get('shared_state', None)
     shared_reference = request.values.get("shared_reference", None) or None
+    shared_description = request.values.get("shared_description", None) or None
     shared_owner = request.values.get("shared_owner", None) or None
     extract_ip = distutils.util.strtobool(request.values.get('extract_ip', True))
     extract_dns = distutils.util.strtobool(request.values.get('extract_dns', True))
@@ -196,7 +205,8 @@ def import_artifacts_by_filek():
 
     if autocommit:
         artifacts = save_artifacts(extract_ip=extract_ip, extract_dns=extract_dns, extract_signature=extract_signature,
-                                   artifacts=artifacts, shared_reference=shared_reference, shared_state=shared_state,
+                                   artifacts=artifacts, shared_reference=shared_reference,
+                                   shared_description=shared_description, shared_state=shared_state,
                                    shared_owner=shared_owner, metadata_field_mapping=metadata_field_mapping)
 
     return jsonify({"artifacts": artifacts})
@@ -209,10 +219,11 @@ def import_artifacts_by_filek():
 def commit_artifacts():
     """Commit previously extracted artifacts. The artifact dictionary
     From Data: artifacts (list of dicts)
-    Optional Arguments: shared_reference (str), shared_state (str)
+    Optional Arguments: shared_reference (str), shared_description(str), shared_state (str)
     Return: dictionary of committed and duplicate artifacts {"committed": [{"type":"IP": "artifact": {}}, {"type":"DNS": "artifact": {}, ...], "duplicates": [{"type":"IP": "artifact": {}}, ...]}"""
     artifacts = request.json.get("artifacts", None)
     shared_reference = request.json.get("shared_reference", None)
+    shared_description = request.json.get("shared_description", None)
     shared_state = request.json.get('shared_state', None)
     extract_ip = request.json.get('extract_ip', True)
     extract_dns = request.json.get('extract_dns', True)
@@ -227,6 +238,7 @@ def commit_artifacts():
         shared_owner = int(current_user.id)
 
     artifacts = save_artifacts(extract_ip=extract_ip, extract_dns=extract_dns, extract_signature=extract_signature,
-                               artifacts=artifacts, shared_reference=shared_reference, shared_state=shared_state,
+                               artifacts=artifacts, shared_reference=shared_reference,
+                               shared_description=shared_description, shared_state=shared_state,
                                metadata_field_mapping=metadata_field_mapping, shared_owner=shared_owner)
     return jsonify({"artifacts": artifacts}), 201

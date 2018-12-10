@@ -8,7 +8,6 @@ angular.module('ThreatKB').controller('ImportController',
             $scope.shared_state = {};
             $scope.shared_owner = null;
             $scope.users = Users.query();
-            //$scope.default_mapping = Cfg_settings.get({key: "DEFAULT_METADATA_MAPPING"});
             $scope.default_mapping = Cfg_settings.get({key: "DEFAULT_METADATA_MAPPING"});
 
             $scope.block_message = "Committing Artifacts. This might take awhile, we're doing lots of advanced processing...";
@@ -36,6 +35,7 @@ angular.module('ThreatKB').controller('ImportController',
                                     file: file,
                                     autocommit: $scope.autocommit,
                                     shared_reference: $scope.shared_reference,
+                                    shared_description: $scope.shared_description,
                                     shared_state: $scope.shared_state,
                                     shared_owner: $scope.shared_owner,
                                     extract_ip: $scope.extract_ip,
@@ -56,7 +56,7 @@ angular.module('ThreatKB').controller('ImportController',
                             }, function (resp) {
                                 blockUI.stop();
                                 console.log('Error status: ' + resp.status);
-                                growl.info("No artifacts extracted from text.", {ttl: 3000, disableCountDown: true})
+                                growl.info("No artifacts extracted from text.", {ttl: 3000, disableCountDown: true});
                                 $scope.clear();
                             }, function (evt) {
                                 var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
@@ -97,7 +97,7 @@ angular.module('ThreatKB').controller('ImportController',
                 blockUI.start($scope.block_message);
 
                 var field_mapping = JSON.parse($scope.default_mapping.value);
-                Import.commit_artifacts(artifacts_to_commit, $scope.shared_reference, $scope.shared_state.state.state, $scope.shared_owner, $scope.extract_ip, $scope.extract_dns, $scope.extract_signature, field_mapping).then(function (data) {
+                Import.commit_artifacts(artifacts_to_commit, $scope.shared_reference, $scope.shared_description, $scope.shared_state.state.state, $scope.shared_owner, $scope.extract_ip, $scope.extract_dns, $scope.extract_signature, field_mapping).then(function (data) {
                     blockUI.stop();
                     var ttl = 3000;
                     var message = "";
@@ -118,7 +118,7 @@ angular.module('ThreatKB').controller('ImportController',
                     });
                     $scope.clear();
                 });
-            }
+            };
 
             $scope.import_artifacts = function () {
                 if ($scope.shared_state.state === undefined) {
@@ -130,7 +130,7 @@ angular.module('ThreatKB').controller('ImportController',
                 }
 
                 var field_mapping = JSON.parse($scope.default_mapping.value);
-                Import.import_artifacts($scope.import_text, $scope.autocommit, $scope.shared_reference, $scope.shared_state.state.state, $scope.shared_owner, $scope.extract_ip, $scope.extract_dns, $scope.extract_signature, field_mapping).then(function (data) {
+                Import.import_artifacts($scope.import_text, $scope.autocommit, $scope.shared_reference, $scope.shared_description, $scope.shared_state.state.state, $scope.shared_owner, $scope.extract_ip, $scope.extract_dns, $scope.extract_signature, field_mapping).then(function (data) {
                         if ($scope.autocommit) {
                             blockUI.stop();
                             var message = "";
@@ -174,6 +174,7 @@ angular.module('ThreatKB').controller('ImportController',
                 $scope.artifacts = null;
                 $scope.checked_indexes = [];
                 $scope.shared_reference = "";
+                $scope.shared_description = "";
                 $scope.shared_owner = "";
                 $scope.users = Users.query();
                 $scope.cfg_states = Cfg_states.query();
