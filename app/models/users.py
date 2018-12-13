@@ -54,7 +54,7 @@ class KBUser(db.Model):
     @staticmethod
     def get_user_cache():
         users = {}
-        for user in db.session.query(KBUser).filter(KBUser.active > 0).all():
+        for user in db.session.query(KBUser).all():
             users[user.id] = user.to_dict()
         return users
 
