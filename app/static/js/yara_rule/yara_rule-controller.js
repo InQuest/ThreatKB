@@ -541,6 +541,7 @@ angular.module('ThreatKB')
                         if (!data) {
                             growl.error(error, {ttl: -1});
                         } else {
+                            $scope.yara_rule.state = data.state;
                             growl.info("Successfully saved signature '" + $scope.yara_rule.name + "'.", {ttl: 2000});
                         }
                     });
