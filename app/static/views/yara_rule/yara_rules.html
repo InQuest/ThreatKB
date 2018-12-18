@@ -13,6 +13,9 @@
                     ngclipboard data-clipboard-text="{{ yara_rule.yara_rule_string }}">
                 Copy To Clipboard
             </button>
+            <a class="btn btn-sm  btn-primary" ng-if="yara_rule.id"
+               ng-click="edit(yara_rule.id)">Edit
+            </a>
             <h4 class="modal-title" id="viewSigLabel" style="float: left; margin-right: 10px;">
                 View Signature Artifact
             </h4>

@@ -799,8 +799,20 @@ angular.module('ThreatKB')
             };
 
         }])
-    .controller('Yara_ruleViewController', ['$scope', '$uibModalInstance', 'yara_rule',
-        function ($scope, $uibModalInstance, yara_rule) {
+    .controller('Yara_ruleViewController', ['$scope', '$uibModalInstance', 'yara_rule', '$location', '$window',
+        function ($scope, $uibModalInstance, yara_rule, $location, $window) {
+
+            $scope.edit = function (id) {
+                var location = $location.absUrl();
+                var last_spot = location.split("/")[location.split("/").length - 1]
+                $uibModalInstance.close($scope.yara_rule);
+                if (isNaN(parseInt(last_spot, 10))) {
+                    $window.location.href = $location.absUrl() + "/" + id;
+                } else if (!isNaN(parseInt(last_spot, 10)) && last_spot !== id) {
+                    $window.location.href = $location.absUrl().replace(/\/[0-9]+$/, "/" + id)
+                }
+                $window.location.href = $location.absUrl();
+            };
 
             $scope.yara_rule = yara_rule;
 
