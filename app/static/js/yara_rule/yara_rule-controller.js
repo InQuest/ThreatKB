@@ -808,8 +808,10 @@ angular.module('ThreatKB')
                 $uibModalInstance.close($scope.yara_rule);
                 if (isNaN(parseInt(last_spot, 10))) {
                     $window.location.href = $location.absUrl() + "/" + id;
+                    return;
                 } else if (!isNaN(parseInt(last_spot, 10)) && last_spot !== id) {
-                    $window.location.href = $location.absUrl().replace(/\/[0-9]+$/, "/" + id)
+                    $window.location.href = $location.absUrl().replace(/\/[0-9]+$/, "/" + id);
+                    return;
                 }
                 $window.location.href = $location.absUrl();
             };
