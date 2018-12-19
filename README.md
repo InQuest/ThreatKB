@@ -34,8 +34,11 @@ Tested on Ubuntu Linux 14.04 -> 16.04
 1. Create system user: `sudo useradd -d /opt/ThreatKB -s /bin/bash -m -U threatkb`
 2. Clone repo: `sudo git clone -b master https://github.com/InQuest/ThreatKB.git /opt/ThreatKB/install`
 3. Fix permissions of /opt/ThreatKB if needed: `sudo chown -R threatkb:threatkb /opt/ThreatKB`
-4. Create MySQL database: `mysql -u root -p{your password} create database threatkb;`
-    - If you wish to create a ThreatKB specific MySQL user, feel free to do so
+4. In MySQL shell as root user:
+    - Create MySQL database: `create database threatkb;`
+    - Create MySQL user: `CREATE USER 'threatkb'@'localhost' IDENTIFIED BY 'password';`
+    - Allow permissions: `GRANT ALL PRIVILEGES ON threatkb . * TO 'threatkb'@'localhost';`
+    - Flush privileges: `FLUSH PRIVELEGES;` 
 5. Update SQL config in /opt/ThreatKB/config.py parameters:
     - SQL_HOST
     - SQL_USERNAME
