@@ -5,6 +5,8 @@ from flask import abort, jsonify, request, Response, json
 from flask.ext.login import current_user, login_required
 import distutils
 
+from app.models.tags_mapping import Tags_mapping
+from app.models.tags import Tags
 from app.models.users import KBUser
 from app.models.metadata import Metadata, MetadataMapping
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
@@ -106,6 +108,13 @@ def get_all_yara_rules():
         if column == "owner_user.email":
             entities = entities.join(KBUser, yara_rule.Yara_rule.owner_user_id == KBUser.id).filter(
                 KBUser.email.like("%" + str(value) + "%"))
+            continue
+
+        if column == "tags":
+            entities = entities.outerjoin(Tags_mapping, yara_rule.Yara_rule.id == Tags_mapping.source_id)\
+                .filter(Tags_mapping.source_table == yara_rule.Yara_rule.__tablename__)\
+                .join(Tags, Tags_mapping.tag_id == Tags.id)\
+                .filter(Tags.text.like("%" + str(value) + "%"))
             continue
 
         try:

@@ -177,7 +177,7 @@ angular.module('ThreatKB')
                         {
                             field: 'checked',
                             displayName: "",
-                            width: '50',
+                            width: '40',
                             enableSorting: false,
                             headerCellTemplate: '<BR><center><input style="vertical-align: middle;" type="checkbox" ng-model="grid.appScope.all_checked" ng-click="grid.appScope.toggle_checked()" /></center>',
                             cellTemplate: '<center><input type="checkbox" ng-model="grid.appScope.checked_indexes[grid.appScope.get_index_from_row(row)]" ng-change="grid.appScope.update_checked_counter(row)" /></center>'
@@ -196,18 +196,18 @@ angular.module('ThreatKB')
                             field: 'creation_date',
                             displayName: "Created Date",
                             enableSorting: true,
-                            width: '180',
+                            width: '150',
                             cellFilter: 'date:\'yyyy-MM-dd HH:mm:ss\''
                         },
                         {
                             field: 'category',
-                            width: '220',
+                            width: '110',
                             enableSorting: true
                         },
                         {
                             field: 'state',
                             displayName: 'State',
-                            width: '180',
+                            width: '110',
                             enableSorting: true,
                             cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.state"'
                             + ' on-select="grid.appScope.save(row.entity)">'
@@ -224,7 +224,7 @@ angular.module('ThreatKB')
                         {
                             field: 'owner_user.email',
                             displayName: 'Owner',
-                            width: '180',
+                            width: '170',
                             enableSorting: false,
                             cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.owner_user"'
                             + ' on-select="grid.appScope.save(row.entity)">'
@@ -239,8 +239,20 @@ angular.module('ThreatKB')
                             + '</div>'
                         },
                         {
+                            field: 'tags',
+                            displayName: 'Tags',
+                            width: '180',
+                            enableSorting: false,
+                            cellTemplate: '<ul class="gridTags" append-to-body="true" ng-model="row.entity.tags">'
+                            + '<li ng-repeat="tag in (row.entity.tags | filter: $select.search) track by tag.id">'
+                            + '<small>{{tag.text}}</small>'
+                            + '</li>'
+                            + '</ul>'
+                            + '</div>'
+                        },
+                        {
                             name: 'Actions',
-                            width: '150',
+                            width: '160',
                             enableFiltering: false,
                             enableColumnMenu: false,
                             enableSorting: false,
