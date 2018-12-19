@@ -8,7 +8,7 @@
     + [Admin User Creation](#admin-user-creation)
   * [Docker Installation](#docker-installation)
   * [Databases](#databases)
-  
+
   ---  
 
 ## Setup and run ThreatKB
@@ -41,9 +41,9 @@ Tested on Ubuntu Linux 14.04 -> 16.04
     - SQL_USERNAME
     - SQL_PASSWORD
 
-### Application Install 
+### Application Install
 **Note:** These steps and the execution of ThreatKB should be ran under the `threatkb` local user you created earlier
-  
+
 1. Run `./install.sh`
     - Setups a Python virtual environment in the directory `/opt/ThreatKB/flask`
     - Installs required node libraries for front-end
@@ -52,12 +52,11 @@ By default Flask will listen on 127.0.0.1:5000, if you want to change this modif
 
 ### Running ThreatKB  
 It's best to run the application and it's Python virtualenv within a screen session to ensure ThreatKB continues to run.
-  
-**Note:** Within screen, Ctrl+a+d will dettach your session and return you to your normal shell. To return to the  screen session, run `screen -list` and look for the "Inquest_ThreatKB" entry followed by its PID then use `screen -r InQuest_ThreatKB.<PID>` to reattach.
-  
+
+**Note:** Within screen, Ctrl+a+d will dettach your session and return you to your normal shell. To return to the  screen session, run `screen -r threatkb`
+
 1. Start a screen session for the application to run within:
-    - `screen -t InQuest_ThreatKB`
-    - Make sure you are inside of the `/opt/ThreatKB` directory within screen
+    - `cd /opt/ThreatKB && screen -dmS threatkb InQuest_ThreatKB`
 2. Inside of screen, start the virtualenv:
     - `source flask/bin/activate`
 3. Start the celery workers:
@@ -88,12 +87,12 @@ It's best to run the application and it's Python virtualenv within a screen sess
 ```
 $ docker-compose up
 -Starting inquestkb_db_1 ... 	
--Starting inquestkb_db_1 ... done	
+-Starting inquestkb_db_1 ... done
 -Recreating inquestkb_threatkb_1 ... 	
--Recreating inquestkb_threatkb_1 ... done	
--Attaching to inquestkb_db_1, inquestkb_threatkb_1	
--....snip...	
--threatkb_1  |  * Debugger is active!	
+-Recreating inquestkb_threatkb_1 ... done
+-Attaching to inquestkb_db_1, inquestkb_threatkb_1
+-....snip...
+-threatkb_1  |  * Debugger is active!
 -threatkb_1  |  * Debugger PIN: 212-674-856
 ```
 
@@ -107,7 +106,7 @@ Releases are controlled by artifact states. States are configurable in the State
 3. Retired state - This excludes a previously released artifact from future releases. Only relevant for signatures.
 4. Any other state - Any other state has no significance on releases. These will not be included in releases.
 
-The Release, Staging, and Retired states must be configured in the admin section *before* you can generate a release. If they are not, the system will error out. 
+The Release, Staging, and Retired states must be configured in the admin section *before* you can generate a release. If they are not, the system will error out.
 
 When a release is created, the system first pulls all signatures that are in the release state. Then, it gathers all signatures that are in the staging state and checks their revision history for the most recently released revision that is in the release state. If it finds it, it will include it in the release. If it does not find any previously released revisions, it will skip the signature.
 
