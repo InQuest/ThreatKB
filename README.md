@@ -25,14 +25,14 @@ Tested on Ubuntu Linux 14.04 -> 16.04
     - `sudo apt-get install mysql-server redis-server`
 4. Install front-end packages:
     - `sudo apt-get install nodejs npm && npm install -g bower`
-    - On some systems, nodejs is installed as either `/usr/bin/node` or `/usr/bin/nodejs`, if it is installed as `/usr/bin/nodejs` simply run the command `sudo cp /usr/bin/nodejs node` for the npm install command to work properly
+    - On some systems, nodejs is installed as either `/usr/bin/node` or `/usr/bin/nodejs`, if it is installed as `/usr/bin/nodejs` simply run the command `sudo cp /usr/bin/nodejs /usr/bin/node` for the npm install command to work properly
 
 **Note:** If you are running on CentOS, install these dependencies:
 `yum install MySQL-python libffi-devel mysql mysql-devel mysql-lib`
 
 ### System Prep  
 1. Create system user: `sudo useradd -d /opt/ThreatKB -s /bin/bash -m -U threatkb`
-2. Clone repo: `sudo git clone -b master git@github.com:InQuest/ThreatKB.git /opt/ThreatKB/install`
+2. Clone repo: `sudo git clone -b master https://github.com/InQuest/ThreatKB.git /opt/ThreatKB/install`
 3. Fix permissions of /opt/ThreatKB if needed: `sudo chown -R threatkb:threatkb /opt/ThreatKB`
 4. Create MySQL database: `mysql -u root -p{your password} create database threatkb;`
     - If you wish to create a ThreatKB specific MySQL user, feel free to do so
