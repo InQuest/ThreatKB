@@ -5,6 +5,8 @@ from flask.ext.login import login_required, current_user
 from dateutil import parser
 from sqlalchemy import exc, and_
 
+from app.models.tags_mapping import Tags_mapping
+from app.models.tags import Tags
 from app.models.users import KBUser
 from app.models.metadata import Metadata, MetadataMapping
 from app.models.cfg_states import verify_state
@@ -39,8 +41,7 @@ def get_all_c2dns():
 
     searches = json.loads(searches)
 
-    if searches and any(
-        [search_key not in c2dns.C2dns.__table__.columns.keys() for search_key, val in searches.items()]):
+    if searches and any([search_key not in c2dns.C2dns.__table__.columns.keys() and search_key != "tags" for search_key, val in searches.items()]):
         entities = c2dns.C2dns.query.outerjoin(Metadata, Metadata.artifact_type == ENTITY_MAPPING["DNS"]).join(
             MetadataMapping,
             and_(
@@ -59,6 +60,13 @@ def get_all_c2dns():
         if column == "owner_user.email":
             entities = entities.join(KBUser, c2dns.C2dns.owner_user_id == KBUser.id).filter(
                 KBUser.email.like("%" + str(value) + "%"))
+            continue
+
+        if column == "tags":
+            entities = entities.outerjoin(Tags_mapping, c2dns.C2dns.id == Tags_mapping.source_id)\
+                .filter(Tags_mapping.source_table == c2dns.C2dns.__tablename__)\
+                .join(Tags, Tags_mapping.tag_id == Tags.id)\
+                .filter(Tags.text.like("%" + str(value) + "%"))
             continue
 
         try:

@@ -104,7 +104,7 @@ angular.module('ThreatKB')
                             field: 'date_created',
                             displayName: "Created Date",
                             enableSorting: true,
-                            width: '180',
+                            width: '150',
                             cellFilter: 'date:\'yyyy-MM-dd HH:mm:ss\''
                         },
                         {
@@ -114,7 +114,7 @@ angular.module('ThreatKB')
                         {
                             field: 'state',
                             displayName: 'State',
-                            width: '180',
+                            width: '130',
                             enableSorting: true,
                             cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.state"'
                             + ' on-select="grid.appScope.save(row.entity)">'
@@ -131,7 +131,7 @@ angular.module('ThreatKB')
                         {
                             field: 'owner_user.email',
                             displayName: 'Owner',
-                            width: '180',
+                            width: '170',
                             enableSorting: false,
                             cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.owner_user"'
                             + ' on-select="grid.appScope.save(row.entity)">'
@@ -143,6 +143,18 @@ angular.module('ThreatKB')
                             + '<small><span ng-bind="person.email"></span></small>'
                             + '</ui-select-choices>'
                             + '</ui-select>'
+                            + '</div>'
+                        },
+                        {
+                            field: 'tags',
+                            displayName: 'Tags',
+                            width: '180',
+                            enableSorting: false,
+                            cellTemplate: '<ul class="gridTags" append-to-body="true" ng-model="row.entity.tags">'
+                            + '<li ng-repeat="tag in (row.entity.tags | filter: $select.search) track by tag.id">'
+                            + '<small>{{tag.text}}</small>'
+                            + '</li>'
+                            + '</ul>'
                             + '</div>'
                         },
                         {
