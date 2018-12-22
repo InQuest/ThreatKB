@@ -42,4 +42,4 @@ By default Flask will listen on 127.0.0.1:5000, if you want to change this modif
 ----
 #### Setup Complete
 
-Now that you are finished with setup, head to [Getting Started](wiki/getting-started.md).
+Now that you are finished with setup, head to [Getting Started](getting-started.md).
