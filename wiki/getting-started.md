@@ -31,4 +31,4 @@ It's best to run the application and it's Python virtualenv within a screen sess
 ----
 #### Installation Complete
 
-ThreatKB is now running, explore the [wiki](wiki/) to .
+ThreatKB is now running. To learn more about this project, explore the [wiki](README.md).
