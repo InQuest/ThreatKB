@@ -1,4 +1,5 @@
 # Database Structure
 
-
-**TODO**
+<p align="center">
+    <img src="res/threatkb-db-struct.svg"></img>
+</p>
