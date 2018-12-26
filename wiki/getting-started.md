@@ -25,7 +25,7 @@ It's best to run the application and it's Python virtualenv within a screen sess
 1. Hash your password for MySQL kb_users table:
     - `flask/bin/python hash_pass.py yourSecretPassword`
 2. Connect to MySQL instance and insert your admin user (replace values below as needed):
-    - `sql INSERT INTO kb_users (email, password, admin) VALUES ("user@domain.com", "<hashed password>, 1, 1);`
+    - `INSERT INTO kb_users (email, password, admin, active) VALUES ('user@domain.com', '<hashed password>', 1, 1);`
 
 
 ----
