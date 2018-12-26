@@ -59,6 +59,22 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                     }]
                 }
             })
+            .when('/c2dns/add', {
+                templateUrl: 'views/c2dns/c2dns.html',
+                controller: 'C2dnsController',
+                access: {restricted: true, admin: false},
+                resolve: {
+                    resolvedC2dns: ['C2dns', function (C2dns) {
+                        return C2dns.query({
+                            page_number: 0,
+                            page_size: 25
+                        });
+                    }],
+                    openModalForId: ['$route', function ($route) {
+                        return "add";
+                    }]
+                }
+            })
             .when('/c2dns/:id', {
                 templateUrl: 'views/c2dns/c2dns.html',
                 controller: 'C2dnsController',
@@ -90,6 +106,22 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                     }],
                     openModalForId: [function () {
                         return null;
+                    }]
+                }
+            })
+            .when('/c2ips/add', {
+                templateUrl: 'views/c2ip/c2ips.html',
+                controller: 'C2ipController',
+                access: {restricted: true, admin: false},
+                resolve: {
+                    resolvedC2ip: ['C2ip', function (C2ip) {
+                        return C2ip.query({
+                            page_number: 0,
+                            page_size: 25
+                        });
+                    }],
+                    openModalForId: ['$route', function ($route) {
+                        return "add";
                     }]
                 }
             })
@@ -179,6 +211,16 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                     }]
                 }
             })
+            .when('/yara_rules/add', {
+                templateUrl: 'views/yara_rule/yara_rules.html',
+                controller: 'Yara_ruleController',
+                access: {restricted: true, admin: false},
+                resolve: {
+                    openModalForId: [function () {
+                        return "add";
+                    }]
+                }
+            })
             .when('/yara_rules/:id', {
                 templateUrl: 'views/yara_rule/yara_rules.html',
                 controller: 'Yara_ruleController',
@@ -261,6 +303,19 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                     }],
                     openModalForId: [function () {
                         return null;
+                    }]
+                }
+            })
+            .when('/tasks/:id', {
+                templateUrl: 'views/tasks/tasks.html',
+                controller: 'TasksController',
+                access: {restricted: true, admin: false},
+                resolve: {
+                    resolvedTask: ['Task', function (Task) {
+                        return Task.query();
+                    }],
+                    openModalForId: ['$route', function ($route) {
+                        return "add";
                     }]
                 }
             })

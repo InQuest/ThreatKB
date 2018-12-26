@@ -354,9 +354,12 @@ angular.module('ThreatKB')
             };
 
             getPage();
-
             if (openModalForId !== null) {
-                $scope.update(openModalForId);
+                if (openModalForId == "add") {
+                    $scope.create();
+                } else {
+                    $scope.update(openModalForId);
+                }
             }
         }])
     .controller('C2ipSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'C2ip', 'c2ip', 'metadata', 'Comments', 'Cfg_states', 'Tags', 'growl', 'Bookmarks', 'hotkeys', 'Users',
