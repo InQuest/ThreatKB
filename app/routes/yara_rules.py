@@ -77,7 +77,7 @@ def get_all_yara_rules():
 
     Return: list of yara_rule artifact dictionaries"""
     include_inactive = request.args.get("include_inactive", False)
-    include_yara_string = bool(distutils.util.strtobool(request.args.get("include_yara_string", False)))
+    include_yara_string = bool(distutils.util.strtobool(request.args.get("include_yara_string", "False")))
     short = bool(distutils.util.strtobool(request.args.get("short", "false")))
     include_metadata = bool(distutils.util.strtobool(request.args.get('include_metadata', "true")))
 
