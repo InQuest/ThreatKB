@@ -356,7 +356,7 @@
                     </div>
                 </div>
 
-                <div>
+                <div ng-if="yara_rule.id">
                     <label>Attached Files ({{ yara_rule.files.length }})</label>
                     <div ng-if="yara_rule.id">
                         <div ngf-select="" ngf-drop="" ng-model="files" ngf-model-invalid="invalidFiles"
@@ -409,7 +409,7 @@
                     </div>
                 </div>
 
-                <div>
+                <div ng-if="yara_rule.id">
                     <label>Revisions ({{ yara_rule.revisions.length }})</label>
                     <div ng-if="yara_rule.revisions && yara_rule.revisions.length" style="padding-top:3px;">
                         <uib-accordion>
@@ -436,10 +436,10 @@
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger pull-left" ng-click="merge_signature()">Merge This Into
-                </button>
+                <button type="button" class="btn btn-danger pull-left"
+                         ng-if="yara_rule.id" ng-click="merge_signature()">Merge This Into</button>
 
-                <div class="pull-left" style="width:350px; padding-right:4px; padding-left:4px;">
+                <div class="pull-left" style="width:350px; padding-right:4px; padding-left:4px;" ng-if="yara_rule.id">
                     <ui-select ng-model="selected_signature"
                                on-select="update_selected_signature($select.selected)">
                         <ui-select-match placeholder="Select a signature or press delete to clear...">

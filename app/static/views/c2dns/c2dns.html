@@ -287,6 +287,26 @@
         </button>
     </div>
     <br>
+    <style type="text/css">
+        .gridTags {
+            padding: 0;
+            width:180px;
+            height: 2em;
+            line-height: 1em;
+            text-overflow: ellipsis;
+            word-break: break-all;
+            overflow:hidden;
+            white-space: nowrap;
+        }
+        .gridTags:hover{
+            overflow: visible;
+            white-space: normal;
+            height:auto;
+        }
+        .gridTags li:not(:last-child):after {
+            content: ", ";
+        }
+    </style>
     <div ui-if="gridOptions.data.length > 0" ui-grid="gridOptions" ng-style="getTableHeight()"
          ui-grid-pagination ui-grid-auto-resize>
     </div>
