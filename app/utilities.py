@@ -2,13 +2,20 @@ import re
 import json
 import sys
 
+from flask_login import current_user
 from plyara import Plyara
 
 from more_itertools import unique_everseen
-from app.models import cfg_settings
+from sqlalchemy import and_, not_, or_
 
+from app import ENTITY_MAPPING
+from app.models import cfg_settings
 from app.models.c2dns import C2dns
 from app.models.c2ip import C2ip
+from app.models.metadata import Metadata, MetadataMapping
+from app.models.tags_mapping import Tags_mapping
+from app.models.tags import Tags
+from app.models.users import KBUser
 from app.models.yara_rule import Yara_rule
 
 # Appears that Ply needs to read the source, so disable bytecode.
@@ -56,10 +63,106 @@ def extract_yara_rules_text(text):
             strings, condition = get_strings_and_conditions(yara_rule_original)
             extracted.append(
                 {"parsed_rule": parsed_rule, "strings": strings, "condition": condition, "imports": imports})
-        except Exception, e:
+        except Exception as e:
             pass
 
     return extracted
+
+
+#####################################################################
+
+def filter_entities(entity,
+                    artifact_type,
+                    searches,
+                    page_number,
+                    page_size,
+                    sort_by,
+                    sort_direction,
+                    include_metadata,
+                    exclude_totals,
+                    default_sort,
+                    include_inactive=True,
+                    include_merged=False,
+                    include_yara_string=None,
+                    short=None):
+
+    searches = json.loads(searches)
+
+    if searches and any([search_key not in entity.__table__.columns.keys()
+                         and search_key not in ("tags", "owner_user.email") for search_key, val in searches.items()]):
+        entities = entity.query.outerjoin(Metadata, Metadata.artifact_type == artifact_type).join(
+            MetadataMapping, and_(MetadataMapping.metadata_id == Metadata.id, MetadataMapping.artifact_id == entity.id))
+    else:
+        entities = entity.query
+
+    if not current_user.admin:
+        entities = entities.filter(or_(entity.owner_user_id == current_user.id, entity.owner_user_id == None))\
+            if artifact_type == ENTITY_MAPPING["TASK"] else entities.filter_by(owner_user_id=current_user.id)
+
+    if not include_inactive:
+        entities = entities.filter_by(active=True)
+
+    for column, value in searches.items():
+        if not value:
+            continue
+
+        s_value = str(value)
+        l_value = "%" + s_value[1:] + "%" if s_value.startswith("!") else "%" + s_value + "%"
+
+        if column == "owner_user.email":
+            entities = entities.join(KBUser, entity.owner_user_id == KBUser.id) \
+                .filter(not_(KBUser.email.like(l_value)) if s_value.startswith("!") else KBUser.email.like(l_value))
+            continue
+
+        if column == "tags":
+            entities = entities.outerjoin(Tags_mapping, entity.id == Tags_mapping.source_id) \
+                .filter(Tags_mapping.source_table == entity.__tablename__) \
+                .join(Tags, Tags_mapping.tag_id == Tags.id) \
+                .filter(not_(Tags.text.like(l_value)) if s_value.startswith("!") else Tags.text.like(l_value))
+            continue
+
+        try:
+            column = getattr(entity, column)
+            entities = entities.filter(not_(column.like(l_value)) if s_value.startswith("!") else column.like(l_value))
+        except AttributeError as e:
+            entities = entities.filter(and_(MetadataMapping.artifact_id == entity.id, Metadata.key == column,
+                                            not_(MetadataMapping.value.like(l_value))
+                                            if s_value.startswith("!") else MetadataMapping.value.like(l_value)))
+
+    if not include_merged:
+        entities = entities.filter(entity.state != 'Merged')
+
+    filtered_entities = entities
+    total_count = entities.count()
+
+    if sort_by:
+        filtered_entities = filtered_entities.order_by("%s %s" % (sort_by, sort_direction))
+    else:
+        filtered_entities = filtered_entities.order_by("%s DESC" % default_sort)
+
+    if page_size:
+        filtered_entities = filtered_entities.limit(int(page_size))
+
+    if page_number:
+        filtered_entities = filtered_entities.offset(int(page_number) * int(page_size))
+
+    filtered_entities = filtered_entities.all()
+
+    response_dict = dict()
+    if artifact_type == ENTITY_MAPPING["TASK"]:
+        response_dict['data'] = [entity.to_dict() for entity in filtered_entities]
+    elif artifact_type == ENTITY_MAPPING["SIGNATURE"]:
+        response_dict['data'] = [entity.to_dict(include_yara_rule_string=include_yara_string,
+                                                short=short,
+                                                include_metadata=include_metadata) for entity in filtered_entities]
+    else:
+        response_dict['data'] = [entity.to_dict(include_metadata=include_metadata) for entity in filtered_entities]
+    response_dict['total_count'] = total_count
+
+    if exclude_totals:
+        return json.dumps(response_dict['data'])
+    else:
+        return json.dumps(response_dict)
 
 
 #####################################################################
@@ -93,6 +196,7 @@ def get_strings_and_conditions(rule):
         segments["condition"][-1] = segments["condition"][-1].rstrip(" }")
 
     return "\n".join(segments["strings"]) if segments.get("strings", None) else "", "\n".join(segments["condition"])
+
 
 #####################################################################
 
@@ -168,20 +272,19 @@ def extract_artifacts(do_extract_ip, do_extract_dns, do_extract_signature, text)
     try:
         import_objects = json.loads(str(text).encode("string_escape"))
         return extract_artifacts_json(do_extract_ip, do_extract_dns, do_extract_signature, import_objects)
-    except ValueError, e:
+    except ValueError as e:
         try:
             import_objects = json.loads(str(text))
             return extract_artifacts_json(do_extract_ip, do_extract_dns, do_extract_signature, import_objects)
-        except ValueError, e:
+        except ValueError as e:
             return extract_artifacts_text(do_extract_ip, do_extract_dns, do_extract_signature, text)
-
-    return output
 
 
 #####################################################################
 
 def parse_yara_rules_file(filename):
     return parse_yara_rules_text(open(filename, "r").read())
+
 
 #####################################################################
 

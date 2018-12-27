@@ -5,15 +5,13 @@ from flask import abort, jsonify, request, Response, json
 from flask.ext.login import current_user, login_required
 import distutils
 
-from app.models.tags_mapping import Tags_mapping
-from app.models.tags import Tags
-from app.models.users import KBUser
 from app.models.metadata import Metadata, MetadataMapping
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
 from app.routes.cfg_category_range_mapping import update_cfg_category_range_mapping_current
 from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
 from app.routes.comments import create_comment
 from app.models.cfg_settings import Cfg_settings
+from app.utilities import filter_entities
 
 import datetime
 
@@ -92,67 +90,22 @@ def get_all_yara_rules():
     sort_direction = request.args.get('sort_dir', 'ASC')
     exclude_totals = request.args.get('exclude_totals', False)
 
-    entities = yara_rule.Yara_rule.query
+    response_dict = filter_entities(entity=yara_rule.Yara_rule,
+                                    artifact_type=ENTITY_MAPPING["SIGNATURE"],
+                                    searches=searches,
+                                    page_number=page_number,
+                                    page_size=page_size,
+                                    sort_by=sort_by,
+                                    sort_direction=sort_direction,
+                                    include_metadata=include_metadata,
+                                    exclude_totals=exclude_totals,
+                                    default_sort="creation_date",
+                                    include_inactive=include_inactive,
+                                    include_merged=include_merged,
+                                    include_yara_string=include_yara_string,
+                                    short=short)
 
-    if not current_user.admin:
-        entities = entities.filter_by(owner_user_id=current_user.id)
-
-    if not include_inactive:
-        entities = entities.filter_by(active=True)
-
-    searches = json.loads(searches)
-    for column, value in searches.items():
-        if not value:
-            continue
-
-        if column == "owner_user.email":
-            entities = entities.join(KBUser, yara_rule.Yara_rule.owner_user_id == KBUser.id).filter(
-                KBUser.email.like("%" + str(value) + "%"))
-            continue
-
-        if column == "tags":
-            entities = entities.outerjoin(Tags_mapping, yara_rule.Yara_rule.id == Tags_mapping.source_id)\
-                .filter(Tags_mapping.source_table == yara_rule.Yara_rule.__tablename__)\
-                .join(Tags, Tags_mapping.tag_id == Tags.id)\
-                .filter(Tags.text.like("%" + str(value) + "%"))
-            continue
-
-        try:
-            column = getattr(yara_rule.Yara_rule, column)
-            entities = entities.filter(column.like("%" + str(value) + "%"))
-        except:
-            continue
-
-    if not include_merged:
-        entities = entities.filter(yara_rule.Yara_rule.state != 'Merged')
-
-    filtered_entities = entities
-    total_count = entities.count()
-
-    if sort_by:
-        filtered_entities = filtered_entities.order_by("%s %s" % (sort_by, sort_direction))
-    else:
-        filtered_entities = filtered_entities.order_by("creation_date DESC")
-
-    if page_size:
-        filtered_entities = filtered_entities.limit(int(page_size))
-
-    if page_number:
-        filtered_entities = filtered_entities.offset(int(page_number) * int(page_size))
-
-    filtered_entities = filtered_entities.all()
-
-    response_dict = dict()
-    response_dict['data'] = [
-        entity.to_dict(include_yara_rule_string=include_yara_string, short=short, include_metadata=include_metadata) for
-        entity in
-        filtered_entities]
-    response_dict['total_count'] = total_count
-
-    if exclude_totals:
-        return Response(json.dumps(response_dict['data']), mimetype="application/json")
-    else:
-        return Response(json.dumps(response_dict), mimetype='application/json')
+    return Response(response_dict, mimetype='application/json')
 
 
 @app.route('/ThreatKB/yara_rules/<int:id>', methods=['GET'])
@@ -214,18 +167,18 @@ def create_yara_rule():
         new_sig_id = request.json['category']['current'] + 1
 
     entity = yara_rule.Yara_rule(
-        state=request.json['state']['state'] if 'state' in request.json['state'] else None
-        , name=request.json['name']
-        , description=request.json.get("description", None)
-        , references=request.json.get("references", None)
-        , category=request.json['category']['category'] if 'category' in request.json['category'] else None
-        , condition=yara_rule.Yara_rule.make_yara_sane(request.json['condition'], "condition:")
-        , strings=yara_rule.Yara_rule.make_yara_sane(request.json['strings'], "strings:")
-        , eventid=new_sig_id
-        , created_user_id=current_user.id
-        , modified_user_id=current_user.id
-        , owner_user_id=current_user.id
-        , imports=yara_rule.Yara_rule.get_imports_from_string(request.json.get("imports", None))
+        state=request.json['state']['state'] if 'state' in request.json['state'] else None,
+        name=request.json['name'],
+        description=request.json.get("description", None),
+        references=request.json.get("references", None),
+        category=request.json['category']['category'] if 'category' in request.json['category'] else None,
+        condition=yara_rule.Yara_rule.make_yara_sane(request.json['condition'], "condition:"),
+        strings=yara_rule.Yara_rule.make_yara_sane(request.json['strings'], "strings:"),
+        eventid=new_sig_id,
+        created_user_id=current_user.id,
+        modified_user_id=current_user.id,
+        owner_user_id=current_user.id,
+        imports=yara_rule.Yara_rule.get_imports_from_string(request.json.get("imports", None))
     )
 
     if entity.state == release_state:
@@ -286,7 +239,6 @@ def update_yara_rule(id):
     if not current_user.admin and entity.owner_user_id != current_user.id:
         abort(403)
 
-
     release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
     draft_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_staging_state > 0).first()
     old_state = entity.state
@@ -305,7 +257,6 @@ def update_yara_rule(id):
                 "State submitted is " + str(
                     rule_state) + " and the rule could not be saved because it does not compile.\n\nerror_code=" + str(
                     return_code) + "\n\n" + stderr)
-
 
     if not release_state or not draft_state:
         raise Exception("You must set a release, draft, and retirement state before modifying signatures")
@@ -357,12 +308,6 @@ def update_yara_rule(id):
 
     if old_state == release_state.state and entity.state == release_state.state and not do_not_bump_revision:
         entity.state = draft_state.state
-
-    # if entity.state == release_state.state:
-    #     try:
-    #         test_yara_rule.get_yara_rule(entity)
-    #     except Exception, e:
-    #         raise Exception("Rule did not compile. Message is %s" % e.message)
 
     db.session.merge(entity)
     db.session.commit()
