@@ -1,10 +1,99 @@
 angular.module('ThreatKB')
-    .controller('AuthController', ['$scope', '$location', 'AuthService', 'Cfg_settings', '$uibModal',
-        function ($scope, $location, AuthService, Cfg_settings, $uibModal) {
+    .controller('AuthController', ['$scope', '$location', 'AuthService', 'Cfg_settings', '$uibModal', 'hotkeys',
+        function ($scope, $location, AuthService, Cfg_settings, $uibModal, hotkeys) {
             $scope.isLoggedIn = AuthService.isLoggedIn;
             $scope.isAdmin = AuthService.isAdmin;
             $scope.user = AuthService.user;
             $scope.nav_image = Cfg_settings.get({key: "NAV_IMAGE"});
+
+            if ($scope.isLoggedIn()) {
+                $location.path("/");
+            }
+
+            $scope.search_artifacts = [];
+
+            $scope.getPermalink = function (id, type_) {
+                return $location.absUrl().split("/").slice(0, 4).join("/") + "/" + type_ + "/" + id;
+            };
+
+            $scope.select_artifact = function (selected) {
+                $location.url(selected.url);
+            }
+
+            hotkeys.bindTo($scope)
+                .add({
+                    combo: 'ctrl+j',
+                    description: 'Search',
+                    allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
+                    callback: function () {
+                        //$document.find("input#focusser-0")[0].focus();
+                        $scope.$broadcast('search_focus');
+                    }
+                });
+
+            $scope.refresh_search = function (search) {
+                if (!search) {
+                    return;
+                }
+
+                $scope.search_artifacts = [];
+
+                var dns_results = C2dns.query({
+                    searches: {domain_name: search},
+                    exclude_totals: true,
+                    include_metadata: false,
+                    short: 1
+                });
+                dns_results.$promise.then(function (results) {
+                    results.forEach(function (c2dns) {
+                        $scope.search_artifacts.push({
+                            name: c2dns.domain_name,
+                            url: "/c2dns/" + c2dns.id,
+                            type: "c2dns"
+                        })
+                    });
+                }, function (error) {
+                    console.log(error);
+                });
+
+                var yara_results = Yara_rule.resource.query({
+                    searches: {name: search},
+                    exclude_totals: true,
+                    include_metadata: false,
+                    short: 1
+                });
+                yara_results.$promise.then(function (results) {
+                    results.forEach(function (yara_rule) {
+                        $scope.search_artifacts.push({
+                            name: yara_rule.name,
+                            url: "/yara_rule/" + yara_rule.id,
+                            type: "yara_rule"
+                        })
+                    });
+                }, function (error) {
+                    console.log(error);
+                });
+
+                var ip_results = C2ip.query({
+                    searches: {ip: search},
+                    exclude_totals: true,
+                    include_metadata: false,
+                    short: 1
+                });
+                ip_results.$promise.then(function (results) {
+                    results.forEach(function (c2ip) {
+                        $scope.search_artifacts.push({
+                            name: c2ip.ip,
+                            url: "/c2ips/" + c2ip.id,
+                            type: "c2ip"
+                        })
+                    });
+
+                }, function (error) {
+                    console.log(error);
+                });
+
+            };
 
             $scope.login = function () {
                 // initial values
@@ -42,6 +131,15 @@ angular.module('ThreatKB')
             $scope.user = {};
             $scope.user.passwordConfirm = "";
 
+            $scope.customSearch = function(actual, expected) {
+                if (expected.length < 3) {
+                    return true;
+                } else if (typeof actual !== "object") {
+                    return actual.toString().toLowerCase().indexOf(expected.toString().toLowerCase()) !== -1;
+                } else {
+                    return false;
+                }
+            };
 
             $scope.create = function () {
                 $scope.clear();
@@ -75,6 +173,12 @@ angular.module('ThreatKB')
                     "active": true,
                     "registered_on": ""
                 };
+            };
+
+            $scope.delete = function (id) {
+                UserService.delete({id: id}, function () {
+                    $scope.users = UserService.query({include_inactive: 1});
+                });
             };
 
             $scope.open = function (id) {

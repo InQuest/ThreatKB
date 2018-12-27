@@ -5,6 +5,9 @@
               class="ng-scope ng-invalid ng-invalid-required ng-dirty"
               ng-submit="ok()">
 
+            <a class="btn btn-sm btn-primary modal-fullscreen-button modal-fullscreen-button-abs-pos"
+               ng-click="toggleFullscreen()">Toggle full screen</a>
+
             <div class="modal-header">
                 <button type="button" class="close"
                         ng-click="cancel()">&times;
@@ -36,23 +39,35 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Title:</label>
+                    <label>Title</label>
                     <span class="error text-danger">*</span>
                     <input type="text" class="form-control" name="title"
                            ng-model="task.title" ng-required="true"
-                           ng-maxlength="256"/>
+                           ng-maxlength="256" focus="true"/>
                 </div>
 
+                <div class="form-group" ng-if="task.date_created">
+                    <label>Owner</label>
+                    <ui-select ng-model="task.owner_user">
+                        <ui-select-match placeholder="Select an owner ...">
+                            <small><span ng-bind="$select.selected.email || task.owner_user.email"></span></small>
+                        </ui-select-match>
+                        <ui-select-choices
+                                repeat="person in (users | filter: $select.search) track by person.id">
+                            <small><span ng-bind="person.email"></span></small>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
 
                 <div class="form-group" ng-if="task.date_created">
-                    <label>Date Created:</label>
+                    <label>Date Created</label>
 
                     <label type="text" class="form-control" name="date_created"
                            ng-model="task.date_created">{{ task.date_created }}</label>
                 </div>
 
                 <div class="form-group" ng-if="task.date_modified">
-                    <label>Date Modified:</label>
+                    <label>Date Modified</label>
 
                     <label type="text" class="form-control" name="date_modified"
                            ng-model="task.date_modified">{{ task.date_modified }}</label>
@@ -60,7 +75,7 @@
 
 
                 <div class="form-group">
-                    <label>State:</label>
+                    <label>State</label>
                     <span class="error text-danger" ng-if="!task.state">*</span>
 
                     <ui-select ng-model="task.state">
@@ -75,19 +90,20 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Description:</label>
+                    <label>Description</label>
                     <span class="error text-danger">*</span>
                     <textarea class="form-control" placeholder="Enter description..." rows="6"
                               ng-model="task.description" ng-required="true"></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label>Final Artifact:</label>
+                    <label>Final Artifact</label>
                     <textarea class="form-control" placeholder="Enter final artifact..." rows="6"
                               ng-model="task.final_artifact"></textarea>
                 </div>
 
                 <div class="form-group" ng-if="task.id">
+                    <label>Comments ({{ task.comments.length }})</label>
                     <div class="input-group">
                         <textarea class="form-control" placeholder="Add a comment..." rows="4"
                                   ng-model="task.new_comment"></textarea>
@@ -98,9 +114,7 @@
                                     class="glyphicon glyphicon-plus"></span></button>
                         </span>
                     </div>
-
-                    <label>Comments ({{ task.comments.length }})</label>
-                    <div style="padding-top:3px;">
+                    <div ng-if="task.comments && task.comments.length" style="padding-top:3px;">
                         <uib-accordion>
                             <div uib-accordion-group class="panel-default"
                                  heading="See comments">
@@ -116,7 +130,7 @@
                             </div>
                         </uib-accordion>
                     </div>
-
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary pull-left" ng-click="extract_artifact()">Extract Artifact

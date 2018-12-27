@@ -39,7 +39,7 @@ class KBUser(db.Model):
     def to_dict(self):
         return dict(
             email=self.email,
-            # registered_on=self.registered_on.isoformat(),
+            registered_on=self.registered_on.isoformat(),
             admin=self.admin,
             active=self.active,
             id=self.id,
@@ -50,6 +50,13 @@ class KBUser(db.Model):
     def generate_auth_token(self, s_key):
         s = Serializer(s_key)
         return s.dumps({'id': self.id})
+
+    @staticmethod
+    def get_user_cache():
+        users = {}
+        for user in db.session.query(KBUser).all():
+            users[user.id] = user.to_dict()
+        return users
 
     @staticmethod
     def verify_auth_token(token, s_key):

@@ -25,7 +25,7 @@ def upgrade():
         whitelist.Whitelist.__table__, [
             {"whitelist_artifact": "127.0.0.0/8", "notes": "Loopback range", "created_time": date_created,
              "modified_time": date_modified},
-            {"whitelist_artifact": "localhost", "notes": "Loopback range", "created_time": date_created,
+            {"whitelist_artifact": "^localhost$", "notes": "Loopback range", "created_time": date_created,
              "modified_time": date_modified},
             {"whitelist_artifact": "8.8.8.8/32", "notes": "Google DNS", "created_time": date_created,
              "modified_time": date_modified},
@@ -37,9 +37,11 @@ def upgrade():
              "modified_time": date_modified},
             {"whitelist_artifact": "172.16.0.0/12", "notes": "RFC1918 Private Range", "created_time": date_created,
              "modified_time": date_modified},
-            {"whitelist_artifact": "(^|[\.\/])google\.com", "notes": "Google DNS", "created_time": date_created,
+            {"whitelist_artifact": "(^|[\.\/])google\.com($|[\/\\]", "notes": "Google DNS",
+             "created_time": date_created,
              "modified_time": date_modified},
-            {"whitelist_artifact": "(^|[\.\/])microsoft\.com", "notes": "Microsoft DNS", "created_time": date_created,
+            {"whitelist_artifact": "(^|[\.\/])microsoft\.com($|[\/\\]", "notes": "Microsoft DNS",
+             "created_time": date_created,
              "modified_time": date_modified},
         ]
     )

@@ -9,7 +9,9 @@ from sqlalchemy.event import listens_for
 from dateutil import parser
 import datetime
 import json
+import re
 import distutils
+import zlib
 
 from flask import abort
 
@@ -27,6 +29,9 @@ class Yara_rule(db.Model):
     category = db.Column(db.String(32), index=True)
     condition = db.Column(db.String(2048))
     strings = db.Column(db.String(30000))
+    imports = db.Column(db.String(512))
+    description = db.Column(db.TEXT())
+    references = db.Column(db.TEXT())
     active = db.Column(db.Boolean, nullable=False, default=True)
     eventid = db.Column(db.Integer(unsigned=True), index=True, nullable=False)
 
@@ -75,16 +80,10 @@ class Yara_rule(db.Model):
             .filter(MetadataMapping.artifact_id == self.id) \
             .all()
 
-    def to_dict(self, include_yara_rule_string=None, short=False):
-        metadata_values_dict = {}
-        metadata_keys = Metadata.get_metadata_keys("SIGNATURE")
-        metadata_values_dict = {m["metadata"]["key"]: m for m in [entity.to_dict() for entity in self.metadata_values]}
-        for key in list(set(metadata_keys) - set(metadata_values_dict.keys())):
-            metadata_values_dict[key] = {}
-
+    def to_dict(self, include_yara_rule_string=None, short=False, include_relationships=True, include_metadata=True):
         yara_dict = dict(
-            creation_date=self.creation_date.isoformat(),
-            last_revision_date=self.last_revision_date.isoformat(),
+            creation_date=self.creation_date.isoformat() if self.creation_date else None,
+            last_revision_date=self.last_revision_date.isoformat() if self.last_revision_date else None,
             state=self.state,
             name=self.name,
             category=self.category,
@@ -92,16 +91,29 @@ class Yara_rule(db.Model):
             id=self.id,
             tags=tags_mapping.get_tags_for_source(self.__tablename__, self.id),
             addedTags=[],
+            description=self.description,
+            references=self.references,
             removedTags=[],
-            created_user=self.created_user.to_dict(),
-            modified_user=self.modified_user.to_dict(),
-            owner_user=self.owner_user.to_dict() if self.owner_user else None,
             revision=self.revision,
-            metadata=Metadata.get_metadata_dict("SIGNATURE"),
-            metadata_values=metadata_values_dict,
             condition="condition:\n\t%s" % self.condition,
-            strings="strings:\n\t%s" % self.strings
+            strings="strings:\n\t%s" % self.strings if self.strings and self.strings.strip() else "",
+            imports=self.imports
         )
+
+        if include_metadata:
+            metadata_values_dict = {}
+            metadata_keys = Metadata.get_metadata_keys("SIGNATURE")
+            metadata_values_dict = {m["metadata"]["key"]: m for m in
+                                    [entity.to_dict() for entity in self.metadata_values]}
+            for key in list(set(metadata_keys) - set(metadata_values_dict.keys())):
+                metadata_values_dict[key] = {}
+            yara_dict.update(
+                dict(metadata=Metadata.get_metadata_dict("SIGNATURE"), metadata_values=metadata_values_dict))
+
+        if include_relationships:
+            yara_dict["created_user"] = self.created_user.to_dict()
+            yara_dict["modified_user"] = self.modified_user.to_dict()
+            yara_dict["owner_user"] = self.owner_user.to_dict() if self.owner_user else None
 
         if not short:
             revisions = Yara_rule_history.query.filter_by(yara_rule_id=self.id).all()
@@ -127,62 +139,123 @@ class Yara_rule(db.Model):
         del dict["addedTags"]
         return dict
 
-    def to_release_dict(self):
-        dict = self.to_dict()
-        del dict["revisions"]
-        del dict["files"]
-        return dict
-
+    def to_release_dict(self, metadata_cache, user_cache):
+        return dict(
+            creation_date=self.creation_date.isoformat(),
+            last_revision_date=self.last_revision_date.isoformat(),
+            state=self.state,
+            name=self.name,
+            category=self.category,
+            eventid=self.eventid,
+            id=self.id,
+            description=self.description,
+            references=self.references,
+            addedTags=[],
+            removedTags=[],
+            created_user=user_cache[self.created_user_id],
+            modified_user=user_cache[self.modified_user_id],
+            owner_user=user_cache[self.owner_user_id] if self.owner_user_id else None,
+            revision=self.revision,
+            metadata=metadata_cache["SIGNATURE"][self.id]["metadata"] if metadata_cache["SIGNATURE"].get(self.id,
+                                                                                                         None) and
+                                                                         metadata_cache["SIGNATURE"][self.id].get(
+                                                                             "metadata", None) else {},
+            metadata_values=metadata_cache["SIGNATURE"][self.id]["metadata_values"] if metadata_cache["SIGNATURE"].get(
+                self.id, None) and metadata_cache["SIGNATURE"][self.id].get("metadata_values", None) else {},
+            condition="condition:\n\t%s" % self.condition,
+            strings="strings:\n\t%s" % self.strings if self.strings and self.strings.strip() else "",
+            imports=self.imports
+        )
 
     def __repr__(self):
         return '<Yara_rule %r>' % (self.id)
 
     @staticmethod
-    def to_yara_rule_string(yara_dict):
+    def get_imports_from_string(imports_string):
+        if not imports_string:
+            return ""
+        return "\n".join([imp.strip() for imp in
+                          set(re.findall(r'^import[\t\s]+\"[A-Za-z0-9_]+\"[\t\s]*$', imports_string, re.MULTILINE))])
+
+    @staticmethod
+    def to_yara_rule_string(yara_dict, include_imports=True):
         yr = Yara_rule()
         metadata_field_mapping = [attr for attr in dir(yr) if
                                   not callable(getattr(yr, attr)) and not attr.startswith("__")]
 
-        yara_rule_text = "rule %s\n{\n\n" % (yara_dict.get("name"))
+        yara_rule_text = ""
+
+        if yara_dict.get("imports", None) and include_imports:
+            yara_rule_text = yara_dict.get("imports") + "\n\n"
+
+        yara_rule_text += "rule %s\n{\n\n" % (yara_dict.get("name"))
         yara_rule_text += "\tmeta:\n"
         metadata_strings = []
         for field in metadata_field_mapping:
             if yara_dict.get(field, None) and not "metadata" in field and field in ["creation_date",
                                                                                     "last_revision_date", "revision",
-                                                                                    "name", "category", "eventid"]:
+                                                                                    "name", "category", "eventid",
+                                                                                    "description", "references"]:
+                try:
+                    yara_dict[field] = re.sub("[^\x00-\x7F]", "", yara_dict[field])
+                except:
+                    pass
                 metadata_strings.append("\t\t%s = \"%s\"\n" % (
-                field.title() if not field.lower() == "eventid" else "EventID", yara_dict[field]))
+                    field.title() if not field.lower() == "eventid" else "EventID",
+                    str(yara_dict[field]).replace("\"", "'") if not field.lower() == "references" else str(
+                        yara_dict[field]).replace("\"", "'").replace("\n", ",")))
 
         try:
             for type_, metalist in yara_dict["metadata"].iteritems():
                 for meta in metalist:
                     if meta["export_with_release"]:
-                        metadata_strings.append("\t\t%s = \"%s\"\n" % (meta["key"],
-                                                                       yara_dict["metadata_values"][meta["key"]][
-                                                                           "value"]
-                                                                       if "value" in yara_dict["metadata_values"][
-                                                                           meta["key"]]
-                                                                       else "NA")
-                                                )
+                        value = yara_dict["metadata_values"][meta["key"]]["value"] if "value" in \
+                                                                                      yara_dict["metadata_values"][
+                                                                                          meta["key"]] else "NA"
+                        try:
+                            value = re.sub("[^\x00-\x7F]", "", value)
+                        except:
+                            pass
+                        metadata_strings.append("\t\t%s = \"%s\"\n" % (meta["key"], str(value).replace("\"", "'")))
         except Exception as e:
             pass
 
         yara_rule_text += "".join(sorted(metadata_strings))
+        formatted_strings = ""
 
-        if not "strings:" in yara_dict["strings"]:
-            yara_rule_text += "\n\tstrings:\n\t\t%s" % (yara_dict["strings"])
+        if yara_dict["strings"] and yara_dict["strings"].strip() and not "strings:" in yara_dict["strings"]:
+            formatted_strings = "\n\tstrings:\n\t\t"
+            formatted_strings += "\n\t\t".join([line.strip() for line in yara_dict["strings"].split("\n")])
+            # yara_rule_text += "\n\tstrings:\n\t\t%s" % (yara_dict["strings"])
         else:
-            yara_rule_text += "\n\t%s" % (yara_dict["strings"])
+            if not yara_dict["strings"] or not yara_dict["strings"].strip():
+                formatted_strings += ""
+            else:
+                formatted_strings = "\n\tstrings:\n\t\t"
+                formatted_strings += "\n\t\t".join([line.strip() for line in yara_dict["strings"].split("\n")[1:]])
+                # yara_rule_text += "\n\t%s" % (yara_dict["strings"])
+
+        yara_rule_text += formatted_strings
+        formatted_condition = ""
 
         if not "condition" in yara_dict["condition"]:
-            yara_rule_text += "\n\tcondition:\n\t\t%s\n\n}" % (yara_dict["condition"])
+            formatted_condition = "\n\tcondition:\n\t\t"
+            formatted_condition += "\n\t\t".join([line.strip() for line in yara_dict["condition"].split("\n")])
+            #yara_rule_text += "\n\tcondition:\n\t\t%s\n\n}" % (yara_dict["condition"])
         else:
-            yara_rule_text += "\n\t%s\n\n}" % (yara_dict["condition"])
+            formatted_condition = "\n\tcondition:\n\t\t"
+            formatted_condition += "\n\t\t".join([line.strip() for line in yara_dict["condition"].split("\n")[1:]])
+            # yara_rule_text += "\n\t%s\n\n}" % (yara_dict["condition"])
 
-        return yara_rule_text
+        yara_rule_text += formatted_condition + "\n}\n"
+
+        return yara_rule_text.encode("utf-8")
 
     @staticmethod
     def make_yara_sane(text, type_):
+        if not text or not text.strip() or not text.strip("\t"):
+            return ""
+
         type_ = "%s:" if not type_.endswith(":") else type_
         return "\n\t".join([string.strip().strip("\t") for string in text.split("\n") if type_ not in string]).strip()
 
@@ -190,6 +263,7 @@ class Yara_rule(db.Model):
     def get_yara_rule_from_yara_dict(cls, yara_dict, metadata_field_mapping={}):
         condition = yara_dict["condition"]
         strings = yara_dict["strings"]
+        imports = yara_dict["imports"]
         yara_dict = yara_dict["rule"]
 
         metadata_fields = {entity.key.lower(): entity for entity in
@@ -245,7 +319,8 @@ class Yara_rule(db.Model):
         #    ["%s = %s %s" % (r["name"], r["value"], " ".join(r["modifiers"]) if "modifiers" in r else "") for r in
         #     yara_dict["strings"]])
         yara_rule.condition = "\n" + condition
-        yara_rule.strings = "\n" + strings
+        yara_rule.strings = "\n" + strings if strings else ""
+        yara_rule.imports = imports
 
         if not yara_rule.category:
             yara_rule.category = CfgCategoryRangeMapping.DEFAULT_CATEGORY
@@ -259,12 +334,16 @@ def generate_eventid(mapper, connect, target):
         if release_state and target.state == release_state.state:
             abort(403)
 
+    target.name = re.sub("[^A-Za-z0-9_]", "", target.name)
+
     if not target.eventid:
         target.eventid = CfgCategoryRangeMapping.get_next_category_eventid(target.category)
 
 
 @listens_for(Yara_rule, "before_update")
 def yara_rule_before_update(mapper, connect, target):
+    target.name = re.sub("[^A-Za-z0-9_]", "", target.name)
+
     if not current_user.admin:
         release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
         if release_state and target.state == release_state.state:
@@ -280,12 +359,27 @@ class Yara_rule_history(db.Model):
     revision = db.Column(db.Integer(unsigned=True))
     state = db.Column(db.String(32), index=True)
 
-    rule_json = db.Column(db.Text, nullable=False)
+    _rule_json = db.Column(db.LargeBinary, nullable=False)
 
     yara_rule_id = db.Column(db.Integer, db.ForeignKey("yara_rules.id"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
     user = db.relationship('KBUser', foreign_keys=user_id,
                            primaryjoin="KBUser.id==Yara_rule_history.user_id")
+
+    @property
+    def rule_json(self):
+        try:
+            return zlib.decompress(self._rule_json)
+        except:
+            return self._rule_json
+
+    @rule_json.setter
+    def rule_json(self, value):
+        self._rule_json = zlib.compress(value, 8)
+
+    @property
+    def release_data_dict(self):
+        return json.loads(self.release_data) if self.release_data else {}
 
     def to_dict(self):
         return dict(

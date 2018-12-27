@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('TasksController', ['$scope', '$timeout', '$filter', '$http', '$uibModal', 'resolvedTask', 'Task', 'Cfg_states', 'growl', 'Users', 'openModalForId', 'uiGridConstants',
-        function ($scope, $timeout, $filter, $http, $uibModal, resolvedTask, Task, Cfg_states, growl, Users, openModalForId, uiGridConstants) {
+    .controller('TasksController', ['$scope', '$timeout', '$filter', '$http', '$uibModal', 'resolvedTask', 'Task', 'Cfg_states', 'growl', 'Users', 'openModalForId', 'uiGridConstants', '$routeParams',
+        function ($scope, $timeout, $filter, $http, $uibModal, resolvedTask, Task, Cfg_states, growl, Users, openModalForId, uiGridConstants, $routeParams) {
 
             $scope.tasks = resolvedTask;
 
@@ -14,10 +14,15 @@ angular.module('ThreatKB')
                 filterText: ''
             };
 
+            $scope.searches = {};
+            if ($routeParams.searches) {
+                $scope.searches = JSON.parse($routeParams.searches);
+            }
+
             var paginationOptions = {
                 pageNumber: 1,
                 pageSize: 25,
-                searches: {},
+                searches: $scope.searches,
                 sort_by: null,
                 sort_dir: null
             };
@@ -39,7 +44,7 @@ angular.module('ThreatKB')
 
                         for (var i = 0; i < grid.columns.length; i++) {
                             var column = grid.columns[i];
-                            if (column.filters[0].term !== undefined && column.filters[0].term !== null && column.filters[0].term !== "") {
+                            if (column.filters[0].term !== undefined && column.filters[0].term !== null && column.filters[0].term.length >= 3) {
                                 paginationOptions.searches[column.colDef.field] = column.filters[0].term
                             }
                         }
@@ -84,10 +89,15 @@ angular.module('ThreatKB')
                 rowHeight: 35,
                 columnDefs:
                     [
-                        {field: 'title', displayName: 'Title', enableSorting: true},
+                        {
+                            field: 'title',
+                            displayName: 'Title',
+                            enableSorting: true
+                        },
                         {
                             field: 'state',
                             displayName: 'State',
+                            width: '180',
                             enableSorting: true,
                             cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.state"'
                             + ' on-select="grid.appScope.save(row.entity)">'
@@ -104,7 +114,7 @@ angular.module('ThreatKB')
                         {
                             field: 'owner_user.email',
                             displayName: 'Owner',
-                            width: '20%',
+                            width: '180',
                             enableSorting: false,
                             cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.owner_user"'
                             + ' on-select="grid.appScope.save(row.entity)">'
@@ -120,6 +130,7 @@ angular.module('ThreatKB')
                         },
                         {
                             name: 'Actions',
+                            width: '120',
                             enableFiltering: false,
                             enableColumnMenu: false,
                             enableSorting: false,
@@ -249,17 +260,22 @@ angular.module('ThreatKB')
             };
 
             getPage();
-
             if (openModalForId !== null) {
-                $scope.update(openModalForId);
+                if (openModalForId == "add") {
+                    $scope.create();
+                } else {
+                    $scope.update(openModalForId);
+                }
             }
         }])
-    .controller('TaskSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'task', 'Comments', 'Cfg_states', 'Import', 'growl', 'blockUI', 'AuthService', 'Bookmarks', 'hotkeys',
-        function ($scope, $http, $uibModalInstance, $location, task, Comments, Cfg_states, Import, growl, blockUI, AuthService, Bookmarks, hotkeys) {
+    .controller('TaskSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'task', 'Comments', 'Cfg_states', 'Import', 'growl', 'blockUI', 'AuthService', 'Bookmarks', 'hotkeys', 'Users',
+        function ($scope, $http, $uibModalInstance, $location, task, Comments, Cfg_states, Import, growl, blockUI, AuthService, Bookmarks, hotkeys, Users) {
             $scope.task = task;
             $scope.task.new_comment = "";
             $scope.Comments = Comments;
             $scope.current_user = AuthService.getUser();
+
+            $scope.users = Users.query();
 
             hotkeys.bindTo($scope)
                 .add({

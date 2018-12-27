@@ -1,12 +1,19 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('Yara_ruleController', ['$scope', '$timeout', '$filter', '$http', '$uibModal', 'Yara_rule', 'Cfg_states', 'CfgCategoryRangeMapping', 'Users', 'growl', 'openModalForId', 'uiGridConstants', 'FileSaver', 'Blob',
-        function ($scope, $timeout, $filter, $http, $uibModal, Yara_rule, Cfg_states, CfgCategoryRangeMapping, Users, growl, openModalForId, uiGridConstants, FileSaver, Blob) {
+    .controller('Yara_ruleController', ['$scope', '$timeout', '$filter', '$http', '$uibModal', 'Yara_rule', 'Cfg_states', 'CfgCategoryRangeMapping', 'Users', 'growl', 'openModalForId', 'uiGridConstants', 'FileSaver', 'Blob', 'Cfg_settings', '$routeParams',
+        function ($scope, $timeout, $filter, $http, $uibModal, Yara_rule, Cfg_states, CfgCategoryRangeMapping, Users, growl, openModalForId, uiGridConstants, FileSaver, Blob, Cfg_settings, $routeParams) {
 
             $scope.cfg_states = Cfg_states.query();
 
             $scope.users = Users.query();
+
+            $scope.searches = {};
+            if ($routeParams.searches) {
+                $scope.searches = JSON.parse($routeParams.searches);
+            }
+
+            $scope.start_filter_requests_length = Cfg_settings.get({key: "START_FILTER_REQUESTS_LENGTH"});
 
             $scope.clear_checked = function () {
                 $scope.checked_indexes = [];
@@ -21,10 +28,7 @@ angular.module('ThreatKB')
             };
 
             $scope.disable_multi_actions = function () {
-                if ($scope.checked_counter < 1) {
-                    return true;
-                }
-                return false;
+                return $scope.checked_counter < 1;
             };
             $scope.get_index_from_row = function (row) {
                 for (var i = 0; i < row.grid.rows.length; i++) {
@@ -76,7 +80,7 @@ angular.module('ThreatKB')
                         }
                         return output;
                     }
-                })
+                });
                 growl.info("Successfully copied " + $scope.checked_counter + " signatures to clipboard.", {ttl: 3})
             };
 
@@ -99,7 +103,7 @@ angular.module('ThreatKB')
             var paginationOptions = {
                 pageNumber: 1,
                 pageSize: 25,
-                searches: {},
+                searches: $scope.searches,
                 sort_by: null,
                 sort_dir: null
             };
@@ -118,15 +122,22 @@ angular.module('ThreatKB')
                     $scope.gridApi.core.on.filterChanged($scope, function () {
                         var grid = this.grid;
                         paginationOptions.searches = {};
+                        var trigger_refresh_for_length = false;
+                        var trigger_refresh_for_emptiness = true;
 
                         for (var i = 0; i < grid.columns.length; i++) {
                             var column = grid.columns[i];
-                            if (column.filters[0].term !== undefined && column.filters[0].term !== null && column.filters[0].term !== "") {
+                            trigger_refresh_for_emptiness &= (column.filters[0].term === undefined || column.filters[0].term === null || column.filters[0].term.length === 0);
+
+                            if (column.filters[0].term !== undefined && column.filters[0].term !== null && column.filters[0].term.length >= parseInt($scope.start_filter_requests_length.value)) {
+                                trigger_refresh_for_length = true;
                                 paginationOptions.searches[column.colDef.field] = column.filters[0].term
                             }
                         }
 
-                        getPage();
+                        if (trigger_refresh_for_length || trigger_refresh_for_emptiness) {
+                            getPage();
+                        }
                     });
                     $scope.gridApi.core.on.sortChanged($scope, function (grid, sortColumns) {
                         if (sortColumns.length === 0) {
@@ -156,11 +167,12 @@ angular.module('ThreatKB')
                             $(":input[type=text]").each(function (i) {
                                 if ($(this).hasClass("ui-grid-filter-input")) {
                                     $(this).attr("tabindex", i + 1);
-                                    if ((i + 1) == 1) {
+                                    if ((i + 1) === 1) {
                                         $(this).focus();
                                     }
                                 }
                             });
+                            $('[role="rowgroup"]').css('overflow', 'auto');     // Force "rowgroup" container to hide horizontal scroll when not needed and allow for height to be precisely calculated
                         }, 500);
                     });
                 },
@@ -170,17 +182,37 @@ angular.module('ThreatKB')
                         {
                             field: 'checked',
                             displayName: "",
+                            width: '40',
                             enableSorting: false,
-                            width: "5%",
                             headerCellTemplate: '<BR><center><input style="vertical-align: middle;" type="checkbox" ng-model="grid.appScope.all_checked" ng-click="grid.appScope.toggle_checked()" /></center>',
                             cellTemplate: '<center><input type="checkbox" ng-model="grid.appScope.checked_indexes[grid.appScope.get_index_from_row(row)]" ng-change="grid.appScope.update_checked_counter(row)" /></center>'
                         },
-                        {field: 'eventid', displayName: "Event ID", width: "10%", enableCellEditOnFocus: true},
-                        {field: 'name', width: "30%", enableSorting: true},
-                        {field: 'category', enableSorting: true},
+                        {
+                            field: 'eventid',
+                            displayName: "Event ID",
+                            width: '120',
+                            enableCellEditOnFocus: true
+                        },
+                        {
+                            field: 'name',
+                            enableSorting: true
+                        },
+                        {
+                            field: 'creation_date',
+                            displayName: "Created Date",
+                            enableSorting: true,
+                            width: '150',
+                            cellFilter: 'date:\'yyyy-MM-dd HH:mm:ss\''
+                        },
+                        {
+                            field: 'category',
+                            width: '110',
+                            enableSorting: true
+                        },
                         {
                             field: 'state',
                             displayName: 'State',
+                            width: '110',
                             enableSorting: true,
                             cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.state"'
                             + ' on-select="grid.appScope.save(row.entity)">'
@@ -197,7 +229,7 @@ angular.module('ThreatKB')
                         {
                             field: 'owner_user.email',
                             displayName: 'Owner',
-                            width: '20%',
+                            width: '170',
                             enableSorting: false,
                             cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.owner_user"'
                             + ' on-select="grid.appScope.save(row.entity)">'
@@ -212,11 +244,30 @@ angular.module('ThreatKB')
                             + '</div>'
                         },
                         {
+                            field: 'tags',
+                            displayName: 'Tags',
+                            width: '180',
+                            enableSorting: false,
+                            cellTemplate: '<ul class="gridTags" append-to-body="true" ng-model="row.entity.tags">'
+                            + '<li ng-repeat="tag in (row.entity.tags | filter: $select.search) track by tag.id">'
+                            + '<small>{{tag.text}}</small>'
+                            + '</li>'
+                            + '</ul>'
+                            + '</div>'
+                        },
+                        {
                             name: 'Actions',
+                            width: '160',
                             enableFiltering: false,
                             enableColumnMenu: false,
                             enableSorting: false,
                             cellTemplate: '<div style="text-align: center;">'
+                            + '<button type="button" ng-click="grid.appScope.viewRule(row.entity.id)"'
+                            + ' class="btn btn-sm">'
+                            + '<small><span class="glyphicon glyphicon-eye-open"></span>'
+                            + '</small>'
+                            + '</button>'
+                            + '&nbsp;'
                             + '<button type="button" ng-click="grid.appScope.update(row.entity.id)"'
                             + ' class="btn btn-sm">'
                             + '<small><span class="glyphicon glyphicon-pencil"></span>'
@@ -249,8 +300,9 @@ angular.module('ThreatKB')
                 var url = '/ThreatKB/yara_rules?';
                 url += 'page_number=' + (paginationOptions.pageNumber - 1);
                 url += '&page_size=' + paginationOptions.pageSize;
-                url += '&include_yara_string=1';
+                url += '&include_yara_string=0';
                 url += '&short=1';
+                url += '&include_metadata=0';
 
                 switch (paginationOptions.sort_dir) {
                     case uiGridConstants.ASC:
@@ -277,6 +329,7 @@ angular.module('ThreatKB')
                         for (var i = 0; i < $scope.gridOptions.data.length; i++) {
                             $scope.checked_indexes.push(false);
                         }
+                        $scope.gridApi.grid.gridHeight = parseInt($scope.getTableHeight().height);  // Re-apply table height calculation, based on new data
                         $scope.gridApi.core.refresh();
                     }, function (error) {
                     });
@@ -294,7 +347,7 @@ angular.module('ThreatKB')
 
             $scope.create = function () {
                 $scope.clear();
-                $scope.open();
+                $scope.edit();
             };
 
             $scope.update = function (id) {
@@ -302,12 +355,16 @@ angular.module('ThreatKB')
                 $scope.cfg_states = Cfg_states.query();
                 $scope.users = Users.query();
                 $scope.cfg_category_range_mapping = CfgCategoryRangeMapping.query();
-                $scope.open(id);
+                $scope.edit(id);
+            };
+
+            $scope.viewRule = function (id) {
+                $scope.yara_rule = Yara_rule.resource.get({id: id, include_yara_string: 1});
+                $scope.view(id);
             };
 
             $scope.delete = function (id) {
                 Yara_rule.resource.delete({id: id}, function () {
-                    //$scope.yara_rules = Yara_rule.resource.query();
                     getPage();
                 });
             };
@@ -329,10 +386,14 @@ angular.module('ThreatKB')
 
                 if (typeof(id) === "number") {
                     Yara_rule.resource.update({id: id}, $scope.yara_rule, function () {
-                        //$scope.yara_rules = Yara_rule.resource.query();
                         getPage();
                     }, function (err) {
-                        growl.error(err.data);
+                        var timeout = 10000;
+                        growl.error(err.data + ". Refreshing page in " + (timeout / 1000) + " seconds", {ttl: timeout});
+                        setTimeout(function () {
+                            getPage();
+                        }, timeout);
+                        $scope.openYaraModal(id);
                     });
                 } else {
                     $scope.yara_rule.metadata_values = {};
@@ -376,10 +437,10 @@ angular.module('ThreatKB')
                     }
 
                     Yara_rule.resource.save($scope.yara_rule, function () {
-                        //$scope.yara_rules = Yara_rule.resource.query();
                         getPage();
                     }, function (err) {
                         growl.error(err.data);
+                        $scope.openYaraModal(id);
                     });
                 }
             };
@@ -400,11 +461,12 @@ angular.module('ThreatKB')
                     "addedTags": [],
                     "removedTags": [],
                     "comments": [],
-                    "files": []
+                    "files": [],
+                    "imports": ""
                 };
             };
 
-            $scope.open = function (id) {
+            $scope.openYaraModal = function(id) {
                 var yara_ruleSave = $uibModal.open({
                     templateUrl: 'yara_rule-save.html',
                     controller: 'Yara_ruleSaveController',
@@ -422,7 +484,7 @@ angular.module('ThreatKB')
                                 filter: "signature",
                                 format: "dict"
                             });
-                        }],
+                        }]
                     }
                 });
 
@@ -438,9 +500,31 @@ angular.module('ThreatKB')
                 });
             };
 
+            $scope.edit = function (id) {
+                $scope.openYaraModal(id);
+            };
+
+            $scope.view = function (id) {
+                var yara_view = $uibModal.open({
+                    templateUrl: 'yara_rule-view.html',
+                    controller: 'Yara_ruleViewController',
+                    size: 'lg',
+                    backdrop: 'static',
+                    resolve: {
+                        yara_rule: function () {
+                            return $scope.yara_rule;
+                        }
+                    }
+                });
+            };
+
             //getPage();
             if (openModalForId !== null) {
-                $scope.update(openModalForId);
+                if (openModalForId == "add") {
+                    $scope.create();
+                } else {
+                    $scope.update(openModalForId);
+                }
             }
         }])
     .controller('Yara_ruleSaveController', ['$scope', '$http', '$cookies', '$uibModalInstance', '$location', 'yara_rule', 'yara_rules', 'metadata', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags', 'Yara_rule', 'Cfg_settings', 'Bookmarks', 'hotkeys',
@@ -454,7 +538,9 @@ angular.module('ThreatKB')
             $scope.Files = Files;
             $scope.selected_signature = null;
 
-            $scope.wrap_editor = ($cookies.get("wrap_editor") == "true");
+            $scope.users = Users.query();
+
+            $scope.wrap_editor = ($cookies.get("wrap_editor") === "true");
 
             if ($scope.wrap_editor == null) {
                 $scope.wrap_editor = false;
@@ -476,6 +562,7 @@ angular.module('ThreatKB')
                         if (!data) {
                             growl.error(error, {ttl: -1});
                         } else {
+                            $scope.yara_rule.state = data.state;
                             growl.info("Successfully saved signature '" + $scope.yara_rule.name + "'.", {ttl: 2000});
                         }
                     });
@@ -490,7 +577,7 @@ angular.module('ThreatKB')
                         $scope.save_artifact();
                     }
                 }).add({
-                combo: 'ctrl+x',
+                combo: 'ctrl+q',
                 description: 'Escape',
                 allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
                 callback: function () {
@@ -551,7 +638,7 @@ angular.module('ThreatKB')
                 var last_spot = location.split("/")[location.split("/").length - 1]
                 if (isNaN(parseInt(last_spot, 10))) {
                     return $location.absUrl() + "/" + id;
-                } else if (!isNaN(parseInt(last_spot, 10)) && last_spot != id) {
+                } else if (!isNaN(parseInt(last_spot, 10)) && last_spot !== id) {
                     return $location.absUrl().replace(/\/[0-9]+$/, "/" + id)
                 }
                 return $location.absUrl();
@@ -732,4 +819,32 @@ angular.module('ThreatKB')
                 $uibModalInstance.close($scope.selected_signature);
             };
 
-        }]);
+        }])
+    .controller('Yara_ruleViewController', ['$scope', '$uibModalInstance', 'yara_rule', '$location', '$window',
+        function ($scope, $uibModalInstance, yara_rule, $location, $window) {
+
+            $scope.edit = function (id) {
+                var location = $location.absUrl();
+                var last_spot = location.split("/")[location.split("/").length - 1]
+                $uibModalInstance.close($scope.yara_rule);
+                if (isNaN(parseInt(last_spot, 10))) {
+                    $window.location.href = $location.absUrl() + "/" + id;
+                    return;
+                } else if (!isNaN(parseInt(last_spot, 10)) && last_spot !== id) {
+                    $window.location.href = $location.absUrl().replace(/\/[0-9]+$/, "/" + id);
+                    return;
+                }
+                $window.location.href = $location.absUrl();
+            };
+
+            $scope.yara_rule = yara_rule;
+
+            $scope.ok = function () {
+                $uibModalInstance.close($scope.yara_rule);
+            };
+
+            $scope.cancel = function () {
+                $uibModalInstance.dismiss('cancel');
+            };
+
+    }]);

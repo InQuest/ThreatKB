@@ -1,6 +1,6 @@
 from app import app, db, bcrypt, admin_only, auto
 from app.models.users import KBUser
-from app.models import yara_rule, c2dns, c2ip, tasks, users
+from app.models import yara_rule, c2dns, c2ip, tasks, users, access_keys
 from flask import request, jsonify, session, json, abort, send_file, Response
 from flask.ext.login import current_user, login_required
 import flask_login
@@ -70,6 +70,22 @@ def get_user_by_id(user_id):
         abort(404)
     return jsonify(user.to_dict())
 
+
+@app.route('/ThreatKB/users/<int:user_id>', methods=['DELETE'])
+@auto.doc()
+@login_required
+@admin_only()
+def delete_user_by_id(user_id):
+    """Return the user associated with the given user id.
+    Return: user dictionary"""
+    user = KBUser.query.get(user_id)
+    if not user:
+        abort(404)
+
+    user.active = 0
+    db.session.add(user)
+    db.session.commit()
+    return jsonify(''), 204
 
 @app.route('/ThreatKB/users/me', methods=['GET'])
 @auto.doc()
@@ -201,8 +217,8 @@ def update_user(user_id):
         if 'password' in request.json else user.password,
         admin=request.json['admin'],
         active=request.json['active'],
-        first_name=request.json['first_name'],
-        last_name=request.json['last_name'],
+        first_name=request.json.get('first_name', ""),
+        last_name=request.json.get('last_name', ""),
         id=user.id
     )
 

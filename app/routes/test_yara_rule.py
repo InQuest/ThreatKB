@@ -7,6 +7,9 @@ import time
 import datetime
 import StringIO
 import yara
+import re
+import uuid
+import subprocess
 
 from sqlalchemy import func
 from sqlalchemy.ext.serializer import loads, dumps
@@ -18,7 +21,7 @@ from flask import abort, jsonify, request, json, Response
 from flask.ext.login import current_user, login_required
 
 from app.models.cfg_settings import Cfg_settings
-from app.models.yara_rule import Yara_testing_history
+from app.models.yara_rule import Yara_testing_history, Yara_rule
 
 
 @app.route('/ThreatKB/test_yara_rule/<int:rule_id>', methods=['GET'])
@@ -74,6 +77,9 @@ def test_yara_rule(yara_rule_entity, files_to_test, user, is_async=False):
     total_file_count, count_of_files_matched, tests_terminated, total_file_time, errors_encountered = 0, 0, 0, 0, 0
     error_msgs = []
     threshold = float(Cfg_settings.get_private_setting("MAX_MILLIS_PER_FILE_THRESHOLD")) or 3.0
+    yara_command = Cfg_settings.get_setting("SIGNATURE_TESTING_COMMAND")
+    yara_test_regex = Cfg_settings.get_setting("SIGNATURE_TESTING_COMMAND_SUCCESS_REGEX")
+
     processes = []
     manager_dicts = []
     for file_path in files_to_test:
@@ -88,11 +94,12 @@ def test_yara_rule(yara_rule_entity, files_to_test, user, is_async=False):
             manager = multiprocessing.Manager()
             manager_dict = manager.dict()
             if old_avg:
-                p = multiprocessing.Process(target=perform_rule_match, args=(rule, file_path, manager_dict))
+                p = multiprocessing.Process(target=perform_rule_match,
+                                            args=(rule, file_path, manager_dict, yara_command, yara_test_regex))
                 processes.append(p)
                 p.start()
             else:
-                perform_rule_match(rule, file_path, manager_dict)
+                perform_rule_match(rule, file_path, manager_dict, yara_command, yara_test_regex)
             manager_dicts.append(manager_dict)
         else:
             manager_dicts.append(perform_rule_match(rule, file_path, dict()))
@@ -135,35 +142,53 @@ def test_yara_rule(yara_rule_entity, files_to_test, user, is_async=False):
                 error_msgs=error_msgs)
 
 
+def does_rule_compile(yara_dict):
+    rule = Yara_rule.to_yara_rule_string(yara_dict, include_imports=True)
+    rule_temp_path = "/tmp/%s.yar" % (str(uuid.uuid4()).replace("-", "")[0:8])
+    with open(rule_temp_path, "w") as f:
+        f.write(rule)
+
+    yara_command = Cfg_settings.get_setting("SIGNATURE_TESTING_COMMAND")
+
+    command = yara_command.replace("RULE", rule_temp_path).replace("FILE_PATH", rule_temp_path)
+    proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc.wait()
+    stdout, stderr = proc.communicate()
+    return_code = proc.returncode
+    return (return_code == 0, return_code, stdout, stderr)
+
 def get_yara_rule(yara_rule_entity):
-    rule_string = """
-    rule %s
-    {
-        strings:
-            %s
-        condition:
-            %s
-    }
-    """ % (yara_rule_entity.name,
-           yara_rule_entity.strings,
-           yara_rule_entity.condition)
+    rule_string = yara_rule_entity.to_dict(include_yara_rule_string=True, include_relationships=False)[
+        "yara_rule_string"]
+    # rule_string = """
+    # rule %s
+    # {
+    #     strings:
+    #         %s
+    #     condition:
+    #         %s
+    # }
+    # """ % (yara_rule_entity.name,
+    #        yara_rule_entity.strings,
+    #        yara_rule_entity.condition)
 
-    rule_buffer = StringIO.StringIO()
-
-    compiled_rule = yara.compile(source=rule_string)
-    compiled_rule.save(file=rule_buffer)
-
-    rule_buffer.seek(0)
-    return yara.load(file=rule_buffer)
+    return rule_string
 
 
-def perform_rule_match(rule, file_path, manager_dict):
+def perform_rule_match(rule, file_path, manager_dict, yara_command, yara_test_regex):
     start = time.time()
-    matches = rule.match(file_path)
+    rule_temp_path = "/tmp/%s.yar" % (str(uuid.uuid4()).replace("-", ""))
+    with open(rule_temp_path, "w") as f:
+        f.write(rule)
+
+    command = yara_command.replace("RULE", rule_temp_path).replace("FILE_PATH", file_path)
+    proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc.wait()
+    stdout, stderr = proc.communicate()
     end = time.time()
     manager_dict['duration'] = end - start
 
-    if matches and matches.__sizeof__() > 0:
+    if re.search(yara_test_regex, stdout):
         manager_dict['match'] = True
     else:
         manager_dict['match'] = False
@@ -177,3 +202,17 @@ def get_all_sig_ids():
         sig_ids.append(rule.id)
 
     return sig_ids
+
+
+if __name__ == "__main__":
+    import sys
+
+    rule = """rule hello {
+        strings:
+                $a1="hello"
+        condition:
+                any of them
+}"""
+    a = perform_rule_match(rule, "/Users/danny/Desktop/temp/hello.yar", multiprocessing.Manager().dict(),
+                           "/usr/local/bin/yara RULE FILE_PATH", "[A-Za-z0-9]")
+    sys.stdout.write(str(a))

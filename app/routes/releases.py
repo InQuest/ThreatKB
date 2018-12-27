@@ -1,9 +1,10 @@
 from flask import abort, jsonify, request, send_file, json, Response
 from flask.ext.login import login_required, current_user
-from app import app, db, admin_only, auto
+from app import app, db, admin_only, auto, nocache
 from app.models import releases, cfg_settings
 import tempfile
 import uuid
+import time
 import distutils
 
 @app.route('/ThreatKB/releases', methods=['GET'])
@@ -13,7 +14,7 @@ import distutils
 def get_all_releases():
     """Return all releases in ThreatKB
     Return: list of release dictionaries"""
-    entities = releases.Release.query.filter_by().all()
+    entities = releases.Release.query.options(db.defer("_release_data")).filter_by().all()
     return Response(json.dumps([entity.to_small_dict() for entity in entities]), mimetype="application/json")
 
 
@@ -40,7 +41,6 @@ def get_releases_latest():
     From Data: count (int)
     Return: list of release dictionaries"""
 
-    settings_count = cfg_settings.Cfg_settings.get_setting("DASHBOARD_RELEASES_COUNT")
     count = request.args.get("count", None)
     short = distutils.util.strtobool(request.args.get("short", "True"))
 
@@ -49,7 +49,8 @@ def get_releases_latest():
     except:
         count = 1
 
-    entities = releases.Release.query.filter(releases.Release.is_test_release == 0).order_by(
+    entities = releases.Release.query.options(db.defer("_release_data")).filter(
+        releases.Release.is_test_release == 0).order_by(
         releases.Release.id.desc()).limit(count)
 
     if not entities:
@@ -69,6 +70,7 @@ def get_releases_latest():
 @auto.doc()
 @login_required
 @admin_only()
+@nocache
 def generate_release_notes(release_id):
     """Generate and return release notes for release associated with release_id
     Return: release text file"""
@@ -90,6 +92,7 @@ def generate_release_notes(release_id):
 @auto.doc()
 @login_required
 @admin_only()
+@nocache
 def generate_artifact_export(release_id):
     """Generate and return artifact export zip file for the release associated with release_id
     Return: release zip file with a single file for all IPs, single file for all DNS, and consolidated category yara files"""
@@ -116,6 +119,10 @@ def create_release():
     """Create new release
     From Data: name (str), is_test_release (bool)
     Return: release dictionary"""
+    short = distutils.util.strtobool(request.args.get('short', "true"))
+
+    start_time = time.time()
+
     release = releases.Release(
         name=request.json.get("name", None),
         is_test_release=request.json.get("is_test_release", 0),
@@ -123,12 +130,23 @@ def create_release():
     )
 
     release.release_data = release.get_release_data()
+    release.num_signatures = len(
+        release.release_data_dict["Signatures"]["Signatures"]) if release.release_data_dict.get("Signatures", None) and \
+                                                                  release.release_data_dict["Signatures"].get(
+                                                                      "Signatures", None) else 0
+    release.num_ips = len(release.release_data_dict["IP"]["IP"]) if release.release_data_dict.get("IP", None) and \
+                                                                    release.release_data_dict["IP"].get("IP",
+                                                                                                        None) else 0
+    release.num_dns = len(release.release_data_dict["DNS"]["DNS"]) if release.release_data_dict.get("DNS", None) and \
+                                                                      release.release_data_dict["DNS"].get("DNS",
+                                                                                                           None) else 0
     release.created_user = current_user
-    db.session.merge(release)
+    db.session.add(release)
     db.session.commit()
 
-    release = releases.Release.query.filter(release.id).first()
-    return jsonify(release.to_dict())
+    r = release.to_dict(short=short)
+    r["build_time_seconds"] = "{0:.2f}".format(time.time() - start_time)
+    return jsonify(r)
 
 
 @app.route('/ThreatKB/releases/<int:release_id>', methods=['DELETE'])

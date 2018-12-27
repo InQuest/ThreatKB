@@ -1,14 +1,21 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('C2ipController', ['$scope', '$timeout', '$filter', '$http', '$uibModal', 'resolvedC2ip', 'C2ip', 'Cfg_states', 'growl', 'Users', 'openModalForId', 'uiGridConstants',
-        function ($scope, $timeout, $filter, $http, $uibModal, resolvedC2ip, C2ip, Cfg_states, growl, Users, openModalForId, uiGridConstants) {
+    .controller('C2ipController', ['$scope', '$timeout', '$filter', '$http', '$uibModal', 'resolvedC2ip', 'C2ip', 'Cfg_states', 'growl', 'Users', 'openModalForId', 'uiGridConstants', 'Cfg_settings', '$routeParams',
+        function ($scope, $timeout, $filter, $http, $uibModal, resolvedC2ip, C2ip, Cfg_states, growl, Users, openModalForId, uiGridConstants, Cfg_settings, $routeParams) {
 
             $scope.c2ips = resolvedC2ip;
 
             $scope.users = Users.query();
 
+            $scope.start_filter_requests_length = Cfg_settings.get({key: "START_FILTER_REQUESTS_LENGTH"});
+
             $scope.cfg_states = Cfg_states.query();
+
+            $scope.searches = {};
+            if ($routeParams.searches) {
+                $scope.searches = JSON.parse($routeParams.searches);
+            }
 
             $scope.filterOptions = {
                 filterText: ''
@@ -17,7 +24,7 @@ angular.module('ThreatKB')
             var paginationOptions = {
                 pageNumber: 1,
                 pageSize: 25,
-                searches: {},
+                searches: $scope.searches,
                 sort_by: null,
                 sort_dir: null
             };
@@ -36,14 +43,21 @@ angular.module('ThreatKB')
                     $scope.gridApi.core.on.filterChanged($scope, function () {
                         var grid = this.grid;
                         paginationOptions.searches = {};
+                        var trigger_refresh_for_length = false;
+                        var trigger_refresh_for_emptiness = true;
 
                         for (var i = 0; i < grid.columns.length; i++) {
                             var column = grid.columns[i];
-                            if (column.filters[0].term !== undefined && column.filters[0].term !== null && column.filters[0].term !== "") {
+                            trigger_refresh_for_emptiness &= (column.filters[0].term === undefined || column.filters[0].term === null || column.filters[0].term.length === 0);
+
+                            if (column.filters[0].term !== undefined && column.filters[0].term !== null && column.filters[0].term.length >= parseInt($scope.start_filter_requests_length.value)) {
+                                trigger_refresh_for_length = true;
                                 paginationOptions.searches[column.colDef.field] = column.filters[0].term
                             }
                         }
-                        getPage()
+                        if (trigger_refresh_for_length || trigger_refresh_for_emptiness) {
+                            getPage();
+                        }
                     });
                     $scope.gridApi.core.on.sortChanged($scope, function (grid, sortColumns) {
                         if (sortColumns.length === 0) {
@@ -78,18 +92,34 @@ angular.module('ThreatKB')
                                     }
                                 }
                             });
+                            $('[role="rowgroup"]').css('overflow', 'auto');     // Force "rowgroup" container to hide horizontal scroll when not needed and allow for height to be precisely calculated
                         }, 500);
                     });
                 },
                 rowHeight: 35,
                 columnDefs:
                     [
-                        {field: 'ip', displayName: 'IP', enableSorting: true},
-                        {field: 'asn', displayName: 'ASN', enableSorting: true},
-                        {field: 'country', enableSorting: true},
+                        {
+                            field: 'ip',
+                            displayName: 'IP',
+                            width: '220',
+                            enableSorting: true
+                        },
+                        {
+                            field: 'date_created',
+                            displayName: "Created Date",
+                            enableSorting: true,
+                            width: '150',
+                            cellFilter: 'date:\'yyyy-MM-dd HH:mm:ss\''
+                        },
+                        {
+                            field: 'description',
+                            enableSorting: true
+                        },
                         {
                             field: 'state',
                             displayName: 'State',
+                            width: '130',
                             enableSorting: true,
                             cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.state"'
                             + ' on-select="grid.appScope.save(row.entity)">'
@@ -106,7 +136,7 @@ angular.module('ThreatKB')
                         {
                             field: 'owner_user.email',
                             displayName: 'Owner',
-                            width: '20%',
+                            width: '170',
                             enableSorting: false,
                             cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.owner_user"'
                             + ' on-select="grid.appScope.save(row.entity)">'
@@ -121,7 +151,20 @@ angular.module('ThreatKB')
                             + '</div>'
                         },
                         {
+                            field: 'tags',
+                            displayName: 'Tags',
+                            width: '180',
+                            enableSorting: false,
+                            cellTemplate: '<ul class="gridTags" append-to-body="true" ng-model="row.entity.tags">'
+                            + '<li ng-repeat="tag in (row.entity.tags | filter: $select.search) track by tag.id">'
+                            + '<small>{{tag.text}}</small>'
+                            + '</li>'
+                            + '</ul>'
+                            + '</div>'
+                        },
+                        {
                             name: 'Actions',
+                            width: '120',
                             enableFiltering: false,
                             enableColumnMenu: false,
                             enableSorting: false,
@@ -167,6 +210,7 @@ angular.module('ThreatKB')
                     .then(function (response) {
                         $scope.gridOptions.totalItems = response.data.total_count;
                         $scope.gridOptions.data = response.data.data;
+                        $scope.gridApi.grid.gridHeight = parseInt($scope.getTableHeight().height);  // Re-apply table height calculation, based on new data
                         $scope.gridApi.core.refresh();
                     }, function (error) {
                     });
@@ -310,13 +354,16 @@ angular.module('ThreatKB')
             };
 
             getPage();
-
             if (openModalForId !== null) {
-                $scope.update(openModalForId);
+                if (openModalForId == "add") {
+                    $scope.create();
+                } else {
+                    $scope.update(openModalForId);
+                }
             }
         }])
-    .controller('C2ipSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'C2ip', 'c2ip', 'metadata', 'Comments', 'Cfg_states', 'Tags', 'growl', 'Bookmarks', 'hotkeys',
-        function ($scope, $http, $uibModalInstance, $location, C2ip, c2ip, metadata, Comments, Cfg_states, Tags, growl, Bookmarks, hotkeys) {
+    .controller('C2ipSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'C2ip', 'c2ip', 'metadata', 'Comments', 'Cfg_states', 'Tags', 'growl', 'Bookmarks', 'hotkeys', 'Users',
+        function ($scope, $http, $uibModalInstance, $location, C2ip, c2ip, metadata, Comments, Cfg_states, Tags, growl, Bookmarks, hotkeys, Users) {
             $scope.c2ip = c2ip;
             if (!$scope.c2ip.id) {
                 $scope.c2ip.metadata = metadata;
@@ -324,6 +371,8 @@ angular.module('ThreatKB')
             $scope.c2ip.new_comment = "";
             $scope.Comments = Comments;
             $scope.metadata = metadata;
+
+            $scope.users = Users.query();
 
             $scope.save_artifact = function () {
                 C2ip.update({id: $scope.c2ip.id}, $scope.c2ip,
@@ -345,7 +394,7 @@ angular.module('ThreatKB')
                         $scope.save_artifact();
                     }
                 }).add({
-                combo: 'ctrl+x',
+                combo: 'ctrl+q',
                 description: 'Escape',
                 allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
                 callback: function () {

@@ -1,14 +1,21 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('C2dnsController', ['$scope', '$timeout', '$filter', '$http', '$uibModal', 'resolvedC2dns', 'C2dns', 'Cfg_states', 'growl', 'Users', 'openModalForId', 'uiGridConstants',
-        function ($scope, $timeout, $filter, $http, $uibModal, resolvedC2dns, C2dns, Cfg_states, growl, Users, openModalForId, uiGridConstants) {
+    .controller('C2dnsController', ['$scope', '$timeout', '$filter', '$http', '$uibModal', 'resolvedC2dns', 'C2dns', 'Cfg_states', 'growl', 'Users', 'openModalForId', 'uiGridConstants', 'Cfg_settings', '$routeParams',
+        function ($scope, $timeout, $filter, $http, $uibModal, resolvedC2dns, C2dns, Cfg_states, growl, Users, openModalForId, uiGridConstants, Cfg_settings, $routeParams) {
 
             $scope.c2dns = resolvedC2dns;
 
             $scope.users = Users.query();
 
             $scope.cfg_states = Cfg_states.query();
+
+            $scope.searches = {};
+            if ($routeParams.searches) {
+                $scope.searches = JSON.parse($routeParams.searches);
+            }
+
+            $scope.start_filter_requests_length = Cfg_settings.get({key: "START_FILTER_REQUESTS_LENGTH"});
 
             $scope.filterOptions = {
                 filterText: ''
@@ -17,7 +24,7 @@ angular.module('ThreatKB')
             var paginationOptions = {
                 pageNumber: 1,
                 pageSize: 25,
-                searches: {},
+                searches: $scope.searches,
                 sort_by: null,
                 sort_dir: null
             };
@@ -36,14 +43,21 @@ angular.module('ThreatKB')
                     $scope.gridApi.core.on.filterChanged($scope, function () {
                         var grid = this.grid;
                         paginationOptions.searches = {};
+                        var trigger_refresh_for_length = false;
+                        var trigger_refresh_for_emptiness = true;
 
                         for (var i = 0; i < grid.columns.length; i++) {
                             var column = grid.columns[i];
-                            if (column.filters[0].term !== undefined && column.filters[0].term !== null && column.filters[0].term !== "") {
+                            trigger_refresh_for_emptiness &= (column.filters[0].term === undefined || column.filters[0].term === null || column.filters[0].term.length === 0);
+
+                            if (column.filters[0].term !== undefined && column.filters[0].term !== null && column.filters[0].term.length >= parseInt($scope.start_filter_requests_length.value)) {
+                                trigger_refresh_for_length = true;
                                 paginationOptions.searches[column.colDef.field] = column.filters[0].term
                             }
                         }
-                        getPage()
+                        if (trigger_refresh_for_length || trigger_refresh_for_emptiness) {
+                            getPage();
+                        }
                     });
                     $scope.gridApi.core.on.sortChanged($scope, function (grid, sortColumns) {
                         if (sortColumns.length === 0) {
@@ -78,18 +92,32 @@ angular.module('ThreatKB')
                                     }
                                 }
                             });
+                            $('[role="rowgroup"]').css('overflow', 'auto');     // Force "rowgroup" container to hide horizontal scroll when not needed and allow for height to be precisely calculated
                         }, 500);
                     });
                 },
                 rowHeight: 35,
                 columnDefs:
                     [
-                        {field: 'domain_name'},
-                        {field: 'match_type', enableSorting: true},
-                        {field: 'expiration_type', enableSorting: true},
+                        {
+                            field: 'domain_name',
+                            width: '300'
+                        },
+                        {
+                            field: 'date_created',
+                            displayName: "Created Date",
+                            enableSorting: true,
+                            width: '150',
+                            cellFilter: 'date:\'yyyy-MM-dd HH:mm:ss\''
+                        },
+                        {
+                            field: 'description',
+                            enableSorting: true
+                        },
                         {
                             field: 'state',
                             displayName: 'State',
+                            width: '130',
                             enableSorting: true,
                             cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.state"'
                             + ' on-select="grid.appScope.save(row.entity)">'
@@ -106,7 +134,7 @@ angular.module('ThreatKB')
                         {
                             field: 'owner_user.email',
                             displayName: 'Owner',
-                            width: '20%',
+                            width: '170',
                             enableSorting: false,
                             cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.owner_user"'
                             + ' on-select="grid.appScope.save(row.entity)">'
@@ -121,7 +149,20 @@ angular.module('ThreatKB')
                             + '</div>'
                         },
                         {
+                            field: 'tags',
+                            displayName: 'Tags',
+                            width: '180',
+                            enableSorting: false,
+                            cellTemplate: '<ul class="gridTags" append-to-body="true" ng-model="row.entity.tags">'
+                            + '<li ng-repeat="tag in (row.entity.tags | filter: $select.search) track by tag.id">'
+                            + '<small>{{tag.text}}</small>'
+                            + '</li>'
+                            + '</ul>'
+                            + '</div>'
+                        },
+                        {
                             name: 'Actions',
+                            width: '120',
                             enableFiltering: false,
                             enableColumnMenu: false,
                             enableSorting: false,
@@ -167,6 +208,7 @@ angular.module('ThreatKB')
                     .then(function (response) {
                         $scope.gridOptions.totalItems = response.data.total_count;
                         $scope.gridOptions.data = response.data.data;
+                        $scope.gridApi.grid.gridHeight = parseInt($scope.getTableHeight().height);  // Re-apply table height calculation, based on new data
                         $scope.gridApi.core.refresh();
                     }, function (error) {
                     });
@@ -309,13 +351,16 @@ angular.module('ThreatKB')
             };
 
             getPage();
-
             if (openModalForId !== null) {
-                $scope.update(openModalForId);
+                if (openModalForId == "add") {
+                    $scope.create();
+                } else {
+                    $scope.update(openModalForId);
+                }
             }
         }])
-    .controller('C2dnsSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'C2dns', 'c2dns', 'metadata', 'Cfg_states', 'Comments', 'Tags', 'growl', 'Bookmarks', 'hotkeys',
-        function ($scope, $http, $uibModalInstance, $location, C2dns, c2dns, metadata, Cfg_states, Comments, Tags, growl, Bookmarks, hotkeys) {
+    .controller('C2dnsSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'C2dns', 'c2dns', 'metadata', 'Cfg_states', 'Comments', 'Tags', 'growl', 'Bookmarks', 'hotkeys', 'Users',
+        function ($scope, $http, $uibModalInstance, $location, C2dns, c2dns, metadata, Cfg_states, Comments, Tags, growl, Bookmarks, hotkeys, Users) {
             $scope.c2dns = c2dns;
             $scope.c2dns.new_comment = "";
             $scope.Comments = Comments;
@@ -323,6 +368,8 @@ angular.module('ThreatKB')
             if (!$scope.c2dns.id) {
                 $scope.c2dns.metadata = metadata;
             }
+
+            $scope.users = Users.query();
 
             $scope.save_artifact = function () {
                 C2dns.update({id: $scope.c2dns.id}, $scope.c2dns,
@@ -344,7 +391,7 @@ angular.module('ThreatKB')
                         $scope.save_artifact();
                     }
                 }).add({
-                combo: 'ctrl+x',
+                combo: 'ctrl+q',
                 description: 'Escape',
                 allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
                 callback: function () {

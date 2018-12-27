@@ -11,7 +11,8 @@ import json
 def get_all_cfg_category_range_mappings():
     """Return list of all category range mappings
     Return: list of category range mapping dictionaries"""
-    entities = cfg_category_range_mapping.CfgCategoryRangeMapping.query.all()
+    entities = cfg_category_range_mapping.CfgCategoryRangeMapping.query.order_by(
+        cfg_category_range_mapping.CfgCategoryRangeMapping.range_min.asc()).all()
     return Response(json.dumps([entity.to_dict() for entity in entities]), mimetype='application/json')
 
 

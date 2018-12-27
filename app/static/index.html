@@ -61,6 +61,7 @@
                     </li>
                     <li>
                 </ul>
+
                 <div class="btn-group pull-right" uib-dropdown ng-show="isLoggedIn()">
                     <button id="btn-append-to-single-button" type="button" class="btn btn-sm navbar-inverse"
                             style="padding-top:15px; border:0px;" uib-dropdown-toggle>
@@ -94,10 +95,29 @@
                         <!--<li role="menuitem"><a href="#!/files">Manage Files</a></li>-->
                         <li role="menuitem"><a href="#!/cfg_states">States</a></li>
                         <li role="menuitem"><a href="#!/cfg_category_range_mapping">Categories</a></li>
+                        <li role="menuitem"><a href="#!/errors">Errors</a></li>
                         <li role="menuitem"><a href="#!/cfg_settings">Settings</a></li>
                     </ul>
                 </div>
 
+                <!--<div ng-show="isLoggedIn()" style="margin-top:15px">-->
+
+                <div ng-show="false" style="margin-top:15px">
+                    <div class="col-sm-4">
+                        <ui-select ng-model="search_artifacts.selected" theme="selectize" title="Global search"
+                                   on-select="select_artifact(search_artifacts.selected)"
+                                   focus-on="search_focus">
+                            <ui-select-match placeholder="Global search..">
+                                {{ item.name }}</ui-select-match>
+                            <ui-select-choices repeat="item in search_artifacts | filter: $select.search"
+                                               refresh="refresh_search($select.search)"
+                                               minimum-input-length="4">
+                                <div ng-bind-html="item.name | highlight: $select.search">{{ item.name }}</div>
+                                <small ng-bind-html="item.type | highlight: $select.search"></small>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
                 <!-- /.navbar-collapse -->
             </div>
     </nav>
@@ -156,6 +176,7 @@
 <script src="js/scripts/scripts-controller.js"></script>
 <script src="js/scripts/scripts-run-controller.js"></script>
 <script src="js/metadata/metadata-controller.js"></script>
+<script src="js/errors/errors-controller.js"></script>
 <!-- /Controllers -->
 
 <!-- Services -->
@@ -180,6 +201,7 @@
 <script src="js/version/version-service.js"></script>
 <script src="js/scripts/scripts-service.js"></script>
 <script src="js/metadata/metadata-service.js"></script>
+<script src="js/errors/errors-service.js"></script>
 <!-- /Services -->
 
 </body>

@@ -153,11 +153,12 @@ def attach(params):
     try:
         artifact, artifact_id, file = params[1:]
     except Exception, e:
-        help(extra_text="""%s attach <artifact> <artifact_id> <file>
+        print help(extra_text="""%s attach <artifact> <artifact_id> <file>
         
         artifact: yara_rule, c2dns, c2ip, task
         artifact_id: artifact id as an integer
         file: the file to attach to the entity""" % (params[0]), params=params)
+        sys.exit(1)
 
     print THREATKB_CLI.create("file_upload",
                               files={"entity_type": artifact, "entity_id": artifact_id, "file": open(file, 'rb')})
@@ -169,11 +170,12 @@ def comment(params):
     try:
         artifact, artifact_id, comment = params[1:]
     except Exception, e:
-        help(extra_text="""%s comment <artifact> <artifact_id> <comment>
+        print help(extra_text="""%s comment <artifact> <artifact_id> <comment>
         
         artifact: yara_rule, c2dns, c2ip, task
         artifact_id: artifact id as an integer
         comment: the comment to add to the artifact""" % (params[0]), params=params)
+        sys.exit(1)
 
     print THREATKB_CLI.create("comments", json.dumps(
         {"comment": comment, "entity_type": ENTITY_TYPES.get(artifact), "entity_id": artifact_id}))
@@ -196,10 +198,12 @@ def search(params):
     try:
         filter_, filter_text = params[1:]
     except Exception, e:
-        help(extra_text="""%s search <filter> <filter_text>
+        print help(extra_text="""%s search <filter> <filter_text>
         
         filter: all, tag, state, category
         filter_text: text to filter on""" % (params[0]), params=params)
+        sys.exit(1)
+
 
     print THREATKB_CLI.get("search", params={filter_: filter_text})
 
@@ -267,7 +271,8 @@ def main():
         initialize()
         search(params)
     else:
-        help(sys.argv)
+        print help(sys.argv)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

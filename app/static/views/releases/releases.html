@@ -67,7 +67,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="release in releases | orderBy:'-date_created' | filter:{name:search} track by $index "
+            <tr ng-repeat="release in releases | orderBy:'-date_created' | filter:{name:search}:customSearch track by $index "
                 ng-if="release.date_created">
                 <td>{{ release.name }}</td>
 
@@ -99,7 +99,8 @@
                             <small><span class="glyphicon glyphicon-folder-open"></span></small>
                         </button>
                         <button type="submit"
-                                ng-click="delete(release.id)"
+                                confirmed-click="delete(release.id)"
+                                ng-confirm-click="Are you sure you want to the release {{ release.name }}?"
                                 class="btn btn-sm btn-danger">
                             <small><span class="glyphicon glyphicon-remove-circle"></span></small>
                         </button>

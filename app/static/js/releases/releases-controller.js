@@ -8,6 +8,10 @@ angular.module('ThreatKB')
 
             $scope.block_message = "Generating release. This could take up to a minute...";
 
+            $scope.customSearch = function(input) {
+                return typeof input === 'object' ? false : angular.equals(input.toLowerCase(),$scope.searchText.toLowerCase());
+            };
+
             $scope.create = function () {
                 $scope.clear();
                 $scope.open();
@@ -21,13 +25,14 @@ angular.module('ThreatKB')
 
             $scope.save = function (id) {
                 if (id) {
-                    Release.resource.update({id: id}, $scope.release, function () {
+                    Release.resource.update({id: id}, $scope.release, function (response) {
                         $scope.releases = Release.resource.query();
                     });
                 } else {
                     blockUI.start($scope.block_message);
-                    Release.resource.save($scope.release, function () {
+                    Release.resource.save($scope.release, function (response) {
                         $scope.releases = Release.resource.query();
+                        growl.info("Successfully built release in " + response.build_time_seconds + " seconds.", {ttl: 3000});
                         blockUI.stop();
                     }, function (error) {
                         blockUI.stop();

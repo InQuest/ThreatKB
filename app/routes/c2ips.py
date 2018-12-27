@@ -5,12 +5,13 @@ from flask.ext.login import current_user, login_required
 from dateutil import parser
 from sqlalchemy import exc
 
-from app.models.users import KBUser
-from app.models.bookmarks import Bookmarks
-from app.models.metadata import Metadata, MetadataMapping, MetadataChoices
 from app.models.cfg_states import verify_state
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
 from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
+from app.routes.comments import create_comment
+import distutils
+
+from app.utilities import filter_entities
 
 
 @app.route('/ThreatKB/c2ips', methods=['GET'])
@@ -32,49 +33,21 @@ def get_all_c2ips():
     page_size = request.args.get('page_size', False)
     sort_by = request.args.get('sort_by', False)
     sort_direction = request.args.get('sort_dir', 'ASC')
+    exclude_totals = request.args.get('exclude_totals', False)
+    include_metadata = bool(distutils.util.strtobool(request.args.get('include_metadata', "true")))
 
-    entities = c2ip.C2ip.query
+    response_dict = filter_entities(entity=c2ip.C2ip,
+                                    artifact_type=ENTITY_MAPPING["IP"],
+                                    searches=searches,
+                                    page_number=page_number,
+                                    page_size=page_size,
+                                    sort_by=sort_by,
+                                    sort_direction=sort_direction,
+                                    include_metadata=include_metadata,
+                                    exclude_totals=exclude_totals,
+                                    default_sort="c2ip.date_created")
 
-    if not current_user.admin:
-        entities = entities.filter_by(owner_user_id=current_user.id)
-
-    searches = json.loads(searches)
-    for column, value in searches.items():
-        if not value:
-            continue
-
-        if column == "owner_user.email":
-            entities = entities.join(KBUser, c2ip.C2ip.owner_user_id == KBUser.id).filter(
-                KBUser.email.like("%" + str(value) + "%"))
-            continue
-
-        try:
-            column = getattr(c2ip.C2ip, column)
-            entities = entities.filter(column.like("%" + str(value) + "%"))
-        except:
-            continue
-
-    filtered_entities = entities
-    total_count = entities.count()
-
-    if sort_by:
-        filtered_entities = filtered_entities.order_by("%s %s" % (sort_by, sort_direction))
-    else:
-        filtered_entities = filtered_entities.order_by("date_created DESC")
-
-    if page_size:
-        filtered_entities = filtered_entities.limit(int(page_size))
-
-    if page_number:
-        filtered_entities = filtered_entities.offset(int(page_number) * int(page_size))
-
-    filtered_entities = filtered_entities.all()
-
-    response_dict = dict()
-    response_dict['data'] = [entity.to_dict() for entity in filtered_entities]
-    response_dict['total_count'] = total_count
-
-    return Response(json.dumps(response_dict), mimetype='application/json')
+    return Response(response_dict, mimetype="application/json")
 
 
 @app.route('/ThreatKB/c2ips/<int:id>', methods=['GET'])
@@ -103,16 +76,18 @@ def create_c2ip():
     From Data: ip (str), asn (str), country (str),  expiration_type (str), expiration_timestamp (date),  state(str)
     Return: c2dns artifact dictionary"""
     entity = c2ip.C2ip(
-        ip=request.json['ip']
-        , asn=request.json['asn']
-        , country=request.json['country']
-        , state=verify_state(request.json['state']['state'])
-        , expiration_type=request.json['expiration_type']
-        , expiration_timestamp=parser.parse(request.json['expiration_timestamp']) if request.json.get("expiration_type",
-                                                                                                      None) else None
-        , created_user_id=current_user.id
-        , modified_user_id=current_user.id
-        , owner_user_id=current_user.id
+        ip=request.json['ip'],
+        asn=request.json['asn'],
+        country=request.json['country'],
+        description=request.json.get("description", None),
+        references=request.json.get("references", None),
+        state=verify_state(request.json['state']['state']),
+        expiration_type=request.json['expiration_type'],
+        expiration_timestamp=parser.parse(request.json['expiration_timestamp'])
+        if request.json.get("expiration_type", None) else None,
+        created_user_id=current_user.id,
+        modified_user_id=current_user.id,
+        owner_user_id=current_user.id
     )
     db.session.add(entity)
     try:
@@ -126,27 +101,13 @@ def create_c2ip():
 
     entity.tags = create_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
 
-    dirty = False
-    for name, value_dict in request.json["metadata_values"].iteritems():
-        if not name or not value_dict:
-            continue
+    if request.json['new_comment']:
+        create_comment(request.json['new_comment'],
+                       ENTITY_MAPPING["IP"],
+                       entity.id,
+                       current_user.id)
 
-        m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
-            Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["IP"]).filter(
-            MetadataMapping.artifact_id == entity.id).first()
-        if m:
-            m.value = value_dict["value"]
-            db.session.add(m)
-            dirty = True
-        else:
-            m = db.session.query(Metadata).filter(Metadata.key == name).filter(
-                Metadata.artifact_type == ENTITY_MAPPING["IP"]).first()
-            db.session.add(MetadataMapping(value=value_dict["value"], metadata_id=m.id, artifact_id=entity.id,
-                                           created_user_id=current_user.id))
-            dirty = True
-
-    if dirty:
-        db.session.commit()
+    entity.save_metadata(request.json.get("metadata_values", {}))
 
     return jsonify(entity.to_dict()), 201
 
@@ -167,6 +128,8 @@ def update_c2ip(id):
         ip=request.json['ip'],
         asn=request.json['asn'],
         country=request.json['country'],
+        description=request.json.get("description", None),
+        references=request.json.get("references", None),
         state=verify_state(request.json['state']['state']) if request.json['state'] and 'state' in request.json['state']
         else verify_state(request.json['state']),
         expiration_type=request.json['expiration_type'],
@@ -188,27 +151,7 @@ def update_c2ip(id):
     create_tags_mapping(entity.__tablename__, entity.id, request.json['addedTags'])
     delete_tags_mapping(entity.__tablename__, entity.id, request.json['removedTags'])
 
-    dirty = False
-    for name, value_dict in request.json["metadata_values"].iteritems():
-        if not name or not value_dict:
-            continue
-
-        m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
-            Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["IP"]).filter(
-            MetadataMapping.artifact_id == entity.id).first()
-        if m:
-            m.value = value_dict["value"]
-            db.session.add(m)
-            dirty = True
-        else:
-            m = db.session.query(Metadata).filter(Metadata.key == name).filter(
-                Metadata.artifact_type == ENTITY_MAPPING["IP"]).first()
-            db.session.add(MetadataMapping(value=value_dict["value"], metadata_id=m.id, artifact_id=entity.id,
-                                           created_user_id=current_user.id))
-            dirty = True
-
-    if dirty:
-        db.session.commit()
+    entity.save_metadata(request.json.get("metadata_values", {}))
 
     entity = c2ip.C2ip.query.get(entity.id)
     return jsonify(entity.to_dict()), 200

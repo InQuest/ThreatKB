@@ -2,7 +2,26 @@ body {
     margin-top: 60px;
     padding: 10px;
     background-color: #ECF0F1;
+    text-align: center;
 }
+
+/* Expand page content to 100% width up to 1900px width (issue #223) */
+body > .container {
+    display: inline-block;
+    margin-left: 0;
+    margin-right: 0;
+}
+@media (max-width: 1900px) {
+    body > .container {
+        width: 100%;
+    }
+}
+@media (min-width: 1901px) {
+    body > .container {
+        width: 1870px;
+    }
+}
+/* /done #223 */
 
 .center {
     margin: auto;
@@ -25,6 +44,15 @@ table td:last-child {
     align: right;
     text-align: right;
 }
+
+/* Make table TD cells left-align content */
+.ui-grid-header-cell .ui-grid-cell-contents {
+    text-align: center;
+}
+.ui-grid-row .ui-grid-cell-contents {
+    text-align: left;
+}
+/* /done */
 
 /* enable absolute positioning */
 .inner-addon {
@@ -120,4 +148,36 @@ span.glyphicon {
     text-align: inherit;
 }
 
+/* Modal full-screen button */
+body.modals-full-screen .modal-dialog {
+    width: auto !important;
+    margin: 10px !important;
+}
+.modal-fullscreen-button {
+    display: none;
+}
+.modal-fullscreen-button.modal-fullscreen-button-abs-pos {
+    position: absolute;
+    right: 40px;
+    top: 10px;
+}
+@media (min-width: 992px) {
+    .modal-fullscreen-button {
+        display: inline-block;
+    } 
+}
 
+/* Bootstrap overrides */
+/* ... modal alignment */
+.modal-dialog { text-align: left; }
+/* ... modal sizing */
+@media (min-width: 768px) {
+    .modal-dialog {
+        width: auto;
+        margin: 10px;
+    }
+}
+@media (min-width: 992px) {
+    .modal-lg { width: 900px; }
+    .modal-dialog { margin: 30px auto; }
+}

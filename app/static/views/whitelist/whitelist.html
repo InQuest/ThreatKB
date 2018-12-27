@@ -17,8 +17,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Whitelist Artifact:</label>
-
+                    <label>Whitelist Artifact <span>(Regex or Network CIDR)</span>:</label>
                     <input class="form-control" name="whitelist_artifact"
                            ng-model="whitelist.whitelist_artifact" ng-required="true"
                            ng-maxlength="2048"/>
@@ -73,7 +72,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="whitelist in whitelists | toArray:false | filter:search track by $index">
+            <tr ng-repeat="whitelist in whitelists | toArray:false | filter:search:customSearch track by $index">
                 <td ng-if="whitelist.id">{{ whitelist.id }}</td>
 
                 <td ng-if="whitelist.id">{{ whitelist.whitelist_artifact }}</td>

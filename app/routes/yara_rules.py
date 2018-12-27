@@ -1,15 +1,19 @@
 from app import app, db, auto, ENTITY_MAPPING
+from app.routes import test_yara_rule
 from app.models import yara_rule, cfg_states, comments
 from flask import abort, jsonify, request, Response, json
 from flask.ext.login import current_user, login_required
 import distutils
 
-from app.models.users import KBUser
-from app.models.metadata import Metadata, MetadataMapping, MetadataChoices
-from app.models.bookmarks import Bookmarks
+from app.models.metadata import Metadata, MetadataMapping
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
 from app.routes.cfg_category_range_mapping import update_cfg_category_range_mapping_current
 from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
+from app.routes.comments import create_comment
+from app.models.cfg_settings import Cfg_settings
+from app.utilities import filter_entities
+
+import datetime
 
 
 @app.route('/ThreatKB/yara_rules/merge_signatures', methods=['POST'])
@@ -71,8 +75,9 @@ def get_all_yara_rules():
 
     Return: list of yara_rule artifact dictionaries"""
     include_inactive = request.args.get("include_inactive", False)
-    include_yara_string = request.args.get("include_yara_string", False)
-    short = distutils.util.strtobool(request.args.get("short", "false"))
+    include_yara_string = bool(distutils.util.strtobool(request.args.get("include_yara_string", "False")))
+    short = bool(distutils.util.strtobool(request.args.get("short", "false")))
+    include_metadata = bool(distutils.util.strtobool(request.args.get('include_metadata', "true")))
 
     if include_yara_string:
         include_yara_string = True
@@ -83,55 +88,24 @@ def get_all_yara_rules():
     page_size = request.args.get('page_size', False)
     sort_by = request.args.get('sort_by', False)
     sort_direction = request.args.get('sort_dir', 'ASC')
+    exclude_totals = request.args.get('exclude_totals', False)
 
-    entities = yara_rule.Yara_rule.query
+    response_dict = filter_entities(entity=yara_rule.Yara_rule,
+                                    artifact_type=ENTITY_MAPPING["SIGNATURE"],
+                                    searches=searches,
+                                    page_number=page_number,
+                                    page_size=page_size,
+                                    sort_by=sort_by,
+                                    sort_direction=sort_direction,
+                                    include_metadata=include_metadata,
+                                    exclude_totals=exclude_totals,
+                                    default_sort="creation_date",
+                                    include_inactive=include_inactive,
+                                    include_merged=include_merged,
+                                    include_yara_string=include_yara_string,
+                                    short=short)
 
-    if not current_user.admin:
-        entities = entities.filter_by(owner_user_id=current_user.id)
-
-    if not include_inactive:
-        entities = entities.filter_by(active=True)
-
-    searches = json.loads(searches)
-    for column, value in searches.items():
-        if not value:
-            continue
-
-        if column == "owner_user.email":
-            entities = entities.join(KBUser, yara_rule.Yara_rule.owner_user_id == KBUser.id).filter(
-                KBUser.email.like("%" + str(value) + "%"))
-            continue
-
-        try:
-            column = getattr(yara_rule.Yara_rule, column)
-            entities = entities.filter(column.like("%" + str(value) + "%"))
-        except:
-            continue
-
-    if not include_merged:
-        entities = entities.filter(yara_rule.Yara_rule.state != 'Merged')
-
-    filtered_entities = entities
-    total_count = entities.count()
-
-    if sort_by:
-        filtered_entities = filtered_entities.order_by("%s %s" % (sort_by, sort_direction))
-    else:
-        filtered_entities = filtered_entities.order_by("creation_date DESC")
-
-    if page_size:
-        filtered_entities = filtered_entities.limit(int(page_size))
-
-    if page_number:
-        filtered_entities = filtered_entities.offset(int(page_number) * int(page_size))
-
-    filtered_entities = filtered_entities.all()
-
-    response_dict = dict()
-    response_dict['data'] = [entity.to_dict(include_yara_string, short) for entity in filtered_entities]
-    response_dict['total_count'] = total_count
-
-    return Response(json.dumps(response_dict), mimetype='application/json')
+    return Response(response_dict, mimetype='application/json')
 
 
 @app.route('/ThreatKB/yara_rules/<int:id>', methods=['GET'])
@@ -174,19 +148,37 @@ def create_yara_rule():
     if not release_state or not draft_state:
         raise Exception("You must set a release, draft, and retirement state before modifying signatures")
 
+    try:
+        rule_state = request.json.get("state", None).get("state", None)
+    except:
+        rule_state = request.json.get("state", None)
+
+    compile_on_save = Cfg_settings.get_setting("COMPILE_YARA_RULE_ON_SAVE")
+    if compile_on_save and distutils.util.strtobool(compile_on_save) and (
+            rule_state == release_state.state or rule_state == draft_state.state):
+        test_result, return_code, stdout, stderr = test_yara_rule.does_rule_compile(request.json)
+        if not test_result:
+            raise Exception(
+                "State submitted is " + str(
+                    rule_state) + " and the rule could not be saved because it does not compile.\n\nerror_code=" + str(
+                    return_code) + "\n\n" + stderr)
+
     if request.json['category'] and 'category' in request.json['category']:
         new_sig_id = request.json['category']['current'] + 1
 
     entity = yara_rule.Yara_rule(
-        state=request.json['state']['state'] if 'state' in request.json['state'] else None
-        , name=request.json['name']
-        , category=request.json['category']['category'] if 'category' in request.json['category'] else None
-        , condition=yara_rule.Yara_rule.make_yara_sane(request.json['condition'], "condition:")
-        , strings=yara_rule.Yara_rule.make_yara_sane(request.json['strings'], "strings:")
-        , eventid=new_sig_id
-        , created_user_id=current_user.id
-        , modified_user_id=current_user.id
-        , owner_user_id=current_user.id
+        state=request.json['state']['state'] if 'state' in request.json['state'] else None,
+        name=request.json['name'],
+        description=request.json.get("description", None),
+        references=request.json.get("references", None),
+        category=request.json['category']['category'] if 'category' in request.json['category'] else None,
+        condition=yara_rule.Yara_rule.make_yara_sane(request.json['condition'], "condition:"),
+        strings=yara_rule.Yara_rule.make_yara_sane(request.json['strings'], "strings:"),
+        eventid=new_sig_id,
+        created_user_id=current_user.id,
+        modified_user_id=current_user.id,
+        owner_user_id=current_user.id,
+        imports=yara_rule.Yara_rule.get_imports_from_string(request.json.get("imports", None))
     )
 
     if entity.state == release_state:
@@ -196,11 +188,18 @@ def create_yara_rule():
     db.session.commit()
 
     entity.tags = create_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
+
+    if request.json['new_comment']:
+        create_comment(request.json['new_comment'],
+                       ENTITY_MAPPING["SIGNATURE"],
+                       entity.id,
+                       current_user.id)
+
     if new_sig_id > 0:
         update_cfg_category_range_mapping_current(request.json['category']['id'], new_sig_id)
 
     dirty = False
-    for name, value_dict in request.json["metadata_values"].iteritems():
+    for name, value_dict in request.json.get("metadata_values", {}).iteritems():
         if not name or not value_dict:
             continue
 
@@ -244,6 +243,21 @@ def update_yara_rule(id):
     draft_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_staging_state > 0).first()
     old_state = entity.state
 
+    try:
+        rule_state = request.json.get("state", None).get("state", None)
+    except:
+        rule_state = request.json.get("state", None)
+
+    compile_on_save = Cfg_settings.get_setting("COMPILE_YARA_RULE_ON_SAVE")
+    if compile_on_save and distutils.util.strtobool(compile_on_save) and (
+            rule_state == release_state.state or rule_state == draft_state.state):
+        test_result, return_code, stdout, stderr = test_yara_rule.does_rule_compile(request.json)
+        if not test_result:
+            raise Exception(
+                "State submitted is " + str(
+                    rule_state) + " and the rule could not be saved because it does not compile.\n\nerror_code=" + str(
+                    return_code) + "\n\n" + stderr)
+
     if not release_state or not draft_state:
         raise Exception("You must set a release, draft, and retirement state before modifying signatures")
 
@@ -274,16 +288,22 @@ def update_yara_rule(id):
         state=request.json['state']['state'] if request.json['state'] and 'state' in request.json['state'] else
         request.json['state'],
         name=request.json['name'],
+        description=request.json.get("description", None),
+        references=request.json.get("references", None),
         category=request.json['category']['category'] if request.json['category'] and 'category' in request
             .json['category'] else request.json['category'],
         condition=yara_rule.Yara_rule.make_yara_sane(request.json["condition"], "condition:"),
         strings=yara_rule.Yara_rule.make_yara_sane(request.json["strings"], "strings:"),
         eventid=temp_sig_id,
         id=id,
+        created_user_id=entity.created_user_id,
+        creation_date=entity.creation_date,
         modified_user_id=current_user.id,
+        last_revision_date=datetime.datetime.now(),
         owner_user_id=request.json['owner_user']['id'] if request.json.get("owner_user", None) and request
             .json["owner_user"].get("id", None) else None,
-        revision=entity.revision if do_not_bump_revision else entity.revision + 1
+        revision=entity.revision if do_not_bump_revision else entity.revision + 1,
+        imports=yara_rule.Yara_rule.get_imports_from_string(request.json.get("imports", None))
     )
 
     if old_state == release_state.state and entity.state == release_state.state and not do_not_bump_revision:
@@ -293,7 +313,7 @@ def update_yara_rule(id):
     db.session.commit()
 
     dirty = False
-    for name, value_dict in request.json["metadata_values"].iteritems():
+    for name, value_dict in request.json.get("metadata_values", {}).iteritems():
         if not name or not value_dict:
             continue
 

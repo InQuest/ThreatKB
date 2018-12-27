@@ -24,6 +24,7 @@ def upgrade():
                     sa.Column('date_modified', sa.DateTime(timezone=True), nullable=True),
                     sa.Column('public', sa.Boolean(), nullable=True),
                     sa.Column('value', sa.String(length=2048), nullable=True),
+                    sa.Column('description', sa.String(length=512), nullable=True),
                     sa.PrimaryKeyConstraint('key')
                     )
     op.create_index(u'ix_cfg_settings_key', 'cfg_settings', ['key'], unique=False)

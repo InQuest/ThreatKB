@@ -22,8 +22,10 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                     resolvedOwnershipData: ['AuthService', function (AuthService) {
                         return AuthService.getOwnershipData();
                     }],
-                    resolvedReleasesLatest: ['Release', function (Release) {
-                        return Release.get_latest_releases(3);
+                    resolvedReleasesLatest: ['Release', 'Cfg_settings', function (Release, Cfg_settings) {
+                        return Cfg_settings.get({key: "DASHBOARD_RELEASES_COUNT"}).$promise.then(function (release_count) {
+                            return Release.get_latest_releases(release_count.value);
+                        });
                     }],
                     resolvedVersion: ['Version', function (Version) {
                         return Version.get_version();
@@ -47,11 +49,29 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                     resolvedC2dns: ['C2dns', function (C2dns) {
                         return C2dns.query({
                             page_number: 0,
-                            page_size: 25
+                            page_size: 25,
+                            include_metadata: 0,
+                            short: 1
                         });
                     }],
                     openModalForId: [function () {
                         return null;
+                    }]
+                }
+            })
+            .when('/c2dns/add', {
+                templateUrl: 'views/c2dns/c2dns.html',
+                controller: 'C2dnsController',
+                access: {restricted: true, admin: false},
+                resolve: {
+                    resolvedC2dns: ['C2dns', function (C2dns) {
+                        return C2dns.query({
+                            page_number: 0,
+                            page_size: 25
+                        });
+                    }],
+                    openModalForId: ['$route', function ($route) {
+                        return "add";
                     }]
                 }
             })
@@ -79,11 +99,29 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                     resolvedC2ip: ['C2ip', function (C2ip) {
                         return C2ip.query({
                             page_number: 0,
-                            page_size: 25
+                            page_size: 25,
+                            include_metadata: 0,
+                            short: 1
                         });
                     }],
                     openModalForId: [function () {
                         return null;
+                    }]
+                }
+            })
+            .when('/c2ips/add', {
+                templateUrl: 'views/c2ip/c2ips.html',
+                controller: 'C2ipController',
+                access: {restricted: true, admin: false},
+                resolve: {
+                    resolvedC2ip: ['C2ip', function (C2ip) {
+                        return C2ip.query({
+                            page_number: 0,
+                            page_size: 25
+                        });
+                    }],
+                    openModalForId: ['$route', function ($route) {
+                        return "add";
                     }]
                 }
             })
@@ -110,6 +148,16 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                 resolve: {
                     resolvedCfgCategoryRangeMapping: ['CfgCategoryRangeMapping', function (CfgCategoryRangeMapping) {
                         return CfgCategoryRangeMapping.query();
+                    }]
+                }
+            })
+            .when('/errors', {
+                templateUrl: 'views/errors/errors.html',
+                controller: 'ErrorsController',
+                access: {restricted: true, admin: true},
+                resolve: {
+                    resolvedErrors: ['Errors', function (Errors) {
+                        return Errors.query();
                     }]
                 }
             })
@@ -163,6 +211,16 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                     }]
                 }
             })
+            .when('/yara_rules/add', {
+                templateUrl: 'views/yara_rule/yara_rules.html',
+                controller: 'Yara_ruleController',
+                access: {restricted: true, admin: false},
+                resolve: {
+                    openModalForId: [function () {
+                        return "add";
+                    }]
+                }
+            })
             .when('/yara_rules/:id', {
                 templateUrl: 'views/yara_rule/yara_rules.html',
                 controller: 'Yara_ruleController',
@@ -172,8 +230,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                         return Yara_rule.resource.query({
                             page_number: 0,
                             page_size: 25,
-                            include_yara_string: 1,
-                            short: 0
+                            include_yara_string: 1
                         });
                     }],
                     openModalForId: ['$route', function ($route) {
@@ -258,6 +315,19 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                         return Task.query();
                     }],
                     openModalForId: ['$route', function ($route) {
+                        return "add";
+                    }]
+                }
+            })
+            .when('/tasks/:id', {
+                templateUrl: 'views/tasks/tasks.html',
+                controller: 'TasksController',
+                access: {restricted: true, admin: false},
+                resolve: {
+                    resolvedTask: ['Task', function (Task) {
+                        return Task.query();
+                    }],
+                    openModalForId: ['$route', function ($route) {
                         return $route.current.params.id;
                     }]
                 }
@@ -321,6 +391,10 @@ angular.module('ThreatKB').run(function ($rootScope, $location, AuthService) {
             day_diff < 31 && Math.ceil(day_diff / 7) + " weeks ago";
     };
 
+    $rootScope.toggleFullscreen = function () {
+        angular.element(document.body).toggleClass('modals-full-screen')
+    };
+
     // Register listener to watch route changes.
     $rootScope.$on('$routeChangeStart', function (event, next, current) {
         AuthService.getUserStatus().then(function () {
@@ -362,7 +436,22 @@ angular.module('ThreatKB').directive("formatDate", function () {
             })
         }
     }
-})
+});
+
+angular.module('ThreatKB').directive('focus', function ($timeout, $parse) {
+    return {
+        link: function (scope, element, attrs) {
+            var model = $parse(attrs.focus);
+            scope.$watch(model, function (value) {
+                if (value === true) {
+                    $timeout(function () {
+                        element[0].focus();
+                    });
+                }
+            });
+        }
+    };
+});
 
 angular.module('ThreatKB').config(function (blockUIConfig) {
     // Tell the blockUI service to ignore certain requests
