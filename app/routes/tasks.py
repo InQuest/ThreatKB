@@ -2,13 +2,9 @@ from app import app, db, auto, ENTITY_MAPPING
 from app.models import tasks
 from flask import abort, jsonify, request, Response
 from flask.ext.login import login_required, current_user
-from dateutil import parser
-import json
-from sqlalchemy import or_
-
-from app.models.bookmarks import Bookmarks
-from app.models.users import KBUser
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
+
+from app.utilities import filter_entities
 
 
 @app.route('/ThreatKB/tasks', methods=['GET'])
@@ -31,48 +27,19 @@ def get_all_tasks():
     sort_by = request.args.get('sort_by', False)
     sort_direction = request.args.get('sort_dir', 'ASC')
 
-    entities = tasks.Tasks.query.filter_by(active=True)
+    response_dict = filter_entities(entity=tasks.Tasks,
+                                    artifact_type=ENTITY_MAPPING["TASK"],
+                                    searches=searches,
+                                    page_number=page_number,
+                                    page_size=page_size,
+                                    sort_by=sort_by,
+                                    sort_direction=sort_direction,
+                                    include_metadata=False,
+                                    exclude_totals=False,
+                                    default_sort="date_created",
+                                    include_inactive=False)
 
-    if not current_user.admin:
-        entities = entities.filter(or_(tasks.Tasks.owner_user_id == current_user.id, tasks.Tasks.owner_user_id == None))
-
-    searches = json.loads(searches)
-    for column, value in searches.items():
-        if not value:
-            continue
-
-        if column == "owner_user.email":
-            entities = entities.join(KBUser, tasks.Tasks.owner_user_id == KBUser.id) \
-                .filter(KBUser.email.like("%" + str(value) + "%"))
-            continue
-
-        try:
-            column = getattr(tasks.Tasks, column)
-            entities = entities.filter(column.like("%" + str(value) + "%"))
-        except:
-            continue
-
-    filtered_entities = entities
-    total_count = entities.count()
-
-    if sort_by:
-        filtered_entities = filtered_entities.order_by("%s %s" % (sort_by, sort_direction))
-    else:
-        filtered_entities = filtered_entities.order_by("date_created DESC")
-
-    if page_size:
-        filtered_entities = filtered_entities.limit(int(page_size))
-
-    if page_number:
-        filtered_entities = filtered_entities.offset(int(page_number) * int(page_size))
-
-    filtered_entities = filtered_entities.all()
-
-    response_dict = dict()
-    response_dict['data'] = [entity.to_dict() for entity in filtered_entities]
-    response_dict['total_count'] = total_count
-
-    return Response(json.dumps(response_dict), mimetype='application/json')
+    return Response(response_dict, mimetype='application/json')
 
 
 @app.route('/ThreatKB/tasks/<int:id>', methods=['GET'])
