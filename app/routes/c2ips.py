@@ -101,7 +101,7 @@ def create_c2ip():
 
     entity.tags = create_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
 
-    if request.json['new_comment']:
+    if request.json.get('new_comment', None):
         create_comment(request.json['new_comment'],
                        ENTITY_MAPPING["IP"],
                        entity.id,
