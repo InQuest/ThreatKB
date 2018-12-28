@@ -357,6 +357,16 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                     }]
                 }
             })
+            .when('/activity_log', {
+                templateUrl: 'views/activity_log/activity_log.html',
+                controller: 'ActivityLogController',
+                access: {restricted: true, admin: false},
+                resolve: {
+                    resolvedActivityLog: ['ActivityLog', function (ActivityLog) {
+                        return ActivityLog.resource.query();
+                    }]
+                }
+            })
             .otherwise({
                 redirectTo: '/'
             });

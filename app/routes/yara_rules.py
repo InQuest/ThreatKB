@@ -2,7 +2,7 @@ from app import app, db, auto, ENTITY_MAPPING
 from app.routes import test_yara_rule
 from app.models import yara_rule, cfg_states, comments
 from flask import abort, jsonify, request, Response, json
-from flask.ext.login import current_user, login_required
+from flask_login import current_user, login_required
 import distutils
 
 from app.models.metadata import Metadata, MetadataMapping

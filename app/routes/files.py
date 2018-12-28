@@ -1,7 +1,7 @@
 from app import app, db, admin_only, auto, ENTITY_MAPPING
 from app.models import cfg_settings, files
 from flask import abort, jsonify, request, send_file, json, Response
-from flask.ext.login import login_required, current_user
+from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 import os
 import errno

@@ -3,18 +3,19 @@ import re
 
 from ipaddr import IPAddress, IPNetwork
 from sqlalchemy.event import listens_for
+from sqlalchemy.orm import Session
 
 import app
-from app import db, current_user, ENTITY_MAPPING
+from app import db, current_user, ENTITY_MAPPING, ACTIVITY_TYPE
 from app.geo_ip_helper import get_geo_for_ip
+from app.models.comments import Comments
 from app.models.whitelist import Whitelist
 from app.routes import tags_mapping
 from app.models.metadata import Metadata, MetadataMapping
-from app.models import cfg_states, cfg_settings
+from app.models import cfg_states, cfg_settings, activity_log
 
 from flask import abort
 
-import ipwhois
 import time
 
 
@@ -48,7 +49,7 @@ class C2ip(db.Model):
 
     comments = db.relationship("Comments", foreign_keys=[id],
                                primaryjoin="and_(Comments.entity_id==C2ip.id, Comments.entity_type=='%s')" % (
-                                   ENTITY_MAPPING["IP"]), lazy="dynamic")
+                                   ENTITY_MAPPING["IP"]))
 
     tags = []
     addedTags = []
@@ -89,7 +90,8 @@ class C2ip(db.Model):
             created_user=self.created_user.to_dict(),
             modified_user=self.modified_user.to_dict(),
             owner_user=self.owner_user.to_dict() if self.owner_user else None,
-            comments=[comment.to_dict() for comment in self.comments],
+            comments=[comment.to_dict() for comment in
+                      Comments.query.filter_by(entity_id=self.id).filter_by(entity_type=ENTITY_MAPPING["IP"]).all()]
         )
 
         if include_metadata:
@@ -102,7 +104,6 @@ class C2ip(db.Model):
             d.update(dict(metadata=Metadata.get_metadata_dict("IP"), metadata_values=metadata_values_dict))
 
         return d
-
 
 
     def to_release_dict(self, metadata_cache, user_cache):
@@ -154,7 +155,7 @@ class C2ip(db.Model):
 
         try:
             db.session.commit()
-        except Exception, e:
+        except Exception as e:
             app.logger.exception(e)
 
     @staticmethod
@@ -289,3 +290,41 @@ def c2ip_before_update(mapper, connect, target):
         release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
         if release_state and target.state == release_state.state:
             abort(403)
+
+
+@listens_for(C2ip, "after_insert")
+def ip_created(mapper, connection, target):
+    activity_log.log_activity(connection=connection,
+                              activity_type=ACTIVITY_TYPE.keys()[ACTIVITY_TYPE.keys().index("ARTIFACT_CREATED")],
+                              activity_text=target.ip,
+                              activity_date=target.date_created,
+                              entity_type=ENTITY_MAPPING["IP"],
+                              entity_id=target.id,
+                              user_id=target.created_user_id)
+
+
+@listens_for(C2ip, "after_update")
+def ip_modified(mapper, connection, target):
+    session = Session.object_session(target)
+
+    if session.is_modified(target, include_collections=False):
+        state_activity_text = activity_log.get_state_change(target, target.ip)
+        if state_activity_text:
+            activity_log.log_activity(connection=connection,
+                                      activity_type=app.ACTIVITY_TYPE.keys()[ACTIVITY_TYPE.keys().index("STATE_TOGGLED")],
+                                      activity_text=state_activity_text,
+                                      activity_date=target.date_modified,
+                                      entity_type=ENTITY_MAPPING["IP"],
+                                      entity_id=target.id,
+                                      user_id=target.modified_user_id)
+
+        changes = activity_log.get_modified_changes(target)
+        if changes.__len__() > 0:
+            activity_log.log_activity(connection=connection,
+                                      activity_type=ACTIVITY_TYPE.keys()[ACTIVITY_TYPE.keys().index("ARTIFACT_MODIFIED")],
+                                      activity_text="'%s' modified with changes: %s"
+                                                    % (target.ip, ', '.join(map(str, changes))),
+                                      activity_date=target.date_modified,
+                                      entity_type=ENTITY_MAPPING["IP"],
+                                      entity_id=target.id,
+                                      user_id=target.modified_user_id)

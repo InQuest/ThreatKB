@@ -1,10 +1,12 @@
-from app import db, current_user, ENTITY_MAPPING
+from sqlalchemy.orm import Session
+
+from app import db, current_user, ENTITY_MAPPING, ACTIVITY_TYPE
 from app.models.files import Files
 from app.routes import tags_mapping
 from app.models.comments import Comments
 from app.models.metadata import MetadataMapping, Metadata
 from app.models.cfg_category_range_mapping import CfgCategoryRangeMapping
-from app.models import cfg_settings, cfg_states
+from app.models import cfg_settings, cfg_states, activity_log
 from sqlalchemy.event import listens_for
 from dateutil import parser
 import datetime
@@ -53,18 +55,18 @@ class Yara_rule(db.Model):
 
     comments = db.relationship("Comments", foreign_keys=[id],
                                primaryjoin="and_(Comments.entity_id==Yara_rule.id, Comments.entity_type=='%s')" % (
-                                   ENTITY_MAPPING["SIGNATURE"]), lazy="dynamic", cascade="all,delete")
+                                   ENTITY_MAPPING["SIGNATURE"]), cascade="all,delete")
 
     files = db.relationship("Files", foreign_keys=[id],
                             primaryjoin="and_(Files.entity_id==Yara_rule.id, Files.entity_type=='%s')" % (
-                                ENTITY_MAPPING["SIGNATURE"]), lazy="dynamic", cascade="all,delete")
+                                ENTITY_MAPPING["SIGNATURE"]), cascade="all,delete")
 
     history = db.relationship("Yara_rule_history", foreign_keys=[id],
-                              primaryjoin="Yara_rule_history.yara_rule_id==Yara_rule.id", lazy="dynamic",
+                              primaryjoin="Yara_rule_history.yara_rule_id==Yara_rule.id",
                               cascade="all,delete")
 
     test_history = db.relationship("Yara_testing_history", foreign_keys=[id],
-                                   primaryjoin="Yara_testing_history.yara_rule_id==Yara_rule.id", lazy="dynamic",
+                                   primaryjoin="Yara_testing_history.yara_rule_id==Yara_rule.id",
                                    cascade="all,delete")
 
     @property
@@ -348,6 +350,44 @@ def yara_rule_before_update(mapper, connect, target):
         release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
         if release_state and target.state == release_state.state:
             abort(403)
+
+
+@listens_for(Yara_rule, "after_insert")
+def yara_created(mapper, connection, target):
+    activity_log.log_activity(connection=connection,
+                              activity_type=ACTIVITY_TYPE.keys()[ACTIVITY_TYPE.keys().index("ARTIFACT_CREATED")],
+                              activity_text=target.title,
+                              activity_date=target.date_created,
+                              entity_type=ENTITY_MAPPING["TASK"],
+                              entity_id=target.id,
+                              user_id=target.created_user_id)
+
+
+@listens_for(Yara_rule, "after_update")
+def yara_modified(mapper, connection, target):
+    session = Session.object_session(target)
+
+    if session.is_modified(target, include_collections=False):
+        state_activity_text = activity_log.get_state_change(target, target.name)
+        if state_activity_text:
+            activity_log.log_activity(connection=connection,
+                                      activity_type=ACTIVITY_TYPE.keys()[ACTIVITY_TYPE.keys().index("STATE_TOGGLED")],
+                                      activity_text=state_activity_text,
+                                      activity_date=target.last_revision_date,
+                                      entity_type=ENTITY_MAPPING["SIGNATURE"],
+                                      entity_id=target.id,
+                                      user_id=target.modified_user_id)
+
+        changes = activity_log.get_modified_changes(target)
+        if changes.__len__() > 0:
+            activity_log.log_activity(connection=connection,
+                                      activity_type=ACTIVITY_TYPE.keys()[ACTIVITY_TYPE.keys().index("ARTIFACT_MODIFIED")],
+                                      activity_text="'%s' modified with changes: %s"
+                                                    % (target.name, ', '.join(map(str, changes))),
+                                      activity_date=target.last_revision_date,
+                                      entity_type=ENTITY_MAPPING["SIGNATURE"],
+                                      entity_id=target.id,
+                                      user_id=target.modified_user_id)
 
 
 class Yara_rule_history(db.Model):

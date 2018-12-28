@@ -2,7 +2,7 @@ from app import app, db, bcrypt, admin_only, auto
 from app.models.users import KBUser
 from app.models import yara_rule, c2dns, c2ip, tasks, users, access_keys
 from flask import request, jsonify, session, json, abort, send_file, Response
-from flask.ext.login import current_user, login_required
+from flask_login import current_user, login_required
 import flask_login
 import tempfile
 import uuid

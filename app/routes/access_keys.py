@@ -5,7 +5,7 @@ import os
 from app import app, db
 from app.models.access_keys import AccessKeys
 from flask import request, jsonify, json, abort, Response, send_file
-from flask.ext.login import current_user, login_required
+from flask_login import current_user, login_required
 
 from app.models.users import KBUser
 

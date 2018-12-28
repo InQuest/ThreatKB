@@ -1,7 +1,7 @@
 from app import app, db, auto, ENTITY_MAPPING
 from app.models import c2dns
 from flask import abort, jsonify, request, Response, json
-from flask.ext.login import login_required, current_user
+from flask_login import login_required, current_user
 from dateutil import parser
 from sqlalchemy import exc
 
@@ -96,7 +96,7 @@ def create_c2dns():
     except exc.IntegrityError:
         app.logger.error("Duplicate DNS: '%s'" % entity.domain_name)
         abort(409)
-    except Exception:
+    except Exception as e:
         app.logger.error("Whitelist validation failed.")
         abort(412, description="Whitelist validation failed.")
 

@@ -1,5 +1,5 @@
 from flask import request, Response, json, abort
-from flask.ext.login import login_required
+from flask_login import login_required
 from sqlalchemy import or_, and_
 from app import app, db, auto, ENTITY_MAPPING
 from app.models import yara_rule, c2dns, c2ip, tasks, tags, tags_mapping, metadata

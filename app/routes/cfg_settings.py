@@ -1,7 +1,7 @@
 from app import app, db, admin_only, auto
 from app.models import cfg_settings
 from flask import abort, jsonify, request, Response
-from flask.ext.login import login_required, current_user
+from flask_login import login_required, current_user
 from dateutil import parser
 import json
 

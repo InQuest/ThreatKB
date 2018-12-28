@@ -1,7 +1,7 @@
 from app import app, db, admin_only, auto
 from app.models import tags
 from flask import abort, jsonify, request, Response
-from flask.ext.login import login_required
+from flask_login import login_required
 import json
 
 from app.models.tags_mapping import Tags_mapping

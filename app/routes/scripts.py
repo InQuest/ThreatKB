@@ -1,5 +1,5 @@
 from flask import abort, jsonify, request, send_file, json, Response
-from flask.ext.login import login_required, current_user
+from flask_login import login_required, current_user
 from app import app, db, admin_only, auto
 from app.models import scripts
 import re

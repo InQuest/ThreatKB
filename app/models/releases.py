@@ -1,14 +1,14 @@
-from app import db
-from app.models import c2dns, c2ip, yara_rule, cfg_settings, cfg_states, metadata, users
+from app import db, ENTITY_MAPPING, ACTIVITY_TYPE
+from app.models import c2dns, c2ip, yara_rule, cfg_settings, cfg_states, metadata, users, activity_log
 from sqlalchemy import and_
 from dateutil import parser
-from datetime import datetime
 import json
 from sqlalchemy.event import listens_for
 import StringIO
 import zipfile
 import zlib
 import re
+
 
 class Release(db.Model):
     __tablename__ = "releases"
@@ -166,7 +166,7 @@ class Release(db.Model):
 
             for signature in last_release["Signatures"]["Signatures"].values():
                 release_data["Signatures"]["Removed"].append(signature)
-        except Exception, e:
+        except Exception as e:
             raise Exception(e.message + "\nSignature: id=%s, description=%s" % (signature["id"], signature["name"]))
 
         ###### IPs ########
@@ -185,7 +185,7 @@ class Release(db.Model):
 
             for ip in last_release["IP"]["IP"].values():
                 release_data["IP"]["Removed"].append(ip)
-        except Exception, e:
+        except Exception as e:
             raise Exception(e.message + "\n IP: id=%s,ip=%s" % (ip["id"], ip["ip"]))
 
         ###### DNS #######
@@ -204,7 +204,7 @@ class Release(db.Model):
 
             for ip in last_release["DNS"]["DNS"].values():
                 release_data["DNS"]["Removed"].append(ip)
-        except Exception, e:
+        except Exception as e:
             raise Exception(e.message + "\n DNS: id=%s,domain_name=%s" % (dns["id"], dns["domain_name"]))
 
         return json.dumps(release_data)
@@ -319,7 +319,7 @@ class Release(db.Model):
                 try:
                     yara_string = yara_rule.Yara_rule.to_yara_rule_string(signature, include_imports=False)
                     rules_string += re.sub("[^\x00-\x7f]", "", yara_string) + "\n\n"
-                except Exception, e:
+                except Exception as e:
                     raise Exception(e.message + "\nYaraRule: id=%s,name=%s" % (signature["id"], signature["name"]))
 
             rules = "%s\n\n%s" % (imports, rules_string)
@@ -340,3 +340,14 @@ class Release(db.Model):
 @listens_for(Release, "before_insert")
 def generate_eventid(mapper, connect, target):
     target.release_data = str(target.release_data).encode("utf-8")
+
+
+@listens_for(Release, "after_insert")
+def release_made(mapper, connection, target):
+    activity_log.log_activity(connection=connection,
+                              activity_type=ACTIVITY_TYPE.keys()[ACTIVITY_TYPE.keys().index("RELEASES_MADE")],
+                              activity_text=target.name,
+                              activity_date=target.date_created,
+                              entity_type=ENTITY_MAPPING["RELEASE"],
+                              entity_id=target.id,
+                              user_id=target.created_user_id)

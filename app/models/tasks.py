@@ -1,4 +1,8 @@
-from app import db, ENTITY_MAPPING
+from sqlalchemy.event import listens_for
+from sqlalchemy.orm import Session
+
+from app import db, ENTITY_MAPPING, ACTIVITY_TYPE
+from app.models import activity_log
 from app.models.comments import Comments
 
 
@@ -29,7 +33,7 @@ class Tasks(db.Model):
 
     comments = db.relationship("Comments", foreign_keys=[id],
                                primaryjoin="and_(Comments.entity_id==Tasks.id, Comments.entity_type=='%s')" % (
-                                   ENTITY_MAPPING["DNS"]), lazy="dynamic")
+                                   ENTITY_MAPPING["DNS"]))
 
     def to_dict(self):
         comments = Comments.query.filter_by(entity_id=self.id).filter_by(
@@ -49,4 +53,42 @@ class Tasks(db.Model):
         )
 
     def __repr__(self):
-        return '<Tasks %r>' % (self.id)
+        return '<Tasks %r>' % self.id
+
+
+@listens_for(Tasks, "after_insert")
+def task_created(mapper, connection, target):
+    activity_log.log_activity(connection=connection,
+                              activity_type=ACTIVITY_TYPE.keys()[ACTIVITY_TYPE.keys().index("ARTIFACT_CREATED")],
+                              activity_text=target.title,
+                              activity_date=target.date_created,
+                              entity_type=ENTITY_MAPPING["TASK"],
+                              entity_id=target.id,
+                              user_id=target.created_user_id)
+
+
+@listens_for(Tasks, "after_update")
+def task_modified(mapper, connection, target):
+    session = Session.object_session(target)
+
+    if session.is_modified(target, include_collections=False):
+        state_activity_text = activity_log.get_state_change(target, target.title)
+        if state_activity_text:
+            activity_log.log_activity(connection=connection,
+                                      activity_type=ACTIVITY_TYPE.keys()[ACTIVITY_TYPE.keys().index("STATE_TOGGLED")],
+                                      activity_text=state_activity_text,
+                                      activity_date=target.date_modified,
+                                      entity_type=ENTITY_MAPPING["TASK"],
+                                      entity_id=target.id,
+                                      user_id=target.modified_user_id)
+
+        changes = activity_log.get_modified_changes(target)
+        if changes.__len__() > 0:
+            activity_log.log_activity(connection=connection,
+                                      activity_type=ACTIVITY_TYPE.keys()[ACTIVITY_TYPE.keys().index("ARTIFACT_MODIFIED")],
+                                      activity_text="'%s' modified with changes: %s"
+                                                    % (target.title, ', '.join(map(str, changes))),
+                                      activity_date=target.date_modified,
+                                      entity_type=ENTITY_MAPPING["TASK"],
+                                      entity_id=target.id,
+                                      user_id=target.modified_user_id)
