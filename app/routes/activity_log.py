@@ -1,10 +1,11 @@
 from flask import request, json, Response
 
 from app import app, db, auto
-from flask_login import login_required, current_user
+from flask_login import login_required
 
 from app.models import activity_log
-from app.models.users import KBUser
+
+from app.utilities import filter_entities
 
 
 @app.route('/ThreatKB/activity_log', methods=['GET'])
@@ -27,46 +28,16 @@ def get_all_activity_logs():
     sort_by = request.args.get('sort_by', False)
     sort_direction = request.args.get('sort_dir', 'ASC')
 
-    searches = json.loads(searches)
+    response_dict = filter_entities(entity=activity_log.ActivityLog,
+                                    artifact_type="ACTIVITY_LOG",
+                                    searches=searches,
+                                    page_number=page_number,
+                                    page_size=page_size,
+                                    sort_by=sort_by,
+                                    sort_direction=sort_direction,
+                                    include_metadata=False,
+                                    exclude_totals=False,
+                                    default_sort="activity_date",
+                                    include_merged=True)
 
-    entities = activity_log.ActivityLog.query
-
-    if not current_user.admin:
-        entities = entities.filter_by(owner_user_id=current_user.id)
-
-    for column, value in searches.items():
-        if not value:
-            continue
-
-        if column == "user.email":
-            entities = entities.join(KBUser, activity_log.ActivityLog.user_id == KBUser.id).filter(
-                KBUser.email.like("%" + str(value) + "%"))
-            continue
-
-        try:
-            column = getattr(activity_log.ActivityLog, column)
-            entities = entities.filter(column.like("%" + str(value) + "%"))
-        except:
-            continue
-
-    filtered_entities = entities
-    total_count = entities.count()
-
-    if sort_by:
-        filtered_entities = filtered_entities.order_by("%s %s" % (sort_by, sort_direction))
-    else:
-        filtered_entities = filtered_entities.order_by("activity_date DESC")
-
-    if page_size:
-        filtered_entities = filtered_entities.limit(int(page_size))
-
-    if page_number:
-        filtered_entities = filtered_entities.offset(int(page_number) * int(page_size))
-
-    filtered_entities = filtered_entities.all()
-
-    response_dict = dict()
-    response_dict['data'] = [entity.to_dict() for entity in filtered_entities]
-    response_dict['total_count'] = total_count
-
-    return Response(json.dumps(response_dict), mimetype='application/json')
+    return Response(response_dict, mimetype='application/json')

@@ -89,7 +89,8 @@ def filter_entities(entity,
     searches = json.loads(searches)
 
     if searches and any([search_key not in entity.__table__.columns.keys()
-                         and search_key not in ("tags", "owner_user.email") for search_key, val in searches.items()]):
+                         and search_key not in ("tags", "owner_user.email", "user.email")
+                         for search_key, val in searches.items()]):
         entities = entity.query.outerjoin(Metadata, Metadata.artifact_type == artifact_type).join(
             MetadataMapping, and_(MetadataMapping.metadata_id == Metadata.id, MetadataMapping.artifact_id == entity.id))
     else:
@@ -111,6 +112,10 @@ def filter_entities(entity,
 
         if column == "owner_user.email":
             entities = entities.join(KBUser, entity.owner_user_id == KBUser.id) \
+                .filter(not_(KBUser.email.like(l_value)) if s_value.startswith("!") else KBUser.email.like(l_value))
+            continue
+        elif column == "user.email":
+            entities = entities.join(KBUser, entity.user_id == KBUser.id) \
                 .filter(not_(KBUser.email.like(l_value)) if s_value.startswith("!") else KBUser.email.like(l_value))
             continue
 
@@ -149,7 +154,7 @@ def filter_entities(entity,
     filtered_entities = filtered_entities.all()
 
     response_dict = dict()
-    if artifact_type == ENTITY_MAPPING["TASK"]:
+    if artifact_type in ("ACTIVITY_LOG", ENTITY_MAPPING["TASK"]):
         response_dict['data'] = [entity.to_dict() for entity in filtered_entities]
     elif artifact_type == ENTITY_MAPPING["SIGNATURE"]:
         response_dict['data'] = [entity.to_dict(include_yara_rule_string=include_yara_string,
