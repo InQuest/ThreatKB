@@ -2,7 +2,7 @@
 # Bootstrap script to setup environment for ThreatKB
 
 virtualenv flask
-if [ $? -ne 0]; then
+if [ $? -ne 0 ]; then
     echo "error: failed to setup virtual environemtn!"
     exit 1
 fi
