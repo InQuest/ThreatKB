@@ -384,8 +384,9 @@ angular.module('ThreatKB')
                     }
                 }
 
-                if (typeof(id) === "number") {
+                if (parseInt(id)) {
                     Yara_rule.resource.update({id: id}, $scope.yara_rule, function () {
+                        growl.info("Successfully saved signature '" + $scope.yara_rule.name + "'.", {ttl: 2000});
                         getPage();
                     }, function (err) {
                         var timeout = 10000;
@@ -560,11 +561,14 @@ angular.module('ThreatKB')
                 Yara_rule.resource.update({id: $scope.yara_rule.id}, $scope.yara_rule,
                     function (data) {
                         if (!data) {
-                            growl.error(error, {ttl: -1});
+                            growl.error(error.data, {ttl: -1});
                         } else {
                             $scope.yara_rule.state = data.state;
                             growl.info("Successfully saved signature '" + $scope.yara_rule.name + "'.", {ttl: 2000});
                         }
+                    },
+                    function (error) {
+                        growl.error(error.data, {ttl: -1});
                     });
             };
 
