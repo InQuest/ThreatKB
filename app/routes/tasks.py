@@ -2,12 +2,6 @@ from app import app, db, auto, ENTITY_MAPPING
 from app.models import tasks
 from flask import abort, jsonify, request, Response
 from flask_login import login_required, current_user
-from dateutil import parser
-import json
-from sqlalchemy import or_
-
-from app.models.bookmarks import Bookmarks
-from app.models.users import KBUser
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
 
 from app.utilities import filter_entities
