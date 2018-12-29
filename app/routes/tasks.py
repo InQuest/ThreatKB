@@ -1,7 +1,7 @@
 from app import app, db, auto, ENTITY_MAPPING
 from app.models import tasks
 from flask import abort, jsonify, request, Response
-from flask.ext.login import login_required, current_user
+from flask_login import login_required, current_user
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
 
 from app.utilities import filter_entities

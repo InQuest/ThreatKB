@@ -1,4 +1,7 @@
-from app import db, ENTITY_MAPPING
+from sqlalchemy.event import listens_for
+
+from app import db, ENTITY_MAPPING, ACTIVITY_TYPE
+from app.models import activity_log
 
 
 class Comments(db.Model):
@@ -28,3 +31,14 @@ class Comments(db.Model):
 
     def __repr__(self):
         return '<Comments %r>' % (self.id)
+
+
+@listens_for(Comments, "after_insert")
+def comment_made(mapper, connection, target):
+    activity_log.log_activity(connection=connection,
+                              activity_type=ACTIVITY_TYPE.keys()[ACTIVITY_TYPE.keys().index("COMMENTS")],
+                              activity_text=target.comment,
+                              activity_date=target.date_created,
+                              entity_type=target.entity_type,
+                              entity_id=target.entity_id,
+                              user_id=target.user_id)

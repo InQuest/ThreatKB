@@ -6,7 +6,7 @@ from app.models.yara_rule import Yara_rule
 from app.models.tasks import Tasks
 
 from flask import abort, jsonify, request, Response
-from flask.ext.login import login_required, current_user
+from flask_login import login_required, current_user
 import json
 
 

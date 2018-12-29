@@ -1,7 +1,7 @@
 from app import app, db, admin_only, auto, current_user
 from app.models import cfg_states
 from flask import abort, jsonify, request, Response
-from flask.ext.login import login_required
+from flask_login import login_required
 from sqlalchemy import or_
 import json
 

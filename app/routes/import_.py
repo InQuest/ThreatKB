@@ -1,5 +1,5 @@
 from flask import abort, jsonify, request
-from flask.ext.login import login_required, current_user
+from flask_login import login_required, current_user
 from app import app, db, admin_only, auto, ENTITY_MAPPING
 from app.models import c2ip, c2dns, yara_rule, cfg_states, comments
 from app.models.metadata import Metadata

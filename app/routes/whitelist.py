@@ -3,7 +3,7 @@ from flask_login import current_user
 from app import app, db, admin_only, auto
 from app.models import whitelist
 from flask import abort, jsonify, request, Response
-from flask.ext.login import login_required
+from flask_login import login_required
 import json
 import re
 

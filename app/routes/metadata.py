@@ -1,7 +1,7 @@
 from app import app, db, auto, admin_only, ENTITY_MAPPING
 from app.models import metadata
 from flask import abort, jsonify, request, Response
-from flask.ext.login import login_required, current_user
+from flask_login import login_required, current_user
 from dateutil import parser
 import json
 

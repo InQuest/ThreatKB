@@ -18,7 +18,7 @@ from app import app, db, admin_only, auto
 from app.celeryapp import celery
 from app.models import yara_rule
 from flask import abort, jsonify, request, json, Response
-from flask.ext.login import current_user, login_required
+from flask_login import current_user, login_required
 
 from app.models.cfg_settings import Cfg_settings
 from app.models.yara_rule import Yara_testing_history, Yara_rule

@@ -1,7 +1,7 @@
 from app import app, db, auto, ENTITY_MAPPING
 from app.models import c2ip
 from flask import abort, jsonify, request, Response, json
-from flask.ext.login import current_user, login_required
+from flask_login import current_user, login_required
 from dateutil import parser
 from sqlalchemy import exc
 

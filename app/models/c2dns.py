@@ -3,18 +3,20 @@ import re
 
 from ipaddr import IPAddress, IPNetwork
 from sqlalchemy.event import listens_for
+from sqlalchemy.orm import Session
 
 import app
-from app import db, current_user, ENTITY_MAPPING
+from app import db, current_user, ENTITY_MAPPING, ACTIVITY_TYPE
 from app.models.whitelist import Whitelist
 from app.models.metadata import Metadata, MetadataMapping
 from app.routes import tags_mapping
 from app.models.comments import Comments
-from app.models import cfg_states, cfg_settings
+from app.models import cfg_states, cfg_settings, activity_log
 
 from flask import abort
 
 import time
+
 
 class C2dns(db.Model):
     __tablename__ = "c2dns"
@@ -41,11 +43,11 @@ class C2dns(db.Model):
 
     owner_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=True)
     owner_user = db.relationship('KBUser', foreign_keys=owner_user_id,
-                                    primaryjoin="KBUser.id==C2dns.owner_user_id")
+                                 primaryjoin="KBUser.id==C2dns.owner_user_id")
 
     comments = db.relationship("Comments", foreign_keys=[id],
                                primaryjoin="and_(Comments.entity_id==C2dns.id, Comments.entity_type=='%s')" % (
-                                   ENTITY_MAPPING["DNS"]), lazy="dynamic")
+                                   ENTITY_MAPPING["DNS"]))
 
     tags = []
     addedTags = []
@@ -88,7 +90,7 @@ class C2dns(db.Model):
 
         try:
             db.session.commit()
-        except Exception, e:
+        except Exception as e:
             app.logger.exception(e)
 
     @staticmethod
@@ -224,8 +226,8 @@ def run_against_whitelist(mapper, connect, target):
 
             abort_import = False
 
-            if not C2dns.WHITELIST_CACHE_LAST_UPDATE or not C2dns.WHITELIST_CACHE or (
-                time.time() - C2dns.WHITELIST_CACHE_LAST_UPDATE) > 60:
+            if not C2dns.WHITELIST_CACHE_LAST_UPDATE or not C2dns.WHITELIST_CACHE \
+                    or (time.time() - C2dns.WHITELIST_CACHE_LAST_UPDATE) > 60:
                 C2dns.WHITELIST_CACHE = Whitelist.query.all()
                 C2dns.WHITELIST_CACHE_LAST_UPDATE = time.time()
 
@@ -271,3 +273,41 @@ def c2dns_before_update(mapper, connect, target):
         release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
         if release_state and target.state == release_state.state:
             abort(403)
+
+
+@listens_for(C2dns, "after_insert")
+def dns_created(mapper, connection, target):
+    activity_log.log_activity(connection=connection,
+                              activity_type=ACTIVITY_TYPE.keys()[ACTIVITY_TYPE.keys().index("ARTIFACT_CREATED")],
+                              activity_text=target.domain_name,
+                              activity_date=target.date_created,
+                              entity_type=ENTITY_MAPPING["DNS"],
+                              entity_id=target.id,
+                              user_id=target.created_user_id)
+
+
+@listens_for(C2dns, "after_update")
+def dns_modified(mapper, connection, target):
+    session = Session.object_session(target)
+
+    if session.is_modified(target, include_collections=False):
+        state_activity_text = activity_log.get_state_change(target, target.domain_name)
+        if state_activity_text:
+            activity_log.log_activity(connection=connection,
+                                      activity_type=ACTIVITY_TYPE.keys()[ACTIVITY_TYPE.keys().index("STATE_TOGGLED")],
+                                      activity_text=state_activity_text,
+                                      activity_date=target.date_modified,
+                                      entity_type=ENTITY_MAPPING["DNS"],
+                                      entity_id=target.id,
+                                      user_id=target.modified_user_id)
+
+        changes = activity_log.get_modified_changes(target)
+        if changes.__len__() > 0:
+            activity_log.log_activity(connection=connection,
+                                      activity_type=ACTIVITY_TYPE.keys()[ACTIVITY_TYPE.keys().index("ARTIFACT_MODIFIED")],
+                                      activity_text="'%s' modified with changes: %s"
+                                                    % (target.domain_name, ', '.join(map(str, changes))),
+                                      activity_date=target.date_modified,
+                                      entity_type=ENTITY_MAPPING["DNS"],
+                                      entity_id=target.id,
+                                      user_id=target.modified_user_id)
