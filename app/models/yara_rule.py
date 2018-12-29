@@ -356,8 +356,8 @@ def yara_rule_before_update(mapper, connect, target):
 def yara_created(mapper, connection, target):
     activity_log.log_activity(connection=connection,
                               activity_type=ACTIVITY_TYPE.keys()[ACTIVITY_TYPE.keys().index("ARTIFACT_CREATED")],
-                              activity_text=target.title,
-                              activity_date=target.date_created,
+                              activity_text=target.name,
+                              activity_date=target.creation_date,
                               entity_type=ENTITY_MAPPING["TASK"],
                               entity_id=target.id,
                               user_id=target.created_user_id)
