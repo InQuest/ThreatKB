@@ -133,10 +133,12 @@ def setup_logging():
     app.logger.addHandler(logging.StreamHandler())
     app.logger.setLevel(logging.DEBUG)
 
+
 @login_manager.user_loader
 def load_user(userid):
     app.logger.debug("load_user called with user_id: '%s'" % (str(userid)))
     return users.KBUser.query.get(int(userid))
+
 
 @login_manager.request_loader
 def load_user_from_request(request):
@@ -151,7 +153,7 @@ def load_user_from_request(request):
             else:
                 abort(403)
         else:
-            abort(403)
+            abort(401)
 
     return None
 
@@ -248,7 +250,7 @@ def generate_app():
                 else:
                     abort(403)
             else:
-                abort(403)
+                abort(401)
 
         return None
 

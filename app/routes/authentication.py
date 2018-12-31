@@ -90,6 +90,7 @@ def delete_user_by_id(user_id):
     db.session.commit()
     return jsonify(''), 204
 
+
 @app.route('/ThreatKB/users/me', methods=['GET'])
 @auto.doc()
 @login_required

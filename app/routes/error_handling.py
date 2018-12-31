@@ -1,11 +1,18 @@
-from app import app, auto, db, current_user, request
+from app import app, auto, db, current_user, request, Response
 import traceback
 import re
 from app.models.errors import Error
 
+
+@app.errorhandler(401)
+def handle_401(err):
+    return Response("", 401)
+
+
 @app.errorhandler(409)
 def handle_409(err):
     return str(err.description), 409
+
 
 @app.errorhandler(500)
 def handle_500(error):

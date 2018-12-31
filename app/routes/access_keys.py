@@ -101,7 +101,7 @@ def is_token_active(token):
     key = db.session.query(AccessKeys).join(KBUser, AccessKeys.user_id == KBUser.id).filter(
         and_(AccessKeys.token == token, KBUser.active > 0)).first()
     if not key:
-        abort(403)
+        abort(401)
 
     if key.status == 'active':
         return True
