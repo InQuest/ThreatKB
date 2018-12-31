@@ -6,6 +6,7 @@ from flask_login import current_user, login_required
 import flask_login
 import tempfile
 import uuid
+import datetime
 
 
 @app.route('/ThreatKB/login', methods=['POST'])
@@ -83,6 +84,8 @@ def delete_user_by_id(user_id):
         abort(404)
 
     user.active = 0
+    db.session.query(access_keys.AccessKeys).filter(access_keys.AccessKeys.user_id == user.id).update(
+        {"status": "inactive", "deleted": datetime.datetime.now()})
     db.session.add(user)
     db.session.commit()
     return jsonify(''), 204

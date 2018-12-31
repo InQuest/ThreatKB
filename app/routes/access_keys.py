@@ -8,6 +8,7 @@ from flask import request, jsonify, json, abort, Response, send_file
 from flask_login import current_user, login_required
 
 from app.models.users import KBUser
+from sqlalchemy import and_
 
 """
 Token and Secret key may be passed as GET params to any API requests
@@ -97,7 +98,8 @@ def create_access_key():
 def is_token_active(token):
     """Is given token Active
     Return: True if token active, False otherwise"""
-    key = AccessKeys.query.filter_by(token=token).first()
+    key = db.session.query(AccessKeys).join(KBUser, AccessKeys.user_id == KBUser.id).filter(
+        and_(AccessKeys.token == token, KBUser.active > 0)).first()
     if not key:
         abort(403)
 
