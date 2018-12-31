@@ -151,7 +151,7 @@ def load_user_from_request(request):
             if user:
                 return user
             else:
-                abort(403)
+                abort(401)
         else:
             abort(401)
 
@@ -248,7 +248,7 @@ def generate_app():
                 if user:
                     return user
                 else:
-                    abort(403)
+                    abort(401)
             else:
                 abort(401)
 
