@@ -154,7 +154,7 @@ def create_yara_rule():
         rule_state = request.json.get("state", None)
 
     unique_rule_name_enforcement = Cfg_settings.get_setting("ENFORCE_UNIQUE_YARA_RULE_NAMES")
-    if unique_rule_name_enforcement:
+    if unique_rule_name_enforcement and distutils.util.strtobool(unique_rule_name_enforcement):
         if db.session.query(yara_rule.Yara_rule).filter(yara_rule.Yara_rule.name == request.json['name']):
             raise Exception("You cannot save two rules with the same name.")
 
@@ -254,7 +254,7 @@ def update_yara_rule(id):
         rule_state = request.json.get("state", None)
 
     unique_rule_name_enforcement = Cfg_settings.get_setting("ENFORCE_UNIQUE_YARA_RULE_NAMES")
-    if unique_rule_name_enforcement:
+    if unique_rule_name_enforcement and distutils.util.strtobool(unique_rule_name_enforcement):
         if db.session.query(yara_rule.Yara_rule).filter(yara_rule.Yara_rule.name == request.json['name']):
             raise Exception("You cannot save two rules with the same name.")
 
