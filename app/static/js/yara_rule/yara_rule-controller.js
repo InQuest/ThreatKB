@@ -389,11 +389,7 @@ angular.module('ThreatKB')
                         growl.info("Successfully saved signature '" + $scope.yara_rule.name + "'.", {ttl: 2000});
                         getPage();
                     }, function (err) {
-                        var timeout = 10000;
-                        growl.error(err.data + ". Refreshing page in " + (timeout / 1000) + " seconds", {ttl: timeout});
-                        setTimeout(function () {
-                            getPage();
-                        }, timeout);
+                        growl.error(err.data);
                         $scope.openYaraModal(id);
                     });
                 } else {
