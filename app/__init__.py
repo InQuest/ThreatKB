@@ -7,6 +7,7 @@ from flask_login import LoginManager
 from flask_login import current_user
 from flask import make_response
 from functools import wraps, update_wrapper
+from flask_caching import Cache
 from flask_selfdoc import Autodoc
 import datetime
 import logging
@@ -15,6 +16,8 @@ import distutils
 
 
 app = Flask(__name__, static_url_path='')
+cache = Cache(app, config={'CACHE_TYPE': 'simple'})
+cache.init_app(app)
 app.secret_key = "a" * 24  # os.urandom(24)
 app.config.from_object("config")
 
@@ -110,7 +113,7 @@ from app.models import metadata
 from app.models import errors
 from app.models import activity_log
 
-
+app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
 app.config["BROKER_URL"] = Cfg_settings.get_private_setting("REDIS_BROKER_URL")
 app.config["TASK_SERIALIZER"] = Cfg_settings.get_private_setting("REDIS_TASK_SERIALIZER")
 app.config["RESULT_SERIALIZER"] = Cfg_settings.get_private_setting("REDIS_RESULT_SERIALIZER")
@@ -127,6 +130,12 @@ celery = make_celery(app)
 
 from app.geo_ip_helper import get_geo_for_ip
 
+
+@app.teardown_request
+def teardown_request(exception):
+    if exception:
+        db.session.rollback()
+    db.session.remove()
 
 @app.before_first_request
 def setup_logging():
@@ -227,17 +236,27 @@ def generate_app():
     from app.routes import errors
     from app.routes import activity_log
 
+    app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
+
+    @app.teardown_request
+    def teardown_request(exception):
+        if exception:
+            db.session.rollback()
+        db.session.remove()
+
     @app.before_first_request
     def setup_logging():
         app.logger.addHandler(logging.StreamHandler())
         app.logger.setLevel(logging.DEBUG)
 
     @login_manager.user_loader
+    @cache.memoize(timeout=60)
     def load_user(userid):
         app.logger.debug("load_user called with user_id: '%s'" % (str(userid)))
         return users.KBUser.query.get(int(userid))
 
     @login_manager.request_loader
+    @cache.memoize(timeout=60)
     def load_user_from_request(request):
         token = request.args.get('token')
         s_key = str(request.args.get('secret_key'))

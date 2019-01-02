@@ -16,6 +16,7 @@ decorator==4.0.11
 deepdiff==3.3.0
 dnspython==1.15.0
 Flask==1.0.2
+Flask-Caching==1.4.0
 Flask-Selfdoc==1.1.0
 Flask-Babel==0.8
 Flask-Bcrypt==0.7.1
