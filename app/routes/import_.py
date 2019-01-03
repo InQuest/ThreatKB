@@ -18,7 +18,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
     metadata_to_save_ip = []
     metadata_to_save_dns = []
 
-    domain_names = {domain_name.domain_name: domain_name for domain_name in c2dns.C2dns.query.all()}
+    domain_names = {domain_name.domain_name.lower(): domain_name for domain_name in c2dns.C2dns.query.all()}
     ip_addresses = {ipaddress.ip: ipaddress for ipaddress in c2ip.C2ip.query.all()}
 
     if not cfg_states.Cfg_states.query.filter_by(state=default_state).first():
@@ -59,7 +59,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                     return_artifacts.append(ip)
             elif artifact["type"].lower() in ["dns", "domain_name"] and extract_dns:
                 # old_dns = c2dns.C2dns.query.filter(c2dns.C2dns.domain_name == artifact["artifact"]).first()
-                old_dns = domain_names.get(artifact["artifact"], None)
+                old_dns = domain_names.get(artifact["artifact"].lower(), None)
                 if old_dns:
                     message = "System comment: duplicate DNS '%s' found at '%s' by '%s'" % (
                     artifact["artifact"], shared_reference if shared_reference else "no reference provided",
