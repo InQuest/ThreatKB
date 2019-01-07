@@ -10,6 +10,14 @@ angular.module('ThreatKB')
 
             $scope.start_filter_requests_length = Cfg_settings.get({key: "START_FILTER_REQUESTS_LENGTH"});
 
+            $('input[type=number]').on('mousewheel', function () {
+                var el = $(this);
+                el.blur();
+                setTimeout(function () {
+                    el.focus();
+                }, 10);
+            });
+
             $scope.cfg_states = Cfg_states.query();
 
             $scope.searches = {};

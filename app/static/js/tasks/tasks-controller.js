@@ -10,6 +10,14 @@ angular.module('ThreatKB')
 
             $scope.cfg_states = Cfg_states.query();
 
+            $('input[type=number]').on('mousewheel', function () {
+                var el = $(this);
+                el.blur();
+                setTimeout(function () {
+                    el.focus();
+                }, 10);
+            });
+
             $scope.filterOptions = {
                 filterText: ''
             };
@@ -286,13 +294,13 @@ angular.module('ThreatKB')
                         $scope.ok();
                     }
                 }).add({
-                    combo: 'ctrl+x',
-                    description: 'Escape',
-                    allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
-                    callback: function () {
-                        $scope.cancel();
-                    }
-                });
+                combo: 'ctrl+x',
+                description: 'Escape',
+                allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
+                callback: function () {
+                    $scope.cancel();
+                }
+            });
 
             if ($scope.task.$promise !== undefined) {
                 $scope.task.$promise.then(function (result) {

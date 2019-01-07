@@ -10,6 +10,14 @@ angular.module('ThreatKB')
 
             $scope.cfg_states = Cfg_states.query();
 
+            $('input[type=number]').on('mousewheel', function () {
+                var el = $(this);
+                el.blur();
+                setTimeout(function () {
+                    el.focus();
+                }, 10);
+            });
+
             $scope.searches = {};
             if ($routeParams.searches) {
                 $scope.searches = JSON.parse($routeParams.searches);

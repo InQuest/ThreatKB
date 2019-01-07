@@ -8,6 +8,13 @@ angular.module('ThreatKB')
 
             $scope.users = Users.query();
 
+            $('input[type=number]').on('mousewheel', function () {
+                var el = $(this);
+                el.blur();
+                setTimeout(function () {
+                    el.focus();
+                }, 10);
+            });
             $scope.searches = {};
             if ($routeParams.searches) {
                 $scope.searches = JSON.parse($routeParams.searches);
@@ -463,7 +470,7 @@ angular.module('ThreatKB')
                 };
             };
 
-            $scope.openYaraModal = function(id) {
+            $scope.openYaraModal = function (id) {
                 var yara_ruleSave = $uibModal.open({
                     templateUrl: 'yara_rule-save.html',
                     controller: 'Yara_ruleSaveController',
@@ -847,4 +854,4 @@ angular.module('ThreatKB')
                 $uibModalInstance.dismiss('cancel');
             };
 
-    }]);
+        }]);
