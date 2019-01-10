@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_login import current_user
+from flask_migrate import Migrate
 from flask import make_response
 from functools import wraps, update_wrapper
 from flask_caching import Cache
@@ -129,6 +130,43 @@ from app.celeryapp import make_celery
 celery = make_celery(app)
 
 from app.geo_ip_helper import get_geo_for_ip
+
+
+# DB functions below used by unit tests.
+def connect_db():
+    """Connects to the specific database."""
+    rv = SQLAlchemy(app)
+    return rv
+
+def get_db():
+    """Opens a new database connection if there is none yet for the
+    current application context.
+    """
+    return connect_db()
+
+def init_db():
+    """Initializes the database."""
+    db = get_db()
+    migrate = Migrate(app, db)
+
+    def upgrade(revision="head"):
+        with app.app_context():
+            from flask_migrate import upgrade as _upgrade
+            _upgrade(revision=revision)
+
+    upgrade()
+
+def deinit_db():
+    """Deinitializes the database."""
+    db = get_db()
+    migrate = Migrate(app, db)
+
+    def downgrade(revision="base"):
+        with app.app_context():
+            from flask_migrate import downgrade as _downgrade
+            _downgrade(revision=revision)
+
+    downgrade()
 
 
 @app.teardown_request
