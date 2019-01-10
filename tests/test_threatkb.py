@@ -48,7 +48,6 @@ class ThreatKBTestCase(unittest.TestCase):
 
 
     def test_empty_c2ip(self):
-        rv = self.login()
         rv = self.app.get('/ThreatKB/c2ips')
         self.assertEqual('{"total_count": 0, "data": []}', rv.data)
 
