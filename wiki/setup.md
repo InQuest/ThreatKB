@@ -1,5 +1,6 @@
 ### Pre-requisites
-Tested on Ubuntu Linux 14.04 -> 16.04
+
+Tested on Ubuntu Linux 14.04 -> 18.10
 
 1. Install system dependencies and libraries:
     - `sudo apt-get install git screen libffi-dev libssl-dev libsqlite3-dev libmysqlclient-dev`
@@ -24,7 +25,7 @@ Tested on Ubuntu Linux 14.04 -> 16.04
     - Create MySQL database: `CREATE DATABASE threatkb;`
     - Create MySQL user: `CREATE USER 'threatkb'@'localhost' IDENTIFIED BY 'password';`
     - Allow permissions: `GRANT ALL PRIVILEGES ON threatkb . * TO 'threatkb'@'localhost';`
-    - Flush privileges: `FLUSH PRIVELEGES;`
+    - Flush privileges: `FLUSH PRIVILEGES;`
 5. Update SQL config in /opt/ThreatKB/config.py parameters:
     - SQL_HOST
     - SQL_USERNAME
