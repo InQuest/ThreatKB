@@ -299,7 +299,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                 access: {restricted: true, admin: false},
                 resolve: {
                     resolvedTask: ['Task', function (Task) {
-                        return Task.query();
+                        return Task.resource.query();
                     }],
                     openModalForId: [function () {
                         return null;
@@ -312,7 +312,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                 access: {restricted: true, admin: false},
                 resolve: {
                     resolvedTask: ['Task', function (Task) {
-                        return Task.query();
+                        return Task.resource.query();
                     }],
                     openModalForId: ['$route', function ($route) {
                         return "add";
@@ -325,7 +325,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                 access: {restricted: true, admin: false},
                 resolve: {
                     resolvedTask: ['Task', function (Task) {
-                        return Task.query();
+                        return Task.resource.query();
                     }],
                     openModalForId: ['$route', function ($route) {
                         return $route.current.params.id;

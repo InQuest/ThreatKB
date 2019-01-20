@@ -1,5 +1,50 @@
 <div>
-
+    <script type="text/ng-template" id="task-batch_edit.html">
+        <form name="form" novalidate
+              class="ng-scope ng-invalid ng-invalid-required ng-dirty"
+              ng-submit="ok()">
+            <a class="btn btn-sm btn-primary modal-fullscreen-button modal-fullscreen-button-abs-pos"
+               ng-click="toggleFullscreen()">Toggle full screen</a>
+            <div class="modal-header">
+                <button type="button" class="close"
+                        ng-click="cancel()">&times;
+                </button>
+                <h4 class="modal-title" style="float: left; margin-right: 10px;">
+                    Batch Edit Selected Tasks
+                </h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Owner</label>
+                    <ui-select ng-model="batch.owner" name="owner">
+                        <ui-select-match placeholder="Select an owner ...">
+                            <small><span ng-bind="$select.selected.email"></span></small>
+                        </ui-select-match>
+                        <ui-select-choices
+                                repeat="person in (users | filter: $select.search) track by person.id">
+                            <small><span ng-bind="person.email"></span></small>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+                <div class="form-group">
+                    <label>State</label>
+                    <ui-select ng-model="batch.state" name="state">
+                        <ui-select-match placeholder="Select a state or press delete to clear..">
+                            <span ng-bind="$select.selected.state"></span>
+                        </ui-select-match>
+                        <ui-select-choices repeat="state in (cfg_states | filter: $select.search) track by state.id">
+                            <span ng-bind="state.state"></span>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" ng-click="cancel()">Close
+                </button>
+                <button ng-disabled="form.$invalid || form.$pristine" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </script>
     <script type="text/ng-template" id="task-save.html">
         <form name="form" role="form" novalidate
               class="ng-scope ng-invalid ng-invalid-required ng-dirty"
@@ -143,6 +188,9 @@
     </script>
     <br>
     <div class="container-fluid">
+        <button type="button" class="btn btn-secondary" ng-disabled="!checked_counter || checked_counter<2" ng-click="open_batch()">
+            Batch Edit ({{ checked_counter }})
+        </button>
         <button class="btn btn-secondary pull-right" style="color:inherit;" ng-click="create()">
             Create Task
         </button>
