@@ -7,7 +7,7 @@ from sqlalchemy import exc
 
 from app.models.cfg_states import verify_state
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
-from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
+from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping, batch_create_tags_mapping
 from app.routes.comments import create_comment
 import distutils
 
@@ -145,16 +145,60 @@ def update_c2dns(id):
     try:
         db.session.commit()
     except exc.IntegrityError:
-        app.logger.error("Duplicate DNS: '%s'" % (entity.domain_name))
-        abort(409)
+        app.logger.error("Duplicate DNS: '%s'" % entity.domain_name)
+        abort(409, description="Duplicate DNS: '%s'" % entity.domain_name)
 
-    create_tags_mapping(entity.__tablename__, entity.id, request.json['addedTags'])
-    delete_tags_mapping(entity.__tablename__, entity.id, request.json['removedTags'])
+    delete_tags_mapping(entity.__tablename__, entity.id)
+    create_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
 
     entity.save_metadata(request.json.get("metadata_values", {}))
 
     entity = c2dns.C2dns.query.get(entity.id)
     return jsonify(entity.to_dict()), 200
+
+
+@app.route('/ThreatKB/c2dns/batch', methods=['PUT'])
+@auto.doc()
+@login_required
+def batch_update_c2dns():
+    """Batch update c2dns artifacts
+    From Data: batch {
+                 state (str),
+                 owner_user (str),
+                 tags (array),
+                 ids (array)
+               }
+    Return: Success"""
+
+    batch = request.json['batch']
+    if batch:
+        fields_to_update = dict()
+        for b in batch['ids']:
+            entity = c2dns.C2dns.query.get(b)
+            if not entity:
+                abort(404)
+            if not current_user.admin and entity.owner_user_id != current_user.id:
+                abort(403)
+
+        if batch['state']:
+            fields_to_update['state'] = verify_state(batch['state']['state'])\
+                if batch['state'] and 'state' in batch['state']\
+                else verify_state(batch['state'])
+        if batch['owner_user']:
+            fields_to_update['owner_user_id'] = batch['owner_user']['id']\
+                if batch.get("owner_user", None) and batch["owner_user"].get("id", None)\
+                else None
+
+        if fields_to_update:
+            db.session.execute(c2dns.C2dns.__table__.update().values(
+                fields_to_update
+            ).where(c2dns.C2dns.id.in_(batch['ids'])))
+            db.session.commit()
+
+        if batch['tags']:
+            batch_create_tags_mapping(c2dns.C2dns.__tablename__, batch['ids'], batch['tags'])
+
+    return jsonify(''), 200
 
 
 @app.route('/ThreatKB/c2dns/<int:id>', methods=['DELETE'])
@@ -173,7 +217,7 @@ def delete_c2dns(id):
     db.session.delete(entity)
     db.session.commit()
 
-    delete_tags_mapping(entity.__tablename__, entity.id, tag_mapping_to_delete)
+    delete_tags_mapping(entity.__tablename__, entity.id)
     delete_bookmarks(ENTITY_MAPPING["DNS"], id, current_user.id)
 
     return jsonify(''), 204
