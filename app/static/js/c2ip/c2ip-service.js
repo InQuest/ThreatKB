@@ -2,11 +2,6 @@
 
 angular.module('ThreatKB')
     .factory('C2ip', ['$resource', '$q', '$http', function ($resource, $q, $http) {
-        var c2ip_resource = $resource('ThreatKB/c2ips/:id', {}, {
-            'query': {method: 'GET', isArray: true},
-            'get': {method: 'GET'},
-            'update': {method: 'PUT'}
-        });
 
         function updateBatch(batch) {
             return $http.put('/ThreatKB/c2ips/batch', {
@@ -22,7 +17,11 @@ angular.module('ThreatKB')
         }
 
         return {
-            resource: c2ip_resource,
+            resource: $resource('ThreatKB/c2ips/:id', {}, {
+                'query': {method: 'GET', isArray: true},
+                'get': {method: 'GET'},
+                'update': {method: 'PUT'}
+            }),
             updateBatch: updateBatch
         };
     }]);

@@ -2,11 +2,6 @@
 
 angular.module('ThreatKB')
     .factory('Task', ['$resource', '$q', '$http', function ($resource, $q, $http) {
-        var task_resource = $resource('ThreatKB/tasks/:id', {}, {
-            'query': {method: 'GET', isArray: true},
-            'get': {method: 'GET'},
-            'update': {method: 'PUT'}
-        });
 
         function updateBatch(batch) {
             return $http.put('/ThreatKB/tasks/batch', {
@@ -22,7 +17,11 @@ angular.module('ThreatKB')
         }
 
         return {
-            resource: task_resource,
+            resource: $resource('ThreatKB/tasks/:id', {}, {
+                'query': {method: 'GET', isArray: true},
+                'get': {method: 'GET'},
+                'update': {method: 'PUT'}
+            }),
             updateBatch: updateBatch
         };
     }]);
