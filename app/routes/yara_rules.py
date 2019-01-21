@@ -6,6 +6,7 @@ from flask_login import current_user, login_required
 import distutils
 
 from app.models.metadata import Metadata, MetadataMapping
+from app.routes.batch import batch_update
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
 from app.routes.cfg_category_range_mapping import update_cfg_category_range_mapping_current
 from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
@@ -350,10 +351,29 @@ def update_yara_rule(id):
     if get_new_sig_id:
         update_cfg_category_range_mapping_current(request.json['category']['id'], temp_sig_id)
 
-    create_tags_mapping(entity.__tablename__, entity.id, request.json['addedTags'])
-    delete_tags_mapping(entity.__tablename__, entity.id, request.json['removedTags'])
+    delete_tags_mapping(entity.__tablename__, entity.id)
+    create_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
 
     return jsonify(entity.to_dict()), 200
+
+
+@app.route('/ThreatKB/yara_rules/batch', methods=['PUT'])
+@auto.doc()
+@login_required
+def batch_update_yara_rules():
+    """Batch update yara rules artifacts
+    From Data: batch {
+                 state (str),
+                 owner_user (str),
+                 tags (array),
+                 ids (array)
+               }
+    Return: Success Code"""
+
+    if 'batch' in request.json and request.json['batch']:
+        return batch_update(batch=request.json['batch'],
+                            artifact=yara_rule.Yara_rule,
+                            session=db.session)
 
 
 @app.route('/ThreatKB/yara_rules/<int:id>', methods=['DELETE'])
@@ -364,7 +384,6 @@ def delete_yara_rule(id):
     Return: None"""
     entity = yara_rule.Yara_rule.query.get(id)
     entity.active = False
-    # tag_mapping_to_delete = entity.to_dict()['tags']
 
     if not entity:
         abort(404)
@@ -375,7 +394,7 @@ def delete_yara_rule(id):
     db.session.merge(entity)
     db.session.commit()
 
-    # delete_tags_mapping(entity.__tablename__, entity.id, tag_mapping_to_delete)
+    # delete_tags_mapping(entity.__tablename__, entity.id)
     delete_bookmarks(ENTITY_MAPPING["SIGNATURE"], id, current_user.id)
 
     return jsonify(''), 204

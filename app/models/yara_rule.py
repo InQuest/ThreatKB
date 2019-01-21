@@ -38,8 +38,6 @@ class Yara_rule(db.Model):
     eventid = db.Column(db.Integer(unsigned=True), index=True, nullable=False)
 
     tags = []
-    addedTags = []
-    removedTags = []
 
     created_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
     created_user = db.relationship('KBUser', foreign_keys=created_user_id,
@@ -92,10 +90,8 @@ class Yara_rule(db.Model):
             eventid=self.eventid,
             id=self.id,
             tags=tags_mapping.get_tags_for_source(self.__tablename__, self.id),
-            addedTags=[],
             description=self.description,
             references=self.references,
-            removedTags=[],
             revision=self.revision,
             condition="condition:\n\t%s" % self.condition,
             strings="strings:\n\t%s" % self.strings if self.strings and self.strings.strip() else "",
@@ -137,8 +133,6 @@ class Yara_rule(db.Model):
         del dict["comments"]
         del dict["revisions"]
         del dict["tags"]
-        del dict["removedTags"]
-        del dict["addedTags"]
         return dict
 
     def to_release_dict(self, metadata_cache, user_cache):
@@ -152,8 +146,6 @@ class Yara_rule(db.Model):
             id=self.id,
             description=self.description,
             references=self.references,
-            addedTags=[],
-            removedTags=[],
             created_user=user_cache[self.created_user_id],
             modified_user=user_cache[self.modified_user_id],
             owner_user=user_cache[self.owner_user_id] if self.owner_user_id else None,

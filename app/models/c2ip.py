@@ -52,8 +52,6 @@ class C2ip(db.Model):
                                    ENTITY_MAPPING["IP"]))
 
     tags = []
-    addedTags = []
-    removedTags = []
 
     WHITELIST_CACHE = None
     WHITELIST_CACHE_LAST_UPDATE = None
@@ -85,8 +83,6 @@ class C2ip(db.Model):
             expiration_timestamp=self.expiration_timestamp.isoformat() if self.expiration_timestamp else None,
             id=self.id,
             tags=tags_mapping.get_tags_for_source(self.__tablename__, self.id),
-            addedTags=[],
-            removedTags=[],
             created_user=self.created_user.to_dict(),
             modified_user=self.modified_user.to_dict(),
             owner_user=self.owner_user.to_dict() if self.owner_user else None,
@@ -119,8 +115,6 @@ class C2ip(db.Model):
             references=self.references,
             expiration_timestamp=self.expiration_timestamp.isoformat() if self.expiration_timestamp else None,
             id=self.id,
-            addedTags=[],
-            removedTags=[],
             created_user=user_cache[self.created_user_id],
             modified_user=user_cache[self.modified_user_id],
             owner_user=user_cache[self.owner_user_id] if self.owner_user_id else None,

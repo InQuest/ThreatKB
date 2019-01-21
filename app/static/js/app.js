@@ -47,7 +47,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                 access: {restricted: true, admin: false},
                 resolve: {
                     resolvedC2dns: ['C2dns', function (C2dns) {
-                        return C2dns.query({
+                        return C2dns.resource.query({
                             page_number: 0,
                             page_size: 25,
                             include_metadata: 0,
@@ -65,7 +65,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                 access: {restricted: true, admin: false},
                 resolve: {
                     resolvedC2dns: ['C2dns', function (C2dns) {
-                        return C2dns.query({
+                        return C2dns.resource.query({
                             page_number: 0,
                             page_size: 25
                         });
@@ -81,7 +81,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                 access: {restricted: true, admin: false},
                 resolve: {
                     resolvedC2dns: ['C2dns', function (C2dns) {
-                        return C2dns.query({
+                        return C2dns.resource.query({
                             page_number: 0,
                             page_size: 25
                         });
@@ -97,7 +97,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                 access: {restricted: true, admin: false},
                 resolve: {
                     resolvedC2ip: ['C2ip', function (C2ip) {
-                        return C2ip.query({
+                        return C2ip.resource.query({
                             page_number: 0,
                             page_size: 25,
                             include_metadata: 0,
@@ -115,7 +115,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                 access: {restricted: true, admin: false},
                 resolve: {
                     resolvedC2ip: ['C2ip', function (C2ip) {
-                        return C2ip.query({
+                        return C2ip.resource.query({
                             page_number: 0,
                             page_size: 25
                         });
@@ -131,7 +131,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                 access: {restricted: true, admin: false},
                 resolve: {
                     resolvedC2ip: ['C2ip', function (C2ip) {
-                        return C2ip.query({
+                        return C2ip.resource.query({
                             page_number: 0,
                             page_size: 25
                         });
@@ -299,7 +299,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                 access: {restricted: true, admin: false},
                 resolve: {
                     resolvedTask: ['Task', function (Task) {
-                        return Task.query();
+                        return Task.resource.query();
                     }],
                     openModalForId: [function () {
                         return null;
@@ -312,7 +312,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                 access: {restricted: true, admin: false},
                 resolve: {
                     resolvedTask: ['Task', function (Task) {
-                        return Task.query();
+                        return Task.resource.query();
                     }],
                     openModalForId: ['$route', function ($route) {
                         return "add";
@@ -325,7 +325,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                 access: {restricted: true, admin: false},
                 resolve: {
                     resolvedTask: ['Task', function (Task) {
-                        return Task.query();
+                        return Task.resource.query();
                     }],
                     openModalForId: ['$route', function ($route) {
                         return $route.current.params.id;
