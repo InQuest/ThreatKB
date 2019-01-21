@@ -6,6 +6,7 @@ from dateutil import parser
 from sqlalchemy import exc
 
 from app.models.cfg_states import verify_state
+from app.routes.batch import batch_update
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
 from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
 from app.routes.comments import create_comment
@@ -151,16 +152,35 @@ def update_c2ip(id):
     try:
         db.session.commit()
     except exc.IntegrityError:
-        app.logger.error("Duplicate IP: '%s'" % (entity.ip))
-        abort(409, description="Duplicate IP: '%s'" % (entity.ip))
+        app.logger.error("Duplicate IP: '%s'" % entity.ip)
+        abort(409, description="Duplicate IP: '%s'" % entity.ip)
 
-    create_tags_mapping(entity.__tablename__, entity.id, request.json['addedTags'])
-    delete_tags_mapping(entity.__tablename__, entity.id, request.json['removedTags'])
+    delete_tags_mapping(entity.__tablename__, entity.id)
+    create_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
 
     entity.save_metadata(request.json.get("metadata_values", {}))
 
     entity = c2ip.C2ip.query.get(entity.id)
     return jsonify(entity.to_dict()), 200
+
+
+@app.route('/ThreatKB/c2ips/batch', methods=['PUT'])
+@auto.doc()
+@login_required
+def batch_update_c2ip():
+    """Batch update c2ip artifacts
+    From Data: batch {
+                 state (str),
+                 owner_user (str),
+                 tags (array),
+                 ids (array)
+               }
+    Return: Success Code"""
+
+    if 'batch' in request.json and request.json['batch']:
+        return batch_update(batch=request.json['batch'],
+                            artifact=c2ip.C2ip,
+                            session=db.session)
 
 
 @app.route('/ThreatKB/c2ips/<int:id>', methods=['DELETE'])
@@ -170,7 +190,6 @@ def delete_c2ip(id):
     """Delete c2ip artifact associated with id
     Return: None"""
     entity = c2ip.C2ip.query.get(id)
-    tag_mapping_to_delete = entity.to_dict()['tags']
 
     if not entity:
         abort(404)
@@ -179,7 +198,7 @@ def delete_c2ip(id):
     db.session.delete(entity)
     db.session.commit()
 
-    delete_tags_mapping(entity.__tablename__, entity.id, tag_mapping_to_delete)
+    delete_tags_mapping(entity.__tablename__, entity.id)
     delete_bookmarks(ENTITY_MAPPING["IP"], id, current_user.id)
 
     return jsonify(''), 204

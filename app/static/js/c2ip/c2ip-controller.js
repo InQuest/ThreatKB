@@ -8,6 +8,8 @@ angular.module('ThreatKB')
 
             $scope.users = Users.query();
 
+            $scope.cfg_states = Cfg_states.query();
+
             $scope.start_filter_requests_length = Cfg_settings.get({key: "START_FILTER_REQUESTS_LENGTH"});
 
             $('input[type=number]').on('mousewheel', function () {
@@ -18,7 +20,13 @@ angular.module('ThreatKB')
                 }, 10);
             });
 
-            $scope.cfg_states = Cfg_states.query();
+            $scope.clear_checked = function () {
+                $scope.checked_indexes = [];
+                $scope.checked_counter = 0;
+                $scope.all_checked = false;
+            };
+
+            $scope.clear_checked();
 
             $scope.searches = {};
             if ($routeParams.searches) {
@@ -27,6 +35,48 @@ angular.module('ThreatKB')
 
             $scope.filterOptions = {
                 filterText: ''
+            };
+
+            $scope.disable_multi_actions = function () {
+                return $scope.checked_counter < 1;
+            };
+            $scope.get_index_from_row = function (row) {
+                for (var i = 0; i < row.grid.rows.length; i++) {
+                    if (row.uid === row.grid.rows[i].uid) {
+                        return i;
+                    }
+                }
+            };
+
+            $scope.toggle_checked = function () {
+                if ($scope.all_checked) {
+                    $scope.check_all();
+                } else {
+                    $scope.uncheck_all();
+                }
+            };
+
+            $scope.update_checked_counter = function (row) {
+                var index = $scope.get_index_from_row(row);
+                if ($scope.checked_indexes[index]) {
+                    $scope.checked_counter += 1;
+                } else {
+                    $scope.checked_counter -= 1;
+                }
+            };
+
+            $scope.uncheck_all = function () {
+                for (var i = 0; i < $scope.checked_indexes.length; i++) {
+                    $scope.checked_indexes[i] = false;
+                }
+                $scope.checked_counter = 0;
+            };
+
+            $scope.check_all = function () {
+                for (var i = 0; i < $scope.checked_indexes.length; i++) {
+                    $scope.checked_indexes[i] = true;
+                }
+                $scope.checked_counter = $scope.checked_indexes.length;
             };
 
             var paginationOptions = {
@@ -95,7 +145,7 @@ angular.module('ThreatKB')
                             $(":input[type=text]").each(function (i) {
                                 if ($(this).hasClass("ui-grid-filter-input")) {
                                     $(this).attr("tabindex", i + 1);
-                                    if ((i + 1) == 1) {
+                                    if ((i + 1) === 1) {
                                         $(this).focus();
                                     }
                                 }
@@ -107,6 +157,14 @@ angular.module('ThreatKB')
                 rowHeight: 35,
                 columnDefs:
                     [
+                        {
+                            field: 'checked',
+                            displayName: "",
+                            width: '40',
+                            enableSorting: false,
+                            headerCellTemplate: '<BR><center><input style="vertical-align: middle;" type="checkbox" ng-model="grid.appScope.all_checked" ng-click="grid.appScope.toggle_checked()" /></center>',
+                            cellTemplate: '<center><input type="checkbox" ng-model="grid.appScope.checked_indexes[grid.appScope.get_index_from_row(row)]" ng-change="grid.appScope.update_checked_counter(row)" /></center>'
+                        },
                         {
                             field: 'ip',
                             displayName: 'IP',
@@ -218,6 +276,11 @@ angular.module('ThreatKB')
                     .then(function (response) {
                         $scope.gridOptions.totalItems = response.data.total_count;
                         $scope.gridOptions.data = response.data.data;
+                        $scope.c2ips = $scope.gridOptions.data;
+                        $scope.clear_checked();
+                        for (var i = 0; i < $scope.gridOptions.data.length; i++) {
+                            $scope.checked_indexes.push(false);
+                        }
                         $scope.gridApi.grid.gridHeight = parseInt($scope.getTableHeight().height);  // Re-apply table height calculation, based on new data
                         $scope.gridApi.core.refresh();
                     }, function (error) {
@@ -238,16 +301,34 @@ angular.module('ThreatKB')
             };
 
             $scope.update = function (id) {
-                $scope.c2ip = C2ip.get({id: id});
+                $scope.c2ip = C2ip.resource.get({id: id});
                 $scope.cfg_states = Cfg_states.query();
                 $scope.users = Users.query();
                 $scope.open(id);
             };
 
             $scope.delete = function (id) {
-                C2ip.delete({id: id}, function () {
-                    //$scope.c2ips = C2ip.query();
+                C2ip.resource.delete({id: id}, function () {
                     getPage();
+                });
+            };
+
+            $scope.save_batch = function () {
+                var c2ipsToUpdate = {
+                    owner_user: $scope.batch.owner,
+                    state: $scope.batch.state,
+                    tags: $scope.batch.tags,
+                    ids: []
+                };
+                for (var i = 0; i < $scope.checked_indexes.length; i++) {
+                    if ($scope.checked_indexes[i]) {
+                        c2ipsToUpdate.ids.push($scope.c2ips[i].id);
+                    }
+                }
+                C2ip.updateBatch(c2ipsToUpdate).then(function (response) {
+                    getPage();
+                }, function (error) {
+                    growl.error(error.data, {ttl: -1});
                 });
             };
 
@@ -259,8 +340,7 @@ angular.module('ThreatKB')
                 }
 
                 if (id) {
-                    C2ip.update({id: id}, $scope.c2ip, function () {
-                        //$scope.c2ips = C2ip.query();
+                    C2ip.resource.update({id: id}, $scope.c2ip, function () {
                         getPage();
                     }, function (error) {
                         growl.error(error.data, {ttl: -1});
@@ -306,8 +386,7 @@ angular.module('ThreatKB')
                         }
                     }
 
-                    C2ip.save($scope.c2ip, function () {
-                        //$scope.c2ips = C2ip.query();
+                    C2ip.resource.save($scope.c2ip, function () {
                         getPage();
                     }, function (error) {
                         growl.error(error.data, {ttl: -1});
@@ -315,7 +394,16 @@ angular.module('ThreatKB')
                 }
             };
 
+            $scope.clear_batch = function () {
+                $scope.batch = {
+                    owner: null,
+                    state: null,
+                    tags: null
+                };
+            };
+
             $scope.clear = function () {
+                $scope.checked_indexes = [];
                 $scope.c2ip = {
                     "date_created": "",
                     "date_modified": "",
@@ -328,9 +416,7 @@ angular.module('ThreatKB')
                     "expiration_timestamp": "",
                     "description": "",
                     "id": "",
-                    "tags": [],
-                    "addedTags": [],
-                    "removedTags": []
+                    "tags": []
                 };
             };
 
@@ -361,9 +447,35 @@ angular.module('ThreatKB')
                 });
             };
 
+            $scope.clear_batch();
+            $scope.open_batch = function () {
+                $scope.clear_batch();
+                $scope.batch_edit();
+            };
+            $scope.batch_edit = function () {
+                var be = $uibModal.open({
+                    templateUrl: 'c2ip-batch_edit.html',
+                    controller: 'C2ipBatchEditController',
+                    size: 'lg',
+                    backdrop: 'static',
+                    resolve: {
+                        batch: function () {
+                            return $scope.batch;
+                        }
+                    }
+                });
+
+                be.result.then(function (batch) {
+                    $scope.batch = batch;
+                    $scope.save_batch();
+                }, function () {
+                    getPage();
+                });
+            };
+
             getPage();
             if (openModalForId !== null) {
-                if (openModalForId == "add") {
+                if (openModalForId === "add") {
                     $scope.create();
                 } else {
                     $scope.update(openModalForId);
@@ -383,7 +495,7 @@ angular.module('ThreatKB')
             $scope.users = Users.query();
 
             $scope.save_artifact = function () {
-                C2ip.update({id: $scope.c2ip.id}, $scope.c2ip,
+                C2ip.resource.update({id: $scope.c2ip.id}, $scope.c2ip,
                     function (data) {
                         if (!data) {
                             growl.error(error, {ttl: -1});
@@ -481,12 +593,24 @@ angular.module('ThreatKB')
                 $uibModalInstance.dismiss('cancel');
             };
 
-            $scope.addedTag = function ($tag) {
-                $scope.c2ip.addedTags.push($tag)
+            $scope.loadTags = function (query) {
+                return Tags.loadTags(query);
+            };
+        }])
+    .controller('C2ipBatchEditController', ['$scope', '$uibModalInstance', 'batch', 'Users', 'Cfg_states', 'Tags',
+        function ($scope, $uibModalInstance, batch, Users, Cfg_states, Tags) {
+            $scope.batch = batch;
+
+            $scope.users = Users.query();
+
+            $scope.cfg_states = Cfg_states.query();
+
+            $scope.ok = function () {
+                $uibModalInstance.close($scope.batch);
             };
 
-            $scope.removedTag = function ($tag) {
-                $scope.c2ip.removedTags.push($tag)
+            $scope.cancel = function () {
+                $uibModalInstance.dismiss('cancel');
             };
 
             $scope.loadTags = function (query) {

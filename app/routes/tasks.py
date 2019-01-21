@@ -2,6 +2,7 @@ from app import app, db, auto, ENTITY_MAPPING
 from app.models import tasks
 from flask import abort, jsonify, request, Response
 from flask_login import login_required, current_user
+from app.routes.batch import batch_update
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
 
 from app.utilities import filter_entities
@@ -108,6 +109,25 @@ def update_tasks(id):
 
     entity = tasks.Tasks.query.filter(tasks.Tasks.id == entity.id).first()
     return jsonify(entity.to_dict()), 200
+
+
+@app.route('/ThreatKB/tasks/batch', methods=['PUT'])
+@auto.doc()
+@login_required
+def batch_update_tasks():
+    """Batch update task artifacts
+    From Data: batch {
+                 state (str),
+                 owner_user (str),
+                 ids (array)
+               }
+    Return: Success"""
+
+    if 'batch' in request.json and request.json['batch']:
+        return batch_update(batch=request.json['batch'],
+                            artifact=tasks.Tasks,
+                            session=db.session,
+                            include_tags=False)
 
 
 @app.route('/ThreatKB/tasks/<int:id>', methods=['DELETE'])

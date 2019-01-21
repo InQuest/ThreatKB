@@ -1,14 +1,16 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('TasksController', ['$scope', '$timeout', '$filter', '$http', '$uibModal', 'resolvedTask', 'Task', 'Cfg_states', 'growl', 'Users', 'openModalForId', 'uiGridConstants', '$routeParams',
-        function ($scope, $timeout, $filter, $http, $uibModal, resolvedTask, Task, Cfg_states, growl, Users, openModalForId, uiGridConstants, $routeParams) {
+    .controller('TasksController', ['$scope', '$timeout', '$filter', '$http', '$uibModal', 'resolvedTask', 'Task', 'Cfg_states', 'growl', 'Users', 'openModalForId', 'uiGridConstants', '$routeParams', 'Cfg_settings',
+        function ($scope, $timeout, $filter, $http, $uibModal, resolvedTask, Task, Cfg_states, growl, Users, openModalForId, uiGridConstants, $routeParams, Cfg_settings) {
 
             $scope.tasks = resolvedTask;
 
             $scope.users = Users.query();
 
             $scope.cfg_states = Cfg_states.query();
+
+            $scope.start_filter_requests_length = Cfg_settings.get({key: "START_FILTER_REQUESTS_LENGTH"});
 
             $('input[type=number]').on('mousewheel', function () {
                 var el = $(this);
@@ -18,14 +20,64 @@ angular.module('ThreatKB')
                 }, 10);
             });
 
-            $scope.filterOptions = {
-                filterText: ''
+            $scope.clear_checked = function () {
+                $scope.checked_indexes = [];
+                $scope.checked_counter = 0;
+                $scope.all_checked = false;
             };
+
+            $scope.clear_checked();
 
             $scope.searches = {};
             if ($routeParams.searches) {
                 $scope.searches = JSON.parse($routeParams.searches);
             }
+
+            $scope.filterOptions = {
+                filterText: ''
+            };
+
+            $scope.disable_multi_actions = function () {
+                return $scope.checked_counter < 1;
+            };
+            $scope.get_index_from_row = function (row) {
+                for (var i = 0; i < row.grid.rows.length; i++) {
+                    if (row.uid === row.grid.rows[i].uid) {
+                        return i;
+                    }
+                }
+            };
+
+            $scope.toggle_checked = function () {
+                if ($scope.all_checked) {
+                    $scope.check_all();
+                } else {
+                    $scope.uncheck_all();
+                }
+            };
+
+            $scope.update_checked_counter = function (row) {
+                var index = $scope.get_index_from_row(row);
+                if ($scope.checked_indexes[index]) {
+                    $scope.checked_counter += 1;
+                } else {
+                    $scope.checked_counter -= 1;
+                }
+            };
+
+            $scope.uncheck_all = function () {
+                for (var i = 0; i < $scope.checked_indexes.length; i++) {
+                    $scope.checked_indexes[i] = false;
+                }
+                $scope.checked_counter = 0;
+            };
+
+            $scope.check_all = function () {
+                for (var i = 0; i < $scope.checked_indexes.length; i++) {
+                    $scope.checked_indexes[i] = true;
+                }
+                $scope.checked_counter = $scope.checked_indexes.length;
+            };
 
             var paginationOptions = {
                 pageNumber: 1,
@@ -49,14 +101,21 @@ angular.module('ThreatKB')
                     $scope.gridApi.core.on.filterChanged($scope, function () {
                         var grid = this.grid;
                         paginationOptions.searches = {};
+                        var trigger_refresh_for_length = false;
+                        var trigger_refresh_for_emptiness = true;
 
                         for (var i = 0; i < grid.columns.length; i++) {
                             var column = grid.columns[i];
-                            if (column.filters[0].term !== undefined && column.filters[0].term !== null && column.filters[0].term.length >= 3) {
+                            trigger_refresh_for_emptiness &= (column.filters[0].term === undefined || column.filters[0].term === null || column.filters[0].term.length === 0);
+
+                            if (column.filters[0].term !== undefined && column.filters[0].term !== null && column.filters[0].term.length >= parseInt($scope.start_filter_requests_length.value)) {
+                                trigger_refresh_for_length = true;
                                 paginationOptions.searches[column.colDef.field] = column.filters[0].term
                             }
                         }
-                        getPage()
+                        if (trigger_refresh_for_length || trigger_refresh_for_emptiness) {
+                            getPage();
+                        }
                     });
                     $scope.gridApi.core.on.sortChanged($scope, function (grid, sortColumns) {
                         if (sortColumns.length === 0) {
@@ -86,17 +145,26 @@ angular.module('ThreatKB')
                             $(":input[type=text]").each(function (i) {
                                 if ($(this).hasClass("ui-grid-filter-input")) {
                                     $(this).attr("tabindex", i + 1);
-                                    if ((i + 1) == 1) {
+                                    if ((i + 1) === 1) {
                                         $(this).focus();
                                     }
                                 }
                             });
+                            $('[role="rowgroup"]').css('overflow', 'auto');
                         }, 500);
                     });
                 },
                 rowHeight: 35,
                 columnDefs:
                     [
+                        {
+                            field: 'checked',
+                            displayName: "",
+                            width: '40',
+                            enableSorting: false,
+                            headerCellTemplate: '<BR><center><input style="vertical-align: middle;" type="checkbox" ng-model="grid.appScope.all_checked" ng-click="grid.appScope.toggle_checked()" /></center>',
+                            cellTemplate: '<center><input type="checkbox" ng-model="grid.appScope.checked_indexes[grid.appScope.get_index_from_row(row)]" ng-change="grid.appScope.update_checked_counter(row)" /></center>'
+                        },
                         {
                             field: 'title',
                             displayName: 'Title',
@@ -184,6 +252,13 @@ angular.module('ThreatKB')
                     .then(function (response) {
                         $scope.gridOptions.totalItems = response.data.total_count;
                         $scope.gridOptions.data = response.data.data;
+                        $scope.tasks = $scope.gridOptions.data;
+                        $scope.clear_checked();
+                        for (var i = 0; i < $scope.gridOptions.data.length; i++) {
+                            $scope.checked_indexes.push(false);
+                        }
+                        $scope.gridApi.grid.gridHeight = parseInt($scope.getTableHeight().height);  // Re-apply table height calculation, based on new data
+                        $scope.gridApi.core.refresh();
                     }, function (error) {
                     });
             };
@@ -202,15 +277,33 @@ angular.module('ThreatKB')
             };
 
             $scope.update = function (id) {
-                $scope.task = Task.get({id: id});
+                $scope.task = Task.resource.get({id: id});
                 $scope.cfg_states = Cfg_states.query();
                 $scope.users = Users.query();
                 $scope.open(id);
             };
 
             $scope.delete = function (id) {
-                Task.delete({id: id}, function () {
+                Task.resource.delete({id: id}, function () {
                     getPage();
+                });
+            };
+
+            $scope.save_batch = function () {
+                var tasksToUpdate = {
+                    owner_user: $scope.batch.owner,
+                    state: $scope.batch.state,
+                    ids: []
+                };
+                for (var i = 0; i < $scope.checked_indexes.length; i++) {
+                    if ($scope.checked_indexes[i]) {
+                        tasksToUpdate.ids.push($scope.tasks[i].id);
+                    }
+                }
+                Task.updateBatch(tasksToUpdate).then(function (response) {
+                    getPage();
+                }, function (error) {
+                    growl.error(error.data, {ttl: -1});
                 });
             };
 
@@ -222,13 +315,13 @@ angular.module('ThreatKB')
                 }
 
                 if (id) {
-                    Task.update({id: id}, $scope.task, function () {
+                    Task.resource.update({id: id}, $scope.task, function () {
                         getPage();
                     }, function (error) {
                         growl.error(error.data, {ttl: -1});
                     });
                 } else {
-                    Task.save($scope.task, function () {
+                    Task.resource.save($scope.task, function () {
                         getPage();
                     }, function (error) {
                         growl.error(error.data, {ttl: -1});
@@ -236,7 +329,15 @@ angular.module('ThreatKB')
                 }
             };
 
+            $scope.clear_batch = function () {
+                $scope.batch = {
+                    owner: null,
+                    state: null
+                };
+            };
+
             $scope.clear = function () {
+                $scope.checked_indexes = [];
                 $scope.task = {
                     title: "",
                     description: "",
@@ -264,12 +365,40 @@ angular.module('ThreatKB')
                 taskSave.result.then(function (entity) {
                     $scope.task = entity;
                     $scope.save(id);
+                }, function () {
+                    getPage();
+                });
+            };
+
+            $scope.clear_batch();
+            $scope.open_batch = function () {
+                $scope.clear_batch();
+                $scope.batch_edit();
+            };
+            $scope.batch_edit = function () {
+                var be = $uibModal.open({
+                    templateUrl: 'task-batch_edit.html',
+                    controller: 'TaskBatchEditController',
+                    size: 'lg',
+                    backdrop: 'static',
+                    resolve: {
+                        batch: function () {
+                            return $scope.batch;
+                        }
+                    }
+                });
+
+                be.result.then(function (batch) {
+                    $scope.batch = batch;
+                    $scope.save_batch();
+                }, function () {
+                    getPage();
                 });
             };
 
             getPage();
             if (openModalForId !== null) {
-                if (openModalForId == "add") {
+                if (openModalForId === "add") {
                     $scope.create();
                 } else {
                     $scope.update(openModalForId);
@@ -386,4 +515,21 @@ angular.module('ThreatKB')
             $scope.cancel = function () {
                 $uibModalInstance.dismiss('cancel');
             };
+        }])
+    .controller('TaskBatchEditController', ['$scope', '$uibModalInstance', 'batch', 'Users', 'Cfg_states',
+        function ($scope, $uibModalInstance, batch, Users, Cfg_states) {
+            $scope.batch = batch;
+
+            $scope.users = Users.query();
+
+            $scope.cfg_states = Cfg_states.query();
+
+            $scope.ok = function () {
+                $uibModalInstance.close($scope.batch);
+            };
+
+            $scope.cancel = function () {
+                $uibModalInstance.dismiss('cancel');
+            };
         }]);
+

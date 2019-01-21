@@ -4,9 +4,11 @@ angular.module('ThreatKB')
     .controller('Yara_ruleController', ['$scope', '$timeout', '$filter', '$http', '$uibModal', 'Yara_rule', 'Cfg_states', 'CfgCategoryRangeMapping', 'Users', 'growl', 'openModalForId', 'uiGridConstants', 'FileSaver', 'Blob', 'Cfg_settings', '$routeParams',
         function ($scope, $timeout, $filter, $http, $uibModal, Yara_rule, Cfg_states, CfgCategoryRangeMapping, Users, growl, openModalForId, uiGridConstants, FileSaver, Blob, Cfg_settings, $routeParams) {
 
+            $scope.users = Users.query();
+
             $scope.cfg_states = Cfg_states.query();
 
-            $scope.users = Users.query();
+            $scope.start_filter_requests_length = Cfg_settings.get({key: "START_FILTER_REQUESTS_LENGTH"});
 
             $('input[type=number]').on('mousewheel', function () {
                 var el = $(this);
@@ -15,12 +17,6 @@ angular.module('ThreatKB')
                     el.focus();
                 }, 10);
             });
-            $scope.searches = {};
-            if ($routeParams.searches) {
-                $scope.searches = JSON.parse($routeParams.searches);
-            }
-
-            $scope.start_filter_requests_length = Cfg_settings.get({key: "START_FILTER_REQUESTS_LENGTH"});
 
             $scope.clear_checked = function () {
                 $scope.checked_indexes = [];
@@ -29,6 +25,11 @@ angular.module('ThreatKB')
             };
 
             $scope.clear_checked();
+
+            $scope.searches = {};
+            if ($routeParams.searches) {
+                $scope.searches = JSON.parse($routeParams.searches);
+            }
 
             $scope.filterOptions = {
                 filterText: ''
@@ -106,7 +107,6 @@ angular.module('ThreatKB')
                 }
             };
 
-
             var paginationOptions = {
                 pageNumber: 1,
                 pageSize: 25,
@@ -141,7 +141,6 @@ angular.module('ThreatKB')
                                 paginationOptions.searches[column.colDef.field] = column.filters[0].term
                             }
                         }
-
                         if (trigger_refresh_for_length || trigger_refresh_for_emptiness) {
                             getPage();
                         }
@@ -376,6 +375,25 @@ angular.module('ThreatKB')
                 });
             };
 
+            $scope.save_batch = function () {
+                var sigsToUpdate = {
+                    owner_user: $scope.batch.owner,
+                    state: $scope.batch.state,
+                    tags: $scope.batch.tags,
+                    ids: []
+                };
+                for (var i = 0; i < $scope.checked_indexes.length; i++) {
+                    if ($scope.checked_indexes[i]) {
+                        sigsToUpdate.ids.push($scope.yara_rules[i].id);
+                    }
+                }
+                Yara_rule.updateBatch(sigsToUpdate).then(function (response) {
+                    getPage();
+                }, function (error) {
+                    growl.error(error.data, {ttl: -1});
+                });
+            };
+
             $scope.save = function (id_or_rule) {
                 var id = id_or_rule;
                 if (typeof(id_or_rule) === "object") {
@@ -449,6 +467,14 @@ angular.module('ThreatKB')
                 }
             };
 
+            $scope.clear_batch = function () {
+                $scope.batch = {
+                    owner: null,
+                    state: null,
+                    tags: null
+                };
+            };
+
             $scope.clear = function () {
                 $scope.checked_indexes = [];
                 $scope.yara_rule = {
@@ -462,8 +488,6 @@ angular.module('ThreatKB')
                     "eventid": "",
                     "id": "",
                     "tags": [],
-                    "addedTags": [],
-                    "removedTags": [],
                     "comments": [],
                     "files": [],
                     "imports": ""
@@ -504,6 +528,31 @@ angular.module('ThreatKB')
                 });
             };
 
+            $scope.clear_batch();
+            $scope.open_batch = function () {
+                $scope.clear_batch();
+                $scope.batch_edit();
+            };
+            $scope.batch_edit = function () {
+                var be = $uibModal.open({
+                    templateUrl: 'yara_rule-batch_edit.html',
+                    controller: 'Yara_ruleBatchEditController',
+                    size: 'lg',
+                    backdrop: 'static',
+                    resolve: {
+                        batch: function () {
+                            return $scope.batch;
+                        }
+                    }
+                });
+
+                be.result.then(function (batch) {
+                    $scope.batch = batch;
+                    $scope.save_batch();
+                }, function () {
+                    getPage();
+                });
+            };
             $scope.edit = function (id) {
                 $scope.openYaraModal(id);
             };
@@ -522,9 +571,8 @@ angular.module('ThreatKB')
                 });
             };
 
-            //getPage();
             if (openModalForId !== null) {
-                if (openModalForId == "add") {
+                if (openModalForId === "add") {
                     $scope.create();
                 } else {
                     $scope.update(openModalForId);
@@ -736,14 +784,6 @@ angular.module('ThreatKB')
                 $uibModalInstance.dismiss('cancel');
             };
 
-            $scope.addedTag = function ($tag) {
-                $scope.yara_rule.addedTags.push($tag)
-            };
-
-            $scope.removedTag = function ($tag) {
-                $scope.yara_rule.removedTags.push($tag)
-            };
-
             $scope.loadTags = function (query) {
                 return Tags.loadTags(query);
             };
@@ -854,4 +894,24 @@ angular.module('ThreatKB')
                 $uibModalInstance.dismiss('cancel');
             };
 
+        }])
+    .controller('Yara_ruleBatchEditController', ['$scope', '$uibModalInstance', 'batch', 'Users', 'Cfg_states', 'Tags',
+        function ($scope, $uibModalInstance, batch, Users, Cfg_states, Tags) {
+            $scope.batch = batch;
+
+            $scope.users = Users.query();
+
+            $scope.cfg_states = Cfg_states.query();
+
+            $scope.ok = function () {
+                $uibModalInstance.close($scope.batch);
+            };
+
+            $scope.cancel = function () {
+                $uibModalInstance.dismiss('cancel');
+            };
+
+            $scope.loadTags = function (query) {
+                return Tags.loadTags(query);
+            };
         }]);
