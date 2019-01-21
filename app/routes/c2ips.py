@@ -20,12 +20,12 @@ from app.utilities import filter_entities
 def get_all_c2ips():
     """Return a list of all c2ip artifacts.
 
-    Pagination variables:
+    Optional URI Parameters:
     page_number: page number to start on, default 0
     page_size: the size of each page, default None (dont paginate)
     sort_by: column to sort by, must exist on the Yara_rule model, default None
     sort_direction: the direction to sort by if sorting, default ASC
-    searches: dictionary of column filters as {column1:filter1, column2:filter2}, columns must exist on Yara_rule model, default {}
+    searches: dictionary of column filters as {column1:filter1, column2:filter2}, columns must exist on C2ip model or as dynamic metadata, default {}
 
     Return: list of c2ip artifact dictionaries"""
     searches = request.args.get('searches', '{}')
@@ -55,6 +55,10 @@ def get_all_c2ips():
 @login_required
 def get_c2ip(id):
     """Return c2ip artifact associated with the given id
+
+    Optional URI Parameters:
+    None
+
     Return: c2ip artifact dictionary"""
     entity = c2ip.C2ip.query.get(id)
     if not entity:
@@ -73,7 +77,9 @@ def get_c2ip(id):
 @login_required
 def create_c2ip():
     """Create c2ip artifact
-    From Data: ip (str), asn (str), country (str),  expiration_type (str), expiration_timestamp (date),  state(str)
+
+    JSON Body: ip (str), asn (str), country (str),  expiration_type (str), expiration_timestamp (date),  state(str)
+
     Return: c2dns artifact dictionary"""
     entity = c2ip.C2ip(
         ip=request.json['ip'],
