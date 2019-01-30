@@ -86,8 +86,8 @@ def create_c2ip():
         ip=request.json['ip'],
         asn=request.json['asn'],
         country=request.json['country'],
-        description=request.json.get("description", None),
-        references=request.json.get("references", None),
+        description=request.json["description"],
+        references=request.json["references"],
         state=verify_state(request.json['state']['state']),
         expiration_type=request.json['expiration_type'],
         expiration_timestamp=parser.parse(request.json['expiration_timestamp'])
@@ -135,8 +135,8 @@ def update_c2ip(id):
         ip=request.json['ip'],
         asn=request.json['asn'],
         country=request.json['country'],
-        description=request.json.get("description", None),
-        references=request.json.get("references", None),
+        description=request.json["description"],
+        references=request.json["references"],
         state=verify_state(request.json['state']['state']) if request.json['state'] and 'state' in request.json['state']
         else verify_state(request.json['state']),
         expiration_type=request.json['expiration_type'],
