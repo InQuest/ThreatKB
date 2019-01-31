@@ -44,7 +44,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                     ip.created_user_id, ip.modified_user_id = current_user.id, current_user.id
                     ip.state = default_state if not shared_state else shared_state
                     if shared_reference:
-                        ip.reference_link = shared_reference
+                        ip.references = shared_reference
 
                     if shared_description:
                         ip.description = shared_description
@@ -73,7 +73,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                     dns.created_user_id, dns.modified_user_id = current_user.id, current_user.id
                     dns.state = default_state if not shared_state else shared_state
                     if shared_reference:
-                        dns.reference_link = shared_reference
+                        dns.references = shared_reference
                     if shared_description:
                         dns.description = shared_description
                     if shared_state:
@@ -91,7 +91,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                 yr.created_user_id, yr.modified_user_id = current_user.id, current_user.id
                 yr.state = default_state if not shared_state else shared_state
                 if shared_reference:
-                    yr.reference_link = shared_reference
+                    yr.references = shared_reference
                 if shared_description:
                     yr.description = shared_description
                 if shared_owner:
