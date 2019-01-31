@@ -39,7 +39,6 @@ class CfgCategoryRangeMapping(db.Model):
                     category = CfgCategoryRangeMapping(category=CfgCategoryRangeMapping.DEFAULT_CATEGORY,
                                                        range_max=default_category_max,
                                                        range_min=default_category_min, current=default_category_min)
-                    db.session.add(category)
                     CfgCategoryRangeMapping.COMMITTED_DEFAULT = category
                 else:
                     category = CfgCategoryRangeMapping.COMMITTED_DEFAULT
@@ -54,6 +53,8 @@ class CfgCategoryRangeMapping(db.Model):
             eventid = category.current + 1
             category.current = eventid
 
+        db.session.execute(
+            "update `cfg_category_range_mapping` set current=%s where id=%s" % (category.current, category.id))
         return eventid
 
 
