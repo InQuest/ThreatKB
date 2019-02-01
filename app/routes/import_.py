@@ -1,7 +1,7 @@
 from flask import abort, jsonify, request
 from flask_login import login_required, current_user
 from app import app, db, admin_only, auto, ENTITY_MAPPING
-from app.models import c2ip, c2dns, yara_rule, cfg_states, comments
+from app.models import c2ip, c2dns, yara_rule, cfg_states, comments, cfg_settings
 from app.models.metadata import Metadata
 from app.utilities import extract_artifacts
 import distutils
@@ -20,6 +20,9 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
 
     domain_names = {domain_name.domain_name.lower(): domain_name for domain_name in c2dns.C2dns.query.all()}
     ip_addresses = {ipaddress.ip: ipaddress for ipaddress in c2ip.C2ip.query.all()}
+    yara_rules = {yr.name: yr for yr in
+                  db.session.query(yara_rule.Yara_rule).filter(yara_rule.Yara_rule.active > 0).all()}
+    unique_rule_name_enforcement = cfg_settings.Cfg_settings.get_setting("ENFORCE_UNIQUE_YARA_RULE_NAMES")
 
     if not cfg_states.Cfg_states.query.filter_by(state=default_state).first():
         db.session.add(cfg_states.Cfg_states(state=default_state))
@@ -87,6 +90,10 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                     db.session.add(dns)
                     return_artifacts.append(dns)
             elif artifact["type"].lower() == "yara_rule" and extract_signature:
+                yr = yara_rules.get(artifact["rule"]["rule_name"], None)
+                if unique_rule_name_enforcement and yr:
+                    duplicate_artifacts.append(artifact)
+
                 yr, fta = yara_rule.Yara_rule.get_yara_rule_from_yara_dict(artifact, metadata_field_mapping)
                 yr.created_user_id, yr.modified_user_id = current_user.id, current_user.id
                 yr.state = default_state if not shared_state else shared_state
