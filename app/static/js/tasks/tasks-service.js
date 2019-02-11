@@ -4,7 +4,7 @@ angular.module('ThreatKB')
     .factory('Task', ['$resource', '$q', '$http', function ($resource, $q, $http) {
 
         function updateBatch(batch) {
-            return $http.put('/ThreatKB/tasks/batch', {
+            return $http.put('/ThreatKB/tasks/batch/edit', {
                 batch: batch
             }).then(function (success) {
                     if (success.status === 200) {

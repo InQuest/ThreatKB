@@ -6,7 +6,7 @@ from flask_login import current_user, login_required
 import distutils
 
 from app.models.metadata import Metadata, MetadataMapping
-from app.routes.batch import batch_update
+from app.routes.batch import batch_update, batch_delete
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
 from app.routes.cfg_category_range_mapping import update_cfg_category_range_mapping_current
 from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
@@ -359,7 +359,7 @@ def update_yara_rule(id):
     return jsonify(entity.to_dict()), 200
 
 
-@app.route('/ThreatKB/yara_rules/batch', methods=['PUT'])
+@app.route('/ThreatKB/yara_rules/batch/edit', methods=['PUT'])
 @auto.doc()
 @login_required
 def batch_update_yara_rules():
@@ -400,3 +400,21 @@ def delete_yara_rule(id):
     delete_bookmarks(ENTITY_MAPPING["SIGNATURE"], id, current_user.id)
 
     return jsonify(''), 204
+
+
+@app.route('/ThreatKB/yara_rules/batch/delete', methods=['PUT'])
+@auto.doc()
+@login_required
+def batch_delete_yara_rules():
+    """Batch inactivate yara rules artifacts
+    From Data: batch {
+                 ids (array)
+               }
+    Return: Success Code"""
+
+    if 'batch' in request.json and request.json['batch']:
+        return batch_delete(batch=request.json['batch'],
+                            artifact=yara_rule.Yara_rule,
+                            session=db.session,
+                            entity_mapping=ENTITY_MAPPING["SIGNATURE"],
+                            is_yara=True)

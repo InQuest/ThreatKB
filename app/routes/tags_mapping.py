@@ -140,6 +140,14 @@ def delete_tags_mapping(table, s_id):
     return
 
 
+def batch_delete_tags_mapping(table, list_of_source_ids):
+    db.session.execute(tags_mapping.Tags_mapping.__table__
+                       .delete()
+                       .where(tags_mapping.Tags_mapping.source_table == table
+                              and tags_mapping.Tags_mapping.source_id.in_(list_of_source_ids)))
+    db.session.commit()
+
+
 @app.route('/ThreatKB/tags_mapping/<int:id>', methods=['DELETE'])
 @login_required
 @admin_only()

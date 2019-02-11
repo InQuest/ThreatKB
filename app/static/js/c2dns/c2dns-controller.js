@@ -299,7 +299,7 @@ angular.module('ThreatKB')
             };
 
             $scope.update = function (id) {
-                $scope.c2dns = C2dns.get({id: id});
+                $scope.c2dns = C2dns.resource.get({id: id});
                 $scope.cfg_states = Cfg_states.query();
                 $scope.users = Users.query();
                 $scope.open(id);
@@ -448,6 +448,21 @@ angular.module('ThreatKB')
             $scope.open_batch = function () {
                 $scope.clear_batch();
                 $scope.batch_edit();
+            };
+            $scope.batch_delete = function () {
+                var c2dnsToDelete = {
+                    ids: []
+                };
+                for (var i = 0; i < $scope.checked_indexes.length; i++) {
+                    if ($scope.checked_indexes[i]) {
+                        c2dnsToDelete.ids.push($scope.c2dns[i].id);
+                    }
+                }
+                C2dns.deleteBatch(c2dnsToDelete).then(function (response) {
+                    getPage();
+                }, function (error) {
+                    growl.error(error.data, {ttl: -1});
+                });
             };
             $scope.batch_edit = function () {
                 var be = $uibModal.open({

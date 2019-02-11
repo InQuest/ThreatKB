@@ -533,6 +533,21 @@ angular.module('ThreatKB')
                 $scope.clear_batch();
                 $scope.batch_edit();
             };
+            $scope.batch_delete = function () {
+                var sigsToDelete = {
+                    ids: []
+                };
+                for (var i = 0; i < $scope.checked_indexes.length; i++) {
+                    if ($scope.checked_indexes[i]) {
+                        sigsToDelete.ids.push($scope.yara_rules[i].id);
+                    }
+                }
+                Yara_rule.deleteBatch(sigsToDelete).then(function (response) {
+                    getPage();
+                }, function (error) {
+                    growl.error(error.data, {ttl: -1});
+                });
+            };
             $scope.batch_edit = function () {
                 var be = $uibModal.open({
                     templateUrl: 'yara_rule-batch_edit.html',
