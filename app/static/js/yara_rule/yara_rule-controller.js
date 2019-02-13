@@ -77,19 +77,27 @@ angular.module('ThreatKB')
                 $scope.checked_counter = $scope.checked_indexes.length;
             };
 
+            $scope.copied_text = "";
             $scope.copy_rules = function () {
-                var c = new Clipboard('.btn', {
-                    text: function (trigger) {
-                        var output = "";
-                        for (var i = 0; i < $scope.checked_indexes.length; i++) {
-                            if ($scope.checked_indexes[i]) {
-                                output += $scope.yara_rules[i].yara_rule_string + "\n\n";
-                            }
-                        }
-                        return output;
+                var sigsToCopy = {
+                    ids: []
+                };
+                for (var i = 0; i < $scope.checked_indexes.length; i++) {
+                    if ($scope.checked_indexes[i]) {
+                        sigsToCopy.ids.push($scope.yara_rules[i].id);
                     }
+                }
+                Yara_rule.copySignatures(sigsToCopy).then(function (response) {
+                    $scope.copied_text = response;
+                    var c = new Clipboard('.btn', {
+                        text: function (trigger) {
+                            return $scope.copied_text;
+                        }
+                    });
+                    growl.info("Successfully copied " + $scope.checked_counter + " signatures to clipboard.", {ttl: 3000})
+                }, function (error) {
+                    growl.error(error.data, {ttl: -1});
                 });
-                growl.info("Successfully copied " + $scope.checked_counter + " signatures to clipboard.", {ttl: 3})
             };
 
             $scope.download_rules = function () {
