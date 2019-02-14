@@ -21,7 +21,20 @@ angular.module('ThreatKB')
         }
 
         function updateBatch(batch) {
-            return $http.put('/ThreatKB/yara_rules/batch', {
+            return $http.put('/ThreatKB/yara_rules/batch/edit', {
+                batch: batch
+            }).then(function (success) {
+                    if (success.status === 200) {
+                        return success.data;
+                    }
+                }, function (error) {
+                    return $q.reject(error.data);
+                }
+            );
+        }
+
+        function deleteBatch(batch) {
+            return $http.put('/ThreatKB/yara_rules/batch/delete', {
                 batch: batch
             }).then(function (success) {
                     if (success.status === 200) {
@@ -40,6 +53,7 @@ angular.module('ThreatKB')
                 'update': {method: 'PUT'}
             }),
             merge_signature: merge_signature,
-            updateBatch: updateBatch
+            updateBatch: updateBatch,
+            deleteBatch: deleteBatch
         };
     }]);

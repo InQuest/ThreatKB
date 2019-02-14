@@ -6,7 +6,7 @@ from dateutil import parser
 from sqlalchemy import exc
 
 from app.models.cfg_states import verify_state
-from app.routes.batch import batch_update
+from app.routes.batch import batch_update, batch_delete
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
 from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
 from app.routes.comments import create_comment
@@ -158,7 +158,7 @@ def update_c2dns(id):
     return jsonify(entity.to_dict()), 200
 
 
-@app.route('/ThreatKB/c2dns/batch', methods=['PUT'])
+@app.route('/ThreatKB/c2dns/batch/edit', methods=['PUT'])
 @auto.doc()
 @login_required
 def batch_update_c2dns():
@@ -197,3 +197,21 @@ def delete_c2dns(id):
     delete_bookmarks(ENTITY_MAPPING["DNS"], id, current_user.id)
 
     return jsonify(''), 204
+
+
+@app.route('/ThreatKB/c2dns/batch/delete', methods=['PUT'])
+@auto.doc()
+@login_required
+def batch_delete_c2dns():
+    """Batch delete c2dns artifacts
+    From Data: batch {
+                 ids (array)
+               }
+    Return: Success Code"""
+
+    if 'batch' in request.json and request.json['batch']:
+        return batch_delete(batch=request.json['batch'],
+                            artifact=c2dns.C2dns,
+                            session=db.session,
+                            entity_mapping=ENTITY_MAPPING["DNS"])
+

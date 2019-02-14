@@ -47,7 +47,7 @@ def get_all_bookmarks():
                 entity = Tasks.query.get(bookmark.entity_id)
                 bookmark.artifact_name = entity.title
                 bookmark.permalink_prefix = "tasks"
-        except Exception, e:
+        except Exception as e:
             app.logger.exception(e)
 
     return Response(json.dumps([bookmark.to_dict(bookmark.artifact_name, bookmark.permalink_prefix)
@@ -97,6 +97,15 @@ def delete_bookmarks(entity_type, entity_id, user_id):
     if bookmark:
         db.session.delete(bookmark)
         db.session.commit()
+
+
+def batch_delete_bookmarks(entity_type, list_of_entity_ids, user_id):
+    db.session.execute(Bookmarks.__table__
+                       .delete()
+                       .where(Bookmarks.entity_type == entity_type
+                              and Bookmarks.user_id == user_id
+                              and Bookmarks.entity_id.in_(list_of_entity_ids)))
+    db.session.commit()
 
 
 def is_bookmarked(entity_type, entity_id, user_id):

@@ -111,7 +111,7 @@ def update_tasks(id):
     return jsonify(entity.to_dict()), 200
 
 
-@app.route('/ThreatKB/tasks/batch', methods=['PUT'])
+@app.route('/ThreatKB/tasks/batch/edit', methods=['PUT'])
 @auto.doc()
 @login_required
 def batch_update_tasks():

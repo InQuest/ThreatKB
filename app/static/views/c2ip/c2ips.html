@@ -345,6 +345,11 @@
         <button type="button" class="btn btn-secondary" ng-disabled="!checked_counter || checked_counter<2" ng-click="open_batch()">
             Batch Edit ({{ checked_counter }})
         </button>
+        <button type="button" class="btn btn-secondary" ng-disabled="!checked_counter || checked_counter<2"
+                confirmed-click="batch_delete()"
+                ng-confirm-click="Are you sure you want to batch delete selected c2ip records?">
+            Batch Delete ({{ checked_counter }})
+        </button>
         <button class="btn btn-secondary pull-right" style="color:inherit;" ng-click="create()">
             Create C2 IP
         </button>

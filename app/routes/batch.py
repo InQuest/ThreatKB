@@ -2,7 +2,32 @@ from flask import abort, jsonify
 from flask_login import current_user
 
 from app.models.cfg_states import verify_state
-from app.routes.tags_mapping import batch_create_tags_mapping
+from app.routes.bookmarks import batch_delete_bookmarks
+from app.routes.tags_mapping import batch_create_tags_mapping, batch_delete_tags_mapping
+
+
+def batch_delete(batch, artifact, session, entity_mapping, is_yara=False):
+    if 'ids' in batch and batch['ids']:
+        for b in batch['ids']:
+            entity = artifact.query.get(b)
+            if not entity:
+                abort(404)
+            if not current_user.admin and entity.owner_user_id != current_user.id:
+                abort(403)
+
+        if is_yara:
+            session.execute(artifact.__table__.update().values(
+                {'active': False}
+            ).where(artifact.id.in_(batch['ids'])))
+        else:
+            session.execute(artifact.__table__.delete().where(artifact.id.in_(batch['ids'])))
+        session.commit()
+
+        if not is_yara:
+            batch_delete_tags_mapping(artifact.__tablename__, batch['ids'])
+        batch_delete_bookmarks(entity_mapping, batch['ids'], current_user.id)
+
+    return jsonify(''), 200
 
 
 def batch_update(batch, artifact, session, include_tags=True):

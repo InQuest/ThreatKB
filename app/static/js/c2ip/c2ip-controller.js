@@ -452,6 +452,21 @@ angular.module('ThreatKB')
                 $scope.clear_batch();
                 $scope.batch_edit();
             };
+            $scope.batch_delete = function () {
+                var c2ipsToDelete = {
+                    ids: []
+                };
+                for (var i = 0; i < $scope.checked_indexes.length; i++) {
+                    if ($scope.checked_indexes[i]) {
+                        c2ipsToDelete.ids.push($scope.c2ips[i].id);
+                    }
+                }
+                C2ip.deleteBatch(c2ipsToDelete).then(function (response) {
+                    getPage();
+                }, function (error) {
+                    growl.error(error.data, {ttl: -1});
+                });
+            };
             $scope.batch_edit = function () {
                 var be = $uibModal.open({
                     templateUrl: 'c2ip-batch_edit.html',
