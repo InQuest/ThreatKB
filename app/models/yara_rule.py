@@ -251,6 +251,7 @@ class Yara_rule(db.Model):
             return ""
 
         type_ = "%s:" if not type_.endswith(":") else type_
+        text = re.sub("[^\x00-\x7f]", "", text)
         return "\n\t".join([string.strip().strip("\t") for string in text.split("\n") if type_ not in string]).strip()
 
     @classmethod
