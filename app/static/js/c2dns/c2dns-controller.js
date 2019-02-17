@@ -306,7 +306,7 @@ angular.module('ThreatKB')
             };
 
             $scope.delete = function (id) {
-                C2dns.delete({id: id}, function () {
+                C2dns.resource.delete({id: id}, function () {
                     getPage();
                 });
             };
