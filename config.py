@@ -1,5 +1,7 @@
 import os
 import sys
+import logging
+import distutils
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -17,7 +19,13 @@ SQLALCHEMY_DATABASE_URI = '{protocol}://{username}:{password}@{hostname}:{port}/
     port = SQL_PORT,
     database = SQL_DATABASE
 )
-#SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'app.db')
+
+LOGGING_LEVEL = getattr(logging, os.getenv('LOGGING_LEVEL', 'DEBUG'))
+
+SQLALCHEMY_ECHO = distutils.util.strtobool(os.getenv("SQLALCHEMY_ECHO", "0"))
+
+# SQLALCHEMY_DATABASE_URI = "sqlite://"
+# SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'app.db')
 
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 

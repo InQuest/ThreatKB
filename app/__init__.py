@@ -30,8 +30,6 @@ login_manager.init_app(app)
 bcrypt = Bcrypt(app)
 celery = None
 
-app.config["SQLALCHEMY_ECHO"] = distutils.util.strtobool(os.getenv("SQLALCHEMY_ECHO", "1"))
-
 ENTITY_MAPPING = {"SIGNATURE": 1, "DNS": 2, "IP": 3, "TASK": 4, "RELEASE": 5}
 ACTIVITY_TYPE = {"ARTIFACT_CREATED": "Artifact Created",
                  "ARTIFACT_MODIFIED": "Artifact Modified",
@@ -178,7 +176,7 @@ def teardown_request(exception):
 @app.before_first_request
 def setup_logging():
     app.logger.addHandler(logging.StreamHandler())
-    app.logger.setLevel(logging.DEBUG)
+    app.logger.setLevel(app.config["LOGGING_LEVEL"])
 
 
 @login_manager.user_loader
@@ -285,7 +283,7 @@ def generate_app():
     @app.before_first_request
     def setup_logging():
         app.logger.addHandler(logging.StreamHandler())
-        app.logger.setLevel(logging.DEBUG)
+        app.logger.setLevel(app.config["LOGGING_LEVEL"])
 
     @login_manager.user_loader
     @cache.memoize(timeout=60)
