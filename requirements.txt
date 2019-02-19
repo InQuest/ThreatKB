@@ -1,10 +1,10 @@
 git+https://github.com/plyara/plyara-fork.git@bytestring-regex-fix#egg=plyara
 docker-compose
+delegator.py
 alembic==0.9.4
 amqp==2.2.1
 app==0.0.1
 Babel==2.4.0
-bcrypt==3.1.3
 billiard==3.5.0.3
 blinker==1.4
 celery==4.1.0
