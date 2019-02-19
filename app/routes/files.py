@@ -8,7 +8,7 @@ import errno
 import tempfile
 import uuid
 import shutil
-import subprocess
+import delegator
 import hashlib
 import re
 
@@ -119,9 +119,10 @@ def upload_file():
                 command = "%s %s" % (postprocessor.value, filename) if not "{FILENAME}" in postprocessor.value else str(
                     postprocessor.value).replace("{FILENAME}", filename)
                 app.logger.debug("POSTPROCESSOR COMMAND '%s'" % (command))
-                proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
-                proc.wait()
-                stdout, stderr = proc.communicate()
+                # proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+                # proc.wait()
+                proc = delegator.run(command)
+                stdout, stderr = proc.out, proc.err
                 app.log.debug("POSTPROCESSOR STDOUT is:\n\n%s" % (stdout))
                 app.log.debug("POSTPROCESSOR STDERR is: \n\n%s" % (stderr))
             except Exception, e:
