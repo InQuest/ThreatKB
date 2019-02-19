@@ -122,9 +122,10 @@ def upload_file():
                 # proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
                 # proc.wait()
                 proc = delegator.run(command)
-                stdout, stderr = proc.out, proc.err
+                stdout, stderr, return_code = proc.out, proc.err, proc.return_code
                 app.log.debug("POSTPROCESSOR STDOUT is:\n\n%s" % (stdout))
                 app.log.debug("POSTPROCESSOR STDERR is: \n\n%s" % (stderr))
+                app.log.debug("POSTPROCESSOR RETCODE is: \n\n%s" % (return_code))
             except Exception, e:
                 pass
 
@@ -135,7 +136,7 @@ def upload_file():
                     app.logger.debug("POSTPROCESSOR TEMPFILE '%s'" % (current_tempfile))
                     try:
                         if name == filename:
-                            app.logger.debug("Filename '%s' is the original file. Skipping.")
+                            app.logger.debug("Filename '%s' is the original file. Skipping." % (name))
                             continue
                         if re.search(postprocessing_exclude_files_regex, name, re.IGNORECASE):
                             app.logger.debug(
