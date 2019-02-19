@@ -127,7 +127,7 @@ def upload_file():
                 app.log.debug("POSTPROCESSOR STDERR is: \n\n%s" % (stderr))
                 app.log.debug("POSTPROCESSOR RETCODE is: \n\n%s" % (return_code))
             except Exception, e:
-                pass
+                app.log.exception(e)
 
             app.logger.debug("POSTPROCESSOR DIRLIST is now:\n\n%s" % (os.listdir(".")))
             for root, dirs, files_local in os.walk(tempdir, topdown=False):
