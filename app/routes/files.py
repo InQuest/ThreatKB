@@ -116,8 +116,8 @@ def upload_file():
             app.logger.debug("POSTPROCESSOR CWD is now '%s'" % (tempdir))
             app.logger.debug("POSTPROCESSOR DIRLIST is:\n\n%s" % (os.listdir(".")))
             try:
-                command = "%s %s" % (postprocessor.value, filename) if not "{FILENAME}" in postprocessor.value else str(
-                    postprocessor.value).replace("{FILENAME}", filename)
+                command = "%s %s/%s %s/%s-pp" % (postprocessor.value, filename) if not "{FILENAME}" in postprocessor.value else str(
+                    postprocessor.value).replace("{FILENAME}", "%s/%s" % (tempdir, filename))
                 app.logger.debug("POSTPROCESSOR COMMAND '%s'" % (command))
                 # proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
                 # proc.wait()
