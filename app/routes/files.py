@@ -121,7 +121,7 @@ def upload_file():
                 app.logger.debug("POSTPROCESSOR COMMAND '%s'" % (command))
                 # proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
                 # proc.wait()
-                proc = delegator.run(command)
+                proc = delegator.run(command, env={'DOCKER_HOST': 'unix:///var/run/docker.sock'})
                 stdout, stderr, return_code = proc.out, proc.err, proc.return_code
                 app.logger.debug("POSTPROCESSOR STDOUT is:\n\n%s" % (stdout))
                 app.logger.debug("POSTPROCESSOR STDERR is: \n\n%s" % (stderr))
