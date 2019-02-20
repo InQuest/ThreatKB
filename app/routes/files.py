@@ -123,11 +123,11 @@ def upload_file():
                 # proc.wait()
                 proc = delegator.run(command)
                 stdout, stderr, return_code = proc.out, proc.err, proc.return_code
-                app.log.debug("POSTPROCESSOR STDOUT is:\n\n%s" % (stdout))
-                app.log.debug("POSTPROCESSOR STDERR is: \n\n%s" % (stderr))
-                app.log.debug("POSTPROCESSOR RETCODE is: \n\n%s" % (return_code))
+                app.logger.debug("POSTPROCESSOR STDOUT is:\n\n%s" % (stdout))
+                app.logger.debug("POSTPROCESSOR STDERR is: \n\n%s" % (stderr))
+                app.logger.debug("POSTPROCESSOR RETCODE is: \n\n%s" % (return_code))
             except Exception, e:
-                app.log.exception(e)
+                app.logger.exception(e)
 
             app.logger.debug("POSTPROCESSOR DIRLIST is now:\n\n%s" % (os.listdir(".")))
             for root, dirs, files_local in os.walk(tempdir, topdown=False):
