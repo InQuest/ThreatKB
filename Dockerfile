@@ -7,10 +7,10 @@ RUN apt-get update && \
     software-properties-common libpcre3 libpcre3-dev
 
 # Install These Docker Dependencies
-RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - \
-    && apt-key fingerprint 0EBFCD88 \
-    && add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-RUN apt-get update && apt-get install -y docker-ce
+# RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - \
+#    && apt-key fingerprint 0EBFCD88 \
+#    && add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+# RUN apt-get update && apt-get install -y docker-ce
 
 # Setup UWSGI Installation
 RUN /usr/sbin/useradd --system --no-log-init --no-create-home --shell /sbin/nologin --home-dir /var/run/uwsgi uwsgi

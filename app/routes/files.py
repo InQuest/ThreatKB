@@ -116,18 +116,18 @@ def upload_file():
             app.logger.debug("POSTPROCESSOR CWD is now '%s'" % (tempdir))
             app.logger.debug("POSTPROCESSOR DIRLIST is:\n\n%s" % (os.listdir(".")))
             try:
-                command = "%s %s" % (postprocessor.value, filename) if not "{FILENAME}" in postprocessor.value else str(
-                    postprocessor.value).replace("{FILENAME}", filename)
+                command = "%s %s/%s %s/%s-pp" % (postprocessor.value, filename) if not "{FILENAME}" in postprocessor.value else str(
+                    postprocessor.value).replace("{FILENAME}", "%s/%s" % (tempdir, filename))
                 app.logger.debug("POSTPROCESSOR COMMAND '%s'" % (command))
                 # proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
                 # proc.wait()
-                proc = delegator.run(command)
+                proc = delegator.run(command, env={'DOCKER_HOST': 'unix:///var/run/docker.sock'})
                 stdout, stderr, return_code = proc.out, proc.err, proc.return_code
-                app.log.debug("POSTPROCESSOR STDOUT is:\n\n%s" % (stdout))
-                app.log.debug("POSTPROCESSOR STDERR is: \n\n%s" % (stderr))
-                app.log.debug("POSTPROCESSOR RETCODE is: \n\n%s" % (return_code))
+                app.logger.debug("POSTPROCESSOR STDOUT is:\n\n%s" % (stdout))
+                app.logger.debug("POSTPROCESSOR STDERR is: \n\n%s" % (stderr))
+                app.logger.debug("POSTPROCESSOR RETCODE is: \n\n%s" % (return_code))
             except Exception, e:
-                app.log.exception(e)
+                app.logger.exception(e)
 
             app.logger.debug("POSTPROCESSOR DIRLIST is now:\n\n%s" % (os.listdir(".")))
             for root, dirs, files_local in os.walk(tempdir, topdown=False):

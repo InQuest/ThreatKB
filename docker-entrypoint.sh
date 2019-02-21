@@ -9,6 +9,7 @@ cd /opt/threatkb
 find . -name "*.pyc" -exec rm -f {} \;
 env/bin/python manage.py db upgrade
 
+
 num_users=`echo "select count(*) from kb_users;" | mysql -u ${SQL_USERNAME} -p"${SQL_PASSWORD}" -h ${SQL_HOST} ${SQL_DATABASE} | sed 's/[^0-9]//g'`
 if [ $num_users -lt 1 ]; then
   PASSWORD=`env/bin/python hash_pass.py ${THREATKB_PASS}`
