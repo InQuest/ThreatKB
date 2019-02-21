@@ -47,7 +47,7 @@ class C2dns(db.Model):
 
     comments = db.relationship("Comments", foreign_keys=[id],
                                primaryjoin="and_(Comments.entity_id==C2dns.id, Comments.entity_type=='%s')" % (
-                                   ENTITY_MAPPING["DNS"]))
+                                   ENTITY_MAPPING["DNS"]), uselist=True)
 
     tags = []
 

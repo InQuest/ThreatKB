@@ -53,19 +53,19 @@ class Yara_rule(db.Model):
 
     comments = db.relationship("Comments", foreign_keys=[id],
                                primaryjoin="and_(Comments.entity_id==Yara_rule.id, Comments.entity_type=='%s')" % (
-                                   ENTITY_MAPPING["SIGNATURE"]), cascade="all,delete")
+                                   ENTITY_MAPPING["SIGNATURE"]), cascade="all,delete", uselist=True)
 
     files = db.relationship("Files", foreign_keys=[id],
                             primaryjoin="and_(Files.entity_id==Yara_rule.id, Files.entity_type=='%s')" % (
-                                ENTITY_MAPPING["SIGNATURE"]), cascade="all,delete")
+                                ENTITY_MAPPING["SIGNATURE"]), cascade="all,delete", uselist=True)
 
     history = db.relationship("Yara_rule_history", foreign_keys=[id],
                               primaryjoin="Yara_rule_history.yara_rule_id==Yara_rule.id",
-                              cascade="all,delete")
+                              cascade="all,delete", uselist=True)
 
     test_history = db.relationship("Yara_testing_history", foreign_keys=[id],
                                    primaryjoin="Yara_testing_history.yara_rule_id==Yara_rule.id",
-                                   cascade="all,delete")
+                                   cascade="all,delete", uselist=True)
 
     @property
     def metadata_fields(self):
