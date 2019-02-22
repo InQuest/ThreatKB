@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='threatkb',
-    version='0.1.0',
+    version='0.1.1',
     description='Knowledge base workflow management for Yara rules and C2 artifacts (IP, DNS, SSL)',
 
     url='https://github.com/InQuest/ThreatKB',
