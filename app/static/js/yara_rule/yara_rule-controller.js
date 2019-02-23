@@ -814,7 +814,7 @@ angular.module('ThreatKB')
             $scope.testSignature = function (id) {
                 if (!$scope.testingPos) {
                     $scope.testingPos = true;
-                    return $http.get('/ThreatKB/test_yara_rule/' + id, {cache: false}).then(function (response) {
+                    return $http.post('/ThreatKB/tests/create/' + id, {cache: false}).then(function (response) {
                         var testResponse = response.data;
                         var growlMsg = "Test Summary<br />"
                             + "---------------------<br/>"
@@ -844,25 +844,10 @@ angular.module('ThreatKB')
             $scope.negTestSignature = function (id) {
                 if (!$scope.testingNeg) {
                     $scope.testingNeg = true;
-                    return $http.get('/ThreatKB/test_yara_rule/' + id + '?negative=1', {cache: false})
+                    return $http.post('/ThreatKB/tests/create/' + id + '?negative=1', {cache: false})
                         .then(function (response) {
                             var testResponse = response.data;
-                            var growlMsg = "Clean Test Summary<br />"
-                                + "---------------------<br/>"
-                                + "Total Time: " + testResponse['duration'] + " ms<br/>"
-                                + "Total Files: " + testResponse['files_tested'] + "<br/>"
-                                + "Matches Found: " + testResponse['files_matched'] + "<br/>"
-                                + "Tests Killed: " + testResponse['tests_terminated'] + "<br/>"
-                                + "Errors Encountered: " + testResponse['errors_encountered'];
-                            if (testResponse['errors_encountered'] > 0) {
-                                growlMsg += "<br/><br/>"
-                                    + "Errors:<br/>"
-                                    + "---------------------<br/>";
-                                for (var i = 0; i < testResponse['error_msgs'].length; i++) {
-                                    growlMsg += testResponse['error_msgs'][i] + "<br/>";
-                                }
-                            }
-                            growl.info(growlMsg, {ttl: 5000});
+                            growl.info(response.data.message, {ttl: 5000});
                             $scope.testingNeg = false;
                             return true;
                         }, function (error) {

@@ -1,0 +1,66 @@
+<div>
+    <script type="text/ng-template" id="test_results_matches-view.html">
+        <a class="btn btn-sm btn-primary modal-fullscreen-button modal-fullscreen-button-abs-pos"
+           ng-click="toggleFullscreen()">Toggle full screen</a>
+        <div class="modal-header">
+            <h4 class="modal-title" id="viewSigLabel" style="float: left; margin-right: 10px;">
+                View Test Matches (<a href="#!/yara_rules/{{ test.yara_rule_id }}"
+                                      target="_blank">{{ test.yara_rule_name }}</a> Revision {{ test.revision }})
+            </h4>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                Type - {{ test.test_type }} - Matches - {{ test.files_matched }} - Test Count - {{ test.files_tested }}
+            </div>
+
+            <table class="table table-striped table-bordered">
+                <trhead>
+                    <th scope="col">Path</th>
+                    <th scope="col">Command</th>
+                    <th scope="col">Match Regex</th>
+                    <th scope="col">Stdout</th>
+                    <th scope="col">Stderr</th>
+                    <th scope="col">Run Time</th>
+                </trhead>
+                <tr ng-repeat="result in test.file_matches">
+                    <td>{{ result.path }}</td>
+                    <td>{{ result.command }}</td>
+                    <td>{{ result.command_match_test_regex }}</td>
+                    <td>{{ result.stdout }}</td>
+                    <td>{{ result.stderr }}</td>
+                    <td style="text-align: left">{{ result.run_time }}</td>
+                </tr>
+            </table>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" ng-click="cancel()">Close
+            </button>
+        </div>
+    </script>
+    <br>
+    <style type="text/css">
+        .gridTags {
+            padding: 0;
+            width: 180px;
+            height: 2em;
+            line-height: 1em;
+            text-overflow: ellipsis;
+            word-break: break-all;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .gridTags:hover {
+            overflow: visible;
+            white-space: normal;
+            height: auto;
+        }
+
+        .gridTags li:not(:last-child):after {
+            content: ", ";
+        }
+    </style>
+    <div ui-if="gridOptions.data.length > 0" ui-grid="gridOptions" ng-style="getTableHeight()"
+         ui-grid-pagination ui-grid-auto-resize>
+    </div>
+</div>

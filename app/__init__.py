@@ -62,6 +62,35 @@ def admin_only():
     return wrapper
 
 
+from app.models import cfg_settings
+
+
+def set_celery_stuff(flask_app):
+    flask_app.config["BROKER_URL"] = os.getenv("REDIS_BROKER_URL",
+                                               cfg_settings.Cfg_settings.get_setting("REDIS_BROKER_URL"))
+    flask_app.config["TASK_SERIALIZER"] = os.getenv("REDIS_TASK_SERIALIZER",
+                                                    cfg_settings.Cfg_settings.get_setting("REDIS_TASK_SERIALIZER"))
+    flask_app.config["RESULT_SERIALIZER"] = os.getenv("REDIS_RESULT_SERIALIZER",
+                                                      cfg_settings.Cfg_settings.get_setting("REDIS_RESULT_SERIALIZER"))
+    flask_app.config["ACCEPT_CONTENT"] = os.getenv("REDIS_ACCEPT_CONTENT",
+                                                   cfg_settings.Cfg_settings.get_setting("REDIS_ACCEPT_CONTENT"))
+    flask_app.config["FILE_STORE_PATH"] = os.getenv("FILE_STORE_PATH",
+                                                    cfg_settings.Cfg_settings.get_setting("FILE_STORE_PATH"))
+    flask_app.config["MAX_MILLIS_PER_FILE_THRESHOLD"] = os.getenv("MAX_MILLIS_PER_FILE_THRESHOLD",
+                                                                  cfg_settings.Cfg_settings.get_setting(
+                                                                      "MAX_MILLIS_PER_FILE_THRESHOLD"))
+
+    if flask_app.config["MAX_MILLIS_PER_FILE_THRESHOLD"]:
+        flask_app.config["MAX_MILLIS_PER_FILE_THRESHOLD"] = float(flask_app.config["MAX_MILLIS_PER_FILE_THRESHOLD"])
+
+
+set_celery_stuff(app)
+
+from app.celeryapp import make_celery
+
+celery = make_celery(app)
+
+
 from app.routes.version import *
 from app.routes.index import *
 from app.routes.authentication import *
@@ -93,7 +122,6 @@ from app.routes.activity_log import *
 from app.models import users
 from app.models import c2ip
 from app.models import c2dns
-from app.models import cfg_settings
 from app.models import yara_rule
 from app.models import cfg_states
 from app.models import comments
@@ -111,21 +139,6 @@ from app.models import bookmarks
 from app.models import metadata
 from app.models import errors
 from app.models import activity_log
-
-app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
-app.config["BROKER_URL"] = Cfg_settings.get_private_setting("REDIS_BROKER_URL")
-app.config["TASK_SERIALIZER"] = Cfg_settings.get_private_setting("REDIS_TASK_SERIALIZER")
-app.config["RESULT_SERIALIZER"] = Cfg_settings.get_private_setting("REDIS_RESULT_SERIALIZER")
-app.config["ACCEPT_CONTENT"] = Cfg_settings.get_private_setting("REDIS_ACCEPT_CONTENT")
-app.config["FILE_STORE_PATH"] = Cfg_settings.get_private_setting("FILE_STORE_PATH")
-app.config["MAX_MILLIS_PER_FILE_THRESHOLD"] = Cfg_settings.get_private_setting(
-    "MAX_MILLIS_PER_FILE_THRESHOLD")
-
-if app.config["MAX_MILLIS_PER_FILE_THRESHOLD"]:
-    app.config["MAX_MILLIS_PER_FILE_THRESHOLD"] = float(app.config["MAX_MILLIS_PER_FILE_THRESHOLD"])
-
-from app.celeryapp import make_celery
-celery = make_celery(app)
 
 from app.geo_ip_helper import get_geo_for_ip
 
@@ -228,16 +241,7 @@ def generate_app():
     from app.models import errors
     from app.models import activity_log
 
-    app.config["BROKER_URL"] = cfg_settings.Cfg_settings.get_private_setting("REDIS_BROKER_URL")
-    app.config["TASK_SERIALIZER"] = cfg_settings.Cfg_settings.get_private_setting("REDIS_TASK_SERIALIZER")
-    app.config["RESULT_SERIALIZER"] = cfg_settings.Cfg_settings.get_private_setting("REDIS_RESULT_SERIALIZER")
-    app.config["ACCEPT_CONTENT"] = cfg_settings.Cfg_settings.get_private_setting("REDIS_ACCEPT_CONTENT")
-    app.config["FILE_STORE_PATH"] = cfg_settings.Cfg_settings.get_private_setting("FILE_STORE_PATH")
-    app.config["MAX_MILLIS_PER_FILE_THRESHOLD"] = cfg_settings.Cfg_settings.get_private_setting(
-        "MAX_MILLIS_PER_FILE_THRESHOLD")
-
-    if app.config["MAX_MILLIS_PER_FILE_THRESHOLD"]:
-        app.config["MAX_MILLIS_PER_FILE_THRESHOLD"] = float(app.config["MAX_MILLIS_PER_FILE_THRESHOLD"])
+    set_celery_stuff(app)
 
     from app.celeryapp import make_celery
     celery = make_celery(app)

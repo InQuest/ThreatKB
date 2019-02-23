@@ -17,6 +17,7 @@ if [ $num_users -lt 1 ]; then
 fi
 
 
+celery -A app.celery worker --loglevel=info -D
 #env/bin/python run.py --listen-on ${LISTEN_ON} --listen-port ${LISTEN_PORT}
 /opt/threatkb/env/bin/uwsgi --yaml /etc/uwsgi.yaml --http "${LISTEN_ON:-0.0.0.0}:${LISTEN_PORT:-5000}" --py-autoreload 1
 
