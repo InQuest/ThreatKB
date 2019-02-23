@@ -191,6 +191,21 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                     }]
                 }
             })
+            .when('/tests', {
+                templateUrl: 'views/tests/tests.html',
+                controller: 'TestsController',
+                access: {restricted: true, admin: false},
+                resolve: {
+                    resolvedTests: ['Tests', function (Tests) {
+                        return Tests.resource.query({
+                            page_number: 0,
+                            page_size: 25,
+                            include_metadata: 0,
+                            short: 1
+                        });
+                    }]
+                }
+            })
             .when('/tags', {
                 templateUrl: 'views/tags/tags.html',
                 controller: 'TagsController',

@@ -11,7 +11,7 @@ from app.models import errors
 def get_all_errors():
     """Return all releases in ThreatKB
     Return: list of release dictionaries"""
-    entities = errors.Error.query.order_by(errors.Error.id.desc()).all()
+    entities = errors.Error.query.order_by(errors.Error.id.desc()).limit(50).all()
     return Response(json.dumps([entity.to_dict() for entity in entities]), mimetype="application/json")
 
 

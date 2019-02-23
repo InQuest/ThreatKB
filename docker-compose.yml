@@ -13,7 +13,13 @@ services:
        MYSQL_DATABASE: threatkb
        MYSQL_USER: threatkb
        MYSQL_PASSWORD: P@sswordsRC00l
-
+   redis:
+     depends_on:
+       - db
+     image: redis:latest
+     ports:
+       - 6379:6379
+     restart: always
    threatkb:
      depends_on:
        - db
