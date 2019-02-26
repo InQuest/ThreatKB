@@ -429,32 +429,85 @@ class Yara_rule_history(db.Model):
 
 
 class Yara_testing_history(db.Model):
+    TEST_TYPE_POSITIVE = "POSITIVE"
+    TEST_TYPE_NEGATIVE = "NEGATIVE"
+    STATUS_SUBMITTED = "SUBMITTED"
+    STATUS_RUNNING = "RUNNING"
+    STATUS_COMPLETE = "COMPLETE"
+    STATUS_ERROR = "ERROR"
+
     __tablename__ = "yara_testing_history"
 
     id = db.Column(db.Integer, primary_key=True)
+    test_type = db.Column(db.String(32), nullable=False)
     yara_rule_id = db.Column(db.Integer, db.ForeignKey("yara_rules.id"), nullable=False)
     revision = db.Column(db.Integer(unsigned=True), nullable=False)
 
     start_time = db.Column(db.DateTime(timezone=True), nullable=False)
-    end_time = db.Column(db.DateTime(timezone=True), nullable=False)
-    files_tested = db.Column(db.Integer(unsigned=True), nullable=False)
-    files_matched = db.Column(db.Integer(unsigned=True), nullable=False)
+    end_time = db.Column(db.DateTime(timezone=True))
+    status = db.Column(db.String(32), nullable=False)
+    total_files = db.Column(db.Integer(unsigned=True), nullable=False)
+    files_tested = db.Column(db.Integer(unsigned=True))
+    files_matched = db.Column(db.Integer(unsigned=True))
     avg_millis_per_file = db.Column(db.Float, nullable=False)
 
+    yara_rule = db.relationship('Yara_rule', foreign_keys=[yara_rule_id],
+                                primaryjoin='Yara_rule.id==Yara_testing_history.yara_rule_id')
     user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
-    user = db.relationship('KBUser', foreign_keys=user_id,
+    user = db.relationship('KBUser', foreign_keys=[user_id],
                            primaryjoin="KBUser.id==Yara_testing_history.user_id")
 
-    def to_dict(self):
-        return dict(
+    def to_dict(self, include_results=False):
+        res = dict(
             yara_rule_id=self.yara_rule_id,
             revision=self.revision,
-            start_time=self.date_created.isoformat(),
-            end_time=self.date_created.isoformat(),
+            start_time=self.start_time.isoformat(),
+            end_time=self.end_time.isoformat() if self.end_time else None,
             files_tested=self.files_tested,
             files_matched=self.files_matched,
-            user=self.user.to_dict()
+            test_type=self.test_type,
+            user=self.user.to_dict(),
+            user_email=self.user.to_dict()["email"],
+            id=self.id,
+            status=self.status,
+            avg_millis_per_file=self.avg_millis_per_file,
+            yara_rule_name=self.yara_rule.name
         )
+        if include_results:
+            res["file_matches"] = [result.to_dict() for result in self.file_matches]
+
+        return res
 
     def __repr__(self):
         return '<YaraTestingHistory %r>' % self.id
+
+
+class Yara_testing_history_files_matches(db.Model):
+    __tablename__ = "yara_testing_history_files_matches"
+
+    id = db.Column(db.Integer, primary_key=True)
+    run_time = db.Column(db.Float, nullable=False)
+    path = db.Column(db.String(5000), nullable=False)
+    stdout = db.Column(db.String(2000))
+    stderr = db.Column(db.String(2000))
+    command = db.Column(db.String(2000))
+    command_match_test_regex = db.Column(db.String(2000))
+
+    history_id = db.Column(db.Integer, db.ForeignKey('yara_testing_history.id'), nullable=False)
+    history = db.relationship('Yara_testing_history', foreign_keys=[history_id],
+                              primaryjoin="Yara_testing_history.id==Yara_testing_history_files_matches.history_id",
+                              backref="file_matches")
+
+    def to_dict(self):
+        return dict(
+            id=self.id,
+            run_time=self.run_time,
+            path=self.path,
+            stdout=self.stdout,
+            stderr=self.stderr,
+            command=self.command,
+            command_match_test_regex=self.command_match_test_regex
+        )
+
+    def __repr__(self):
+        return '<YaraTestingHistoryFilesMatches %r>' % self.id
