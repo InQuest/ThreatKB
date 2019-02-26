@@ -17,7 +17,7 @@ if [ $num_users -lt 1 ]; then
 fi
 
 
-if [[ -z RUN_AGENT ]]; then
+if [[ ! -z "${RUN_AGENT}" ]]; then
   celery -A app.celery worker --loglevel=info
 else
   #env/bin/python run.py --listen-on ${LISTEN_ON} --listen-port ${LISTEN_PORT}
