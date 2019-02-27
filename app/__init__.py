@@ -31,6 +31,7 @@ bcrypt = Bcrypt(app)
 celery = None
 
 ENTITY_MAPPING = {"SIGNATURE": 1, "DNS": 2, "IP": 3, "TASK": 4, "RELEASE": 5}
+ENTITY_MAPPING = {"SIGNATURE": 1, "DNS": 2, "IP": 3, "TASK": 4, "RELEASE": 5}
 ACTIVITY_TYPE = {"ARTIFACT_CREATED": "Artifact Created",
                  "ARTIFACT_MODIFIED": "Artifact Modified",
                  "COMMENTS": 'Comment',
