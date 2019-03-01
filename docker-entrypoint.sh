@@ -8,8 +8,7 @@ cd /opt/threatkb
 ./wait-for-it.sh db:3306 -- echo "db is up"
 
 if [[ ! -z "${RUN_AGENT}" ]]; then
-  su - uwsgi
-  /opt/threatkb/env/bin/celery -A app.celery worker --loglevel=info
+  /opt/threatkb/env/bin/celery -A app.celery worker --uid uwsgi --loglevel=info
 else
   find . -name "*.pyc" -exec rm -f {} \;
   env/bin/python manage.py db upgrade
