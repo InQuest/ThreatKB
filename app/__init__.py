@@ -84,8 +84,9 @@ def set_celery_stuff(flask_app):
     if flask_app.config["MAX_MILLIS_PER_FILE_THRESHOLD"]:
         flask_app.config["MAX_MILLIS_PER_FILE_THRESHOLD"] = float(flask_app.config["MAX_MILLIS_PER_FILE_THRESHOLD"])
 
-
 set_celery_stuff(app)
+
+print("app config: %s" % (str(app.config)))
 
 from app.celeryapp import make_celery
 
