@@ -77,8 +77,42 @@ angular.module('ThreatKB')
                 $scope.checked_counter = $scope.checked_indexes.length;
             };
 
-            $scope.copied_text = "";
-            $scope.copy_rules = function () {
+            $scope.copied_text = undefined;
+            $('#batchCopyBtn').mousedown(function(event) {
+                $scope.copy_rules();
+            });
+            let c = new ClipboardJS('#batchCopyBtn', {
+                text: function(trigger) {
+                    return $scope.copied_text;
+                }
+            });
+            $scope.updateClipboard = function(data, checked_counter) {
+                // navigator.permissions.query({name: "clipboard-write"}).then(result => {
+                //     if (result.state == "granted" || result.state == "prompt") {
+                //         /* write to the clipboard now */
+                //     }
+                // });
+                var c = new ClipboardJS();
+
+                // navigator.clipboard.writeText(data).then(function() {
+                //     growl.info("Successfully copied " + checked_counter + " signatures to clipboard.", {ttl: 3000})
+                // }, function() {
+                //     growl.error("Unable to copy " + checked_counter + " signatures to clipboard.", {ttl: 3000})
+                // });
+            };
+            $scope.copy_rules = async function () {
+                var sigsToCopy = {
+                    ids: []
+                };
+                for (var i = 0; i < $scope.checked_indexes.length; i++) {
+                    if ($scope.checked_indexes[i]) {
+                        sigsToCopy.ids.push($scope.yara_rules[i].id);
+                    }
+                }
+                $scope.copied_text = await Yara_rule.copySignatures(sigsToCopy);
+            };
+
+            $scope.download_rules = function () {
                 var sigsToCopy = {
                     ids: []
                 };
@@ -88,31 +122,16 @@ angular.module('ThreatKB')
                     }
                 }
                 Yara_rule.copySignatures(sigsToCopy).then(function (response) {
-                    $scope.copied_text = response;
-                    var c = new Clipboard('.btn', {
-                        text: function (trigger) {
-                            return $scope.copied_text;
-                        }
-                    });
-                    growl.info("Successfully copied " + $scope.checked_counter + " signatures to clipboard.", {ttl: 3000})
+                    try {
+                        FileSaver.saveAs(new Blob([response], {type: "text/plain"}), "yara_rules.txt");
+                    }
+                    catch (error) {
+                        growl.error("Error downloading signatures.", {ttl: -1});
+                    }
                 }, function (error) {
                     growl.error(error.data, {ttl: -1});
                 });
-            };
 
-            $scope.download_rules = function () {
-                var output = "";
-                for (var i = 0; i < $scope.checked_indexes.length; i++) {
-                    if ($scope.checked_indexes[i]) {
-                        output += $scope.yara_rules[i].yara_rule_string + "\n\n";
-                    }
-                }
-                try {
-                    FileSaver.saveAs(new Blob([output], {type: "text/plain"}), "yara_rules.txt");
-                }
-                catch (error) {
-                    growl.error("Error downloading signatures.", {ttl: -1});
-                }
             };
 
             var paginationOptions = {
