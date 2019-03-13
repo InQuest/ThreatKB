@@ -523,7 +523,8 @@
     </script>
     <br>
     <div class="container-fluid">
-        <button id="batchCopyBtn" aria-label="" type="button" class="btn btn-secondary" ng-disabled="!checked_counter">
+        <button id="batchCopyBtn" aria-label="" type="button" class="btn btn-secondary" ng-disabled="!checked_counter"
+        uib-tooltip="Copied {{ checked_counter }} Yara Rule{{ checked_counter > 1 ? 's' : '' }}!" tooltip-trigger="'outsideClick'">
             Copy ({{ checked_counter }})
         </button>
         <button type="button" class="btn btn-secondary" ng-disabled="!checked_counter" ng-click="download_rules()">
