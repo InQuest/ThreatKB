@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('Yara_ruleController', ['$scope', '$timeout', '$filter', '$http', '$uibModal', 'Yara_rule', 'Cfg_states', 'CfgCategoryRangeMapping', 'Users', 'growl', 'openModalForId', 'uiGridConstants', 'FileSaver', 'Blob', 'Cfg_settings', '$routeParams',
-        function ($scope, $timeout, $filter, $http, $uibModal, Yara_rule, Cfg_states, CfgCategoryRangeMapping, Users, growl, openModalForId, uiGridConstants, FileSaver, Blob, Cfg_settings, $routeParams) {
+    .controller('Yara_ruleController', ['$scope', '$timeout', '$filter', '$http', '$uibModal', 'Yara_rule', 'Cfg_states', 'CfgCategoryRangeMapping', 'Users', 'growl', 'openModalForId', 'uiGridConstants', 'FileSaver', 'Blob', 'Cfg_settings', '$routeParams', 'blockUI',
+        function ($scope, $timeout, $filter, $http, $uibModal, Yara_rule, Cfg_states, CfgCategoryRangeMapping, Users, growl, openModalForId, uiGridConstants, FileSaver, Blob, Cfg_settings, $routeParams, blockUI) {
 
             $scope.users = Users.query();
 
@@ -61,6 +61,7 @@ angular.module('ThreatKB')
                 } else {
                     $scope.checked_counter -= 1;
                 }
+                $scope.copy_rules();
             };
 
             $scope.uncheck_all = function () {
@@ -75,32 +76,15 @@ angular.module('ThreatKB')
                     $scope.checked_indexes[i] = true;
                 }
                 $scope.checked_counter = $scope.checked_indexes.length;
+                $scope.copy_rules();
             };
 
-            $scope.copied_text = undefined;
-            $('#batchCopyBtn').mousedown(function(event) {
-                $scope.copy_rules();
-            });
             let c = new ClipboardJS('#batchCopyBtn', {
                 text: function(trigger) {
-                    return $scope.copied_text;
+                    return trigger.getAttribute('aria-label');
                 }
             });
-            $scope.updateClipboard = function(data, checked_counter) {
-                // navigator.permissions.query({name: "clipboard-write"}).then(result => {
-                //     if (result.state == "granted" || result.state == "prompt") {
-                //         /* write to the clipboard now */
-                //     }
-                // });
-                var c = new ClipboardJS();
-
-                // navigator.clipboard.writeText(data).then(function() {
-                //     growl.info("Successfully copied " + checked_counter + " signatures to clipboard.", {ttl: 3000})
-                // }, function() {
-                //     growl.error("Unable to copy " + checked_counter + " signatures to clipboard.", {ttl: 3000})
-                // });
-            };
-            $scope.copy_rules = async function () {
+            $scope.get_sigs_to_copy = function () {
                 var sigsToCopy = {
                     ids: []
                 };
@@ -109,19 +93,19 @@ angular.module('ThreatKB')
                         sigsToCopy.ids.push($scope.yara_rules[i].id);
                     }
                 }
-                $scope.copied_text = await Yara_rule.copySignatures(sigsToCopy);
+                return sigsToCopy;
+            };
+            $scope.copy_rules = function () {
+                blockUI.start("");
+                Yara_rule.copySignatures($scope.get_sigs_to_copy()).then(function (response) {
+                    blockUI.stop();
+                    document.getElementById('batchCopyBtn').setAttribute("aria-label", response);
+                }, function (error) {
+                });
             };
 
             $scope.download_rules = function () {
-                var sigsToCopy = {
-                    ids: []
-                };
-                for (var i = 0; i < $scope.checked_indexes.length; i++) {
-                    if ($scope.checked_indexes[i]) {
-                        sigsToCopy.ids.push($scope.yara_rules[i].id);
-                    }
-                }
-                Yara_rule.copySignatures(sigsToCopy).then(function (response) {
+                Yara_rule.copySignatures($scope.get_sigs_to_copy()).then(function (response) {
                     try {
                         FileSaver.saveAs(new Blob([response], {type: "text/plain"}), "yara_rules.txt");
                     }
