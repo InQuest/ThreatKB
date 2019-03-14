@@ -3,21 +3,33 @@
 angular.module('ThreatKB')
     .factory('Yara_rule', ['$resource', '$http', '$q', function ($resource, $http, $q) {
 
+        function copySignatures(ids) {
+            return $http.post('/ThreatKB/yara_rules/copy', {
+                copy: ids
+            }).then(function (success) {
+                    if (success.status === 200 && success.data) {
+                        return success.data;
+                    }
+                }, function (error) {
+                    return $q.reject(error.data);
+                }
+            );
+        }
+
         function merge_signature(merge_from_id, merge_to_id) {
             return $http.post('/ThreatKB/yara_rules/merge_signatures', {
                 merge_from_id: merge_from_id,
                 merge_to_id: merge_to_id
-            })
-                .then(function (success) {
-                        if (success.status === 200 && success.data) {
-                            return success.data;
-                        } else {
-                            //TODO
-                        }
-                    }, function (error) {
-                        return $q.reject(error.data);
+            }).then(function (success) {
+                    if (success.status === 200 && success.data) {
+                        return success.data;
+                    } else {
+                        //TODO
                     }
-                );
+                }, function (error) {
+                    return $q.reject(error.data);
+                }
+            );
         }
 
         function updateBatch(batch) {
@@ -52,6 +64,7 @@ angular.module('ThreatKB')
                 'get': {method: 'GET'},
                 'update': {method: 'PUT'}
             }),
+            copySignatures: copySignatures,
             merge_signature: merge_signature,
             updateBatch: updateBatch,
             deleteBatch: deleteBatch

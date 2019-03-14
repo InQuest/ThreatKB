@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('Yara_ruleController', ['$scope', '$timeout', '$filter', '$http', '$uibModal', 'Yara_rule', 'Cfg_states', 'CfgCategoryRangeMapping', 'Users', 'growl', 'openModalForId', 'uiGridConstants', 'FileSaver', 'Blob', 'Cfg_settings', '$routeParams',
-        function ($scope, $timeout, $filter, $http, $uibModal, Yara_rule, Cfg_states, CfgCategoryRangeMapping, Users, growl, openModalForId, uiGridConstants, FileSaver, Blob, Cfg_settings, $routeParams) {
+    .controller('Yara_ruleController', ['$scope', '$timeout', '$filter', '$http', '$uibModal', 'Yara_rule', 'Cfg_states', 'CfgCategoryRangeMapping', 'Users', 'growl', 'openModalForId', 'uiGridConstants', 'FileSaver', 'Blob', 'Cfg_settings', '$routeParams', 'blockUI',
+        function ($scope, $timeout, $filter, $http, $uibModal, Yara_rule, Cfg_states, CfgCategoryRangeMapping, Users, growl, openModalForId, uiGridConstants, FileSaver, Blob, Cfg_settings, $routeParams, blockUI) {
 
             $scope.users = Users.query();
 
@@ -61,6 +61,7 @@ angular.module('ThreatKB')
                 } else {
                     $scope.checked_counter -= 1;
                 }
+                $scope.copy_rules();
             };
 
             $scope.uncheck_all = function () {
@@ -75,36 +76,46 @@ angular.module('ThreatKB')
                     $scope.checked_indexes[i] = true;
                 }
                 $scope.checked_counter = $scope.checked_indexes.length;
+                $scope.copy_rules();
             };
 
-            $scope.copy_rules = function () {
-                var c = new Clipboard('.btn', {
-                    text: function (trigger) {
-                        var output = "";
-                        for (var i = 0; i < $scope.checked_indexes.length; i++) {
-                            if ($scope.checked_indexes[i]) {
-                                output += $scope.yara_rules[i].yara_rule_string + "\n\n";
-                            }
-                        }
-                        return output;
+            let c = new ClipboardJS('#batchCopyBtn', {
+                text: function(trigger) {
+                    return trigger.getAttribute('aria-label');
+                }
+            });
+            $scope.get_sigs_to_copy = function () {
+                var sigsToCopy = {
+                    ids: []
+                };
+                for (var i = 0; i < $scope.checked_indexes.length; i++) {
+                    if ($scope.checked_indexes[i]) {
+                        sigsToCopy.ids.push($scope.yara_rules[i].id);
                     }
+                }
+                return sigsToCopy;
+            };
+            $scope.copy_rules = function () {
+                blockUI.start("");
+                Yara_rule.copySignatures($scope.get_sigs_to_copy()).then(function (response) {
+                    blockUI.stop();
+                    document.getElementById('batchCopyBtn').setAttribute("aria-label", response);
+                }, function (error) {
                 });
-                growl.info("Successfully copied " + $scope.checked_counter + " signatures to clipboard.", {ttl: 3})
             };
 
             $scope.download_rules = function () {
-                var output = "";
-                for (var i = 0; i < $scope.checked_indexes.length; i++) {
-                    if ($scope.checked_indexes[i]) {
-                        output += $scope.yara_rules[i].yara_rule_string + "\n\n";
+                Yara_rule.copySignatures($scope.get_sigs_to_copy()).then(function (response) {
+                    try {
+                        FileSaver.saveAs(new Blob([response], {type: "text/plain"}), "yara_rules.txt");
                     }
-                }
-                try {
-                    FileSaver.saveAs(new Blob([output], {type: "text/plain"}), "yara_rules.txt");
-                }
-                catch (error) {
-                    growl.error("Error downloading signatures.", {ttl: -1});
-                }
+                    catch (error) {
+                        growl.error("Error downloading signatures.", {ttl: -1});
+                    }
+                }, function (error) {
+                    growl.error(error.data, {ttl: -1});
+                });
+
             };
 
             var paginationOptions = {

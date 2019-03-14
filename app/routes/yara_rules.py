@@ -418,3 +418,26 @@ def batch_delete_yara_rules():
                             session=db.session,
                             entity_mapping=ENTITY_MAPPING["SIGNATURE"],
                             is_yara=True)
+
+
+@app.route('/ThreatKB/yara_rules/copy', methods=['POST'])
+@auto.doc()
+@login_required
+def copy_yara_rules():
+    """Get yara strings for copy
+    From Data: ids (array)
+    Return: yara strings for copy"""
+
+    signatures = []
+    if 'copy' in request.json and request.json['copy']\
+            and 'ids' in request.json['copy'] and request.json['copy']['ids']:
+        for sig_id in request.json['copy']['ids']:
+            sig = yara_rule.Yara_rule.query.get(sig_id)
+            if not sig:
+                abort(404)
+            if not current_user.admin and sig.owner_user_id != current_user.id:
+                abort(403)
+
+            signatures.append(sig.to_dict(include_yara_rule_string=True)["yara_rule_string"])
+
+    return jsonify('\n\n'.join(map(str, signatures))), 200
