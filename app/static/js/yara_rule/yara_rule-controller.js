@@ -298,14 +298,6 @@ angular.module('ThreatKB')
                             + '<span class="glyphicon glyphicon-remove-circle"></span>'
                             + '</small>'
                             + '</button>'
-                            + '&nbsp;'
-                            + '<button class="btn btn-sm">'
-                            + '<small><span class="glyphicon glyphicon-link" style="font-size: 1.2em;"'
-                            + 'title="Copy Yara Rule to clipboard" tooltip-placement="bottom"'
-                            + 'uib-tooltip="Copied Yara Rule!"'
-                            + 'tooltip-trigger="\'outsideClick\'"'
-                            + 'ngclipboard data-clipboard-text="{{ row.entity.yara_rule_string }}"></span></small>'
-                            + '</button>'
                             + '</div>'
                         }
                     ]
