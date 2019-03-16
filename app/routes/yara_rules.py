@@ -1,4 +1,5 @@
 from app import app, db, auto, ENTITY_MAPPING
+from app.models.yara_rule import Yara_rule_history, Yara_rule
 from app.routes import test_yara_rule
 from app.models import yara_rule, cfg_states, comments
 from flask import abort, jsonify, request, Response, json
@@ -132,6 +133,32 @@ def get_yara_rule(id):
         else False
 
     return jsonify(return_dict)
+
+
+@app.route('/ThreatKB/yara_rules/<int:yara_rule_id>/revision/<int:revision>', methods=['GET'])
+@auto.doc()
+@login_required
+def get_yara_rule_string_from_revision(yara_rule_id, revision):
+    """Return yara_rule string associated with the given yara rule and revision number
+    Return: yara_rule string representation"""
+
+    current_entity = yara_rule.Yara_rule.query.get(yara_rule_id)
+    revision_entity = Yara_rule_history.query \
+        .filter_by(yara_rule_id=yara_rule_id) \
+        .filter_by(revision=revision) \
+        .first()
+
+    if not current_entity or not revision_entity:
+        abort(404)
+
+    if not current_user.admin and current_entity.owner_user_id != current_user.id:
+        abort(403)
+
+    revision_dict = revision_entity.to_dict()
+    yara_revision_dict = revision_dict["rule_json"]
+    yara_rule_string = Yara_rule.to_yara_rule_string(yara_revision_dict)
+
+    return jsonify(yara_rule_string)
 
 
 @app.route('/ThreatKB/yara_rules', methods=['POST'])
@@ -287,7 +314,7 @@ def update_yara_rule(id):
     temp_sig_id = entity.eventid
     get_new_sig_id = False
     if request.json['category'] and 'category' in request.json['category'] and not entity.category == \
-            request.json['category']['category']:
+                                                                                   request.json['category']['category']:
         get_new_sig_id = True
         if not request.json['category']['current']:
             temp_sig_id = request.json['category']['range_min']

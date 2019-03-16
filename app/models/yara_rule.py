@@ -119,7 +119,7 @@ class Yara_rule(db.Model):
                 entity_type=ENTITY_MAPPING["SIGNATURE"]).all()
             files = Files.query.filter_by(entity_id=self.id).filter_by(entity_type=ENTITY_MAPPING["SIGNATURE"]).all()
             yara_dict.update(dict(comments=[comment.to_dict() for comment in comments],
-                                  revisions=[revision.to_dict() for revision in revisions],
+                                  revisions=[revision.to_dict(include_json=False) for revision in revisions],
                                   files=[file.to_dict() for file in files],
                                   ))
 
@@ -414,15 +414,19 @@ class Yara_rule_history(db.Model):
     def release_data_dict(self):
         return json.loads(self.release_data) if self.release_data else {}
 
-    def to_dict(self):
-        return dict(
+    def to_dict(self, include_json=True):
+        yara_history_dict = dict(
             date_created=self.date_created.isoformat(),
             revision=self.revision,
-            rule_json=json.loads(self.rule_json),
             yara_rule_id=self.yara_rule_id,
             user=self.user.to_dict(),
             state=self.state
         )
+
+        if include_json:
+            yara_history_dict["rule_json"] = json.loads(self.rule_json)
+
+        return yara_history_dict
 
     def __repr__(self):
         return '<Yara_rule_history %r>' % (self.id)
