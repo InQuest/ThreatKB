@@ -58,6 +58,17 @@ angular.module('ThreatKB')
             );
         }
 
+        function getSignatureFromRevision(sig_id, revision) {
+            return $http.get('/ThreatKB/yara_rules/' + sig_id + '/revision/' + revision)
+                .then(function (success) {
+                    if (success.status === 200) {
+                        return success.data;
+                    }
+                }, function (error) {
+                    return $q.reject(error.data);
+                }
+            );
+        }
         return {
             resource: $resource('ThreatKB/yara_rules/:id', {}, {
                 'query': {method: 'GET', isArray: true},
@@ -67,6 +78,7 @@ angular.module('ThreatKB')
             copySignatures: copySignatures,
             merge_signature: merge_signature,
             updateBatch: updateBatch,
-            deleteBatch: deleteBatch
+            deleteBatch: deleteBatch,
+            getSignatureFromRevision: getSignatureFromRevision
         };
     }]);

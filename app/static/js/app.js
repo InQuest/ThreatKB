@@ -245,7 +245,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                         return Yara_rule.resource.query({
                             page_number: 0,
                             page_size: 25,
-                            include_yara_string: 1
+                            include_yara_string: 0
                         });
                     }],
                     openModalForId: ['$route', function ($route) {

@@ -596,6 +596,9 @@ angular.module('ThreatKB')
                     $scope.update(openModalForId);
                 }
             }
+
+            $scope.revisionIsOpen = false;
+
         }])
     .controller('Yara_ruleSaveController', ['$scope', '$http', '$cookies', '$uibModalInstance', '$location', 'yara_rule', 'yara_rules', 'metadata', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags', 'Yara_rule', 'Cfg_settings', 'Bookmarks', 'hotkeys',
         function ($scope, $http, $cookies, $uibModalInstance, $location, yara_rule, yara_rules, metadata, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags, Yara_rule, Cfg_settings, Bookmarks, hotkeys) {
@@ -708,7 +711,7 @@ angular.module('ThreatKB')
 
             $scope.getPermalink = function (id) {
                 var location = $location.absUrl();
-                var last_spot = location.split("/")[location.split("/").length - 1]
+                var last_spot = location.split("/")[location.split("/").length - 1];
                 if (isNaN(parseInt(last_spot, 10))) {
                     return $location.absUrl() + "/" + id;
                 } else if (!isNaN(parseInt(last_spot, 10)) && last_spot !== id) {
@@ -875,7 +878,7 @@ angular.module('ThreatKB')
 
             $scope.edit = function (id) {
                 var location = $location.absUrl();
-                var last_spot = location.split("/")[location.split("/").length - 1]
+                var last_spot = location.split("/")[location.split("/").length - 1];
                 $uibModalInstance.close($scope.yara_rule);
                 if (isNaN(parseInt(last_spot, 10))) {
                     $window.location.href = $location.absUrl() + "/" + id;
@@ -917,4 +920,23 @@ angular.module('ThreatKB')
             $scope.loadTags = function (query) {
                 return Tags.loadTags(query);
             };
+        }])
+    .controller('Yara_revisionController', ['$scope', 'Yara_rule',
+        function ($scope, Yara_rule) {
+            $scope.$watch(
+                'revisionIsOpen',
+                function(value) {
+                    if (value) {
+                        if(!$scope.revision.yara_rule_string) {
+                            Yara_rule.getSignatureFromRevision($scope.revision.yara_rule_id, $scope.revision.revision)
+                                .then(function (response) {
+                                    $scope.revision.yara_rule_string = response;
+                                    $scope.revisionIsLoaded = true;
+                                }, function (error) {
+                                    growl.error(error.data, {ttl: -1});
+                                });
+                        }
+                    }
+                }
+            );
         }]);
