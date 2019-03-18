@@ -1,3 +1,5 @@
+import distutils
+
 from app import app, db, auto, ENTITY_MAPPING
 from app.models import tasks
 from flask import abort, jsonify, request, Response
@@ -27,6 +29,8 @@ def get_all_tasks():
     page_size = request.args.get('page_size', False)
     sort_by = request.args.get('sort_by', False)
     sort_direction = request.args.get('sort_dir', 'ASC')
+    exclude_totals = request.args.get('exclude_totals', False)
+    include_metadata = bool(distutils.util.strtobool(request.args.get('include_metadata', "false")))
 
     response_dict = filter_entities(entity=tasks.Tasks,
                                     artifact_type=ENTITY_MAPPING["TASK"],
@@ -35,8 +39,8 @@ def get_all_tasks():
                                     page_size=page_size,
                                     sort_by=sort_by,
                                     sort_direction=sort_direction,
-                                    include_metadata=False,
-                                    exclude_totals=False,
+                                    include_metadata=include_metadata,
+                                    exclude_totals=exclude_totals,
                                     default_sort="date_created",
                                     include_inactive=False)
 
