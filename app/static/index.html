@@ -20,7 +20,7 @@
 <body>
 <div ng-controller="AuthController">
     <div growl></div>
-    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" style="max-height: 55px;">
         <div class="container">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
@@ -104,20 +104,19 @@
                     </ul>
                 </div>
 
-                <!--<div ng-show="isLoggedIn()" style="margin-top:15px">-->
-
-                <div ng-show="false" style="margin-top:15px">
-                    <div class="col-sm-4">
+                <div ng-show="isLoggedIn()" style="margin-top:15px">
+                    <div class="col-sm-4" style="opacity: 80%;">
                         <ui-select ng-model="search_artifacts.selected" theme="selectize" title="Global search"
                                    on-select="select_artifact(search_artifacts.selected)"
                                    focus-on="search_focus">
-                            <ui-select-match placeholder="Global search..">
-                                {{ item.name }}</ui-select-match>
+                            <ui-select-match placeholder="Global search..">{{ item.name }}</ui-select-match>
                             <ui-select-choices repeat="item in search_artifacts | filter: $select.search"
                                                refresh="refresh_search($select.search)"
-                                               minimum-input-length="4">
-                                <div ng-bind-html="item.name | highlight: $select.search">{{ item.name }}</div>
-                                <small ng-bind-html="item.type | highlight: $select.search"></small>
+                                               minimum-input-length="4" style="background-color: white;">
+                                <a href="{{ getPermalink(item.url) }}">
+                                    <div ng-bind-html="item.name | highlight: $select.search">{{ item.name }}</div>
+                                    <small ng-bind-html="item.type | highlight: $select.search"></small>
+                                </a>
                             </ui-select-choices>
                         </ui-select>
                     </div>

@@ -1,6 +1,6 @@
 angular.module('ThreatKB')
-    .controller('AuthController', ['$scope', '$location', 'AuthService', 'Cfg_settings', '$uibModal', 'hotkeys',
-        function ($scope, $location, AuthService, Cfg_settings, $uibModal, hotkeys) {
+    .controller('AuthController', ['$scope', '$location', 'AuthService', 'Cfg_settings', 'hotkeys', 'C2dns', 'C2ip', 'Yara_rule', 'Task',
+        function ($scope, $location, AuthService, Cfg_settings, hotkeys, C2dns, C2ip, Yara_rule, Task) {
             $scope.isLoggedIn = AuthService.isLoggedIn;
             $scope.isAdmin = AuthService.isAdmin;
             $scope.user = AuthService.user;
@@ -12,13 +12,13 @@ angular.module('ThreatKB')
 
             $scope.search_artifacts = [];
 
-            $scope.getPermalink = function (id, type_) {
-                return $location.absUrl().split("/").slice(0, 4).join("/") + "/" + type_ + "/" + id;
+            $scope.getPermalink = function (url) {
+                return $location.absUrl().split("/").slice(0, 4).join("/") + url;
             };
 
             $scope.select_artifact = function (selected) {
                 $location.url(selected.url);
-            }
+            };
 
             hotkeys.bindTo($scope)
                 .add({
@@ -38,19 +38,19 @@ angular.module('ThreatKB')
 
                 $scope.search_artifacts = [];
 
-                var dns_results = C2dns.query({
+                var dns_results = C2dns.resource.query({
                     searches: {domain_name: search},
                     exclude_totals: true,
-                    include_metadata: false,
-                    short: 1
+                    include_metadata: false
                 });
                 dns_results.$promise.then(function (results) {
                     results.forEach(function (c2dns) {
                         $scope.search_artifacts.push({
                             name: c2dns.domain_name,
-                            url: "/c2dns/" + c2dns.id,
-                            type: "c2dns"
-                        })
+                            id: c2dns.id,
+                            type: "c2dns",
+                            url: "/c2dns/" + c2dns.id
+                        });
                     });
                 }, function (error) {
                     console.log(error);
@@ -60,33 +60,54 @@ angular.module('ThreatKB')
                     searches: {name: search},
                     exclude_totals: true,
                     include_metadata: false,
+                    include_yara_string: false,
                     short: 1
                 });
                 yara_results.$promise.then(function (results) {
                     results.forEach(function (yara_rule) {
                         $scope.search_artifacts.push({
                             name: yara_rule.name,
-                            url: "/yara_rule/" + yara_rule.id,
-                            type: "yara_rule"
-                        })
+                            id: yara_rule.id,
+                            type: "yara_rule",
+                            url: "/yara_rules/" + yara_rule.id
+                        });
                     });
                 }, function (error) {
                     console.log(error);
                 });
 
-                var ip_results = C2ip.query({
+                var ip_results = C2ip.resource.query({
                     searches: {ip: search},
                     exclude_totals: true,
-                    include_metadata: false,
-                    short: 1
+                    include_metadata: false
                 });
                 ip_results.$promise.then(function (results) {
                     results.forEach(function (c2ip) {
                         $scope.search_artifacts.push({
                             name: c2ip.ip,
-                            url: "/c2ips/" + c2ip.id,
-                            type: "c2ip"
-                        })
+                            id: c2ip.id,
+                            type: "c2ip",
+                            url: "/c2ips/" + c2ip.id
+                        });
+                    });
+
+                }, function (error) {
+                    console.log(error);
+                });
+
+                var task_results = Task.resource.query({
+                    searches: {title: search},
+                    exclude_totals: true,
+                    include_metadata: false
+                });
+                task_results.$promise.then(function (results) {
+                    results.forEach(function (task) {
+                        $scope.search_artifacts.push({
+                            name: task.title,
+                            id: task.id,
+                            type: "task",
+                            url: "/tasks/" + task.id
+                        });
                     });
 
                 }, function (error) {
