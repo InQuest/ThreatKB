@@ -112,7 +112,9 @@
                             <ui-select-match placeholder="Global search..">{{ item.name }}</ui-select-match>
                             <ui-select-choices repeat="item in search_artifacts | filter: $select.search"
                                                refresh="refresh_search($select.search)"
-                                               minimum-input-length="4" style="background-color: white;">
+                                               minimum-input-length="4"
+                                               style="background-color: white;"
+                                               position="down">
                                 <a href="{{ getPermalink(item.url) }}">
                                     <div ng-bind-html="item.name | highlight: $select.search">{{ item.name }}</div>
                                     <small ng-bind-html="item.type | highlight: $select.search"></small>
