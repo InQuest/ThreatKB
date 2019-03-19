@@ -148,6 +148,10 @@ span.glyphicon {
     text-align: inherit;
 }
 
+input.ui-select-search.ui-select-toggle {
+    display: block !important;
+}
+
 /* Modal full-screen button */
 body.modals-full-screen .modal-dialog {
     width: auto !important;
@@ -164,7 +168,7 @@ body.modals-full-screen .modal-dialog {
 @media (min-width: 992px) {
     .modal-fullscreen-button {
         display: inline-block;
-    } 
+    }
 }
 
 /* Bootstrap overrides */
