@@ -27,7 +27,7 @@ sys.dont_write_bytecode
 def extract_ips_text(text):
     regex = cfg_settings.Cfg_settings.get_setting(key="IMPORT_IP_REGEX")
     ip_regex = regex if regex else '(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?:\/\d{1,3})?)'
-    return re.compile(ip_regex).findall(text)
+    return re.compile(ip_regex).findall(text.replace("[.]", "."))
 
 
 #####################################################################
@@ -36,7 +36,7 @@ def extract_dns_text(text):
     hostnames = []
     regex = cfg_settings.Cfg_settings.get_setting(key="IMPORT_DNS_REGEX")
     url_regex = regex if regex else 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
-    for dns in re.compile(url_regex).findall(text):
+    for dns in re.compile(url_regex).findall(text.replace("[.]", ".")):
         try:
             hostnames.append(dns)
         except:
