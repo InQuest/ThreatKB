@@ -78,7 +78,10 @@
         </div>
         <div class="modal-body">
             <div class="form-group">
-                <pre>{{ yara_rule.yara_rule_string }}</pre>
+                <span class="pull-right">Wrap&nbsp;<input type="checkbox" ng-checked="wrap_editor"
+                                                          ng-model="wrap_editor"
+                                                          ng-change="change_wrap_editor()"></span><br />
+                <ui-codemirror ui-codemirror-opts="editor_options" ng-model="yara_rule.yara_rule_string"></ui-codemirror>
             </div>
             <div class="form-group">
                 <label>Comments ({{ yara_rule.comments.length }})</label>
