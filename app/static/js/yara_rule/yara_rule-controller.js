@@ -80,7 +80,7 @@ angular.module('ThreatKB')
             };
 
             let c = new ClipboardJS('#batchCopyBtn', {
-                text: function(trigger) {
+                text: function (trigger) {
                     return trigger.getAttribute('aria-label');
                 }
             });
@@ -108,8 +108,7 @@ angular.module('ThreatKB')
                 Yara_rule.copySignatures($scope.get_sigs_to_copy()).then(function (response) {
                     try {
                         FileSaver.saveAs(new Blob([response], {type: "text/plain"}), "yara_rules.txt");
-                    }
-                    catch (error) {
+                    } catch (error) {
                         growl.error("Error downloading signatures.", {ttl: -1});
                     }
                 }, function (error) {
@@ -232,16 +231,16 @@ angular.module('ThreatKB')
                             width: '110',
                             enableSorting: true,
                             cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.state"'
-                            + ' on-select="grid.appScope.save(row.entity)">'
-                            + '<ui-select-match placeholder="Select an state ...">'
-                            + '<small><span ng-bind="$select.selected.state || row.entity.state"></span></small>'
-                            + '</ui-select-match>'
-                            + '<ui-select-choices'
-                            + ' repeat="state in (grid.appScope.cfg_states | filter: $select.search) track by state.id">'
-                            + '<small><span ng-bind="state.state"></span></small>'
-                            + '</ui-select-choices>'
-                            + '</ui-select>'
-                            + '</div>'
+                                + ' on-select="grid.appScope.save(row.entity)">'
+                                + '<ui-select-match placeholder="Select an state ...">'
+                                + '<small><span ng-bind="$select.selected.state || row.entity.state"></span></small>'
+                                + '</ui-select-match>'
+                                + '<ui-select-choices'
+                                + ' repeat="state in (grid.appScope.cfg_states | filter: $select.search) track by state.id">'
+                                + '<small><span ng-bind="state.state"></span></small>'
+                                + '</ui-select-choices>'
+                                + '</ui-select>'
+                                + '</div>'
                         },
                         {
                             field: 'owner_user.email',
@@ -249,16 +248,16 @@ angular.module('ThreatKB')
                             width: '170',
                             enableSorting: false,
                             cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.owner_user"'
-                            + ' on-select="grid.appScope.save(row.entity)">'
-                            + '<ui-select-match placeholder="Select an owner ...">'
-                            + '<small><span ng-bind="$select.selected.email || row.entity.owner_user.email"></span></small>'
-                            + '</ui-select-match>'
-                            + '<ui-select-choices'
-                            + ' repeat="person in (grid.appScope.users | filter: $select.search) track by person.id">'
-                            + '<small><span ng-bind="person.email"></span></small>'
-                            + '</ui-select-choices>'
-                            + '</ui-select>'
-                            + '</div>'
+                                + ' on-select="grid.appScope.save(row.entity)">'
+                                + '<ui-select-match placeholder="Select an owner ...">'
+                                + '<small><span ng-bind="$select.selected.email || row.entity.owner_user.email"></span></small>'
+                                + '</ui-select-match>'
+                                + '<ui-select-choices'
+                                + ' repeat="person in (grid.appScope.users | filter: $select.search) track by person.id">'
+                                + '<small><span ng-bind="person.email"></span></small>'
+                                + '</ui-select-choices>'
+                                + '</ui-select>'
+                                + '</div>'
                         },
                         {
                             field: 'tags',
@@ -266,11 +265,11 @@ angular.module('ThreatKB')
                             width: '180',
                             enableSorting: false,
                             cellTemplate: '<ul class="gridTags" append-to-body="true" ng-model="row.entity.tags">'
-                            + '<li ng-repeat="tag in (row.entity.tags | filter: $select.search) track by tag.id">'
-                            + '<small>{{tag.text}}</small>'
-                            + '</li>'
-                            + '</ul>'
-                            + '</div>'
+                                + '<li ng-repeat="tag in (row.entity.tags | filter: $select.search) track by tag.id">'
+                                + '<small>{{tag.text}}</small>'
+                                + '</li>'
+                                + '</ul>'
+                                + '</div>'
                         },
                         {
                             name: 'Actions',
@@ -279,26 +278,26 @@ angular.module('ThreatKB')
                             enableColumnMenu: false,
                             enableSorting: false,
                             cellTemplate: '<div style="text-align: center;">'
-                            + '<button type="button" ng-click="grid.appScope.viewRule(row.entity.id)"'
-                            + ' class="btn btn-sm">'
-                            + '<small><span class="glyphicon glyphicon-eye-open"></span>'
-                            + '</small>'
-                            + '</button>'
-                            + '&nbsp;'
-                            + '<button type="button" ng-click="grid.appScope.update(row.entity.id)"'
-                            + ' class="btn btn-sm">'
-                            + '<small><span class="glyphicon glyphicon-pencil"></span>'
-                            + '</small>'
-                            + '</button>'
-                            + '&nbsp;'
-                            + '<button confirmed-click="grid.appScope.delete(row.entity.id)"'
-                            + ' ng-confirm-click="Are you sure you want to '
-                            + 'inactivate this signature?" class="btn btn-sm btn-danger">'
-                            + '<small>'
-                            + '<span class="glyphicon glyphicon-remove-circle"></span>'
-                            + '</small>'
-                            + '</button>'
-                            + '</div>'
+                                + '<button type="button" ng-click="grid.appScope.viewRule(row.entity.id)"'
+                                + ' class="btn btn-sm">'
+                                + '<small><span class="glyphicon glyphicon-eye-open"></span>'
+                                + '</small>'
+                                + '</button>'
+                                + '&nbsp;'
+                                + '<button type="button" ng-click="grid.appScope.update(row.entity.id)"'
+                                + ' class="btn btn-sm">'
+                                + '<small><span class="glyphicon glyphicon-pencil"></span>'
+                                + '</small>'
+                                + '</button>'
+                                + '&nbsp;'
+                                + '<button confirmed-click="grid.appScope.delete(row.entity.id)"'
+                                + ' ng-confirm-click="Are you sure you want to '
+                                + 'inactivate this signature?" class="btn btn-sm btn-danger">'
+                                + '<small>'
+                                + '<span class="glyphicon glyphicon-remove-circle"></span>'
+                                + '</small>'
+                                + '</button>'
+                                + '</div>'
                         }
                     ]
             };
@@ -399,7 +398,7 @@ angular.module('ThreatKB')
 
             $scope.save = function (id_or_rule) {
                 var id = id_or_rule;
-                if (typeof(id_or_rule) === "object") {
+                if (typeof (id_or_rule) === "object") {
                     if (id_or_rule.merge) {
                         Yara_rule.merge_signature($scope.yara_rule.id, id_or_rule.id).then(function (data) {
                             growl.info("Successfully merged '" + $scope.yara_rule.name + "' into '" + id_or_rule.name + "'", {ttl: 3000});
@@ -453,7 +452,7 @@ angular.module('ThreatKB')
                     if ($scope.yara_rule.metadata[0].hasOwnProperty("select")) {
                         for (var i = 0; i < $scope.yara_rule.metadata[0].select.length; i++) {
                             var entity = $scope.yara_rule.metadata[0].select[i];
-                            if (typeof(entity.default) == "object") {
+                            if (typeof (entity.default) == "object") {
                                 $scope.yara_rule.metadata_values[entity.key] = {value: entity.default.choice};
                             } else {
                                 $scope.yara_rule.metadata_values[entity.key] = {value: entity.default};
@@ -873,8 +872,31 @@ angular.module('ThreatKB')
             };
 
         }])
-    .controller('Yara_ruleViewController', ['$scope', '$uibModalInstance', 'yara_rule', '$location', '$window',
-        function ($scope, $uibModalInstance, yara_rule, $location, $window) {
+    .controller('Yara_ruleViewController', ['$scope', '$uibModalInstance', 'yara_rule', '$location', '$window', '$cookies',
+        function ($scope, $uibModalInstance, yara_rule, $location, $window, $cookies) {
+
+            $scope.wrap_editor = ($cookies.get("wrap_editor") === "true");
+
+            $scope.editor_options = {
+                lineNumbers: true,
+                lineWrapping: $scope.wrap_editor,
+                mode: 'yara',
+                readOnly: true
+            };
+
+            if ($scope.wrap_editor == null) {
+                $scope.wrap_editor = false;
+                var expireDate = new Date();
+                expireDate.setDate(expireDate.getDate() + 365);
+                $cookies.put("wrap_editor", $scope.wrap_editor, {expires: expireDate});
+            }
+
+            $scope.change_wrap_editor = function () {
+                $scope.editor_options.lineWrapping = $scope.wrap_editor;
+                var expireDate = new Date();
+                expireDate.setDate(expireDate.getDate() + 365);
+                $cookies.put("wrap_editor", $scope.wrap_editor, {expires: expireDate});
+            };
 
             $scope.edit = function (id) {
                 var location = $location.absUrl();
@@ -925,9 +947,9 @@ angular.module('ThreatKB')
         function ($scope, Yara_rule) {
             $scope.$watch(
                 'revisionIsOpen',
-                function(value) {
+                function (value) {
                     if (value) {
-                        if(!$scope.revision.yara_rule_string) {
+                        if (!$scope.revision.yara_rule_string) {
                             Yara_rule.getSignatureFromRevision($scope.revision.yara_rule_id, $scope.revision.revision)
                                 .then(function (response) {
                                     $scope.revision.yara_rule_string = response;
