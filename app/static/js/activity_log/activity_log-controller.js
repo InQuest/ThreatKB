@@ -52,17 +52,23 @@ angular.module('ThreatKB')
                         paginationOptions.searches = {};
                         var trigger_refresh_for_length = false;
                         var trigger_refresh_for_emptiness = true;
+                        var trigger_refresh_for_selection = false;
 
                         for (var i = 0; i < grid.columns.length; i++) {
                             var column = grid.columns[i];
                             trigger_refresh_for_emptiness &= (column.filters[0].term === undefined || column.filters[0].term === null || column.filters[0].term.length === 0);
 
-                            if (column.filters[0].term !== undefined && column.filters[0].term !== null && column.filters[0].term.length >= parseInt($scope.start_filter_requests_length.value)) {
-                                trigger_refresh_for_length = true;
-                                paginationOptions.searches[column.colDef.field] = column.filters[0].term
+                            if (column.filters[0].term !== undefined && column.filters[0].term !== null) {
+                                if (column.field === "entity_type" || column.field === "activity_type") {
+                                    trigger_refresh_for_selection = true;
+                                    paginationOptions.searches[column.colDef.field] = column.filters[0].term;
+                                } else if (column.filters[0].term.length >= parseInt($scope.start_filter_requests_length.value)) {
+                                    trigger_refresh_for_length = true;
+                                    paginationOptions.searches[column.colDef.field] = column.filters[0].term;
+                                }
                             }
                         }
-                        if (trigger_refresh_for_length || trigger_refresh_for_emptiness) {
+                        if (trigger_refresh_for_length || trigger_refresh_for_emptiness || trigger_refresh_for_selection) {
                             getPage();
                         }
                     });
@@ -110,7 +116,53 @@ angular.module('ThreatKB')
                             field: 'activity_type',
                             displayName: 'Activity Type',
                             enableSorting: true,
-                            width: '130'
+                            width: '165',
+                            filterHeaderTemplate: '<div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters">'
+                                + '<ui-select append-to-body="true" ng-model="colFilter.term">'
+                                + '<ui-select-match allow-clear="true">'
+                                + '<small><span ng-bind="$select.selected.label || colFilter.term"></span></small>'
+                                + '</ui-select-match>'
+                                + '<ui-select-choices repeat="option.value as option in colFilter.options">'
+                                + '<small><span ng-bind="option.label"></span></small>'
+                                + '</ui-select-choices>'
+                                + '</ui-select>'
+                                + '</div>',
+                            filter: {
+                                type: uiGridConstants.filter.SELECT,
+                                options: [
+                                    {value: "ARTIFACT_CREATED", label: "Artifact Created"},
+                                    {value: "ARTIFACT_MODIFIED", label: "Artifact Modified"},
+                                    {value: "COMMENTS", label: 'Comment'},
+                                    {value: "STATE_TOGGLED", label: 'State Toggled'},
+                                    {value: "RELEASES_MADE", label: 'Release Made'}
+                                ]
+                            }
+                        },
+                        {
+                            field: 'entity_type',
+                            displayName: 'Entity Type',
+                            enableSorting: true,
+                            width: '160',
+                            filterHeaderTemplate: '<div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters">'
+                                + '<ui-select append-to-body="true" ng-model="colFilter.term">'
+                                + '<ui-select-match allow-clear="true">'
+                                + '<small><span ng-bind="$select.selected.label || colFilter.term"></span></small>'
+                                + '</ui-select-match>'
+                                + '<ui-select-choices repeat="option.value as option in colFilter.options">'
+                                + '<small><span ng-bind="option.label"></span></small>'
+                                + '</ui-select-choices>'
+                                + '</ui-select>'
+                                + '</div>',
+                            filter: {
+                                type: uiGridConstants.filter.SELECT,
+                                options: [
+                                    {value: '2', label: 'DNS'},
+                                    {value: '3', label: 'IP'},
+                                    {value: '1', label: 'SIGNATURE'},
+                                    {value: '4', label: 'TASK'},
+                                    {value: '5', label: 'RELEASE'}
+                                ]
+                            }
                         },
                         {
                             field: 'activity_date',
