@@ -599,8 +599,14 @@ angular.module('ThreatKB')
             $scope.revisionIsOpen = false;
 
         }])
-    .controller('Yara_ruleSaveController', ['$scope', '$http', '$cookies', '$uibModalInstance', '$location', 'yara_rule', 'yara_rules', 'metadata', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags', 'Yara_rule', 'Cfg_settings', 'Bookmarks', 'hotkeys',
-        function ($scope, $http, $cookies, $uibModalInstance, $location, yara_rule, yara_rules, metadata, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags, Yara_rule, Cfg_settings, Bookmarks, hotkeys) {
+    .controller('Yara_ruleSaveController', ['$scope', '$http', '$cookies', '$uibModalInstance', '$location', '$window', 'yara_rule', 'yara_rules', 'metadata', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags', 'Yara_rule', 'Cfg_settings', 'Bookmarks', 'hotkeys',
+        function ($scope, $http, $cookies, $uibModalInstance, $location, $window, yara_rule, yara_rules, metadata, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags, Yara_rule, Cfg_settings, Bookmarks, hotkeys) {
+
+            yara_rule.$promise.then(
+                function (yr) {
+                    $window.document.title = "ThreatKB: " + yr.name;
+                }
+            )
 
             $scope.yara_rule = yara_rule;
             $scope.yara_rules = yara_rules;
@@ -797,10 +803,12 @@ angular.module('ThreatKB')
             };
 
             $scope.ok = function () {
+                $window.document.title = "ThreatKB";
                 $uibModalInstance.close($scope.yara_rule);
             };
 
             $scope.cancel = function () {
+                $window.document.title = "ThreatKB";
                 $uibModalInstance.dismiss('cancel');
             };
 
@@ -874,6 +882,12 @@ angular.module('ThreatKB')
         }])
     .controller('Yara_ruleViewController', ['$scope', '$uibModalInstance', 'yara_rule', '$location', '$window', '$cookies',
         function ($scope, $uibModalInstance, yara_rule, $location, $window, $cookies) {
+
+            yara_rule.$promise.then(
+                function (yr) {
+                    $window.document.title = "ThreatKB: " + yr.name;
+                }
+            );
 
             $scope.wrap_editor = ($cookies.get("wrap_editor") === "true");
 

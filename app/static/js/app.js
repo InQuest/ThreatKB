@@ -390,7 +390,7 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
         $qProvider.errorOnUnhandledRejections(false);
     }]);
 
-angular.module('ThreatKB').run(function ($rootScope, $location, AuthService) {
+angular.module('ThreatKB').run(function ($rootScope, $location, AuthService, $window) {
 
 
     $rootScope.ENTITY_MAPPING = {IP: 3, DNS: 2, SIGNATURE: 1, TASK: 4};
@@ -422,6 +422,8 @@ angular.module('ThreatKB').run(function ($rootScope, $location, AuthService) {
 
     // Register listener to watch route changes.
     $rootScope.$on('$routeChangeStart', function (event, next, current) {
+        $window.document.title = "ThreatKB";
+
         AuthService.getUserStatus().then(function () {
                 if (next.access.restricted && !AuthService.isLoggedIn()) {
                     $location.path('/login');

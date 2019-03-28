@@ -405,8 +405,15 @@ angular.module('ThreatKB')
                 }
             }
         }])
-    .controller('TaskSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'task', 'Comments', 'Cfg_states', 'Import', 'growl', 'blockUI', 'AuthService', 'Bookmarks', 'hotkeys', 'Users',
-        function ($scope, $http, $uibModalInstance, $location, task, Comments, Cfg_states, Import, growl, blockUI, AuthService, Bookmarks, hotkeys, Users) {
+    .controller('TaskSaveController', ['$scope', '$http', '$uibModalInstance', '$location', '$window', 'task', 'Comments', 'Cfg_states', 'Import', 'growl', 'blockUI', 'AuthService', 'Bookmarks', 'hotkeys', 'Users',
+        function ($scope, $http, $uibModalInstance, $location, $window, task, Comments, Cfg_states, Import, growl, blockUI, AuthService, Bookmarks, hotkeys, Users) {
+
+            task.$promise.then(
+                function (t) {
+                    $window.document.title = "ThreatKB: " + t.title;
+                }
+            )
+
             $scope.task = task;
             $scope.task.new_comment = "";
             $scope.Comments = Comments;
@@ -509,10 +516,12 @@ angular.module('ThreatKB')
             };
 
             $scope.ok = function () {
+                $window.document.title = "ThreatKB";
                 $uibModalInstance.close($scope.task);
             };
 
             $scope.cancel = function () {
+                $window.document.title = "ThreatKB";
                 $uibModalInstance.dismiss('cancel');
             };
         }])

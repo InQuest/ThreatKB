@@ -497,8 +497,15 @@ angular.module('ThreatKB')
                 }
             }
         }])
-    .controller('C2ipSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'C2ip', 'c2ip', 'metadata', 'Comments', 'Cfg_states', 'Tags', 'growl', 'Bookmarks', 'hotkeys', 'Users',
-        function ($scope, $http, $uibModalInstance, $location, C2ip, c2ip, metadata, Comments, Cfg_states, Tags, growl, Bookmarks, hotkeys, Users) {
+    .controller('C2ipSaveController', ['$scope', '$http', '$uibModalInstance', '$location', '$window', 'C2ip', 'c2ip', 'metadata', 'Comments', 'Cfg_states', 'Tags', 'growl', 'Bookmarks', 'hotkeys', 'Users',
+        function ($scope, $http, $uibModalInstance, $location, $window, C2ip, c2ip, metadata, Comments, Cfg_states, Tags, growl, Bookmarks, hotkeys, Users) {
+
+            c2ip.$promise.then(
+                function (c2) {
+                    $window.document.title = "ThreatKB: " + c2.ip;
+                }
+            );
+
             $scope.c2ip = c2ip;
             if (!$scope.c2ip.id) {
                 $scope.c2ip.metadata = metadata;
@@ -601,10 +608,12 @@ angular.module('ThreatKB')
             };
 
             $scope.ok = function () {
+                $window.document.title = "ThreatKB";
                 $uibModalInstance.close($scope.c2ip);
             };
 
             $scope.cancel = function () {
+                $window.document.title = "ThreatKB";
                 $uibModalInstance.dismiss('cancel');
             };
 

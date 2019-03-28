@@ -494,8 +494,15 @@ angular.module('ThreatKB')
                 }
             }
         }])
-    .controller('C2dnsSaveController', ['$scope', '$http', '$uibModalInstance', '$location', 'C2dns', 'c2dns', 'metadata', 'Cfg_states', 'Comments', 'Tags', 'growl', 'Bookmarks', 'hotkeys', 'Users',
-        function ($scope, $http, $uibModalInstance, $location, C2dns, c2dns, metadata, Cfg_states, Comments, Tags, growl, Bookmarks, hotkeys, Users) {
+    .controller('C2dnsSaveController', ['$scope', '$http', '$uibModalInstance', '$location', '$window', 'C2dns', 'c2dns', 'metadata', 'Cfg_states', 'Comments', 'Tags', 'growl', 'Bookmarks', 'hotkeys', 'Users',
+        function ($scope, $http, $uibModalInstance, $location, $window, C2dns, c2dns, metadata, Cfg_states, Comments, Tags, growl, Bookmarks, hotkeys, Users) {
+
+            c2dns.$promise.then(
+                function (c2) {
+                    $window.document.title = "ThreatKB: " + c2.domain_name;
+                }
+            );
+
             $scope.c2dns = c2dns;
             $scope.c2dns.new_comment = "";
             $scope.Comments = Comments;
@@ -602,10 +609,12 @@ angular.module('ThreatKB')
             };
 
             $scope.ok = function () {
+                $window.document.title = "ThreatKB";
                 $uibModalInstance.close($scope.c2dns);
             };
 
             $scope.cancel = function () {
+                $window.document.title = "ThreatKB";
                 $uibModalInstance.dismiss('cancel');
             };
 
