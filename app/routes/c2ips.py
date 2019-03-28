@@ -33,6 +33,7 @@ def get_all_c2ips():
     page_number = request.args.get('page_number', False)
     page_size = request.args.get('page_size', False)
     sort_by = request.args.get('sort_by', False)
+    operator = request.args.get('operator', 'and')
     sort_direction = request.args.get('sort_dir', 'ASC')
     exclude_totals = request.args.get('exclude_totals', False)
     include_metadata = bool(distutils.util.strtobool(request.args.get('include_metadata', "true")))
@@ -46,7 +47,8 @@ def get_all_c2ips():
                                     sort_direction=sort_direction,
                                     include_metadata=include_metadata,
                                     exclude_totals=exclude_totals,
-                                    default_sort="c2ip.date_created")
+                                    default_sort="c2ip.date_created",
+                                    operator=operator)
 
     return Response(response_dict, mimetype="application/json")
 

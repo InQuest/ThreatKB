@@ -110,7 +110,7 @@
                                    on-select="select_artifact(search_artifacts.selected)"
                                    focus-on="search_focus">
                             <ui-select-match placeholder="Global search..">{{ item.name }}</ui-select-match>
-                            <ui-select-choices repeat="item in search_artifacts | filter: $select.search"
+                            <ui-select-choices repeat="item in search_artifacts"
                                                refresh="refresh_search($select.search)"
                                                minimum-input-length="4"
                                                style="background-color: white;"

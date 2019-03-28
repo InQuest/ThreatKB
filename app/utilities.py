@@ -10,6 +10,7 @@ from sqlalchemy import and_, not_, or_
 
 from app import ENTITY_MAPPING
 from app.models import cfg_settings
+from app.models.comments import Comments
 from app.models.c2dns import C2dns
 from app.models.c2ip import C2ip
 from app.models.metadata import Metadata, MetadataMapping
@@ -84,9 +85,14 @@ def filter_entities(entity,
                     include_inactive=True,
                     include_merged=False,
                     include_yara_string=None,
-                    short=None):
+                    short=None,
+                    operator="and"):
 
     searches = json.loads(searches)
+
+    operator = and_ if operator == "and" else or_
+
+    clauses = []
 
     if searches and any([search_key not in entity.__table__.columns.keys()
                          and search_key not in ("tags", "owner_user.email", "user.email")
@@ -118,6 +124,11 @@ def filter_entities(entity,
             entities = entities.join(KBUser, entity.user_id == KBUser.id) \
                 .filter(not_(KBUser.email.like(l_value)) if s_value.startswith("!") else KBUser.email.like(l_value))
             continue
+        elif column == "comments":
+            entities = entities.join(Comments,
+                                     and_(Comments.entity_type == artifact_type, Comments.entity_id == entity.id)) \
+                .filter(
+                not_(Comments.comment.like(l_value) if s_value.startswith("!") else Comments.comment.like(l_value)))
 
         if column == "tags":
             entities = entities.outerjoin(Tags_mapping, entity.id == Tags_mapping.source_id) \
@@ -128,15 +139,16 @@ def filter_entities(entity,
 
         try:
             column = getattr(entity, column)
-            entities = entities.filter(not_(column.like(l_value)) if s_value.startswith("!") else column.like(l_value))
+            clauses.append(not_(column.like(l_value)) if s_value.startswith("!") else column.like(l_value))
         except AttributeError as e:
-            entities = entities.filter(and_(MetadataMapping.artifact_id == entity.id, Metadata.key == column,
-                                            not_(MetadataMapping.value.like(l_value))
+            clauses.append(and_(MetadataMapping.artifact_id == entity.id, Metadata.key == column,
+                                not_(MetadataMapping.value.like(l_value))
                                             if s_value.startswith("!") else MetadataMapping.value.like(l_value)))
 
     if not include_merged:
         entities = entities.filter(entity.state != 'Merged')
 
+    entities = entities.filter(operator(*clauses))
     filtered_entities = entities
     total_count = entities.count()
 

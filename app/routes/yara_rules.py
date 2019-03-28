@@ -89,6 +89,7 @@ def get_all_yara_rules():
     page_number = request.args.get('page_number', False)
     page_size = request.args.get('page_size', False)
     sort_by = request.args.get('sort_by', False)
+    operator = request.args.get('operator', 'and')
     sort_direction = request.args.get('sort_dir', 'ASC')
     exclude_totals = request.args.get('exclude_totals', False)
 
@@ -105,7 +106,8 @@ def get_all_yara_rules():
                                     include_inactive=include_inactive,
                                     include_merged=include_merged,
                                     include_yara_string=include_yara_string,
-                                    short=short)
+                                    short=short,
+                                    operator=operator)
 
     return Response(response_dict, mimetype='application/json')
 

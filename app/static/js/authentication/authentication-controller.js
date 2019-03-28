@@ -57,11 +57,18 @@ angular.module('ThreatKB')
                 });
 
                 var yara_results = Yara_rule.resource.query({
-                    searches: {name: search},
+                    searches: {
+                        name: search,
+                        description: search,
+                        references: search,
+                        strings: search,
+                        condition: search
+                    },
                     exclude_totals: true,
                     include_metadata: false,
                     include_yara_string: false,
-                    short: 1
+                    short: 1,
+                    operator: "or"
                 });
                 yara_results.$promise.then(function (results) {
                     results.forEach(function (yara_rule) {
