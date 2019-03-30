@@ -500,11 +500,13 @@ angular.module('ThreatKB')
     .controller('C2ipSaveController', ['$scope', '$http', '$uibModalInstance', '$location', '$window', 'C2ip', 'c2ip', 'metadata', 'Comments', 'Cfg_states', 'Tags', 'growl', 'Bookmarks', 'hotkeys', 'Users',
         function ($scope, $http, $uibModalInstance, $location, $window, C2ip, c2ip, metadata, Comments, Cfg_states, Tags, growl, Bookmarks, hotkeys, Users) {
 
-            c2ip.$promise.then(
-                function (c2) {
-                    $window.document.title = "ThreatKB: " + c2.ip;
-                }
-            );
+            if (c2ip.$promise !== null) {
+                c2ip.$promise.then(
+                    function (c2) {
+                        $window.document.title = "ThreatKB: " + c2.ip;
+                    }
+                );
+            }
 
             $scope.c2ip = c2ip;
             if (!$scope.c2ip.id) {
@@ -603,7 +605,16 @@ angular.module('ThreatKB')
                     $scope.c2ip.comments = $scope.Comments.resource.query({
                         entity_type: Comments.ENTITY_MAPPING.IP,
                         entity_id: id
-                    })
+                    });
+                });
+            };
+
+            $scope.delete_comment = function (id, comment_id) {
+                $scope.Comments.resource.delete({id: comment_id}, function () {
+                    $scope.c2ip.comments = $scope.Comments.resource.query({
+                        entity_type: Comments.ENTITY_MAPPING.IP,
+                        entity_id: id
+                    });
                 });
             };
 
