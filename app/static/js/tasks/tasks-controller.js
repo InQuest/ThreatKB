@@ -408,11 +408,13 @@ angular.module('ThreatKB')
     .controller('TaskSaveController', ['$scope', '$http', '$uibModalInstance', '$location', '$window', 'task', 'Comments', 'Cfg_states', 'Import', 'growl', 'blockUI', 'AuthService', 'Bookmarks', 'hotkeys', 'Users',
         function ($scope, $http, $uibModalInstance, $location, $window, task, Comments, Cfg_states, Import, growl, blockUI, AuthService, Bookmarks, hotkeys, Users) {
 
-            task.$promise.then(
-                function (t) {
-                    $window.document.title = "ThreatKB: " + t.title;
-                }
-            )
+            if (task.$promise !== null) {
+                task.$promise.then(
+                    function (t) {
+                        $window.document.title = "ThreatKB: " + t.title;
+                    }
+                );
+            }
 
             $scope.task = task;
             $scope.task.new_comment = "";
@@ -511,7 +513,16 @@ angular.module('ThreatKB')
                     $scope.task.comments = $scope.Comments.resource.query({
                         entity_type: Comments.ENTITY_MAPPING.TASK,
                         entity_id: id
-                    })
+                    });
+                });
+            };
+
+            $scope.delete_comment = function (id, comment_id) {
+                $scope.Comments.resource.delete({id: comment_id}, function () {
+                    $scope.task.comments = $scope.Comments.resource.query({
+                        entity_type: Comments.ENTITY_MAPPING.TASK,
+                        entity_id: id
+                    });
                 });
             };
 

@@ -497,11 +497,13 @@ angular.module('ThreatKB')
     .controller('C2dnsSaveController', ['$scope', '$http', '$uibModalInstance', '$location', '$window', 'C2dns', 'c2dns', 'metadata', 'Cfg_states', 'Comments', 'Tags', 'growl', 'Bookmarks', 'hotkeys', 'Users',
         function ($scope, $http, $uibModalInstance, $location, $window, C2dns, c2dns, metadata, Cfg_states, Comments, Tags, growl, Bookmarks, hotkeys, Users) {
 
-            c2dns.$promise.then(
-                function (c2) {
-                    $window.document.title = "ThreatKB: " + c2.domain_name;
-                }
-            );
+            if (c2dns.$promise !== undefined) {
+                c2dns.$promise.then(
+                    function (c2) {
+                        $window.document.title = "ThreatKB: " + c2.domain_name;
+                    }
+                );
+            }
 
             $scope.c2dns = c2dns;
             $scope.c2dns.new_comment = "";
@@ -604,7 +606,16 @@ angular.module('ThreatKB')
                     $scope.c2dns.comments = $scope.Comments.resource.query({
                         entity_type: Comments.ENTITY_MAPPING.DNS,
                         entity_id: id
-                    })
+                    });
+                });
+            };
+
+            $scope.delete_comment = function (id, comment_id) {
+                $scope.Comments.resource.delete({id: comment_id}, function () {
+                    $scope.c2dns.comments = $scope.Comments.resource.query({
+                        entity_type: Comments.ENTITY_MAPPING.DNS,
+                        entity_id: id
+                    });
                 });
             };
 

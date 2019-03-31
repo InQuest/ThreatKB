@@ -602,11 +602,13 @@ angular.module('ThreatKB')
     .controller('Yara_ruleSaveController', ['$scope', '$http', '$cookies', '$uibModalInstance', '$location', '$window', 'yara_rule', 'yara_rules', 'metadata', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags', 'Yara_rule', 'Cfg_settings', 'Bookmarks', 'hotkeys',
         function ($scope, $http, $cookies, $uibModalInstance, $location, $window, yara_rule, yara_rules, metadata, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags, Yara_rule, Cfg_settings, Bookmarks, hotkeys) {
 
-            yara_rule.$promise.then(
-                function (yr) {
-                    $window.document.title = "ThreatKB: " + yr.name;
-                }
-            )
+            if (yara_rule.$promise !== null) {
+                yara_rule.$promise.then(
+                    function (yr) {
+                        $window.document.title = "ThreatKB: " + yr.name;
+                    }
+                );
+            }
 
             $scope.yara_rule = yara_rule;
             $scope.yara_rules = yara_rules;
@@ -762,7 +764,16 @@ angular.module('ThreatKB')
                     $scope.yara_rule.comments = $scope.Comments.resource.query({
                         entity_type: Comments.ENTITY_MAPPING.SIGNATURE,
                         entity_id: id
-                    })
+                    });
+                });
+            };
+
+            $scope.delete_comment = function (id, comment_id) {
+                $scope.Comments.resource.delete({id: comment_id}, function () {
+                    $scope.yara_rule.comments = $scope.Comments.resource.query({
+                        entity_type: Comments.ENTITY_MAPPING.SIGNATURE,
+                        entity_id: id
+                    });
                 });
             };
 
