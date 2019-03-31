@@ -186,16 +186,16 @@ angular.module('ThreatKB')
                             width: '130',
                             enableSorting: true,
                             cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.state"'
-                            + ' on-select="grid.appScope.save(row.entity)">'
-                            + '<ui-select-match placeholder="Select an state ...">'
-                            + '<small><span ng-bind="$select.selected.state || row.entity.state"></span></small>'
-                            + '</ui-select-match>'
-                            + '<ui-select-choices'
-                            + ' repeat="state in (grid.appScope.cfg_states | filter: $select.search) track by state.id">'
-                            + '<small><span ng-bind="state.state"></span></small>'
-                            + '</ui-select-choices>'
-                            + '</ui-select>'
-                            + '</div>'
+                                + ' on-select="grid.appScope.save(row.entity)">'
+                                + '<ui-select-match placeholder="Select an state ...">'
+                                + '<small><span ng-bind="$select.selected.state || row.entity.state"></span></small>'
+                                + '</ui-select-match>'
+                                + '<ui-select-choices'
+                                + ' repeat="state in (grid.appScope.cfg_states | filter: $select.search) track by state.id">'
+                                + '<small><span ng-bind="state.state"></span></small>'
+                                + '</ui-select-choices>'
+                                + '</ui-select>'
+                                + '</div>'
                         },
                         {
                             field: 'owner_user.email',
@@ -203,16 +203,16 @@ angular.module('ThreatKB')
                             width: '170',
                             enableSorting: false,
                             cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.owner_user"'
-                            + ' on-select="grid.appScope.save(row.entity)">'
-                            + '<ui-select-match placeholder="Select an owner ...">'
-                            + '<small><span ng-bind="$select.selected.email || row.entity.owner_user.email"></span></small>'
-                            + '</ui-select-match>'
-                            + '<ui-select-choices'
-                            + ' repeat="person in (grid.appScope.users | filter: $select.search) track by person.id">'
-                            + '<small><span ng-bind="person.email"></span></small>'
-                            + '</ui-select-choices>'
-                            + '</ui-select>'
-                            + '</div>'
+                                + ' on-select="grid.appScope.save(row.entity)">'
+                                + '<ui-select-match placeholder="Select an owner ...">'
+                                + '<small><span ng-bind="$select.selected.email || row.entity.owner_user.email"></span></small>'
+                                + '</ui-select-match>'
+                                + '<ui-select-choices'
+                                + ' repeat="person in (grid.appScope.users | filter: $select.search) track by person.id">'
+                                + '<small><span ng-bind="person.email"></span></small>'
+                                + '</ui-select-choices>'
+                                + '</ui-select>'
+                                + '</div>'
                         },
                         {
                             field: 'tags',
@@ -220,11 +220,11 @@ angular.module('ThreatKB')
                             width: '180',
                             enableSorting: false,
                             cellTemplate: '<ul class="gridTags" append-to-body="true" ng-model="row.entity.tags">'
-                            + '<li ng-repeat="tag in (row.entity.tags | filter: $select.search) track by tag.id">'
-                            + '<small>{{tag.text}}</small>'
-                            + '</li>'
-                            + '</ul>'
-                            + '</div>'
+                                + '<li ng-repeat="tag in (row.entity.tags | filter: $select.search) track by tag.id">'
+                                + '<small>{{tag.text}}</small>'
+                                + '</li>'
+                                + '</ul>'
+                                + '</div>'
                         },
                         {
                             name: 'Actions',
@@ -233,19 +233,25 @@ angular.module('ThreatKB')
                             enableColumnMenu: false,
                             enableSorting: false,
                             cellTemplate: '<div style="text-align: center;">'
-                            + '<button type="button" ng-click="grid.appScope.update(row.entity.id)"'
-                            + ' class="btn btn-sm">'
-                            + '<small><span class="glyphicon glyphicon-pencil"></span>'
-                            + '</small>'
-                            + '</button>'
-                            + '&nbsp;'
-                            + '<button confirmed-click="grid.appScope.delete(row.entity.id)"'
-                            + ' ng-confirm-click="Are you sure you want to '
-                            + 'delete this c2dns?" class="btn btn-sm btn-danger">'
-                            + '<small>'
-                            + '<span class="glyphicon glyphicon-remove-circle"></span>'
-                            + '</small>'
-                            + '</button></div>'
+                                + '<button type="button" ng-click="grid.appScope.viewDns(row.entity.id)"'
+                                + ' class="btn btn-sm">'
+                                + '<small><span class="glyphicon glyphicon-eye-open"></span>'
+                                + '</small>'
+                                + '</button>'
+                                + '&nbsp;'
+                                + '<button type="button" ng-click="grid.appScope.update(row.entity.id)"'
+                                + ' class="btn btn-sm">'
+                                + '<small><span class="glyphicon glyphicon-pencil"></span>'
+                                + '</small>'
+                                + '</button>'
+                                + '&nbsp;'
+                                + '<button confirmed-click="grid.appScope.delete(row.entity.id)"'
+                                + ' ng-confirm-click="Are you sure you want to '
+                                + 'delete this c2dns?" class="btn btn-sm btn-danger">'
+                                + '<small>'
+                                + '<span class="glyphicon glyphicon-remove-circle"></span>'
+                                + '</small>'
+                                + '</button></div>'
                         }
                     ]
             };
@@ -285,6 +291,8 @@ angular.module('ThreatKB')
                     });
             };
 
+            getPage();
+
             $scope.getTableHeight = function () {
                 var rowHeight = $scope.gridOptions.rowHeight;
                 var headerHeight = 100;
@@ -302,7 +310,12 @@ angular.module('ThreatKB')
                 $scope.c2dns = C2dns.resource.get({id: id});
                 $scope.cfg_states = Cfg_states.query();
                 $scope.users = Users.query();
-                $scope.open(id);
+                $scope.edit(id);
+            };
+
+            $scope.viewDns = function (id) {
+                $scope.c2dns = C2dns.resource.get({id: id});
+                $scope.view(id);
             };
 
             $scope.delete = function (id) {
@@ -332,7 +345,7 @@ angular.module('ThreatKB')
 
             $scope.save = function (id_or_dns) {
                 var id = id_or_dns;
-                if (typeof(id_or_dns) === "object") {
+                if (typeof (id_or_dns) === "object") {
                     id = id_or_dns.id;
                     $scope.c2dns = id_or_dns;
                 }
@@ -342,6 +355,7 @@ angular.module('ThreatKB')
                         getPage();
                     }, function (error) {
                         growl.error(error.data, {ttl: -1});
+                        $scope.openDnsModal(id);
                     });
                 } else {
                     $scope.c2dns.metadata_values = {};
@@ -376,7 +390,7 @@ angular.module('ThreatKB')
                     if ($scope.c2dns.metadata[0].hasOwnProperty("select")) {
                         for (var i = 0; i < $scope.c2dns.metadata[0].select.length; i++) {
                             var entity = $scope.c2dns.metadata[0].select[i];
-                            if (typeof(entity.default) == "object") {
+                            if (typeof (entity.default) == "object") {
                                 $scope.c2dns.metadata_values[entity.key] = {value: entity.default.choice};
                             } else {
                                 $scope.c2dns.metadata_values[entity.key] = {value: entity.default};
@@ -388,6 +402,7 @@ angular.module('ThreatKB')
                         getPage();
                     }, function (error) {
                         growl.error(error.data, {ttl: -1});
+                        $scope.openDnsModal(id);
                     });
                 }
             };
@@ -417,7 +432,7 @@ angular.module('ThreatKB')
                 };
             };
 
-            $scope.open = function (id) {
+            $scope.openDnsModal = function (id) {
                 var c2dnsSave = $uibModal.open({
                     templateUrl: 'c2dns-save.html',
                     controller: 'C2dnsSaveController',
@@ -484,8 +499,24 @@ angular.module('ThreatKB')
                     getPage();
                 });
             };
+            $scope.edit = function (id) {
+                $scope.openDnsModal(id);
+            };
 
-            getPage();
+            $scope.view = function (id) {
+                var dns_view = $uibModal.open({
+                    templateUrl: 'c2dns-view.html',
+                    controller: 'C2dnsViewController',
+                    size: 'lg',
+                    backdrop: 'static',
+                    resolve: {
+                        c2dns: function () {
+                            return $scope.c2dns;
+                        }
+                    }
+                });
+            };
+
             if (openModalForId !== null) {
                 if (openModalForId === "add") {
                     $scope.create();
@@ -632,6 +663,46 @@ angular.module('ThreatKB')
             $scope.loadTags = function (query) {
                 return Tags.loadTags(query);
             };
+        }])
+    .controller('C2dnsViewController', ['$scope', '$uibModalInstance', 'c2dns', '$location', '$window', 'Cfg_settings',
+        function ($scope, $uibModalInstance, c2dns, $location, $window, Cfg_settings) {
+
+            $scope.static_references = {};
+            Cfg_settings.get({key: "ARTIFACT_STATIC_REFERENCES"}).$promise.then(function (staticReferences) {
+                    $scope.static_references = JSON.parse(staticReferences.value);
+                }
+            );
+
+            c2dns.$promise.then(
+                function (c2) {
+                    $window.document.title = "ThreatKB: " + c2.domain_name;
+                }
+            );
+
+            $scope.c2dns = c2dns;
+
+            $scope.edit = function (id) {
+                var location = $location.absUrl();
+                var last_spot = location.split("/")[location.split("/").length - 1];
+                $uibModalInstance.close($scope.c2dns);
+                if (isNaN(parseInt(last_spot, 10))) {
+                    $window.location.href = $location.absUrl() + "/" + id;
+                    return;
+                } else if (!isNaN(parseInt(last_spot, 10)) && last_spot !== id) {
+                    $window.location.href = $location.absUrl().replace(/\/[0-9]+$/, "/" + id);
+                    return;
+                }
+                $window.location.href = $location.absUrl();
+            };
+
+            $scope.ok = function () {
+                $uibModalInstance.close($scope.c2dns);
+            };
+
+            $scope.cancel = function () {
+                $uibModalInstance.dismiss('cancel');
+            };
+
         }])
     .controller('C2dnsBatchEditController', ['$scope', '$uibModalInstance', 'batch', 'Users', 'Cfg_states', 'Tags',
         function ($scope, $uibModalInstance, batch, Users, Cfg_states, Tags) {

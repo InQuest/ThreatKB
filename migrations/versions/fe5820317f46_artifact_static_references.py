@@ -30,7 +30,7 @@ def upgrade():
         [
             {
                 "key": "ARTIFACT_STATIC_REFERENCES",
-                "value": "{\"DNS\": [\"https://whois.domaintools.com/\",\"https://www.virustotal.com/#/domain/openrce.org\"],\"IP\": [\"https://whois.domaintools.com/\",\"https://reverseip.domaintools.com/search/?q=\",\"https://www.shodan.io/host/\",\"https://viz.greynoise.io/ip/\",\"https://www.virustotal.com/#/ip-address/\"]}",
+                "value": "{\"DNS\": [\"https://whois.domaintools.com/\",\"https://www.virustotal.com/#/domain/\"],\"IP\": [\"https://whois.domaintools.com/\",\"https://reverseip.domaintools.com/search/?q=\",\"https://www.shodan.io/host/\",\"https://viz.greynoise.io/ip/\",\"https://www.virustotal.com/#/ip-address/\"]}",
                 "public": True,
                 "date_created": date_created,
                 "date_modified": date_modified,
