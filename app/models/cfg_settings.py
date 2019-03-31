@@ -1,5 +1,6 @@
 from app import db
 
+
 class Cfg_settings(db.Model):
     __tablename__ = "cfg_settings"
 
@@ -8,7 +9,7 @@ class Cfg_settings(db.Model):
     date_modified = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp(),
                               onupdate=db.func.current_timestamp())
     public = db.Column(db.Boolean, index=True, default=True)
-    value = db.Column(db.String(2048))
+    value = db.Column(db.TEXT())
     description = db.Column(db.String(512))
 
     def to_dict(self):

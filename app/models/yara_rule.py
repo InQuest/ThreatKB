@@ -36,6 +36,8 @@ class Yara_rule(db.Model):
     references = db.Column(db.TEXT(), index=True)
     active = db.Column(db.Boolean, nullable=False, default=True)
     eventid = db.Column(db.Integer(unsigned=True), index=True, nullable=False)
+    _mitre_techniques = db.Column(db.String(256), index=True)
+    _mitre_tactics = db.Column(db.String(256), index=True)
 
     tags = []
 
@@ -68,6 +70,22 @@ class Yara_rule(db.Model):
                                    cascade="all,delete", uselist=True)
 
     @property
+    def mitre_techniques(self):
+        return self._mitre_techniques.split(",")
+
+    @property
+    def mitre_tactics(self):
+        return self._mitre_tactics.split(",")
+
+    @mitre_techniques.setter
+    def mitre_techniques(self, value):
+        return ",".join(value)
+
+    @mitre_tactics.setter
+    def mitre_tactics(self, value):
+        return ",".join(value)
+
+    @property
     def metadata_fields(self):
         return db.session.query(Metadata).filter(Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).all()
 
@@ -95,7 +113,9 @@ class Yara_rule(db.Model):
             revision=self.revision,
             condition="condition:\n\t%s" % self.condition,
             strings="strings:\n\t%s" % self.strings if self.strings and self.strings.strip() else "",
-            imports=self.imports
+            imports=self.imports,
+            mitre_tactics=self.mitre_tactics,
+            mitre_techniques=self.mitre_techniques
         )
 
         if include_metadata:
@@ -158,7 +178,9 @@ class Yara_rule(db.Model):
                 self.id, None) and metadata_cache["SIGNATURE"][self.id].get("metadata_values", None) else {},
             condition="condition:\n\t%s" % self.condition,
             strings="strings:\n\t%s" % self.strings if self.strings and self.strings.strip() else "",
-            imports=self.imports
+            imports=self.imports,
+            mitre_tactics=self.mitre_tactics,
+            mitre_techniques=self.mitre_techniques
         )
 
     def __repr__(self):
@@ -174,6 +196,10 @@ class Yara_rule(db.Model):
     @staticmethod
     def to_yara_rule_string(yara_dict, include_imports=True):
         yr = Yara_rule()
+        metadata_fields_to_show = ["creation_date", "last_revision_date", "revision",
+                                    "name", "category", "eventid",
+                                    "description", "references"]
+
         metadata_field_mapping = [attr for attr in dir(yr) if
                                   not callable(getattr(yr, attr)) and not attr.startswith("__")]
 
@@ -186,18 +212,20 @@ class Yara_rule(db.Model):
         yara_rule_text += "\tmeta:\n"
         metadata_strings = []
         for field in metadata_field_mapping:
-            if yara_dict.get(field, None) and not "metadata" in field and field in ["creation_date",
-                                                                                    "last_revision_date", "revision",
-                                                                                    "name", "category", "eventid",
-                                                                                    "description", "references"]:
+            if yara_dict.get(field, None) and not "metadata" in field and field in metadata_fields_to_show:
                 try:
                     yara_dict[field] = re.sub("[^\x00-\x7F]", "", yara_dict[field])
                 except:
                     pass
-                metadata_strings.append("\t\t%s = \"%s\"\n" % (
-                    field.title() if not field.lower() == "eventid" else "EventID",
-                    str(yara_dict[field]).replace("\"", "'") if not field.lower() == "references" else str(
-                        yara_dict[field]).replace("\"", "'").replace("\n", ",")))
+
+                if field.lower() == "references":
+                    r_val = str(yara_dict[field]).replace("\"", "'").replace("\n", ",")
+                elif field.lower().startswith("mitre"):
+                    r_val = ",".join(yara_dict[field])
+                else:
+                    r_val = str(yara_dict[field]).replace("\"", "'")
+
+                metadata_strings.append("\t\t%s = \"%s\"\n" % (field.title() if not field.lower() == "eventid" else "EventID", r_val))
 
         try:
             for type_, metalist in yara_dict["metadata"].iteritems():

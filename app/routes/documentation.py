@@ -5,4 +5,4 @@ from app import app, auto
 def documentation():
     """Generate and return API documentation
     Return: API documentation HTML string"""
-    return auto.html()
+    return auto.html(template="autodoc_threatkb.html")

@@ -609,6 +609,8 @@ angular.module('ThreatKB')
                     }
                 );
             }
+            $scope.mitre_techniques = Cfg_settings.get({key: "MITRE_TECHNIQUES"});
+            $scope.mitre_tactics = Cfg_settings.get({key: "MITRE_TACTICS"});
 
             $scope.yara_rule = yara_rule;
             $scope.yara_rules = yara_rules;
