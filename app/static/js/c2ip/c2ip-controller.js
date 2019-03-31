@@ -500,7 +500,7 @@ angular.module('ThreatKB')
     .controller('C2ipSaveController', ['$scope', '$http', '$uibModalInstance', '$location', '$window', 'C2ip', 'c2ip', 'metadata', 'Comments', 'Cfg_states', 'Tags', 'growl', 'Bookmarks', 'hotkeys', 'Users',
         function ($scope, $http, $uibModalInstance, $location, $window, C2ip, c2ip, metadata, Comments, Cfg_states, Tags, growl, Bookmarks, hotkeys, Users) {
 
-            if (c2ip.$promise !== null) {
+            if (c2ip.$promise !== null && c2ip.$promise !== undefined) {
                 c2ip.$promise.then(
                     function (c2) {
                         $window.document.title = "ThreatKB: " + c2.ip;

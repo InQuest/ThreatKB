@@ -497,7 +497,7 @@ angular.module('ThreatKB')
     .controller('C2dnsSaveController', ['$scope', '$http', '$uibModalInstance', '$location', '$window', 'C2dns', 'c2dns', 'metadata', 'Cfg_states', 'Comments', 'Tags', 'growl', 'Bookmarks', 'hotkeys', 'Users',
         function ($scope, $http, $uibModalInstance, $location, $window, C2dns, c2dns, metadata, Cfg_states, Comments, Tags, growl, Bookmarks, hotkeys, Users) {
 
-            if (c2dns.$promise !== undefined) {
+            if (c2dns.$promise !== undefined && c2dns.$promise !== null) {
                 c2dns.$promise.then(
                     function (c2) {
                         $window.document.title = "ThreatKB: " + c2.domain_name;
