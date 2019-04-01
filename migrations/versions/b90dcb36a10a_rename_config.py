@@ -23,7 +23,7 @@ def upgrade():
                     sa.Column('date_created', sa.DateTime(timezone=True), nullable=True),
                     sa.Column('date_modified', sa.DateTime(timezone=True), nullable=True),
                     sa.Column('public', sa.Boolean(), nullable=True),
-                    sa.Column('value', sa.String(length=2048), nullable=True),
+                    sa.Column('value', sa.TEXT(), nullable=True),
                     sa.Column('description', sa.String(length=512), nullable=True),
                     sa.PrimaryKeyConstraint('key')
                     )
