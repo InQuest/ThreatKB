@@ -71,19 +71,23 @@ class Yara_rule(db.Model):
 
     @property
     def mitre_techniques(self):
-        return self._mitre_techniques.split(",")
+        if self._mitre_techniques:
+            return self._mitre_techniques.split(",") or []
+        return []
 
     @property
     def mitre_tactics(self):
-        return self._mitre_tactics.split(",")
+        if self._mitre_tactics:
+            return self._mitre_tactics.split(",")
+        return []
 
     @mitre_techniques.setter
     def mitre_techniques(self, value):
-        return ",".join(value)
+        self._mitre_techniques = ",".join(value)
 
     @mitre_tactics.setter
     def mitre_tactics(self, value):
-        return ",".join(value)
+        self._mitre_tactics = ",".join(value)
 
     @property
     def metadata_fields(self):

@@ -216,6 +216,22 @@ def create_yara_rule():
         imports=yara_rule.Yara_rule.get_imports_from_string(request.json.get("imports", None))
     )
 
+    mitre_techniques = Cfg_settings.get_setting("MITRE_TECHNIQUES").split(",")
+    entity.mitre_techniques = request.json.get("mitre_techniques", [])
+    matches = [technique for technique in entity.mitre_techniques if technique not in mitre_techniques]
+    if matches:
+        raise (Exception(
+            "The following techniques were not found in the configuration: %s. Check 'MITRE_TECHNIQUES' on the settings page" % (
+                matches)))
+
+    mitre_tactics = Cfg_settings.get_setting("MITRE_TACTICS").split(",")
+    entity.mitre_tactics = request.json.get("mitre_tactics", [])
+    matches = [tactic for tactic in entity.mitre_tactics if tactic not in mitre_tactics]
+    if matches:
+        raise (Exception(
+            "The following tactics were not found in the configuration: %s. Check 'MITRE_TACTICS' on the settings page" % (
+                matches)))
+
     if entity.state == release_state:
         entity.state = draft_state.state
 
@@ -347,6 +363,22 @@ def update_yara_rule(id):
         revision=entity.revision if do_not_bump_revision else entity.revision + 1,
         imports=yara_rule.Yara_rule.get_imports_from_string(request.json.get("imports", None))
     )
+
+    mitre_techniques = Cfg_settings.get_setting("MITRE_TECHNIQUES").split(",")
+    entity.mitre_techniques = request.json.get("mitre_techniques", [])
+    matches = [technique for technique in entity.mitre_techniques if technique not in mitre_techniques]
+    if matches:
+        raise (Exception(
+            "The following techniques were not found in the configuration: %s. Check 'MITRE_TECHNIQUES' on the settings page" % (
+                matches)))
+
+    mitre_tactics = Cfg_settings.get_setting("MITRE_TACTICS").split(",")
+    entity.mitre_tactics = request.json.get("mitre_tactics", [])
+    matches = [tactic for tactic in entity.mitre_tactics if tactic not in mitre_tactics]
+    if matches:
+        raise (Exception(
+            "The following tactics were not found in the configuration: %s. Check 'MITRE_TACTICS' on the settings page" % (
+                matches)))
 
     if old_state == release_state.state and entity.state == release_state.state and not do_not_bump_revision:
         entity.state = draft_state.state

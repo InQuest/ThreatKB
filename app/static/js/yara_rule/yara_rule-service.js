@@ -75,7 +75,7 @@ angular.module('ThreatKB')
                 'get': {method: 'GET'},
                 'update': {method: 'PUT'}
             }),
-            copySignatures: copySignatures,
+            jcopySignatures: copySignatures,
             merge_signature: merge_signature,
             updateBatch: updateBatch,
             deleteBatch: deleteBatch,

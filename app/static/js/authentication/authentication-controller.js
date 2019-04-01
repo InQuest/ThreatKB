@@ -62,7 +62,9 @@ angular.module('ThreatKB')
                         description: search,
                         references: search,
                         strings: search,
-                        condition: search
+                        condition: search,
+                        _mitre_techniques: search,
+                        _mitre_tactics: search,
                     },
                     exclude_totals: true,
                     include_metadata: false,

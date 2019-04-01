@@ -21,7 +21,7 @@
                             <small><span ng-bind="$select.selected.email"></span></small>
                         </ui-select-match>
                         <ui-select-choices
-                                repeat="person in (users | filter: $select.search) track by person.id">
+                            repeat="person in (users | filter: $select.search) track by person.id">
                             <small><span ng-bind="person.email"></span></small>
                         </ui-select-choices>
                     </ui-select>
@@ -80,8 +80,9 @@
             <div class="form-group">
                 <span class="pull-right">Wrap&nbsp;<input type="checkbox" ng-checked="wrap_editor"
                                                           ng-model="wrap_editor"
-                                                          ng-change="change_wrap_editor()"></span><br />
-                <ui-codemirror ui-codemirror-opts="editor_options" ng-model="yara_rule.yara_rule_string"></ui-codemirror>
+                                                          ng-change="change_wrap_editor()"></span><br/>
+                <ui-codemirror ui-codemirror-opts="editor_options"
+                               ng-model="yara_rule.yara_rule_string"></ui-codemirror>
             </div>
             <div class="form-group">
                 <label>Comments ({{ yara_rule.comments.length }})</label>
@@ -93,7 +94,8 @@
                                 <li class="list-group-item justify-content-between"
                                     ng-repeat="comment in yara_rule.comments | orderBy:'-date_created'">
                                     <div>
-                                        <pre style="word-break: normal; white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word;">{{ comment.comment }}</pre>
+                                        <pre
+                                            style="word-break: normal; white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word;">{{ comment.comment }}</pre>
                                         <span>{{ comment.user.email }}&nbsp;<small>{{ pretty_date(comment.date_created) }}</small></span>
                                     </div>
                                 </li>
@@ -213,7 +215,7 @@
                             <small><span ng-bind="$select.selected.email || yara_rule.owner_user.email"></span></small>
                         </ui-select-match>
                         <ui-select-choices
-                                repeat="person in (users | filter: $select.search) track by person.id">
+                            repeat="person in (users | filter: $select.search) track by person.id">
                             <small><span ng-bind="person.email"></span></small>
                         </ui-select-choices>
                     </ui-select>
@@ -267,6 +269,30 @@
                 </div>
 
                 <div class="form-group">
+                    <label>Mitre ATT&CK Tactics</label>
+                    <ui-select multiple ng-model="yara_rule.mitre_tactics" theme="bootstrap"
+                               close-on-select="false"
+                               title="Choose tactics">
+                        <ui-select-match placeholder="Choose tactics...">{{$item}}</ui-select-match>
+                        <ui-select-choices repeat="tactic in mitre_tactics | filter:$select.search">
+                            {{ tactic }}
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+
+                <div class="form-group">
+                    <label>Mitre ATT&CK Tactics</label>
+                    <ui-select multiple ng-model="yara_rule.mitre_techniques" theme="bootstrap"
+                               close-on-select="false"
+                               title="Choose tactics">
+                        <ui-select-match placeholder="Choose tactics...">{{$item}}</ui-select-match>
+                        <ui-select-choices repeat="tactic in mitre_techniques | filter:$select.search">
+                            {{ tactic }}
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+
+                <div class="form-group">
                     <label>Category</label>
                     <span class="error text-danger">*</span>
                     <ui-select ng-model="yara_rule.category" ng-required="true">
@@ -274,7 +300,7 @@
                             <span ng-bind="$select.selected.category || yara_rule.category"></span>
                         </ui-select-match>
                         <ui-select-choices
-                                repeat="category in (cfg_category_range_mapping | filter: $select.search) track by category.id">
+                            repeat="category in (cfg_category_range_mapping | filter: $select.search) track by category.id">
                             <span ng-bind="category.category"></span>
                         </ui-select-choices>
                     </ui-select>
@@ -339,11 +365,11 @@
                                on-select="update_selected_metadata(m, $select.selected)" ng-required="m.required">
                         <ui-select-match placeholder="Select an option or press delete to clear...">
                             <small><span
-                                    ng-bind="$select.selected.choice || yara_rule.metadata_values[m.key].value"></span>
+                                ng-bind="$select.selected.choice || yara_rule.metadata_values[m.key].value"></span>
                             </small>
                         </ui-select-match>
                         <ui-select-choices
-                                repeat="option in (m.choices | filter: $select.search) track by option.id">
+                            repeat="option in (m.choices | filter: $select.search) track by option.id">
                             <small><span>{{ option.choice }}</span></small>
                         </ui-select-choices>
                     </ui-select>
@@ -358,7 +384,7 @@
                             <small><span ng-bind="$select.selected.choice || m.default"></span></small>
                         </ui-select-match>
                         <ui-select-choices
-                                repeat="option in (m.choices | filter: $select.search) track by option.id">
+                            repeat="option in (m.choices | filter: $select.search) track by option.id">
                             <small><span>{{ option.choice }}</span></small>
                         </ui-select-choices>
                     </ui-select>
@@ -393,7 +419,7 @@
                         <span class="input-group-btn" style="height:10px;">
                             <button class="btn btn-secondary" type="button"
                                     ng-click="add_comment(yara_rule.id)" style="height:100%;"><span
-                                    class="glyphicon glyphicon-plus"></span></button>
+                                class="glyphicon glyphicon-plus"></span></button>
                         </span>
                     </div>
                     <div ng-if="yara_rule.comments && yara_rule.comments.length" style="padding-top:3px;">
@@ -404,9 +430,14 @@
                                     <li class="list-group-item justify-content-between"
                                         ng-repeat="comment in yara_rule.comments | orderBy:'-date_created'">
                                         <div>
-                                            <pre style="word-break: normal; white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word;">{{ comment.comment }}</pre>
+                                            <pre
+                                                style="word-break: normal; white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word;">{{ comment.comment }}</pre>
                                             <span>{{ comment.user.email }}&nbsp;<small>{{ pretty_date(comment.date_created) }}</small></span>
-                                            <button type="button" class="btn btn-xs pull-right" confirmed-click="delete_comment({{ yara_rule.id }},{{ comment.id }})" ng-confirm-click="Are you sure you want to delete comment?"><span style="color: red;" class="glyphicon glyphicon-remove-circle"></span></button>
+                                            <button type="button" class="btn btn-xs pull-right"
+                                                    confirmed-click="delete_comment({{ yara_rule.id }},{{ comment.id }})"
+                                                    ng-confirm-click="Are you sure you want to delete comment?"><span
+                                                style="color: red;" class="glyphicon glyphicon-remove-circle"></span>
+                                            </button>
                                         </div>
                                     </li>
                                 </ul>
@@ -437,18 +468,18 @@
                                         ng-repeat="f in yara_rule.files | orderBy:'-last_revision_date'">
                                         <a title="{{ file_store_path.value }}/{{ entity_mapping.SIGNATURE }}/{{ f.entity_id }}/{{ f.filename }}"
                                            href="ThreatKB/files/{{ f.entity_type }}/{{ f.entity_id }}/{{ f.id }}">{{ f.filename }}</a>&nbsp;<span
-                                            ng-if="f.date_modified"
-                                            style="font-size: 0.8em;">({{ pretty_date(f.date_modified) }} by {{ f.user.email }})</span>
+                                        ng-if="f.date_modified"
+                                        style="font-size: 0.8em;">({{ pretty_date(f.date_modified) }} by {{ f.user.email }})</span>
                                         <div class="pull-right">
                                             <div><a title="Search VirusTotal"
                                                     href="https://www.virustotal.com/#/file/{{ f.sha256 }}/detection"
                                                     target="_blank"><span
-                                                    class="glyphicon glyphicon-certificate"></span></a>
+                                                class="glyphicon glyphicon-certificate"></span></a>
                                                 &nbsp;
                                                 <a title="Search Google"
                                                    href="https://google.com/search?q={{ f.sha256 }}"
                                                    target="_blank"><span
-                                                        class="glyphicon glyphicon-globe"></span></a>
+                                                    class="glyphicon glyphicon-globe"></span></a>
                                                 &nbsp;
                                                 <a>
                                             <span class="glyphicon glyphicon-link" style="font-size: 1.2em;"
@@ -480,8 +511,10 @@
                                             <uib-accordion>
                                                 <div uib-accordion-group class="panel-default"
                                                      heading="{{ revision.revision }} @ {{ revision.date_created }} by {{ revision.user.email }}"
-                                                     ng-repeat="revision in yara_rule.revisions | orderBy:'-date_created'" is-open="revisionIsOpen">
-                                                    <pre ng-controller="Yara_revisionController" ng-show="revisionIsLoaded">{{revision.yara_rule_string}}</pre>
+                                                     ng-repeat="revision in yara_rule.revisions | orderBy:'-date_created'"
+                                                     is-open="revisionIsOpen">
+                                                    <pre ng-controller="Yara_revisionController"
+                                                         ng-show="revisionIsLoaded">{{ revision.yara_rule_string }}</pre>
                                                 </div>
                                             </uib-accordion>
                                         </div>
@@ -496,7 +529,8 @@
 
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger pull-left"
-                         ng-if="yara_rule.id" ng-click="merge_signature()">Merge This Into</button>
+                        ng-if="yara_rule.id" ng-click="merge_signature()">Merge This Into
+                </button>
 
                 <div class="pull-left" style="width:350px; padding-right:4px; padding-left:4px;" ng-if="yara_rule.id">
                     <ui-select ng-model="selected_signature"
@@ -505,7 +539,7 @@
                             <small><span ng-bind="$select.selected.name || row.entity.name"></span></small>
                         </ui-select-match>
                         <ui-select-choices
-                                repeat="yr in (yara_rules | filter: $select.search) track by yr.id">
+                            repeat="yr in (yara_rules | filter: $select.search) track by yr.id">
                             <small><span>{{ yr.eventid }} - {{ yr.name }}</span></small>
                         </ui-select-choices>
                     </ui-select>
@@ -528,13 +562,15 @@
     <br>
     <div class="container-fluid">
         <button id="batchCopyBtn" aria-label="" type="button" class="btn btn-secondary" ng-disabled="!checked_counter"
-        uib-tooltip="Copied {{ checked_counter }} Yara Rule{{ checked_counter > 1 ? 's' : '' }}!" tooltip-trigger="'outsideClick'">
+                uib-tooltip="Copied {{ checked_counter }} Yara Rule{{ checked_counter > 1 ? 's' : '' }}!"
+                tooltip-trigger="'outsideClick'">
             Copy ({{ checked_counter }})
         </button>
         <button type="button" class="btn btn-secondary" ng-disabled="!checked_counter" ng-click="download_rules()">
             Download ({{ checked_counter }})
         </button>
-        <button type="button" class="btn btn-secondary" ng-disabled="!checked_counter || checked_counter<2" ng-click="open_batch()">
+        <button type="button" class="btn btn-secondary" ng-disabled="!checked_counter || checked_counter<2"
+                ng-click="open_batch()">
             Batch Edit ({{ checked_counter }})
         </button>
         <button type="button" class="btn btn-secondary" ng-disabled="!checked_counter || checked_counter<2"
@@ -551,19 +587,21 @@
     <style type="text/css">
         .gridTags {
             padding: 0;
-            width:180px;
+            width: 180px;
             height: 2em;
             line-height: 1em;
             text-overflow: ellipsis;
             word-break: break-all;
-            overflow:hidden;
+            overflow: hidden;
             white-space: nowrap;
         }
-        .gridTags:hover{
+
+        .gridTags:hover {
             overflow: visible;
             white-space: normal;
-            height:auto;
+            height: auto;
         }
+
         .gridTags li:not(:last-child):after {
             content: ", ";
         }

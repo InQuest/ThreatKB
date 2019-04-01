@@ -609,8 +609,26 @@ angular.module('ThreatKB')
                     }
                 );
             }
-            $scope.mitre_techniques = Cfg_settings.get({key: "MITRE_TECHNIQUES"});
-            $scope.mitre_tactics = Cfg_settings.get({key: "MITRE_TACTICS"});
+
+            var mitre_techniques = Cfg_settings.get({key: "MITRE_TECHNIQUES"});
+            if (mitre_techniques.$promise !== null && mitre_techniques.$promise !== undefined) {
+                mitre_techniques.$promise.then(
+                    function (techniques) {
+                        $scope.mitre_techniques = techniques.value.split(",");
+                    }
+                );
+            }
+
+            $scope.mitre_tests = ["red", "blue"]
+
+            var mitre_tactics = Cfg_settings.get({key: "MITRE_TACTICS"});
+            if (mitre_tactics.$promise !== null && mitre_tactics.$promise !== undefined) {
+                mitre_tactics.$promise.then(
+                    function (tactics) {
+                        $scope.mitre_tactics = tactics.value.split(",");
+                    }
+                );
+            }
 
             $scope.yara_rule = yara_rule;
             $scope.yara_rules = yara_rules;
@@ -639,6 +657,7 @@ angular.module('ThreatKB')
             };
 
             $scope.save_artifact = function () {
+
                 Yara_rule.resource.update({id: $scope.yara_rule.id}, $scope.yara_rule,
                     function (data) {
                         if (!data) {

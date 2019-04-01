@@ -15,7 +15,7 @@ from sqlalchemy.dialects import mysql
 from app.models import cfg_settings
 
 revision = 'fe5820317f46'
-down_revision = '650b0ad88d25'
+down_revision = '43120a4ae154'
 branch_labels = None
 depends_on = None
 
