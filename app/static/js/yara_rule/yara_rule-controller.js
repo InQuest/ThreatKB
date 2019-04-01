@@ -619,8 +619,6 @@ angular.module('ThreatKB')
                 );
             }
 
-            $scope.mitre_tests = ["red", "blue"]
-
             var mitre_tactics = Cfg_settings.get({key: "MITRE_TACTICS"});
             if (mitre_tactics.$promise !== null && mitre_tactics.$promise !== undefined) {
                 mitre_tactics.$promise.then(
