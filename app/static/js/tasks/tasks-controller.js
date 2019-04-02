@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('TasksController', ['$scope', '$timeout', '$filter', '$http', '$uibModal', 'resolvedTask', 'Task', 'Cfg_states', 'growl', 'Users', 'openModalForId', 'uiGridConstants', '$routeParams', 'Cfg_settings',
-        function ($scope, $timeout, $filter, $http, $uibModal, resolvedTask, Task, Cfg_states, growl, Users, openModalForId, uiGridConstants, $routeParams, Cfg_settings) {
+    .controller('TasksController', ['$scope', '$timeout', '$filter', '$q', '$http', '$uibModal', 'resolvedTask', 'Task', 'Cfg_states', 'growl', 'Users', 'openModalForId', 'uiGridConstants', '$routeParams', 'Cfg_settings',
+        function ($scope, $timeout, $filter, $q, $http, $uibModal, resolvedTask, Task, Cfg_states, growl, Users, openModalForId, uiGridConstants, $routeParams, Cfg_settings) {
 
             $scope.tasks = resolvedTask;
 
@@ -228,40 +228,54 @@ angular.module('ThreatKB')
                     ]
             };
 
-            var getPage = function () {
-                var url = '/ThreatKB/tasks?';
-                url += 'page_number=' + (paginationOptions.pageNumber - 1);
-                url += '&page_size=' + paginationOptions.pageSize;
-                switch (paginationOptions.sort_dir) {
-                    case uiGridConstants.ASC:
-                        url += '&sort_dir=ASC';
-                        break;
-                    case uiGridConstants.DESC:
-                        url += '&sort_dir=DESC';
-                        break;
-                    default:
-                        break;
-                }
-                if (paginationOptions.sort_by !== null) {
-                    url += '&sort_by=' + paginationOptions.sort_by;
-                }
-                if (paginationOptions.searches !== {}) {
-                    url += '&searches=' + JSON.stringify(paginationOptions.searches);
-                }
-                $http.get(url)
-                    .then(function (response) {
-                        $scope.gridOptions.totalItems = response.data.total_count;
-                        $scope.gridOptions.data = response.data.data;
-                        $scope.tasks = $scope.gridOptions.data;
-                        $scope.clear_checked();
-                        for (var i = 0; i < $scope.gridOptions.data.length; i++) {
-                            $scope.checked_indexes.push(false);
-                        }
-                        $scope.gridApi.grid.gridHeight = parseInt($scope.getTableHeight().height);  // Re-apply table height calculation, based on new data
-                        $scope.gridApi.core.refresh();
-                    }, function (error) {
-                    });
-            };
+            // Debounce getPage requests (by 1000ms)
+            var cancelGetPage = null,
+                getPageDelay = 1000;
+            var getPage = _.debounce(
+                function () {
+                    // Cancel previous request (if any found)
+                    if (cancelGetPage) {
+                        cancelGetPage.resolve();
+                    }
+                    // Compose request
+                    var url = '/ThreatKB/tasks?';
+                    url += 'page_number=' + (paginationOptions.pageNumber - 1);
+                    url += '&page_size=' + paginationOptions.pageSize;
+                    switch (paginationOptions.sort_dir) {
+                        case uiGridConstants.ASC:
+                            url += '&sort_dir=ASC';
+                            break;
+                        case uiGridConstants.DESC:
+                            url += '&sort_dir=DESC';
+                            break;
+                        default:
+                            break;
+                    }
+                    if (paginationOptions.sort_by !== null) {
+                        url += '&sort_by=' + paginationOptions.sort_by;
+                    }
+                    if (paginationOptions.searches !== {}) {
+                        url += '&searches=' + JSON.stringify(paginationOptions.searches);
+                    }
+                    // Set new request cancelation trigger
+                    cancelGetPage = $q.defer();
+                    // ... and fire off a cancelable request
+                    $http.get(url, { timeout: cancelGetPage.promise })
+                        .then(function (response) {
+                            $scope.gridOptions.totalItems = response.data.total_count;
+                            $scope.gridOptions.data = response.data.data;
+                            $scope.tasks = $scope.gridOptions.data;
+                            $scope.clear_checked();
+                            for (var i = 0; i < $scope.gridOptions.data.length; i++) {
+                                $scope.checked_indexes.push(false);
+                            }
+                            $scope.gridApi.grid.gridHeight = parseInt($scope.getTableHeight().height);  // Re-apply table height calculation, based on new data
+                            $scope.gridApi.core.refresh();
+                        }, function (error) {
+                        });
+                },
+                getPageDelay
+            );
 
             $scope.getTableHeight = function () {
                 var rowHeight = $scope.gridOptions.rowHeight;
