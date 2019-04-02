@@ -303,7 +303,7 @@ angular.module('ThreatKB')
 
             $scope.create = function () {
                 $scope.clear();
-                $scope.open();
+                $scope.edit();
             };
 
             $scope.update = function (id) {
