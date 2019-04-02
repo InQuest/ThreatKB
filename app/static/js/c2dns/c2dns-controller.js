@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('C2dnsController', ['$scope', '$timeout', '$filter', '$http', '$uibModal', 'resolvedC2dns', 'C2dns', 'Cfg_states', 'growl', 'Users', 'openModalForId', 'uiGridConstants', 'Cfg_settings', '$routeParams',
-        function ($scope, $timeout, $filter, $http, $uibModal, resolvedC2dns, C2dns, Cfg_states, growl, Users, openModalForId, uiGridConstants, Cfg_settings, $routeParams) {
+    .controller('C2dnsController', ['$scope', '$timeout', '$filter', '$q', '$http', '$uibModal', 'resolvedC2dns', 'C2dns', 'Cfg_states', 'growl', 'Users', 'openModalForId', 'uiGridConstants', 'Cfg_settings', '$routeParams',
+        function ($scope, $timeout, $filter, $q, $http, $uibModal, resolvedC2dns, C2dns, Cfg_states, growl, Users, openModalForId, uiGridConstants, Cfg_settings, $routeParams) {
 
             $scope.c2dns = resolvedC2dns;
 
@@ -256,40 +256,55 @@ angular.module('ThreatKB')
                     ]
             };
 
-            var getPage = function () {
-                var url = '/ThreatKB/c2dns?';
-                url += 'page_number=' + (paginationOptions.pageNumber - 1);
-                url += '&page_size=' + paginationOptions.pageSize;
-                switch (paginationOptions.sort_dir) {
-                    case uiGridConstants.ASC:
-                        url += '&sort_dir=ASC';
-                        break;
-                    case uiGridConstants.DESC:
-                        url += '&sort_dir=DESC';
-                        break;
-                    default:
-                        break;
-                }
-                if (paginationOptions.sort_by !== null) {
-                    url += '&sort_by=' + paginationOptions.sort_by;
-                }
-                if (paginationOptions.searches !== {}) {
-                    url += '&searches=' + JSON.stringify(paginationOptions.searches);
-                }
-                $http.get(url)
-                    .then(function (response) {
-                        $scope.gridOptions.totalItems = response.data.total_count;
-                        $scope.gridOptions.data = response.data.data;
-                        $scope.c2dns = $scope.gridOptions.data;
-                        $scope.clear_checked();
-                        for (var i = 0; i < $scope.gridOptions.data.length; i++) {
-                            $scope.checked_indexes.push(false);
-                        }
-                        $scope.gridApi.grid.gridHeight = parseInt($scope.getTableHeight().height);  // Re-apply table height calculation, based on new data
-                        $scope.gridApi.core.refresh();
-                    }, function (error) {
-                    });
-            };
+            // Debounce getPage requests (by 1000ms)
+            var cancelGetPage = null,
+                getPageDelay = 1000;
+            var getPage = _.debounce(
+                function () {
+                    // Cancel previous request (if any found)
+                    if (cancelGetPage) {
+                        cancelGetPage.resolve();
+                    }
+                    // Compose request
+                    var url = '/ThreatKB/c2dns?';
+                    url += 'page_number=' + (paginationOptions.pageNumber - 1);
+                    url += '&page_size=' + paginationOptions.pageSize;
+                    switch (paginationOptions.sort_dir) {
+                        case uiGridConstants.ASC:
+                            url += '&sort_dir=ASC';
+                            break;
+                        case uiGridConstants.DESC:
+                            url += '&sort_dir=DESC';
+                            break;
+                        default:
+                            break;
+                    }
+                    if (paginationOptions.sort_by !== null) {
+                        url += '&sort_by=' + paginationOptions.sort_by;
+                    }
+                    if (paginationOptions.searches !== {}) {
+                        url += '&searches=' + JSON.stringify(paginationOptions.searches);
+                    }
+                    // Set new request cancelation trigger
+                    cancelGetPage = $q.defer();
+                    // ... and fire off a cancelable request
+                    $http.get(url, { timeout: cancelGetPage.promise })
+                    $http.get(url)
+                        .then(function (response) {
+                            $scope.gridOptions.totalItems = response.data.total_count;
+                            $scope.gridOptions.data = response.data.data;
+                            $scope.c2dns = $scope.gridOptions.data;
+                            $scope.clear_checked();
+                            for (var i = 0; i < $scope.gridOptions.data.length; i++) {
+                                $scope.checked_indexes.push(false);
+                            }
+                            $scope.gridApi.grid.gridHeight = parseInt($scope.getTableHeight().height);  // Re-apply table height calculation, based on new data
+                            $scope.gridApi.core.refresh();
+                        }, function (error) {
+                        });
+                },
+                getPageDelay
+            );
 
             getPage();
 
