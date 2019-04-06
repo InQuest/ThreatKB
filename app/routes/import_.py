@@ -20,8 +20,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
 
     domain_names = {domain_name.domain_name.lower(): domain_name for domain_name in c2dns.C2dns.query.all()}
     ip_addresses = {ipaddress.ip: ipaddress for ipaddress in c2ip.C2ip.query.all()}
-    yara_rules = {yr.name: yr for yr in
-                  db.session.query(yara_rule.Yara_rule).filter(yara_rule.Yara_rule.active > 0).all()}
+    yara_rules = {yr.name: yr for yr in db.session.query(yara_rule.Yara_rule).all()}
     unique_rule_name_enforcement = cfg_settings.Cfg_settings.get_setting("ENFORCE_UNIQUE_YARA_RULE_NAMES")
 
     if not cfg_states.Cfg_states.query.filter_by(state=default_state).first():
