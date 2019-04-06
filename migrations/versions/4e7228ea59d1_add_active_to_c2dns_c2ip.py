@@ -19,8 +19,10 @@ depends_on = None
 def upgrade():
     op.add_column('c2dns', sa.Column('active', sa.Boolean(), nullable=False))
     op.create_index(u'ix_c2dns_active', 'c2dns', ['active'], unique=False)
+    op.execute("""UPDATE c2dns set active=1;""")
     op.add_column('c2ip', sa.Column('active', sa.Boolean(), nullable=False))
     op.create_index(u'ix_c2ip_active', 'c2ip', ['active'], unique=False)
+    op.execute("""UPDATE c2ip set active=1;""")
     op.create_index(u'ix_yara_rules_active', 'yara_rules', ['active'], unique=False)
 
 
