@@ -186,15 +186,16 @@ def delete_c2dns(id):
     """Delete c2dns artifact associated with id
     Return: None"""
     entity = c2dns.C2dns.query.get(id)
-    tag_mapping_to_delete = entity.to_dict()['tags']
+    entity.active = False
 
     if not entity:
         abort(404)
+
     if not current_user.admin and entity.owner_user_id != current_user.id:
         abort(403)
-    db.session.delete(entity)
-    db.session.commit()
 
+    db.session.merge(entity)
+    db.session.commit()
     delete_tags_mapping(entity.__tablename__, entity.id)
     delete_bookmarks(ENTITY_MAPPING["DNS"], id, current_user.id)
 

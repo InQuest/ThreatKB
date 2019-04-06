@@ -192,12 +192,15 @@ def delete_c2ip(id):
     """Delete c2ip artifact associated with id
     Return: None"""
     entity = c2ip.C2ip.query.get(id)
+    entity.active = False
 
     if not entity:
         abort(404)
+
     if not current_user.admin and entity.owner_user_id != current_user.id:
         abort(403)
-    db.session.delete(entity)
+
+    db.session.merge(entity)
     db.session.commit()
 
     delete_tags_mapping(entity.__tablename__, entity.id)
