@@ -34,6 +34,7 @@ class C2ip(db.Model):
     references = db.Column(db.TEXT())
     expiration_type = db.Column(db.String(32))
     expiration_timestamp = db.Column(db.DateTime(timezone=True))
+    active = db.Column(db.Boolean, nullable=False, default=True, index=True)
 
     created_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
     created_user = db.relationship('KBUser', foreign_keys=created_user_id,
