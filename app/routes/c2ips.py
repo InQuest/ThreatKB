@@ -262,3 +262,12 @@ def batch_delete_c2ip():
                             artifact=c2ip.C2ip,
                             session=db.session,
                             entity_mapping=ENTITY_MAPPING["IP"])
+
+
+@app.route('/ThreatKB/c2ip/delete_all_inactive', methods=['PUT'])
+@auto.doc()
+@login_required
+def delete_all_inactive_c2ip():
+    db.session.query(c2ip.C2ip).filter(c2ip.C2ip.active == 0).delete()
+    db.session.commit()
+    return jsonify(''), 200

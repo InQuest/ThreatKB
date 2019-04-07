@@ -412,6 +412,11 @@
                 ng-confirm-click="Are you sure you want to batch delete selected c2dns records?">
             Batch Delete ({{ checked_counter }})
         </button>
+        <button type="button" class="btn btn-secondary" ng-if="view_selected == 'Inactive Only'"
+                confirmed-click="delete_all_inactive()"
+                ng-confirm-click="Are you sure you want to delete all inactive DNS?">
+            Delete All Inactive
+        </button>
         <button class="btn btn-secondary pull-right" style="color:inherit;" ng-click="create()">
             Create C2 DNS
         </button>

@@ -40,6 +40,17 @@ angular.module('ThreatKB')
             );
         }
 
+        function delete_all_inactive() {
+            return $http.put('/ThreatKB/c2ip/delete_all_inactive').then(function (success) {
+                    if (success.status === 200) {
+                        return success.data;
+                    }
+                }, function (error) {
+                    return $q.reject(error.data);
+                }
+            );
+        }
+
         return {
             resource: $resource('ThreatKB/c2ips/:id', {}, {
                 'query': {method: 'GET', isArray: true},
@@ -48,6 +59,7 @@ angular.module('ThreatKB')
             }),
             updateBatch: updateBatch,
             deleteBatch: deleteBatch,
-            activateArtifact: activateArtifact
+            activateArtifact: activateArtifact,
+            delete_all_inactive: delete_all_inactive
         };
     }]);

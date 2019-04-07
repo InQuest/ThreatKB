@@ -589,6 +589,11 @@
                 ng-confirm-click="Are you sure you want to batch inactive selected signature records?">
             Batch Delete ({{ checked_counter }})
         </button>
+        <button type="button" class="btn btn-secondary" ng-if="view_selected == 'Inactive Only'"
+                confirmed-click="delete_all_inactive()"
+                ng-confirm-click="Are you sure you want to delete all inactive Yara Rules?">
+            Delete All Inactive
+        </button>
         <button class="btn btn-secondary pull-right" style="color:inherit; padding-left:10px;" ng-click="create()"
                 title="Create Signatures">
             Create Signature

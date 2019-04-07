@@ -255,3 +255,11 @@ def batch_delete_c2dns():
                             session=db.session,
                             entity_mapping=ENTITY_MAPPING["DNS"])
 
+
+@app.route('/ThreatKB/c2dns/delete_all_inactive', methods=['PUT'])
+@auto.doc()
+@login_required
+def delete_all_inactive_c2dns():
+    db.session.query(c2dns.C2dns).filter(c2dns.C2dns.active == 0).delete()
+    db.session.commit()
+    return jsonify(''), 200

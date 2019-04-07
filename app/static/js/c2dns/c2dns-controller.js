@@ -366,6 +366,13 @@ angular.module('ThreatKB')
                 });
             };
 
+            $scope.delete_all_inactive = function () {
+                C2dns.delete_all_inactive().then(function (success) {
+                    growl.info("Successfully deleted all inactive DNS", {ttl: 3000});
+                    getPage();
+                })
+            };
+
             $scope.activateArtifact = function (id, name) {
                 C2dns.activateArtifact(id).then(function (success) {
                     growl.info("Successfully activated signature " + name, {ttl: 3000});

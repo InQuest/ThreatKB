@@ -546,6 +546,13 @@ angular.module('ThreatKB')
                 $scope.openIpModal(id);
             };
 
+            $scope.delete_all_inactive = function () {
+                C2ip.delete_all_inactive().then(function (success) {
+                    growl.info("Successfully deleted all inactive IPs", {ttl: 3000});
+                    getPage();
+                })
+            };
+
             $scope.activateArtifact = function (id, name) {
                 C2ip.activateArtifact(id).then(function (success) {
                     growl.info("Successfully activated signature " + name, {ttl: 3000});

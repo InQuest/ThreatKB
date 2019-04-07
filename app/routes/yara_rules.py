@@ -490,6 +490,11 @@ def delete_yara_rule(id):
         # delete_tags_mapping(entity.__tablename__, entity.id)
         delete_bookmarks(ENTITY_MAPPING["SIGNATURE"], id, current_user.id)
     else:
+
+        db.session.query(yara_rule.Yara_testing_history).filter(
+            yara_rule.Yara_testing_history.yara_rule_id.in_([entity.id])).delete(synchronize_session='fetch')
+        db.session.query(yara_rule.Yara_rule_history).filter(
+            yara_rule.Yara_rule_history.yara_rule_id.in_([entity.id])).delete(synchronize_session='fetch')
         db.session.delete(entity)
         db.session.commit()
 
@@ -537,3 +542,18 @@ def copy_yara_rules():
             signatures.append(sig.to_dict(include_yara_rule_string=True)["yara_rule_string"])
 
     return jsonify('\n\n'.join(map(str, signatures))), 200
+
+
+@app.route('/ThreatKB/yara_rules/delete_all_inactive', methods=['PUT'])
+@auto.doc()
+@login_required
+def delete_all_inactive_yara_rules():
+    rules_to_delete = db.session.query(yara_rule.Yara_rule).filter(yara_rule.Yara_rule.active == 0).all()
+    rules_to_delete_ids = [rule.id for rule in rules_to_delete]
+    db.session.query(yara_rule.Yara_testing_history).filter(
+        yara_rule.Yara_testing_history.yara_rule_id.in_(rules_to_delete_ids)).delete(synchronize_session='fetch')
+    db.session.query(yara_rule.Yara_rule_history).filter(
+        yara_rule.Yara_rule_history.yara_rule_id.in_(rules_to_delete_ids)).delete(synchronize_session='fetch')
+    db.session.query(yara_rule.Yara_rule).filter(yara_rule.Yara_rule.active == 0).delete()
+    db.session.commit()
+    return jsonify(''), 200

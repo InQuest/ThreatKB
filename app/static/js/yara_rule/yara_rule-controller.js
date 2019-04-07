@@ -381,6 +381,12 @@ angular.module('ThreatKB')
                 $scope.getPage();
             };
 
+            $scope.delete_all_inactive = function () {
+                Yara_rule.delete_all_inactive().then(function (success) {
+                    growl.info("Successfully deleted all inactive yara rules", {ttl: 3000});
+                    getPage();
+                })
+            };
 
             getPage();
 
