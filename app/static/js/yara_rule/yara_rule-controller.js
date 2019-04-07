@@ -79,7 +79,7 @@ angular.module('ThreatKB')
                 $scope.copy_rules();
             };
 
-            let c = new ClipboardJS('#batchCopyBtn', {
+            var c = new ClipboardJS('#batchCopyBtn', {
                 text: function (trigger) {
                     return trigger.getAttribute('aria-label');
                 }
@@ -278,6 +278,12 @@ angular.module('ThreatKB')
                             enableColumnMenu: false,
                             enableSorting: false,
                             cellTemplate: '<div style="text-align: center;">'
+                                + '<button type="button" ng-if="!row.entity.active" ng-click="grid.appScope.activateRule(row.entity.id, row.entity.name)"'
+                                + ' class="btn btn-sm">'
+                                + '<small><span class="glyphicon glyphicon-check"></span>'
+                                + '</small>'
+                                + '</button>'
+                                + '&nbsp;'
                                 + '<button type="button" ng-click="grid.appScope.viewRule(row.entity.id)"'
                                 + ' class="btn btn-sm">'
                                 + '<small><span class="glyphicon glyphicon-eye-open"></span>'
@@ -290,9 +296,16 @@ angular.module('ThreatKB')
                                 + '</small>'
                                 + '</button>'
                                 + '&nbsp;'
-                                + '<button confirmed-click="grid.appScope.delete(row.entity.id)"'
+                                + '<button ng-if="row.entity.active" confirmed-click="grid.appScope.delete(row.entity.id)"'
                                 + ' ng-confirm-click="Are you sure you want to '
-                                + 'inactivate this signature?" class="btn btn-sm btn-danger">'
+                                + 'deactivate this signature?" class="btn btn-sm btn-danger">'
+                                + '<small>'
+                                + '<span class="glyphicon glyphicon-remove-circle"></span>'
+                                + '</small>'
+                                + '</button>'
+                                + '<button ng-if="!row.entity.active" confirmed-click="grid.appScope.delete(row.entity.id)"'
+                                + ' ng-confirm-click="Are you sure you want to '
+                                + 'deactivate this signature?" class="btn btn-sm btn-danger">'
                                 + '<small>'
                                 + '<span class="glyphicon glyphicon-remove-circle"></span>'
                                 + '</small>'
@@ -320,6 +333,7 @@ angular.module('ThreatKB')
                     url += '&include_yara_string=0';
                     url += '&short=1';
                     url += '&include_metadata=0';
+                    url += '&view=' + $scope.view_selected;
 
                     switch (paginationOptions.sort_dir) {
                         case uiGridConstants.ASC:
@@ -357,6 +371,17 @@ angular.module('ThreatKB')
                 getPageDelay
             );
 
+            $scope.getPage = getPage;
+
+            $scope.view_options = ["Active Only", "All", "Inactive Only"];
+            $scope.view_selected = "Active Only";
+            $scope.change_view = function (item, model) {
+                $scope.view_selected = item;
+
+                $scope.getPage();
+            };
+
+
             getPage();
 
             $scope.getTableHeight = function () {
@@ -383,6 +408,13 @@ angular.module('ThreatKB')
             $scope.viewRule = function (id) {
                 $scope.yara_rule = Yara_rule.resource.get({id: id, include_yara_string: 1});
                 $scope.view(id);
+            };
+
+            $scope.activateRule = function (id, name) {
+                Yara_rule.activateRule(id).then(function (success) {
+                    growl.info("Successfully activated signature " + name, {ttl: 3000});
+                    getPage();
+                });
             };
 
             $scope.delete = function (id) {

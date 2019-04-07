@@ -29,6 +29,17 @@ angular.module('ThreatKB')
             );
         }
 
+        function activateArtifact(id) {
+            return $http.put('/ThreatKB/c2dns/activate/' + id).then(function (success) {
+                    if (success.status === 200) {
+                        return success.data;
+                    }
+                }, function (error) {
+                    return $q.reject(error.data);
+                }
+            );
+        }
+
         return {
             resource: $resource('ThreatKB/c2dns/:id', {}, {
                 'query': {method: 'GET', isArray: true},
@@ -36,6 +47,7 @@ angular.module('ThreatKB')
                 'update': {method: 'PUT'}
             }),
             updateBatch: updateBatch,
-            deleteBatch: deleteBatch
+            deleteBatch: deleteBatch,
+            activateArtifact: activateArtifact
         };
     }]);

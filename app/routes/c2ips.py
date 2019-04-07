@@ -29,6 +29,22 @@ def get_all_c2ips():
     searches: dictionary of column filters as {column1:filter1, column2:filter2}, columns must exist on C2ip model or as dynamic metadata, default {}
 
     Return: list of c2ip artifact dictionaries"""
+
+    view = request.args.get("view", "Active Only")
+
+    if view == "All":
+        include_inactive = True
+        include_active = True
+    elif view == "Active Only":
+        include_inactive = False
+        include_active = True
+    elif view == "Inactive Only":
+        include_inactive = True
+        include_active = False
+    else:
+        include_inactive = False
+        include_active = True
+
     searches = request.args.get('searches', '{}')
     page_number = request.args.get('page_number', False)
     page_size = request.args.get('page_size', False)
@@ -46,6 +62,8 @@ def get_all_c2ips():
                                     sort_by=sort_by,
                                     sort_direction=sort_direction,
                                     include_metadata=include_metadata,
+                                    include_inactive=include_inactive,
+                                    include_active=include_active,
                                     exclude_totals=exclude_totals,
                                     default_sort="c2ip.date_created",
                                     operator=operator)
@@ -96,7 +114,8 @@ def create_c2ip():
         if request.json.get("expiration_type", None) else None,
         created_user_id=current_user.id,
         modified_user_id=current_user.id,
-        owner_user_id=current_user.id
+        owner_user_id=current_user.id,
+        active=request.json.get("active", True)
     )
     db.session.add(entity)
     try:
@@ -120,6 +139,16 @@ def create_c2ip():
 
     return jsonify(entity.to_dict()), 201
 
+
+@app.route('/ThreatKB/c2ip/activate/<int:id>', methods=['PUT'])
+@auto.doc()
+@login_required
+def activate_c2ip(id):
+    entity = c2ip.C2ip.query.get(id)
+    entity.active = 1
+    db.session.merge(entity)
+    db.session.commit()
+    return jsonify(entity.to_dict()), 201
 
 @app.route('/ThreatKB/c2ips/<int:id>', methods=['PUT'])
 @auto.doc()
@@ -147,7 +176,8 @@ def update_c2ip(id):
         owner_user_id=request.json['owner_user']['id'] if request.json.get("owner_user", None) and request.json[
             "owner_user"].get("id", None) else None,
         id=id,
-        modified_user_id=current_user.id
+        modified_user_id=current_user.id,
+        active=request.json.get("active", entity.active)
     )
     db.session.merge(entity)
 
@@ -192,19 +222,27 @@ def delete_c2ip(id):
     """Delete c2ip artifact associated with id
     Return: None"""
     entity = c2ip.C2ip.query.get(id)
-    entity.active = False
 
-    if not entity:
-        abort(404)
+    if entity.active:
+        entity.active = False
 
-    if not current_user.admin and entity.owner_user_id != current_user.id:
-        abort(403)
+        if not entity:
+            abort(404)
 
-    db.session.merge(entity)
-    db.session.commit()
+        if not current_user.admin and entity.owner_user_id != current_user.id:
+            abort(403)
 
-    delete_tags_mapping(entity.__tablename__, entity.id)
-    delete_bookmarks(ENTITY_MAPPING["IP"], id, current_user.id)
+        db.session.merge(entity)
+        db.session.commit()
+
+        delete_tags_mapping(entity.__tablename__, entity.id)
+        delete_bookmarks(ENTITY_MAPPING["IP"], id, current_user.id)
+    else:
+        db.session.delete(entity)
+        db.session.commit()
+
+        delete_tags_mapping(entity.__tablename__, entity.id)
+        delete_bookmarks(ENTITY_MAPPING["IP"], id, current_user.id)
 
     return jsonify(''), 204
 

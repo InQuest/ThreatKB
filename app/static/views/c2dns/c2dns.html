@@ -21,7 +21,7 @@
                             <small><span ng-bind="$select.selected.email"></span></small>
                         </ui-select-match>
                         <ui-select-choices
-                                repeat="person in (users | filter: $select.search) track by person.id">
+                            repeat="person in (users | filter: $select.search) track by person.id">
                             <small><span ng-bind="person.email"></span></small>
                         </ui-select-choices>
                     </ui-select>
@@ -55,7 +55,7 @@
             </div>
         </form>
     </script>
-        <script type="text/ng-template" id="c2dns-view.html">
+    <script type="text/ng-template" id="c2dns-view.html">
         <a class="btn btn-sm btn-primary modal-fullscreen-button modal-fullscreen-button-abs-pos"
            ng-click="toggleFullscreen()">Toggle full screen</a>
         <div class="modal-header">
@@ -72,7 +72,8 @@
         <div class="modal-body">
             <div class="form-group">
                 <p ng-repeat="reference in static_references.DNS track by $index">
-                    <a href="{{ reference }}{{ c2dns.domain_name }}" target="_blank">{{ reference }}{{ c2dns.domain_name }}</a>
+                    <a href="{{ reference }}{{ c2dns.domain_name }}" target="_blank">
+                        {{ reference }}{{ c2dns.domain_name }}</a>
                 </p>
             </div>
             <div class="form-group">
@@ -85,7 +86,8 @@
                                 <li class="list-group-item justify-content-between"
                                     ng-repeat="comment in c2dns.comments | orderBy:'-date_created'">
                                     <div>
-                                        <pre style="word-break: normal; white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word;">{{ comment.comment }}</pre>
+                                        <pre
+                                            style="word-break: normal; white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word;">{{ comment.comment }}</pre>
                                         <span>{{ comment.user.email }}&nbsp;<small>{{ pretty_date(comment.date_created) }}</small></span>
                                     </div>
                                 </li>
@@ -157,7 +159,7 @@
                             <small><span ng-bind="$select.selected.email || c2dns.owner_user.email"></span></small>
                         </ui-select-match>
                         <ui-select-choices
-                                repeat="person in (users | filter: $select.search) track by person.id">
+                            repeat="person in (users | filter: $select.search) track by person.id">
                             <small><span ng-bind="person.email"></span></small>
                         </ui-select-choices>
                     </ui-select>
@@ -304,7 +306,7 @@
                             </small>
                         </ui-select-match>
                         <ui-select-choices
-                                repeat="option in (m.choices | filter: $select.search) track by option.id">
+                            repeat="option in (m.choices | filter: $select.search) track by option.id">
                             <small><span>{{ option.choice }}</span></small>
                         </ui-select-choices>
                     </ui-select>
@@ -319,7 +321,7 @@
                             <small><span ng-bind="$select.selected.choice || m.default"></span></small>
                         </ui-select-match>
                         <ui-select-choices
-                                repeat="option in (m.choices | filter: $select.search) track by option.id">
+                            repeat="option in (m.choices | filter: $select.search) track by option.id">
                             <small><span>{{ option.choice }}</span></small>
                         </ui-select-choices>
                     </ui-select>
@@ -354,7 +356,7 @@
                         <span class="input-group-btn" style="height:10px;">
                             <button class="btn btn-secondary" type="button"
                                     ng-click="add_comment(c2dns.id)" style="height:100%;"><span
-                                    class="glyphicon glyphicon-plus"></span></button>
+                                class="glyphicon glyphicon-plus"></span></button>
                         </span>
                     </div>
                     <div ng-if="c2dns.comments && c2dns.comments.length" style="padding-top:3px;">
@@ -365,9 +367,14 @@
                                     <li class="list-group-item justify-content-between"
                                         ng-repeat="comment in c2dns.comments | orderBy:'-date_created'">
                                         <div>
-                                            <pre style="word-break: normal; white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word;">{{ comment.comment }}</pre>
+                                            <pre
+                                                style="word-break: normal; white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word;">{{ comment.comment }}</pre>
                                             <span>{{ comment.user.email }}&nbsp;<small>{{ pretty_date(comment.date_created) }}</small></span>
-                                            <button type="button" class="btn btn-xs pull-right" confirmed-click="delete_comment({{ c2dns.id }},{{ comment.id }})" ng-confirm-click="Are you sure you want to delete comment?"><span style="color: red;" class="glyphicon glyphicon-remove-circle"></span></button>
+                                            <button type="button" class="btn btn-xs pull-right"
+                                                    confirmed-click="delete_comment({{ c2dns.id }},{{ comment.id }})"
+                                                    ng-confirm-click="Are you sure you want to delete comment?"><span
+                                                style="color: red;" class="glyphicon glyphicon-remove-circle"></span>
+                                            </button>
                                         </div>
                                     </li>
                                 </ul>
@@ -385,7 +392,19 @@
     </script>
     <br>
     <div class="container-fluid">
-        <button type="button" class="btn btn-secondary" ng-disabled="!checked_counter || checked_counter<2" ng-click="open_batch()">
+        <div style="float: left;">
+            <ui-select ng-model="view_selected" style="width: 200px;" title="Select view"
+                       on-select="change_view($item, $model)">
+                <ui-select-match placeholder="Select view" title="Select view">
+                    {{$select.selected}}
+                </ui-select-match>
+                <ui-select-choices repeat="view in (view_options | filter: $select.search) track by view">
+                    <span ng-bind="view"></span>
+                </ui-select-choices>
+            </ui-select>
+        </div>
+        <button type="button" class="btn btn-secondary" ng-disabled="!checked_counter || checked_counter<2"
+                ng-click="open_batch()">
             Batch Edit ({{ checked_counter }})
         </button>
         <button type="button" class="btn btn-secondary" ng-disabled="!checked_counter || checked_counter<2"
@@ -401,19 +420,21 @@
     <style type="text/css">
         .gridTags {
             padding: 0;
-            width:180px;
+            width: 180px;
             height: 2em;
             line-height: 1em;
             text-overflow: ellipsis;
             word-break: break-all;
-            overflow:hidden;
+            overflow: hidden;
             white-space: nowrap;
         }
-        .gridTags:hover{
+
+        .gridTags:hover {
             overflow: visible;
             white-space: normal;
-            height:auto;
+            height: auto;
         }
+
         .gridTags li:not(:last-child):after {
             content: ", ";
         }

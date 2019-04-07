@@ -82,7 +82,8 @@ def filter_entities(entity,
                     include_metadata,
                     exclude_totals,
                     default_sort,
-                    include_inactive=True,
+                    include_inactive=False,
+                    include_active=True,
                     include_merged=False,
                     include_yara_string=None,
                     short=None,
@@ -106,7 +107,9 @@ def filter_entities(entity,
         entities = entities.filter(or_(entity.owner_user_id == current_user.id, entity.owner_user_id == None))\
             if artifact_type == ENTITY_MAPPING["TASK"] else entities.filter_by(owner_user_id=current_user.id)
 
-    if not include_inactive:
+    if include_inactive and not include_active:
+        entities = entities.filter_by(active=False)
+    elif not include_inactive and include_active:
         entities = entities.filter_by(active=True)
 
     for column, value in searches.items():

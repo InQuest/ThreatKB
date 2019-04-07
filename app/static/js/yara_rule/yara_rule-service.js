@@ -45,6 +45,17 @@ angular.module('ThreatKB')
             );
         }
 
+        function activateRule(rule_id) {
+            return $http.put('/ThreatKB/yara_rules/activate/' + rule_id).then(function (success) {
+                    if (success.status === 200) {
+                        return success.data;
+                    }
+                }, function (error) {
+                    return $q.reject(error.data);
+                }
+            );
+        }
+
         function deleteBatch(batch) {
             return $http.put('/ThreatKB/yara_rules/batch/delete', {
                 batch: batch
@@ -79,6 +90,7 @@ angular.module('ThreatKB')
             merge_signature: merge_signature,
             updateBatch: updateBatch,
             deleteBatch: deleteBatch,
-            getSignatureFromRevision: getSignatureFromRevision
+            getSignatureFromRevision: getSignatureFromRevision,
+            activateRule: activateRule
         };
     }]);

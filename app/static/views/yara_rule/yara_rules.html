@@ -561,6 +561,17 @@
     </script>
     <br>
     <div class="container-fluid">
+        <div style="float: left;">
+            <ui-select ng-model="view_selected" style="width: 200px;" title="Select view"
+                       on-select="change_view($item, $model)">
+                <ui-select-match placeholder="Select view" title="Select view">
+                    {{$select.selected}}
+                </ui-select-match>
+                <ui-select-choices repeat="view in (view_options | filter: $select.search) track by view">
+                    <span ng-bind="view"></span>
+                </ui-select-choices>
+            </ui-select>
+        </div>
         <button id="batchCopyBtn" aria-label="" type="button" class="btn btn-secondary" ng-disabled="!checked_counter"
                 uib-tooltip="Copied {{ checked_counter }} Yara Rule{{ checked_counter > 1 ? 's' : '' }}!"
                 tooltip-trigger="'outsideClick'">

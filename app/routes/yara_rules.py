@@ -76,7 +76,22 @@ def get_all_yara_rules():
     searches: dictionary of column filters as {column1:filter1, column2:filter2}, columns must exist on Yara_rule model, default {}
 
     Return: list of yara_rule artifact dictionaries"""
-    include_inactive = request.args.get("include_inactive", False)
+
+    view = request.args.get("view", "Active Only")
+
+    if view == "All":
+        include_inactive = True
+        include_active = True
+    elif view == "Active Only":
+        include_inactive = False
+        include_active = True
+    elif view == "Inactive Only":
+        include_inactive = True
+        include_active = False
+    else:
+        include_inactive = False
+        include_active = True
+
     include_yara_string = bool(distutils.util.strtobool(request.args.get("include_yara_string", "False")))
     short = bool(distutils.util.strtobool(request.args.get("short", "false")))
     include_metadata = bool(distutils.util.strtobool(request.args.get('include_metadata', "true")))
@@ -104,6 +119,7 @@ def get_all_yara_rules():
                                     exclude_totals=exclude_totals,
                                     default_sort="creation_date",
                                     include_inactive=include_inactive,
+                                    include_active=include_active,
                                     include_merged=include_merged,
                                     include_yara_string=include_yara_string,
                                     short=short,
@@ -213,7 +229,8 @@ def create_yara_rule():
         created_user_id=current_user.id,
         modified_user_id=current_user.id,
         owner_user_id=current_user.id,
-        imports=yara_rule.Yara_rule.get_imports_from_string(request.json.get("imports", None))
+        imports=yara_rule.Yara_rule.get_imports_from_string(request.json.get("imports", None)),
+        active=request.json.get("active", True)
     )
 
     mitre_techniques = Cfg_settings.get_setting("MITRE_TECHNIQUES").split(",")
@@ -273,6 +290,16 @@ def create_yara_rule():
 
     return jsonify(entity.to_dict()), 201
 
+
+@app.route('/ThreatKB/yara_rules/activate/<int:id>', methods=['PUT'])
+@auto.doc()
+@login_required
+def activate_yara_rule(id):
+    entity = yara_rule.Yara_rule.query.get(id)
+    entity.active = 1
+    db.session.merge(entity)
+    db.session.commit()
+    return jsonify(entity.to_dict()), 201
 
 @app.route('/ThreatKB/yara_rules/<int:id>', methods=['PUT'])
 @auto.doc()
@@ -361,7 +388,8 @@ def update_yara_rule(id):
         owner_user_id=request.json['owner_user']['id'] if request.json.get("owner_user", None) and request
             .json["owner_user"].get("id", None) else None,
         revision=entity.revision if do_not_bump_revision else entity.revision + 1,
-        imports=yara_rule.Yara_rule.get_imports_from_string(request.json.get("imports", None))
+        imports=yara_rule.Yara_rule.get_imports_from_string(request.json.get("imports", None)),
+        active=request.json.get("active", entity.active)
     )
 
     mitre_techniques = Cfg_settings.get_setting("MITRE_TECHNIQUES").split(",")
@@ -446,19 +474,26 @@ def delete_yara_rule(id):
     """INACTIVATE yara_rule artifact associated with id
     Return: None"""
     entity = yara_rule.Yara_rule.query.get(id)
-    entity.active = False
 
-    if not entity:
-        abort(404)
+    if entity.active:
+        entity.active = False
 
-    if not current_user.admin and entity.owner_user_id != current_user.id:
-        abort(403)
+        if not entity:
+            abort(404)
 
-    db.session.merge(entity)
-    db.session.commit()
+        if not current_user.admin and entity.owner_user_id != current_user.id:
+            abort(403)
 
-    # delete_tags_mapping(entity.__tablename__, entity.id)
-    delete_bookmarks(ENTITY_MAPPING["SIGNATURE"], id, current_user.id)
+        db.session.merge(entity)
+        db.session.commit()
+
+        # delete_tags_mapping(entity.__tablename__, entity.id)
+        delete_bookmarks(ENTITY_MAPPING["SIGNATURE"], id, current_user.id)
+    else:
+        db.session.delete(entity)
+        db.session.commit()
+
+        delete_bookmarks(ENTITY_MAPPING["SIGNATURE"], id, current_user.id)
 
     return jsonify(''), 204
 

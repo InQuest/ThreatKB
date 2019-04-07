@@ -72,6 +72,7 @@ class C2ip(db.Model):
 
     def to_dict(self, include_metadata=True):
         d = dict(
+            active=self.active,
             date_created=self.date_created.isoformat() if self.date_created else None,
             date_modified=self.date_modified.isoformat() if self.date_modified else None,
             ip=self.ip,

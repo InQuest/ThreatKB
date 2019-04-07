@@ -230,11 +230,17 @@ angular.module('ThreatKB')
                         },
                         {
                             name: 'Actions',
-                            width: '120',
+                            width: '160',
                             enableFiltering: false,
                             enableColumnMenu: false,
                             enableSorting: false,
                             cellTemplate: '<div style="text-align: center;">'
+                                + '<button type="button" ng-if="!row.entity.active" ng-click="grid.appScope.activateArtifact(row.entity.id, row.entity.ip)"'
+                                + ' class="btn btn-sm">'
+                                + '<small><span class="glyphicon glyphicon-check"></span>'
+                                + '</small>'
+                                + '</button>'
+                                + '&nbsp;'
                                 + '<button type="button" ng-click="grid.appScope.viewIp(row.entity.id)"'
                                 + ' class="btn btn-sm">'
                                 + '<small><span class="glyphicon glyphicon-eye-open"></span>'
@@ -247,13 +253,21 @@ angular.module('ThreatKB')
                                 + '</small>'
                                 + '</button>'
                                 + '&nbsp;'
-                                + '<button confirmed-click="grid.appScope.delete(row.entity.id)"'
+                                + '<button ng-if="row.entity.active" confirmed-click="grid.appScope.delete(row.entity.id)"'
                                 + ' ng-confirm-click="Are you sure you want to '
-                                + 'delete this c2ip?" class="btn btn-sm btn-danger">'
+                                + 'deactivate this c2ip?" class="btn btn-sm btn-danger">'
                                 + '<small>'
                                 + '<span class="glyphicon glyphicon-remove-circle"></span>'
                                 + '</small>'
-                                + '</button></div>'
+                                + '</button>'
+                                + '<button ng-if="!row.entity.active" confirmed-click="grid.appScope.delete(row.entity.id)"'
+                                + ' ng-confirm-click="Are you sure you want to '
+                                + 'delete this c2ip permanently?" class="btn btn-sm btn-danger">'
+                                + '<small>'
+                                + '<span class="glyphicon glyphicon-remove-circle"></span>'
+                                + '</small>'
+                                + '</button>' +
+                                '</div>'
                         }
                     ]
             };
@@ -271,6 +285,8 @@ angular.module('ThreatKB')
                     var url = '/ThreatKB/c2ips?';
                     url += 'page_number=' + (paginationOptions.pageNumber - 1);
                     url += '&page_size=' + paginationOptions.pageSize;
+                    url += '&view=' + $scope.view_selected;
+
                     switch (paginationOptions.sort_dir) {
                         case uiGridConstants.ASC:
                             url += '&sort_dir=ASC';
@@ -306,6 +322,16 @@ angular.module('ThreatKB')
                 },
                 getPageDelay
             );
+
+            $scope.getPage = getPage;
+
+            $scope.view_options = ["Active Only", "All", "Inactive Only"];
+            $scope.view_selected = "Active Only";
+            $scope.change_view = function (item, model) {
+                $scope.view_selected = item;
+
+                $scope.getPage();
+            };
 
             getPage();
 
@@ -518,6 +544,13 @@ angular.module('ThreatKB')
             };
             $scope.edit = function (id) {
                 $scope.openIpModal(id);
+            };
+
+            $scope.activateArtifact = function (id, name) {
+                C2ip.activateArtifact(id).then(function (success) {
+                    growl.info("Successfully activated signature " + name, {ttl: 3000});
+                    getPage();
+                });
             };
 
             $scope.view = function (id) {
