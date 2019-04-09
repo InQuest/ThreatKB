@@ -72,10 +72,119 @@
         <div class="modal-body">
             <div class="form-group">
                 <p ng-repeat="reference in static_references.DNS track by $index">
-                    <a href="{{ reference }}{{ c2dns.domain_name }}" target="_blank">
-                        {{ reference }}{{ c2dns.domain_name }}</a>
+                    <a href="{{ reference.url }}{{ c2dns.domain_name }}" target="_blank">
+                        {{ reference.name }}</a>
                 </p>
             </div>
+            <div class="form-group" ng-if="c2dns.domain_name">
+                <label>Domain Name</label>
+                <input readonly type="text" class="form-control" ng-model="c2dns.domain_name"/>
+            </div>
+
+            <div class="form-group" ng-if="c2dns.owner_user">
+                <label>Owner</label>
+                <input readonly type="text" class="form-control" ng-model="c2dns.owner_user.email"/>
+            </div>
+
+            <div class="form-group" ng-if="c2dns.date_created">
+                <label>Date Created</label>
+                <input readonly type="text" class="form-control" ng-model="c2dns.date_created"/>
+            </div>
+
+            <div class="form-group" ng-if="c2dns.date_modified">
+                <label>Date Modified</label>
+                <input readonly type="text" class="form-control" ng-model="c2dns.date_modified"/>
+            </div>
+
+            <div class="form-group" ng-if="c2dns.description">
+                <label>Description</label>
+                <textarea readonly class="form-control" ng-model="c2dns.description"></textarea>
+            </div>
+
+            <div class="form-group" ng-if="c2dns.references">
+                <label>References</label>
+                <textarea readonly class="form-control" ng-model="c2dns.references"></textarea>
+            </div>
+
+            <div class="form-group" ng-if="c2dns.state">
+                <label>State</label>
+                <input readonly type="text" class="form-control" ng-model="c2dns.state"/>
+            </div>
+
+            <div class="form-group" ng-if="c2dns.match_type">
+                <label>Match Type</label>
+                <input readonly type="text" class="form-control" ng-model="c2dns.match_type"/>
+            </div>
+
+
+            <div class="form-group" ng-if="c2dns.expiration_type">
+                <label>Expiration Type</label>
+                <input readonly type="text" class="form-control" ng-model="c2dns.expiration_type"/>
+            </div>
+
+            <div class="form-group" ng-if="c2dns.expiration_timestamp">
+                <label>Expiration Timestamp</label>
+                <input readonly type="text" class="form-control" ng-model="c2dns.expiration_timestamp"
+                    ui-date="expiration_timestampDateOptions" ui-date-format="yy-mm-dd"/>
+            </div>
+
+            <!-- START DYNAMICALLY GENERATED CONTENT -->
+            <div class="form-group" ng-repeat="m in metadata[0].string" ng-if="c2dns.id">
+                <label>{{ m.key }}</label>
+                <input readonly class="form-control" ng-model="c2dns.metadata_values[m.key].value"/>
+            </div>
+
+            <div class="form-group" ng-repeat="m in metadata[0].string" ng-if="!c2dns.id">
+                <label>{{ m.key }}</label>
+                <input readonly class="form-control" ng-model="m.default">
+            </div>
+
+            <div class="form-group" ng-repeat="m in metadata[0].integer" ng-if="c2dns.id">
+                <label>{{ m.key }}</label>
+                <input readonly class="form-control" ng-model="c2dns.metadata_values[m.key].value" type="number"/>
+            </div>
+
+            <div class="form-group" ng-repeat="m in metadata[0].integer" ng-if="!c2dns.id">
+                <label>{{ m.key }}</label>
+                <input readonly class="form-control" ng-model="m.default" type="number"/>
+            </div>
+
+            <div class="form-group" ng-repeat="m in metadata[0].date" ng-if="c2dns.id">
+                <label>{{ m.key }}</label>
+                <input readonly class="form-control" ng-model="c2dns.metadata_values[m.key].value" type="date" format-date/>
+            </div>
+
+            <div class="form-group" ng-repeat="m in metadata[0].date" ng-if="!c2dns.id">
+                <label>{{ m.key }}</label>
+                <input readonly class="form-control" ng-model="m.default" type="date" format-date>
+            </div>
+
+            <div class="form-group" ng-repeat="m in metadata[0].multiline_comment" ng-if="c2dns.id">
+                <label>{{ m.key }}</label>
+                <textarea readonly class="form-control" ng-model="c2dns.metadata_values[m.key].value"></textarea>
+            </div>
+
+            <div class="form-group" ng-repeat="m in metadata[0].multiline_comment" ng-if="!c2dns.id">
+                <label>{{ m.key }}</label>
+                <textarea readonly class="form-control" ng-model="m.default" ng-required="m.required"></textarea>
+            </div>
+
+            <div class="form-group" ng-repeat="m in metadata[0].select" ng-if="c2dns.id">
+                <label>{{ m.key }}</label>
+                <input readonly class="form-control" ng-model="c2dns.metadata_values[m.key].value">
+            </div>
+
+            <div class="form-group" ng-repeat="m in metadata[0].select" ng-if="!c2dns.id">
+                <label>{{ m.key }}</label>
+                <input readonly class="form-control" ng-model="m.default">
+            </div>
+            <!-- /START DYNAMICALLY GENERATED CONTENT -->
+
+            <div class="form-group" ng-if="c2dns.tags.length > 0">
+                <label>Tags</label>
+                <tags-input ng-disabled="true" ng-model="c2dns.tags"></tags-input>
+            </div>
+
             <div class="form-group">
                 <label>Comments ({{ c2dns.comments.length }})</label>
                 <div ng-if="c2dns.comments && c2dns.comments.length" style="padding-top:3px;">

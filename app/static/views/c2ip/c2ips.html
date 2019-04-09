@@ -72,9 +72,121 @@
         <div class="modal-body">
             <div class="form-group">
                 <p ng-repeat="reference in static_references.IP track by $index">
-                    <a href="{{ reference }}{{ c2ip.ip }}" target="_blank">{{ reference }}{{ c2ip.ip }}</a>
+                    <a href="{{ reference.url }}{{ c2ip.ip }}" target="_blank">{{ reference.name }}</a>
                 </p>
             </div>
+            <div class="form-group" ng-if="c2ip.ip">
+                <label>IP</label>
+                <input readonly type="text" class="form-control" ng-model="c2ip.ip"/>
+            </div>
+            <div class="form-group" ng-if="c2ip.owner_user">
+                <label>Owner</label>
+                <input readonly type="text" class="form-control" ng-model="c2ip.owner_user.email"/>
+            </div>
+
+            <div class="form-group" ng-if="c2ip.date_created">
+                <label>Date Created</label>
+                <input readonly type="text" class="form-control" ng-model="c2ip.date_created"/>
+            </div>
+
+            <div class="form-group" ng-if="c2ip.date_modified">
+                <label>Date Modified</label>
+                <input readonly type="text" class="form-control" ng-model="c2ip.date_modified"/>
+            </div>
+
+            <div class="form-group" ng-if="c2ip.description">
+                <label>Description</label>
+                <textarea readonly type="text" class="form-control" ng-model="c2ip.description"></textarea>
+            </div>
+
+            <div class="form-group" ng-if="c2ip.references">
+                <label>References</label>
+                <textarea readonly class="form-control" ng-model="c2ip.references"></textarea>
+            </div>
+
+            <div class="form-group" ng-if="c2ip.state">
+                <label>State</label>
+                <input readonly type="text" class="form-control" ng-model="c2ip.state"/>
+            </div>
+
+            <div class="form-group" ng-if="c2ip.asn">
+                <label>ASN</label>
+                <input readonly type="text" class="form-control" ng-model="c2ip.asn"/>
+            </div>
+
+            <div class="form-group" ng-if="c2ip.country">
+                <label>Country</label>
+                <input readonly type="text" class="form-control" ng-model="c2ip.country"/>
+            </div>
+
+            <div class="form-group" ng-if="c2ip.expiration_type">
+                <label>Expiration Type</label>
+                <input readonly type="text" class="form-control" ng-model="c2ip.expiration_type"/>
+            </div>
+
+            <div class="form-group" ng-if="c2ip.expiration_timestamp">
+                <label>Expiration Timestamp</label>
+                <input readonly type="text" class="form-control" ng-model="c2ip.expiration_timestamp"
+                    ui-date="expiration_timestampDateOptions" ui-date-format="yy-mm-dd"/>
+            </div>
+
+            <!-- START DYNAMICALLY GENERATED CONTENT -->
+            <div class="form-group" ng-repeat="m in metadata[0].string" ng-if="c2ip.id">
+                <label>{{ m.key }}</label>
+                <input readonly class="form-control" ng-model="c2ip.metadata_values[m.key].value"/>
+            </div>
+
+            <div class="form-group" ng-repeat="m in metadata[0].string" ng-if="!c2ip.id">
+                <label>{{ m.key }}</label>
+                <input readonly class="form-control" ng-model="m.default">
+            </div>
+
+            <div class="form-group" ng-repeat="m in metadata[0].integer" ng-if="c2ip.id">
+                <label>{{ m.key }}</label>
+                <input readonly class="form-control" ng-model="c2ip.metadata_values[m.key].value" type="number"/>
+            </div>
+
+            <div class="form-group" ng-repeat="m in metadata[0].integer" ng-if="!c2ip.id">
+                <label>{{ m.key }}</label>
+                <input readonly class="form-control" ng-model="m.default" type="number"/>
+            </div>
+
+            <div class="form-group" ng-repeat="m in metadata[0].date" ng-if="c2ip.id">
+                <label>{{ m.key }}</label>
+                <input readonly class="form-control" ng-model="c2ip.metadata_values[m.key].value" type="date" format-date/>
+            </div>
+
+            <div class="form-group" ng-repeat="m in metadata[0].date" ng-if="!c2ip.id">
+                <label>{{ m.key }}</label>
+                <input readonly class="form-control" ng-model="m.default" type="date" format-date>
+            </div>
+
+            <div class="form-group" ng-repeat="m in metadata[0].multiline_comment" ng-if="c2ip.id">
+                <label>{{ m.key }}</label>
+                <textarea readonly class="form-control" ng-model="c2ip.metadata_values[m.key].value"></textarea>
+            </div>
+
+            <div class="form-group" ng-repeat="m in metadata[0].multiline_comment" ng-if="!c2ip.id">
+                <label>{{ m.key }}</label>
+                <textarea readonly class="form-control" ng-model="m.default"></textarea>
+            </div>
+
+            <div class="form-group" ng-repeat="m in metadata[0].select" ng-if="c2ip.id">
+                <label>{{ m.key }}</label>
+                <input readonly class="form-control" ng-model="c2ip.metadata_values[m.key].value">
+            </div>
+
+            <div class="form-group" ng-repeat="m in metadata[0].select" ng-if="!c2ip.id">
+                <label>{{ m.key }}</label>
+                <input readonly class="form-control" ng-model="m.default">
+            </div>
+            <!-- /START DYNAMICALLY GENERATED CONTENT -->
+
+            <div class="form-group" ng-if="c2ip.tags.length > 0">
+                <label>Tags</label>
+                <tags-input ng-disabled="true" ng-model="c2ip.tags"></tags-input>
+            </div>
+
             <div class="form-group">
                 <label>Comments ({{ c2ip.comments.length }})</label>
                 <div ng-if="c2ip.comments && c2ip.comments.length" style="padding-top:3px;">
