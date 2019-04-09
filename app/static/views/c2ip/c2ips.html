@@ -70,10 +70,12 @@
             </h4>
         </div>
         <div class="modal-body">
-            <div class="form-group">
-                <p ng-repeat="reference in static_references.IP track by $index">
-                    <a href="{{ reference.url }}{{ c2ip.ip }}" target="_blank">{{ reference.name }}</a>
-                </p>
+            <div class="form-group text-center">
+                <span ng-repeat="reference in static_references.IP track by $index">
+                    | &nbsp;&nbsp;
+                    <a href="{{ reference.url }}{{ c2ip.ip }}" target="_blank">{{ reference.name }}</a> &nbsp;&nbsp;
+                </span>
+                |
             </div>
             <div class="form-group" ng-if="c2ip.ip">
                 <label>IP</label>
@@ -127,7 +129,7 @@
             <div class="form-group" ng-if="c2ip.expiration_timestamp">
                 <label>Expiration Timestamp</label>
                 <input readonly type="text" class="form-control" ng-model="c2ip.expiration_timestamp"
-                    ui-date="expiration_timestampDateOptions" ui-date-format="yy-mm-dd"/>
+                       ui-date="expiration_timestampDateOptions" ui-date-format="yy-mm-dd"/>
             </div>
 
             <!-- START DYNAMICALLY GENERATED CONTENT -->
@@ -153,7 +155,8 @@
 
             <div class="form-group" ng-repeat="m in metadata[0].date" ng-if="c2ip.id">
                 <label>{{ m.key }}</label>
-                <input readonly class="form-control" ng-model="c2ip.metadata_values[m.key].value" type="date" format-date/>
+                <input readonly class="form-control" ng-model="c2ip.metadata_values[m.key].value" type="date"
+                       format-date/>
             </div>
 
             <div class="form-group" ng-repeat="m in metadata[0].date" ng-if="!c2ip.id">

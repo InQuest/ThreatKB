@@ -70,11 +70,13 @@
             </h4>
         </div>
         <div class="modal-body">
-            <div class="form-group">
-                <p ng-repeat="reference in static_references.DNS track by $index">
+            <div class="form-group text-center">
+                <span ng-repeat="reference in static_references.DNS track by $index">
+                    | &nbsp;&nbsp;
                     <a href="{{ reference.url }}{{ c2dns.domain_name }}" target="_blank">
-                        {{ reference.name }}</a>
-                </p>
+                        {{ reference.name }}</a> &nbsp;&nbsp;
+                </span>
+                |
             </div>
             <div class="form-group" ng-if="c2dns.domain_name">
                 <label>Domain Name</label>
@@ -125,7 +127,7 @@
             <div class="form-group" ng-if="c2dns.expiration_timestamp">
                 <label>Expiration Timestamp</label>
                 <input readonly type="text" class="form-control" ng-model="c2dns.expiration_timestamp"
-                    ui-date="expiration_timestampDateOptions" ui-date-format="yy-mm-dd"/>
+                       ui-date="expiration_timestampDateOptions" ui-date-format="yy-mm-dd"/>
             </div>
 
             <!-- START DYNAMICALLY GENERATED CONTENT -->
@@ -151,7 +153,8 @@
 
             <div class="form-group" ng-repeat="m in metadata[0].date" ng-if="c2dns.id">
                 <label>{{ m.key }}</label>
-                <input readonly class="form-control" ng-model="c2dns.metadata_values[m.key].value" type="date" format-date/>
+                <input readonly class="form-control" ng-model="c2dns.metadata_values[m.key].value" type="date"
+                       format-date/>
             </div>
 
             <div class="form-group" ng-repeat="m in metadata[0].date" ng-if="!c2dns.id">
