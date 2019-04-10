@@ -124,9 +124,10 @@
                             class="btn btn-sm">
                         <small><span class="glyphicon glyphicon-pencil"></span></small>
                     </button>
-                    <button type="submit"
-                            ng-click="delete(cfg_state.id)"
-                            class="btn btn-sm btn-danger">
+                    <button type="button"
+                            confirmed-click="delete(cfg_state.id)"
+                            class="btn btn-sm btn-danger"
+                            ng-confirm-click="Are you REALLY sure you want to delete the state?">
                         <small><span class="glyphicon glyphicon-remove-circle"></span></small>
                     </button>
 
