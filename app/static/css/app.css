@@ -185,3 +185,9 @@ body.modals-full-screen .modal-dialog {
     .modal-lg { width: 900px; }
     .modal-dialog { margin: 30px auto; }
 }
+/* Datepicker (uib-datepicker) sizing */
+.form-group .input-group .uib-datepicker-popup.dropdown-menu {
+    width: 254px;
+    right: 0;
+    left: unset !important;
+}
