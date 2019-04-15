@@ -465,6 +465,24 @@ angular.module('ThreatKB').directive("formatDate", function () {
     }
 });
 
+angular.module('ThreatKB').directive('dateFormatter', [
+    function () {
+        return {
+            restrict: 'A',
+            require: 'ngModel',
+            link: function postLink(scope, elem, attr, modelCtrl) {
+                modelCtrl.$parsers.push(function(modelValue) {
+                    return moment(modelValue).format('YYYY-MM-DD');
+                });
+
+                modelCtrl.$formatters.push(function(modelValue) {
+                    return moment(modelValue, 'YYYY-MM-DD').toDate();
+                });
+            }
+        };
+    }
+]);
+
 angular.module('ThreatKB').directive('focus', function ($timeout, $parse) {
     return {
         link: function (scope, element, attrs) {

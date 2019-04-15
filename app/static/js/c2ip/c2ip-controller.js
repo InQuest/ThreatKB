@@ -467,7 +467,6 @@ angular.module('ThreatKB')
                     "asn": "",
                     "country": "",
                     "reference_link": "",
-                    "expiration_type": "",
                     "expiration_timestamp": "",
                     "description": "",
                     "id": "",
@@ -669,6 +668,17 @@ angular.module('ThreatKB')
                 return $location.absUrl();
             };
 
+            $scope.dateOptions = {
+                showWeeks: false,
+            };
+
+            $scope.openDatepicker = function() {
+                $scope.expiration_timestamp.opened = true;
+            };
+
+            $scope.expiration_timestamp = {
+                opened: false
+            };
 
             $scope.cfg_states = Cfg_states.query();
 
