@@ -480,7 +480,6 @@ angular.module('ThreatKB')
                     "domain_name": "",
                     "match_type": "",
                     "reference_link": "",
-                    "expiration_type": "",
                     "expiration_timestamp": "",
                     "description": "",
                     "id": "",
@@ -672,6 +671,18 @@ angular.module('ThreatKB')
             if (!$scope.c2dns.match_type) {
                 $scope.c2dns.match_type = $scope.match_types[0];
             }
+
+            $scope.dateOptions = {
+                showWeeks: false,
+            };
+
+            $scope.openDatepicker = function() {
+                $scope.expiration_timestamp.opened = true;
+            };
+
+            $scope.expiration_timestamp = {
+                opened: false
+            };
 
             $scope.cfg_states = Cfg_states.query();
 

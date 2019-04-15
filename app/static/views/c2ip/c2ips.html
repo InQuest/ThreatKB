@@ -121,15 +121,12 @@
                 <input readonly type="text" class="form-control" ng-model="c2ip.country"/>
             </div>
 
-            <div class="form-group" ng-if="c2ip.expiration_type">
-                <label>Expiration Type</label>
-                <input readonly type="text" class="form-control" ng-model="c2ip.expiration_type"/>
-            </div>
-
             <div class="form-group" ng-if="c2ip.expiration_timestamp">
                 <label>Expiration Timestamp</label>
-                <input readonly type="text" class="form-control" ng-model="c2ip.expiration_timestamp"
-                       ui-date="expiration_timestampDateOptions" ui-date-format="yy-mm-dd"/>
+                <input readonly type="text" class="form-control" name="expiration_timestamp" ng-required="false"
+                       date-formatter uib-datepicker-popup="yyyy-MM-dd" is-open="expiration_timestamp.opened"
+                       datepicker-options="dateOptions" close-text="Close"
+                       ng-model="c2ip.expiration_timestamp" />
             </div>
 
             <!-- START DYNAMICALLY GENERATED CONTENT -->
@@ -343,23 +340,17 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Expiration Type</label>
-                    <span class="error"
-                          ng-show="form.expiration_type.$error.minlength">Must be at least  characters.</span>
-                    <span class="error"
-                          ng-show="form.expiration_type.$error.maxlength">Must be at most 32 characters.</span>
-
-                    <input class="form-control" name="expiration_type"
-                           ng-model="c2ip.expiration_type" ng-required="false"
-                           ng-maxlength="32"/>
-                </div>
-
-                <div class="form-group">
                     <label>Expiration Timestamp</label>
 
-                    <input class="form-control" name="expiration_timestamp"
-                           ui-date="expiration_timestampDateOptions" ui-date-format="yy-mm-dd"
-                           ng-model="c2ip.expiration_timestamp" ng-required="false"/>
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="expiration_timestamp" ng-required="false"
+                               date-formatter uib-datepicker-popup="yyyy-MM-dd" is-open="expiration_timestamp.opened"
+                               datepicker-options="dateOptions" close-text="Close"
+                               ng-model="c2ip.expiration_timestamp" />
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-default" ng-click="openDatepicker()"><i class="glyphicon glyphicon-calendar"></i></button>
+                        </span>
+                    </div>
                 </div>
 
                 <!-- START DYNAMICALLY GENERATED CONTENT -->

@@ -99,7 +99,7 @@ def get_c2ip(id):
 def create_c2ip():
     """Create c2ip artifact
 
-    JSON Body: ip (str), asn (str), country (str),  expiration_type (str), expiration_timestamp (date),  state(str)
+    JSON Body: ip (str), asn (str), country (str), expiration_timestamp (date),  state(str)
 
     Return: c2dns artifact dictionary"""
     entity = c2ip.C2ip(
@@ -109,9 +109,8 @@ def create_c2ip():
         description=request.json["description"],
         references=request.json["references"],
         state=verify_state(request.json['state']['state']),
-        expiration_type=request.json['expiration_type'],
         expiration_timestamp=parser.parse(request.json['expiration_timestamp'])
-        if request.json.get("expiration_type", None) else None,
+        if request.json.get("expiration_timestamp", None) else None,
         created_user_id=current_user.id,
         modified_user_id=current_user.id,
         owner_user_id=current_user.id,
@@ -150,12 +149,13 @@ def activate_c2ip(id):
     db.session.commit()
     return jsonify(entity.to_dict()), 201
 
+
 @app.route('/ThreatKB/c2ips/<int:id>', methods=['PUT'])
 @auto.doc()
 @login_required
 def update_c2ip(id):
     """Update c2ip artifact
-    From Data: ip (str), asn (str), country (str), expiration_type (str), expiration_timestamp (date), state(str)
+    From Data: ip (str), asn (str), country (str), expiration_timestamp (date), state(str)
     Return: c2dns artifact dictionary"""
     entity = c2ip.C2ip.query.get(id)
     if not entity:
@@ -170,7 +170,6 @@ def update_c2ip(id):
         references=request.json["references"],
         state=verify_state(request.json['state']['state']) if request.json['state'] and 'state' in request.json['state']
         else verify_state(request.json['state']),
-        expiration_type=request.json['expiration_type'],
         expiration_timestamp=parser.parse(request.json['expiration_timestamp']) if request.json.get(
             "expiration_timestamp", None) else None,
         owner_user_id=request.json['owner_user']['id'] if request.json.get("owner_user", None) and request.json[

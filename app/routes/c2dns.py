@@ -94,16 +94,15 @@ def get_c2dns(id):
 @login_required
 def create_c2dns():
     """Create c2dns artifact
-    From Data: domain_name (str), match_type (str),  expiration_type (str), expiration_timestamp (date), state(str)
+    From Data: domain_name (str), match_type (str), expiration_timestamp (date), state(str)
     Return: c2dns artifact dictionary"""
     entity = c2dns.C2dns(
         domain_name=request.json['domain_name'],
         match_type=request.json['match_type'],
         description=request.json["description"],
         references=request.json["references"],
-        expiration_type=request.json['expiration_type'],
         expiration_timestamp=parser.parse(request.json['expiration_timestamp'])
-        if request.json.get("expiration_type", None) else None,
+        if request.json.get("expiration_timestamp", None) else None,
         state=verify_state(request.json['state']['state'])
         if request.json['state'] and 'state' in request.json['state'] else verify_state(request.json['state']),
         created_user_id=current_user.id,
@@ -145,12 +144,13 @@ def activate_c2dns(id):
     db.session.commit()
     return jsonify(entity.to_dict()), 201
 
+
 @app.route('/ThreatKB/c2dns/<int:id>', methods=['PUT'])
 @auto.doc()
 @login_required
 def update_c2dns(id):
     """Update c2dns artifact
-    From Data: domain_name (str), match_type (str), expiration_type (str), expiration_timestamp (date), state(str)
+    From Data: domain_name (str), match_type (str), expiration_timestamp (date), state(str)
     Return: c2dns artifact dictionary"""
     entity = c2dns.C2dns.query.get(id)
     if not entity:
@@ -164,7 +164,6 @@ def update_c2dns(id):
         match_type=request.json['match_type'],
         description=request.json["description"],
         references=request.json["references"],
-        expiration_type=request.json['expiration_type'],
         expiration_timestamp=parser.parse(request.json['expiration_timestamp']) if request.json.get(
             "expiration_timestamp", None) else None,
         id=id,
