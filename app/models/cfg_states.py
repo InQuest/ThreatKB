@@ -20,9 +20,12 @@ class Cfg_states(db.Model):
             is_release_state=self.is_release_state,
             is_retired_state=self.is_retired_state,
             is_staging_state=self.is_staging_state,
-            sig_count=db.session.query(yara_rule.Yara_rule).filter(yara_rule.Yara_rule.state == self.state).count(),
-            dns_count=db.session.query(c2dns.C2dns).filter(c2dns.C2dns.state == self.state).count(),
-            ip_count=db.session.query(c2ip.C2ip).filter(c2ip.C2ip.state == self.state).count(),
+            sig_count=db.session.query(yara_rule.Yara_rule).filter(yara_rule.Yara_rule.state == self.state).filter(
+                yara_rule.Yara_rule.active > 0).count(),
+            dns_count=db.session.query(c2dns.C2dns).filter(c2dns.C2dns.state == self.state).filter(
+                c2dns.C2dns.active > 0).count(),
+            ip_count=db.session.query(c2ip.C2ip).filter(c2ip.C2ip.state == self.state).filter(
+                c2ip.C2ip.active > 0).count(),
             task_count=db.session.query(tasks.Tasks).filter(tasks.Tasks.state == self.state).count(),
         )
 
