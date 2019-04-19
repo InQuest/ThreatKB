@@ -422,7 +422,7 @@ angular.module('ThreatKB')
     .controller('TaskSaveController', ['$scope', '$http', '$uibModalInstance', '$location', '$window', 'task', 'Comments', 'Cfg_states', 'Import', 'growl', 'blockUI', 'AuthService', 'Bookmarks', 'hotkeys', 'Users',
         function ($scope, $http, $uibModalInstance, $location, $window, task, Comments, Cfg_states, Import, growl, blockUI, AuthService, Bookmarks, hotkeys, Users) {
 
-            if (task.$promise !== null) {
+            if (task.$promise) {
                 task.$promise.then(
                     function (t) {
                         $window.document.title = "ThreatKB: " + t.title;
