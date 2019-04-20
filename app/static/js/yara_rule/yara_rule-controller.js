@@ -146,7 +146,9 @@ angular.module('ThreatKB')
                             var column = grid.columns[i];
                             trigger_refresh_for_emptiness &= (column.filters[0].term === undefined || column.filters[0].term === null || column.filters[0].term.length === 0);
 
-                            if (column.filters[0].term !== undefined && column.filters[0].term !== null && column.filters[0].term.length >= parseInt($scope.start_filter_requests_length.value)) {
+                            if (column.filters[0].term !== undefined && column.filters[0].term !== null
+                                && ("~" === column.filters[0].term
+                                    || column.filters[0].term.length >= parseInt($scope.start_filter_requests_length.value))) {
                                 trigger_refresh_for_length = true;
                                 paginationOptions.searches[column.colDef.field] = column.filters[0].term
                             }
