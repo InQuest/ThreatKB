@@ -62,7 +62,8 @@ angular.module('ThreatKB')
                                 if (column.field === "entity_type" || column.field === "activity_type") {
                                     trigger_refresh_for_selection = true;
                                     paginationOptions.searches[column.colDef.field] = column.filters[0].term;
-                                } else if (column.filters[0].term.length >= parseInt($scope.start_filter_requests_length.value)) {
+                                } else if ("~" === column.filters[0].term
+                                    || column.filters[0].term.length >= parseInt($scope.start_filter_requests_length.value)) {
                                     trigger_refresh_for_length = true;
                                     paginationOptions.searches[column.colDef.field] = column.filters[0].term;
                                 }

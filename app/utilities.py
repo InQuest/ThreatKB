@@ -88,7 +88,6 @@ def filter_entities(entity,
                     include_yara_string=None,
                     short=None,
                     operator="and"):
-
     searches = json.loads(searches)
 
     operator = and_ if operator == "and" else or_
@@ -104,7 +103,7 @@ def filter_entities(entity,
         entities = entity.query
 
     if not current_user.admin:
-        entities = entities.filter(or_(entity.owner_user_id == current_user.id, entity.owner_user_id == None))\
+        entities = entities.filter(or_(entity.owner_user_id == current_user.id, entity.owner_user_id == None)) \
             if artifact_type == ENTITY_MAPPING["TASK"] else entities.filter_by(owner_user_id=current_user.id)
 
     if include_inactive and not include_active and hasattr(entity, "active"):
@@ -117,36 +116,63 @@ def filter_entities(entity,
             continue
 
         s_value = str(value)
+        is_null = False
+        if s_value == "~":
+            is_null = True
         l_value = "%" + s_value[1:] + "%" if s_value.startswith("!") else "%" + s_value + "%"
 
         if column == "owner_user.email":
-            entities = entities.join(KBUser, entity.owner_user_id == KBUser.id) \
-                .filter(not_(KBUser.email.like(l_value)) if s_value.startswith("!") else KBUser.email.like(l_value))
+            if is_null:
+                entities = entities.filter(entity.owner_user_id.is_(None))
+            else:
+                entities = entities.join(KBUser, entity.owner_user_id == KBUser.id) \
+                    .filter(not_(KBUser.email.like(l_value)) if s_value.startswith("!") else KBUser.email.like(l_value))
             continue
         elif column == "user.email":
-            entities = entities.join(KBUser, entity.user_id == KBUser.id) \
-                .filter(not_(KBUser.email.like(l_value)) if s_value.startswith("!") else KBUser.email.like(l_value))
+            if is_null:
+                entities = entities.filter(entity.user_id.is_(None))
+            else:
+                entities = entities.join(KBUser, entity.user_id == KBUser.id) \
+                    .filter(not_(KBUser.email.like(l_value)) if s_value.startswith("!") else KBUser.email.like(l_value))
             continue
         elif column == "comments":
-            entities = entities.join(Comments,
-                                     and_(Comments.entity_type == artifact_type, Comments.entity_id == entity.id)) \
-                .filter(
-                not_(Comments.comment.like(l_value) if s_value.startswith("!") else Comments.comment.like(l_value)))
+            if is_null:
+                entities = entities.filter(Comments.comment.is_(None))
+            else:
+                entities = entities \
+                    .join(Comments, and_(Comments.entity_type == artifact_type, Comments.entity_id == entity.id)) \
+                    .filter(not_(Comments.comment.like(l_value)
+                                 if s_value.startswith("!")
+                                 else Comments.comment.like(l_value)))
 
         if column == "tags":
-            entities = entities.outerjoin(Tags_mapping, entity.id == Tags_mapping.source_id) \
-                .filter(Tags_mapping.source_table == entity.__tablename__) \
-                .join(Tags, Tags_mapping.tag_id == Tags.id) \
-                .filter(not_(Tags.text.like(l_value)) if s_value.startswith("!") else Tags.text.like(l_value))
+            if is_null:
+                entities = entities\
+                    .outerjoin(Tags_mapping,
+                               and_(entity.id == Tags_mapping.source_id,
+                                    entity.__tablename__ == Tags_mapping.source_table)) \
+                    .filter(Tags_mapping.tag_id.is_(None))
+            else:
+                entities = entities.outerjoin(Tags_mapping, entity.id == Tags_mapping.source_id) \
+                    .filter(Tags_mapping.source_table == entity.__tablename__) \
+                    .join(Tags, Tags_mapping.tag_id == Tags.id) \
+                    .filter(not_(Tags.text.like(l_value)) if s_value.startswith("!") else Tags.text.like(l_value))
             continue
 
         try:
             column = getattr(entity, column)
-            clauses.append(not_(column.like(l_value)) if s_value.startswith("!") else column.like(l_value))
+            if is_null:
+                clauses.append(column.is_(None))
+            else:
+                clauses.append(not_(column.like(l_value)) if s_value.startswith("!") else column.like(l_value))
         except AttributeError as e:
-            clauses.append(and_(MetadataMapping.artifact_id == entity.id, Metadata.key == column,
-                                not_(MetadataMapping.value.like(l_value))
-                                            if s_value.startswith("!") else MetadataMapping.value.like(l_value)))
+            if is_null:
+                clauses.append(and_(MetadataMapping.artifact_id == entity.id, Metadata.key == column,
+                                    MetadataMapping.value.is_(None)))
+            else:
+                clauses.append(and_(MetadataMapping.artifact_id == entity.id, Metadata.key == column,
+                                    not_(MetadataMapping.value.like(l_value))
+                                    if s_value.startswith("!") else MetadataMapping.value.like(l_value)))
 
     if not include_merged:
         entities = entities.filter(entity.state != 'Merged')
