@@ -16,7 +16,7 @@ class CfgCategoryRangeMapping(db.Model):
 
     def to_dict(self, include_inactive=False):
 
-        if not include_inactive:
+        if include_inactive:
             sig_count = db.session.query(yara_rule.Yara_rule).filter(yara_rule.Yara_rule.eventid >= self.range_min,
                                                                      yara_rule.Yara_rule.eventid <= self.range_max).count()
         else:
