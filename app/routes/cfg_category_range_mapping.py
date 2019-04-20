@@ -11,9 +11,12 @@ import json
 def get_all_cfg_category_range_mappings():
     """Return list of all category range mappings
     Return: list of category range mapping dictionaries"""
+    include_inactive = request.args.get("include_inactive", False)
+
     entities = cfg_category_range_mapping.CfgCategoryRangeMapping.query.order_by(
         cfg_category_range_mapping.CfgCategoryRangeMapping.range_min.asc()).all()
-    return Response(json.dumps([entity.to_dict() for entity in entities]), mimetype='application/json')
+    return Response(json.dumps([entity.to_dict(include_inactive=include_inactive) for entity in entities]),
+                    mimetype='application/json')
 
 
 @app.route('/ThreatKB/cfg_category_range_mapping/<int:id>', methods=['GET'])

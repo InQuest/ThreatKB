@@ -14,15 +14,23 @@ class CfgCategoryRangeMapping(db.Model):
     range_max = db.Column(db.Integer(unsigned=True), index=True, nullable=False)
     current = db.Column(db.Integer(unsigned=True), index=True, nullable=True)
 
-    def to_dict(self):
+    def to_dict(self, include_inactive=False):
+
+        if not include_inactive:
+            sig_count = db.session.query(yara_rule.Yara_rule).filter(yara_rule.Yara_rule.eventid >= self.range_min,
+                                                                     yara_rule.Yara_rule.eventid <= self.range_max).count()
+        else:
+            sig_count = db.session.query(yara_rule.Yara_rule) \
+                .filter(yara_rule.Yara_rule.eventid >= self.range_min, yara_rule.Yara_rule.eventid <= self.range_max) \
+                .filter(yara_rule.Yara_rule.active > 0).count()
+
         return dict(
             id=self.id,
             category=self.category,
             range_min=self.range_min,
             range_max=self.range_max,
             current=self.current,
-            sig_count=db.session.query(yara_rule.Yara_rule).filter(yara_rule.Yara_rule.eventid >= self.range_min,
-                                                                   yara_rule.Yara_rule.eventid <= self.range_max).count()
+            sig_count=sig_count
         )
 
     @staticmethod
