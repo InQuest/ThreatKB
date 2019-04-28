@@ -120,6 +120,7 @@ from app.routes.scripts import *
 from app.routes.metadata import *
 from app.routes.errors import *
 from app.routes.activity_log import *
+from app.routes.macros import *
 
 from app.models import users
 from app.models import c2ip
@@ -141,6 +142,7 @@ from app.models import bookmarks
 from app.models import metadata
 from app.models import errors
 from app.models import activity_log
+from app.models import macros
 
 from app.geo_ip_helper import get_geo_for_ip
 
@@ -151,11 +153,13 @@ def connect_db():
     rv = SQLAlchemy(app)
     return rv
 
+
 def get_db():
     """Opens a new database connection if there is none yet for the
     current application context.
     """
     return connect_db()
+
 
 def init_db():
     """Initializes the database."""
@@ -168,6 +172,7 @@ def init_db():
             _upgrade(revision=revision)
 
     upgrade()
+
 
 def deinit_db():
     """Deinitializes the database."""
@@ -187,6 +192,7 @@ def teardown_request(exception):
     if exception:
         db.session.rollback()
     db.session.remove()
+
 
 @app.before_first_request
 def setup_logging():
@@ -242,6 +248,7 @@ def generate_app():
     from app.models import metadata
     from app.models import errors
     from app.models import activity_log
+    from app.models import macros
 
     set_celery_stuff(app)
 
@@ -277,6 +284,7 @@ def generate_app():
     from app.routes import metadata
     from app.routes import errors
     from app.routes import activity_log
+    from app.routes import macros
 
     app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
 

@@ -26,6 +26,7 @@ if __name__ == '__main__':
     from app.models import comments
     from app.models import errors
     from app.models import files
+    from app.models import macros
     from app.models import metadata
     from app.models import releases
     from app.models import scripts
