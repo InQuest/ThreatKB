@@ -283,8 +283,9 @@ class Yara_rule(db.Model):
     @staticmethod
     def expand_macros(yara_rule_text):
         all_macros = macros.Macros.get_macros()
+        tag_template = cfg_settings.Cfg_settings.get_setting("MACRO_TAG_TEMPLATE")
         for m in all_macros:
-            yara_rule_text = yara_rule_text.replace(m['tag'], m['value'])
+            yara_rule_text = yara_rule_text.replace(tag_template % m['tag'], m['value'])
         return yara_rule_text
 
     @staticmethod
