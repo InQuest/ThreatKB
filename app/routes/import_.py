@@ -41,6 +41,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                         comments.Comments(comment=message, entity_type=ENTITY_MAPPING["IP"],
                                           entity_id=old_ip.id, user_id=current_user.id))
                     duplicate_artifacts.append(artifact)
+                    continue
                 else:
                     ip = c2ip.C2ip.get_c2ip_from_ip(artifact, metadata_field_mapping)
                     ip.created_user_id, ip.modified_user_id = current_user.id, current_user.id
@@ -70,6 +71,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                         comments.Comments(comment=message, entity_type=ENTITY_MAPPING["DNS"],
                                           entity_id=old_dns.id, user_id=current_user.id))
                     duplicate_artifacts.append(artifact)
+                    continue
                 else:
                     dns = c2dns.C2dns.get_c2dns_from_hostname(artifact, metadata_field_mapping)
                     dns.created_user_id, dns.modified_user_id = current_user.id, current_user.id
@@ -92,6 +94,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                 yr = yara_rules.get(artifact["rule"]["rule_name"], None)
                 if unique_rule_name_enforcement and yr:
                     duplicate_artifacts.append(artifact)
+                    continue
 
                 yr, fta = yara_rule.Yara_rule.get_yara_rule_from_yara_dict(artifact, metadata_field_mapping)
                 yr.created_user_id, yr.modified_user_id = current_user.id, current_user.id
