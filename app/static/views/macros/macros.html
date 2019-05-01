@@ -100,7 +100,7 @@
 
                 <th style="width: 200px; text-align: center;">Modified User</th>
 
-                <th style="width: 120px;">Actions</th>
+                <th style="width: 150px; text-align: center;">Actions</th>
             </tr>
             </thead>
             <tbody>
@@ -126,6 +126,12 @@
                         </button>
                         <button class="btn btn-sm btn-danger" ng-if="macro.active" confirmed-click="delete(macro.tag)"
                                 ng-confirm-click="Are you sure you want to deactivate this macro?">
+                            <small>
+                                <span class="glyphicon glyphicon-remove-circle"></span>
+                            </small>
+                        </button>
+                        <button class="btn btn-sm btn-danger" ng-if="!macro.active" confirmed-click="delete(macro.tag)"
+                                ng-confirm-click="Are you sure you want to delete this macro permanently?">
                             <small>
                                 <span class="glyphicon glyphicon-remove-circle"></span>
                             </small>

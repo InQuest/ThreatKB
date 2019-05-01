@@ -57,6 +57,9 @@ angular.module('ThreatKB')
                     function () {
                         $scope.macro = {};
                         $scope.macros = Macros.resource.query({view: $scope.view_selected});
+                    }, function() {
+                        growl.info("Unable to permanently delete macro " + tag
+                            + " as it's still associated with Signature.", {ttl: 3000});
                     });
             };
 

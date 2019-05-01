@@ -124,6 +124,9 @@ def delete_macro(tag):
         db.session.merge(entity)
         db.session.commit()
     else:
+        if entity.is_associated_with_sig():
+            return abort(409)
+
         db.session.delete(entity)
         db.session.commit()
 

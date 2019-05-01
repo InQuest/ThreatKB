@@ -1,3 +1,4 @@
+from sqlalchemy import or_
 from app import db
 
 
@@ -34,6 +35,19 @@ class Macros(db.Model):
     def __repr__(self):
         return '<Marcos %s>' % self.tag
 
+    def is_associated_with_sig(self):
+        from app.models import yara_rule, cfg_settings
+
+        tag_template = cfg_settings.Cfg_settings.get_setting("MACRO_TAG_TEMPLATE")
+        l_value = "%" + (tag_template % self.tag) + "%"
+
+        sig_count = db.session.query(yara_rule.Yara_rule) \
+            .filter(or_(yara_rule.Yara_rule.strings.like(l_value),
+                        yara_rule.Yara_rule.condition.like(l_value))) \
+            .count()
+
+        return True if sig_count > 0 else False
+
     @staticmethod
     def get_value(tag):
         try:
@@ -45,7 +59,7 @@ class Macros(db.Model):
     @staticmethod
     def get_macros():
         try:
-            entities = db.session.query(Macros).all()
+            entities = db.session.query(Macros).filter(Macros.active > 0).all()
             return [entity.to_dict() for entity in entities]
         except:
             return None
