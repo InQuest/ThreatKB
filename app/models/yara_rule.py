@@ -6,7 +6,7 @@ from app.routes import tags_mapping
 from app.models.comments import Comments
 from app.models.metadata import MetadataMapping, Metadata
 from app.models.cfg_category_range_mapping import CfgCategoryRangeMapping
-from app.models import cfg_settings, cfg_states, activity_log
+from app.models import cfg_settings, cfg_states, activity_log, macros
 from sqlalchemy.event import listens_for
 from dateutil import parser
 import datetime
@@ -276,7 +276,17 @@ class Yara_rule(db.Model):
 
         yara_rule_text += formatted_condition + "\n}\n"
 
+        yara_rule_text = Yara_rule.expand_macros(yara_rule_text)
+
         return yara_rule_text.encode("utf-8")
+
+    @staticmethod
+    def expand_macros(yara_rule_text):
+        all_macros = macros.Macros.get_macros()
+        tag_template = cfg_settings.Cfg_settings.get_setting("MACRO_TAG_TEMPLATE")
+        for m in all_macros:
+            yara_rule_text = yara_rule_text.replace(tag_template % m['tag'], m['value'])
+        return yara_rule_text
 
     @staticmethod
     def make_yara_sane(text, type_):

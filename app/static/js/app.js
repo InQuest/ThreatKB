@@ -382,6 +382,16 @@ angular.module('ThreatKB', ['ngResource', 'ngRoute', 'ngCookies', 'ui.bootstrap'
                     }]
                 }
             })
+            .when('/macros', {
+                templateUrl: 'views/macros/macros.html',
+                controller: 'MacrosController',
+                access: {restricted: false, admin: false},
+                resolve: {
+                    resolvedMacros: ['Macros', function (Macros) {
+                        return Macros.resource.query({view: 'Active Only'});
+                    }]
+                }
+            })
             .otherwise({
                 redirectTo: '/'
             });

@@ -66,13 +66,13 @@
                 </ul>
 
                 <div class="btn-group pull-right" uib-dropdown ng-show="isLoggedIn()">
-                    <button id="btn-append-to-single-button" type="button" class="btn btn-sm navbar-inverse"
+                    <button id="user-button" type="button" class="btn btn-sm navbar-inverse"
                             style="padding-top:15px; border:0px;" uib-dropdown-toggle>
                         <img ng-src="/ThreatKB/users/me/picture" style="height:25px;" ng-if="isLoggedIn()"></span>&nbsp;&nbsp;<span
                             class="caret" style="color:#9d9d9d"></span>
                     </button>
                     <ul class="dropdown-menu" uib-dropdown-menu role="menu" style="background-color: #ECF0F1;"
-                        aria-labelledby="btn-append-to-single-button">
+                        aria-labelledby="user-button">
                         <li role="menuitem"><a href="#!/profile">Edit Profile</a></li>
                         <li role="menuitem"><a href="#!/access_keys">My API Keys</a></li>
                         <li role="menuitem"><a href="/ThreatKB/documentation">API Documentation</a></li>
@@ -82,13 +82,13 @@
 
                 <div class="btn-group pull-right" style="position:relative" uib-dropdown
                      ng-show="isLoggedIn() && isAdmin()" style="box-shadow: -14px 0 0 -13px #9d9d9d">
-                    <button id="btn-append-to-single-button" type="button" class="btn btn-sm navbar-inverse"
+                    <button id="menu-button" type="button" class="btn btn-sm navbar-inverse"
                             style="padding-top:17px; border:0px; font-size: 14px;" uib-dropdown-toggle>
                         <span class="glyphicon glyphicon-cog" style="color:#9d9d9d"></span>&nbsp;<span class="caret"
                                                                                                        style="color:#9d9d9d"></span>
                     </button>
                     <ul class="dropdown-menu" uib-dropdown-menu role="menu" style="background-color: #ECF0F1;"
-                        aria-labelledby="btn-append-to-single-button">
+                        aria-labelledby="menu-button">
 
                         <li role="menuitem"><a href="#!/users">Users</a></li>
                         <li role="menuitem"><a href="#!/whitelist">Whitelist</a></li>
@@ -101,6 +101,7 @@
                         <li role="menuitem"><a href="#!/errors">Errors</a></li>
                         <li role="menuitem"><a href="#!/cfg_settings">Settings</a></li>
                         <li role="menuitem"><a href="#!/activity_log">Activity Log</a></li>
+                        <li role="menuitem"><a href="#!/macros">Macros</a></li>
                     </ul>
                 </div>
 
@@ -186,6 +187,7 @@
 <script src="js/errors/errors-controller.js"></script>
 <script src="js/activity_log/activity_log-controller.js"></script>
 <script src="js/tests/tests-controller.js"></script>
+<script src="js/macros/macros-controller.js"></script>
 <!-- /Controllers -->
 
 <!-- Services -->
@@ -213,6 +215,7 @@
 <script src="js/errors/errors-service.js"></script>
 <script src="js/activity_log/activity_log-service.js"></script>
 <script src="js/tests/tests-service.js"></script>
+<script src="js/macros/macros-service.js"></script>
 <!-- /Services -->
 
 </body>

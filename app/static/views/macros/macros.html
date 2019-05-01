@@ -1,0 +1,145 @@
+<div>
+
+    <script type="text/ng-template" id="macros-create.html">
+        <form name="form" role="form" novalidate
+              class="ng-scope ng-invalid ng-invalid-required ng-dirty"
+              ng-submit="ok()">
+
+            <div class="modal-header">
+                <button type="button" class="close"
+                        ng-click="cancel()">&times;
+                </button>
+                <h4 class="modal-title" id="myCreateMacroLabel">Create Macro</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Tag</label>
+                    <input type="text" class="form-control" name="tag" ng-model="macro.tag" ng-required="true"
+                           ng-maxlength="512" value="{{ macro.tag }}"/>
+                    <span class="error" ng-show="form.value.$error.minlength">Must be at least 1 character.</span>
+                    <span class="error" ng-show="form.value.$error.maxlength">Must be at most 512 characters.</span>
+                </div>
+
+                <div class="form-group">
+                    <label>Value</label>
+                    <textarea class="form-control" name="value" ng-model="macro.value" ng-required="true"></textarea>
+                    <span class="error" ng-show="form.value.$error.minlength">Must be at least 1 character.</span>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" ng-click="cancel()">Cancel</button>
+                <button type="submit" ng-disabled="form.$invalid" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </script>
+
+    <script type="text/ng-template" id="macros-edit.html">
+        <form name="form" role="form" novalidate
+              class="ng-scope ng-invalid ng-invalid-required ng-dirty"
+              ng-submit="ok()">
+
+            <div class="modal-header">
+                <button type="button" class="close"
+                        ng-click="cancel()">&times;
+                </button>
+                <h4 class="modal-title" id="myMacroLabel">Edit Macro</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Tag</label>
+                    <input readonly type="text" class="form-control" name="tag" ng-model="macro.tag" ng-required="true"
+                           ng-maxlength="512" value="{{ macro.tag }}"/>
+                </div>
+
+                <div class="form-group">
+                    <label>Value</label>
+                    <textarea class="form-control" name="value" ng-model="macro.value" ng-required="true"></textarea>
+                    <span class="error" ng-show="form.value.$error.minlength">Must be at least 1 character.</span>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" ng-click="cancel()">Cancel</button>
+                <button type="submit" ng-disabled="form.$invalid" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </script>
+
+    <br>
+    <div class="container-fluid">
+        <div style="float: left;">
+            <ui-select ng-model="view_selected" style="width: 200px;" title="Select view"
+                       on-select="change_view($item, $model)">
+                <ui-select-match placeholder="Select view" title="Select view">
+                    {{$select.selected}}
+                </ui-select-match>
+                <ui-select-choices repeat="view in (view_options | filter: $select.search) track by view">
+                    <span ng-bind="view"></span>
+                </ui-select-choices>
+            </ui-select>
+        </div>
+        <div class="inner-addon left-addon col-md-4" style="padding-left:0px;">
+            <i class="glyphicon glyphicon-search"></i>
+            <input type="text" class="form-control" placeholder="Search" ng-model="search"/>
+        </div>
+        <button class="btn btn-secondary pull-right" style="color:inherit;" ng-click="create()">
+            Create Macro
+        </button>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Tag</th>
+
+                <th>Value</th>
+
+                <th style="width: 120px;">Date Modified</th>
+
+                <th style="width: 200px; text-align: center;">Modified User</th>
+
+                <th style="width: 150px; text-align: center;">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="macro in macros | orderBy:'-date_modified' | toArray:false | filter:search:customSearch track by $index">
+                <td ng-if="macro.tag">{{ macro.tag }}</td>
+
+                <td ng-if="macro.tag">{{ macro.value }}</td>
+
+                <td ng-if="macro.date_modified"><small>{{ pretty_date(macro.date_modified) }}</small></td>
+
+                <td ng-if="macro.modified_user" style="text-align: center;">
+                    <small>{{ macro.modified_user.email }}</small>
+                </td>
+
+                <td ng-if="macro.tag" style="float:right">
+                    <div style="text-align: center;">
+                        <button class="btn btn-sm" type="button" ng-if="!macro.active"
+                                ng-click="activate(macro.tag)">
+                            <small><span class="glyphicon glyphicon-check"></span></small>
+                        </button>
+                        <button class="btn btn-sm" type="submit" ng-click="update(macro.tag)">
+                            <small><span class="glyphicon glyphicon-pencil"></span></small>
+                        </button>
+                        <button class="btn btn-sm btn-danger" ng-if="macro.active" confirmed-click="delete(macro.tag)"
+                                ng-confirm-click="Are you sure you want to deactivate this macro?">
+                            <small>
+                                <span class="glyphicon glyphicon-remove-circle"></span>
+                            </small>
+                        </button>
+                        <button class="btn btn-sm btn-danger" ng-if="!macro.active" confirmed-click="delete(macro.tag)"
+                                ng-confirm-click="Are you sure you want to delete this macro permanently?">
+                            <small>
+                                <span class="glyphicon glyphicon-remove-circle"></span>
+                            </small>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
