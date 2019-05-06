@@ -88,8 +88,8 @@ class Release(db.Model):
         if not retired_state:
             raise Exception("You need to specify a retired release state first.")
 
-        dns = c2dns.C2dns.query.filter(c2dns.C2dns.state == release_state.state).all()
-        ip = c2ip.C2ip.query.filter(c2ip.C2ip.state == release_state.state).all()
+        dns = c2dns.C2dns.query.filter(and_(c2dns.C2dns.state == release_state.state, c2dns.C2dns.active > 0)).all()
+        ip = c2ip.C2ip.query.filter(and_(c2ip.C2ip.state == release_state.state, c2ip.C2ip.active > 0)).all()
         yr = yara_rule.Yara_rule.query\
             .filter(and_(yara_rule.Yara_rule.state == release_state.state, yara_rule.Yara_rule.active > 0))\
             .all()
