@@ -252,14 +252,14 @@ class Yara_rule(db.Model):
 
         if yara_dict["strings"] and yara_dict["strings"].strip() and not "strings:" in yara_dict["strings"]:
             formatted_strings = "\n\tstrings:\n\t\t"
-            formatted_strings += "\n\t\t".join([line.strip() for line in yara_dict["strings"].split("\n")])
+            formatted_strings += "\n".join([line for line in yara_dict["strings"].split("\n")])
             # yara_rule_text += "\n\tstrings:\n\t\t%s" % (yara_dict["strings"])
         else:
             if not yara_dict["strings"] or not yara_dict["strings"].strip():
                 formatted_strings += ""
             else:
                 formatted_strings = "\n\tstrings:\n\t\t"
-                formatted_strings += "\n\t\t".join([line.strip() for line in yara_dict["strings"].split("\n")[1:]])
+                formatted_strings += "\n".join([line for line in yara_dict["strings"].split("\n")[1:]])
                 # yara_rule_text += "\n\t%s" % (yara_dict["strings"])
 
         yara_rule_text += formatted_strings
@@ -267,11 +267,11 @@ class Yara_rule(db.Model):
 
         if not "condition" in yara_dict["condition"]:
             formatted_condition = "\n\tcondition:\n\t\t"
-            formatted_condition += "\n\t\t".join([line.strip() for line in yara_dict["condition"].split("\n")])
+            formatted_condition += "\n".join([line for line in yara_dict["condition"].split("\n")])
             #yara_rule_text += "\n\tcondition:\n\t\t%s\n\n}" % (yara_dict["condition"])
         else:
             formatted_condition = "\n\tcondition:\n\t\t"
-            formatted_condition += "\n\t\t".join([line.strip() for line in yara_dict["condition"].split("\n")[1:]])
+            formatted_condition += "\n".join([line for line in yara_dict["condition"].split("\n")[1:]])
             # yara_rule_text += "\n\t%s\n\n}" % (yara_dict["condition"])
 
         yara_rule_text += formatted_condition + "\n}\n"
@@ -295,7 +295,7 @@ class Yara_rule(db.Model):
 
         type_ = "%s:" if not type_.endswith(":") else type_
         text = re.sub("[^\x00-\x7f]", "", text)
-        return "\n\t".join([string.strip().strip("\t") for string in text.split("\n") if type_ not in string]).strip()
+        return "\n".join([string for string in text.split("\n") if type_ not in string]).strip()
 
     @classmethod
     def get_yara_rule_from_yara_dict(cls, yara_dict, metadata_field_mapping={}):
