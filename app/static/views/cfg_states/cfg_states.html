@@ -80,9 +80,9 @@
 
                 <th>State</th>
 
-                <th>Release State</th>
-
                 <th>Staging State</th>
+
+                <th>Release State</th>
 
                 <th>Retired State</th>
 
@@ -103,11 +103,11 @@
 
                 <td ng-if="cfg_state.state">{{ cfg_state.state }}</td>
 
-                <td ng-if="cfg_state.is_release_state && cfg_state.id">Yes</td>
-                <td ng-if="!cfg_state.is_release_state && cfg_state.id">No</td>
-
                 <td ng-if="cfg_state.is_staging_state && cfg_state.id">Yes</td>
                 <td ng-if="!cfg_state.is_staging_state && cfg_state.id">No</td>
+
+                <td ng-if="cfg_state.is_release_state && cfg_state.id">Yes</td>
+                <td ng-if="!cfg_state.is_release_state && cfg_state.id">No</td>
 
                 <td ng-if="cfg_state.is_retired_state && cfg_state.id">Yes</td>
                 <td ng-if="!cfg_state.is_retired_state && cfg_state.id">No</td>

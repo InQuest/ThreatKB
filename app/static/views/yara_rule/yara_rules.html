@@ -281,11 +281,11 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Mitre ATT&CK Tactics</label>
+                    <label>Mitre ATT&CK Techniques</label>
                     <ui-select multiple ng-model="yara_rule.mitre_techniques" theme="bootstrap"
                                close-on-select="false"
-                               title="Choose tactics">
-                        <ui-select-match placeholder="Choose tactics...">{{$item}}</ui-select-match>
+                               title="Choose techniques">
+                        <ui-select-match placeholder="Choose techniques...">{{$item}}</ui-select-match>
                         <ui-select-choices repeat="tactic in mitre_techniques | filter:$select.search">
                             {{ tactic }}
                         </ui-select-choices>
