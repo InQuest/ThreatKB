@@ -1,0 +1,21 @@
+<!-- Toolbar -->
+<div class="tkb-codemirror-toolbar">
+  <!-- Find -->
+  <span ng-show="controlsFind">Find</span>
+  <input ng-show="controlsFind" type="text" tkb-codemirror-find-input
+         placholder="Find" title="Ctrl+F, then Ctrl+[Shift]+G for Previous/Next"
+         ng-model="findExpression" ng-change="doFind()" />
+  <span ng-show="controlsFind && searchCursor" class="tkb-codemirror-toolbar-find-controls">
+    <a ng-click="findPrevious()">&#x25C4;</a>
+    <a ng-click="findNext()">&#x25BA;</a>
+    <a ng-click="cancelFind()">&#10005;</a>
+  </span>
+  <!-- Wrap -->
+  <span ng-show="controlsWrap">Wrap</span>
+  <input ng-show="controlsWrap" type="checkbox"
+         ng-model="opts.lineWrapping" />
+  <!-- Transcluded content -->
+  <ng-transclude></ng-transclude>
+</div>
+<!-- Editor -->
+<div ng-if="opts" ui-codemirror="opts" ng-model="ngModel"></div>

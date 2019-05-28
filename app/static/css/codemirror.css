@@ -318,3 +318,72 @@ div.CodeMirror-cursors {
 
 /* Help users use markselection to safely style text background */
 span.CodeMirror-selectedtext { background: none; }
+
+/* Scrolling containment */
+tkb-codemirror {
+  position: relative;
+  display: block;
+}
+
+tkb-codemirror > .tkb-codemirror-toolbar {
+  /* display: none; */
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  font-size: 11px;
+  line-height: 18px;
+  vertical-align: middle
+}
+tkb-codemirror:hover > .tkb-codemirror-toolbar,
+tkb-codemirror:focus-within > .tkb-codemirror-toolbar {
+  /* display: block; */
+}
+
+tkb-codemirror > .tkb-codemirror-toolbar > * {
+  vertical-align: middle;
+  margin: 0 0 0 4px;
+}
+tkb-codemirror > .tkb-codemirror-toolbar > input[type="text"] {
+  border-top: 0;
+  border-left: 0;
+  border-right: 0;
+}
+tkb-codemirror > .tkb-codemirror-toolbar > .tkb-codemirror-toolbar-find-controls > a {
+  color: black;
+  cursor: pointer;
+}
+tkb-codemirror > .tkb-codemirror-toolbar > .tkb-codemirror-toolbar-find-controls > a:last-child {
+  margin-right: 16px;
+}
+tkb-codemirror > [ui-codemirror] {
+  border-top: 3px solid transparent;
+  border-bottom: 3px solid transparent;
+}
+tkb-codemirror.scroll-top.scroll-animation-a > [ui-codemirror] {
+  animation: scroll-top-a 1000ms;
+}
+tkb-codemirror.scroll-top.scroll-animation-b > [ui-codemirror] {
+  animation: scroll-top-b 1000ms;
+}
+@keyframes scroll-top-a {
+  0% { border-top: 3px solid rgba(255, 0, 0, 1); }
+  100% { border-top: 3px solid rgba(255, 0, 0, 0); }
+}
+@keyframes scroll-top-b {
+  0% { border-top: 3px solid rgba(255, 0, 0, 1); }
+  100% { border-top: 3px solid rgba(255, 0, 0, 0); }
+}
+tkb-codemirror.scroll-bottom.scroll-animation-a > [ui-codemirror] {
+  animation: scroll-bottom-a 1000ms;
+}
+tkb-codemirror.scroll-bottom.scroll-animation-b > [ui-codemirror] {
+  animation: scroll-bottom-b 1000ms;
+}
+@keyframes scroll-bottom-a {
+  0% { border-bottom: 3px solid rgba(255, 0, 0, 1); }
+  100% { border-bottom: 3px solid rgba(255, 0, 0, 0); }
+}
+@keyframes scroll-bottom-b {
+  0% { border-bottom: 3px solid rgba(255, 0, 0, 1); }
+  100% { border-bottom: 3px solid rgba(255, 0, 0, 0); }
+}

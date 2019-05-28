@@ -81,7 +81,11 @@
                 </div>
                 <BR>
                 <BR>
-                <textarea ui-codemirror="cmOption" ng-model="script.code"></textarea>
+                <tkb-codemirror ng-model="script.code" 
+                                line-numbers="true" line-wrapping="true" indent-with-tabs="true" autofocus="true"
+                                onLoad="onCmLoad()"
+                                contain-scroll-wheel="true" controls-wrap="false" controls-find="true">
+                </tkb-codemirror>
 
             </div>
             <div class="modal-footer">

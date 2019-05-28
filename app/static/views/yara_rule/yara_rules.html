@@ -78,11 +78,15 @@
         </div>
         <div class="modal-body">
             <div class="form-group">
-                <span class="pull-right">Wrap&nbsp;<input type="checkbox" ng-checked="wrap_editor"
-                                                          ng-model="wrap_editor"
-                                                          ng-change="change_wrap_editor()"></span><br/>
-                <ui-codemirror ui-codemirror-opts="editor_options"
-                               ng-model="yara_rule.yara_rule_string"></ui-codemirror>
+                <tkb-codemirror ng-model="yara_rule.yara_rule_string" 
+                                mode="'yara'"
+                                line-numbers="true" line-wrapping="editor.wrap"
+                                contain-scroll-wheel="true" controls-wrap="false" controls-find="true">
+                    <span>Wrap</span>
+                    <input type="checkbox" 
+                           ng-model="editor.wrap"
+                           ng-change="change_wrap_editor()"></span>
+                </tkb-codemirror>
             </div>
             <div class="form-group">
                 <label>Comments ({{ yara_rule.comments.length }})</label>
@@ -234,18 +238,28 @@
                 </div>
 
                 <label>Strings Editor</label>
-                <span class="pull-right">Wrap&nbsp;<input type="checkbox" ng-checked="wrap_editor"
-                                                          ng-model="wrap_editor"
-                                                          ng-change="change_wrap_editor()"></span>
-                <ui-codemirror ui-codemirror-opts="editor_options" ng-model="yara_rule.strings"></ui-codemirror>
+                <tkb-codemirror ng-model="yara_rule.strings" 
+                                mode="'yara'"
+                                line-numbers="true" line-wrapping="editor.wrap"
+                                contain-scroll-wheel="true" controls-wrap="false" controls-find="true">
+                    <span>Wrap</span>
+                    <input type="checkbox" 
+                           ng-model="editor.wrap"
+                           ng-change="change_wrap_editor()"></span>
+                </tkb-codemirror>
                 <BR>
 
                 <label>Conditions Editor</label>
                 <span class="error text-danger" ng-if="!yara_rule.condition">*</span>
-                <span class="pull-right">Wrap&nbsp;<input type="checkbox" ng-checked="wrap_editor"
-                                                          ng-model="wrap_editor"
-                                                          ng-change="change_wrap_editor()"></span>
-                <ui-codemirror ui-codemirror-opts="editor_options" ng-model="yara_rule.condition"></ui-codemirror>
+                <tkb-codemirror ng-model="yara_rule.condition"
+                                mode="'yara'"
+                                line-numbers="true" line-wrapping="editor.wrap"
+                                contain-scroll-wheel="true" controls-wrap="false" controls-find="true">
+                    <span>Wrap</span>
+                    <input type="checkbox" 
+                           ng-model="editor.wrap"
+                           ng-change="change_wrap_editor()"></span>
+                </tkb-codemirror>
                 <BR>
 
                 <label>Imports</label>
