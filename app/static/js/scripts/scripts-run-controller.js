@@ -45,19 +45,12 @@ angular.module('ThreatKB')
         function ($scope, $http, $uibModalInstance, script, growl, Script) {
             $scope.script = script;
 
-            $scope.cmOption = {
-                lineNumbers: true,
-                lineWrapping: true,
-                indentWithTabs: true,
-                readOnly: 'nocursor',
-                autofocus: true,
-                onLoad: function (_cm) {
-                    $scope.modeChanged = function () {
-                        _cm.setOption("mode", $scope.script.interpreter.toLowerCase());
-                        _cm.focus();
-                        _cm.autofocus = true;
-                    };
-                }
+            $scope.onCmLoad = function (_cm) {
+                $scope.modeChanged = function () {
+                    _cm.setOption("mode", $scope.script.interpreter.toLowerCase());
+                    _cm.focus();
+                    _cm.autofocus = true;
+                };
             };
 
             $scope.run_script = function () {

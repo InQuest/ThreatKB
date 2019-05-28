@@ -146,9 +146,7 @@ angular.module('ThreatKB')
                             var column = grid.columns[i];
                             trigger_refresh_for_emptiness &= (column.filters[0].term === undefined || column.filters[0].term === null || column.filters[0].term.length === 0);
 
-                            if (column.filters[0].term !== undefined && column.filters[0].term !== null
-                                && ("~" === column.filters[0].term
-                                    || column.filters[0].term.length >= parseInt($scope.start_filter_requests_length.value))) {
+                            if (column.filters[0].term !== undefined && column.filters[0].term !== null && column.filters[0].term.length >= parseInt($scope.start_filter_requests_length.value)) {
                                 trigger_refresh_for_length = true;
                                 paginationOptions.searches[column.colDef.field] = column.filters[0].term
                             }
@@ -692,20 +690,21 @@ angular.module('ThreatKB')
 
             $scope.users = Users.query();
 
-            $scope.wrap_editor = ($cookies.get("wrap_editor") === "true");
+            $scope.editor = {
+                wrap: ($cookies.get("wrap_editor") === "true")
+            };
 
-            if ($scope.wrap_editor == null) {
-                $scope.wrap_editor = false;
+            if ($scope.editor.wrap == null) {
+                $scope.editor.wrap = false;
                 var expireDate = new Date();
                 expireDate.setDate(expireDate.getDate() + 365);
-                $cookies.put("wrap_editor", $scope.wrap_editor, {expires: expireDate});
+                $cookies.put("wrap_editor", $scope.editor.wrap, {expires: expireDate});
             }
 
             $scope.change_wrap_editor = function () {
-                $scope.editor_options.lineWrapping = $scope.wrap_editor;
                 var expireDate = new Date();
                 expireDate.setDate(expireDate.getDate() + 365);
-                $cookies.put("wrap_editor", $scope.wrap_editor, {expires: expireDate});
+                $cookies.put("wrap_editor", $scope.editor.wrap, {expires: expireDate});
             };
 
             $scope.save_artifact = function () {
@@ -744,7 +743,7 @@ angular.module('ThreatKB')
                 description: 'Toggle word wrap',
                 allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
                 callback: function () {
-                    $scope.wrap_editor = !$scope.wrap_editor;
+                    $scope.editor.wrap = !$scope.editor.wrap;
                     $scope.change_wrap_editor();
                 }
             });
@@ -811,12 +810,6 @@ angular.module('ThreatKB')
 
             $scope.print_comment = function (comment) {
                 return comment.comment.replace(/(?:\r\n|\r|\n)/g, "<BR>");
-            };
-
-            $scope.editor_options = {
-                lineNumbers: true,
-                lineWrapping: $scope.wrap_editor,
-                mode: 'yara'
             };
 
             $scope.update_selected_signature = function (yara_rule) {
@@ -973,27 +966,21 @@ angular.module('ThreatKB')
                 }
             );
 
-            $scope.wrap_editor = ($cookies.get("wrap_editor") === "true");
-
-            $scope.editor_options = {
-                lineNumbers: true,
-                lineWrapping: $scope.wrap_editor,
-                mode: 'yara',
-                readOnly: true
+            $scope.editor = {
+                wrap: ($cookies.get("wrap_editor") === "true")
             };
 
-            if ($scope.wrap_editor == null) {
-                $scope.wrap_editor = false;
+            if ($scope.editor.wrap == null) {
+                $scope.editor.wrap = false;
                 var expireDate = new Date();
                 expireDate.setDate(expireDate.getDate() + 365);
-                $cookies.put("wrap_editor", $scope.wrap_editor, {expires: expireDate});
+                $cookies.put("wrap_editor", $scope.wrap_ededitor.wrapitor, {expires: expireDate});
             }
 
             $scope.change_wrap_editor = function () {
-                $scope.editor_options.lineWrapping = $scope.wrap_editor;
                 var expireDate = new Date();
                 expireDate.setDate(expireDate.getDate() + 365);
-                $cookies.put("wrap_editor", $scope.wrap_editor, {expires: expireDate});
+                $cookies.put("wrap_editor", $scope.editor.wrap, {expires: expireDate});
             };
 
             $scope.edit = function (id) {
