@@ -802,7 +802,7 @@ angular.module('ThreatKB')
 
             $scope.cfg_states = Cfg_states.query();
             $scope.cfg_category_range_mapping = CfgCategoryRangeMapping.query();
-            $scope.do_not_bump_revision = false;
+            $scope.do_not_bump_revision = true;
 
             $scope.just_opened = true;
             $scope.negTestDir = Cfg_settings.get({key: "NEGATIVE_TESTING_FILE_DIRECTORY"});
