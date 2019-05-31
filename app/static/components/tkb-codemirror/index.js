@@ -17,7 +17,6 @@ angular.module('ThreatKB').directive('tkbCodemirror', function () {
   return {
     templateUrl: 'components/tkb-codemirror/index.html',
     scope: {
-      ngModel: '=',
       mode: '=',
       readOnly: '=',
       containScrollWheel: '=',
@@ -29,8 +28,15 @@ angular.module('ThreatKB').directive('tkbCodemirror', function () {
       controlsFind: '=',
       onLoad: '&'
     },
+    require : '?ngModel',
     transclude: true,
-    link: function ($scope, element, attrs) {
+    link: function ($scope, element, attrs, ngModel) {
+
+      // Watch ngModel for changes
+      $scope.$watch(
+        function () { return ngModel && ngModel.$viewValue; },
+        function (value) { $scope.value = value; }
+      )
 
       // Process codemirror options
       $scope.$watch(
@@ -63,6 +69,13 @@ angular.module('ThreatKB').directive('tkbCodemirror', function () {
         // Run callback
         if ($scope.onLoad) { $scope.onLoad(); }
 
+        // Watch for changes
+        editor.on('changes', function (instance) {
+          // Set changes to ngModel
+          var value = instance.doc.getValue();
+          ngModel.$setViewValue(value);
+        });
+
         // Handle wheel-scroll event
         var codeMirrotVScrollEl = element[0].querySelector('.CodeMirror-vscrollbar'),
             codeMirrotVScrollFlip = 0;
@@ -74,7 +87,7 @@ angular.module('ThreatKB').directive('tkbCodemirror', function () {
                 height =        codeMirrotVScrollEl.offsetHeight,
                 delta =         (ev.type == 'DOMMouseScroll' ? ev.detail * -40 : (ev.originalEvent ? ev.originalEvent.wheelDelta : ev.wheelDelta)),
                 up =            delta > 0,
-                prevent = () => {
+                prevent = function () {
                   ev.stopPropagation();
                   ev.preventDefault();
                   return false;
