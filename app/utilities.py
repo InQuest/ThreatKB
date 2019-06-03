@@ -87,7 +87,8 @@ def filter_entities(entity,
                     include_merged=False,
                     include_yara_string=None,
                     short=None,
-                    operator="and"):
+                    operator="and",
+                    since=None):
     searches = json.loads(searches)
 
     operator = and_ if operator == "and" else or_
@@ -173,6 +174,17 @@ def filter_entities(entity,
                 clauses.append(and_(MetadataMapping.artifact_id == entity.id, Metadata.key == column,
                                     not_(MetadataMapping.value.like(l_value))
                                     if s_value.startswith("!") else MetadataMapping.value.like(l_value)))
+
+    if since:
+        try:
+            clauses.append(entity.activity_date > since)
+        except:
+            pass
+
+        try:
+            clauses.append(entity.creation_date > since)
+        except:
+            pass
 
     if not include_merged:
         entities = entities.filter(entity.state != 'Merged')

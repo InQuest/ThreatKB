@@ -196,6 +196,7 @@ angular.module('ThreatKB')
                 var url = '/ThreatKB/activity_log?';
                 url += 'page_number=' + (paginationOptions.pageNumber - 1);
                 url += '&page_size=' + paginationOptions.pageSize;
+                url += '&since=45';
                 switch (paginationOptions.sort_dir) {
                     case uiGridConstants.ASC:
                         url += '&sort_dir=ASC';

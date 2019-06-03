@@ -4,6 +4,7 @@ from app import app, db, auto
 from flask_login import login_required
 
 from app.models import activity_log
+from datetime import timedelta, datetime
 
 from app.utilities import filter_entities
 
@@ -27,6 +28,12 @@ def get_all_activity_logs():
     page_size = request.args.get('page_size', False)
     sort_by = request.args.get('sort_by', False)
     sort_direction = request.args.get('sort_dir', 'ASC')
+    try:
+        since_days = int(request.args.get('since', 45))
+    except:
+        since_days = 45
+
+    since = datetime.now() - timedelta(days=since_days)
 
     response_dict = filter_entities(entity=activity_log.ActivityLog,
                                     artifact_type="ACTIVITY_LOG",
@@ -38,6 +45,7 @@ def get_all_activity_logs():
                                     include_metadata=False,
                                     exclude_totals=False,
                                     default_sort="activity_date",
-                                    include_merged=True)
+                                    include_merged=True,
+                                    since=since)
 
     return Response(response_dict, mimetype='application/json')
