@@ -144,6 +144,10 @@ angular.module('ThreatKB').controller('ImportController',
                                 }
                             }
 
+                            if (data.errors) {
+                                message += "There were " + data.errors.length + " errors that were not committed.<BR><BR>";
+                            }
+
                             growl.info(message, {
                                 ttl: 3000,
                                 disableCountDown: true

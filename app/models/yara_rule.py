@@ -360,6 +360,10 @@ class Yara_rule(db.Model):
         yara_rule.strings = "\n" + strings if strings else ""
         yara_rule.imports = imports
 
+        for key, val in yara_rule.__dict__.items():
+            if not key.startswith('_') and type(val) in [str, unicode]:
+                val.decode("ascii")
+
         if not yara_rule.category:
             yara_rule.category = CfgCategoryRangeMapping.DEFAULT_CATEGORY
         return yara_rule, fields_to_add

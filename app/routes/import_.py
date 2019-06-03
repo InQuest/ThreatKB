@@ -17,6 +17,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
     fields_to_add = {}
     metadata_to_save_ip = []
     metadata_to_save_dns = []
+    error_artifacts = []
 
     domain_names = {domain_name.domain_name.lower(): domain_name for domain_name in c2dns.C2dns.query.all()}
     ip_addresses = {ipaddress.ip: ipaddress for ipaddress in c2ip.C2ip.query.all()}
@@ -111,6 +112,10 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                 fields_to_add[yr] = fta
         except Exception as e:
             app.logger.exception(e)
+            if type(e) == UnicodeEncodeError:
+                error_artifacts.append((artifact, "Unicode error: %s" % e.reason))
+            else:
+                error_artifacts.append((artifact, e.message))
             app.logger.error("Failed to commit artifacts '%s'" % artifact)
 
     db.session.commit()
@@ -139,7 +144,8 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
         db.session.commit()
 
     return {"committed": [artifact.to_dict() for artifact in return_artifacts],
-            "duplicates": duplicate_artifacts}
+            "duplicates": duplicate_artifacts,
+            "errors": error_artifacts}
 
 
 #####################################################################
