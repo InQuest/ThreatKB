@@ -194,7 +194,7 @@
                                     <div>
                                         <pre
                                             style="word-break: normal; white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word;">{{ comment.comment }}</pre>
-                                        <span>{{ comment.user.email }}&nbsp;<small>{{ pretty_date(comment.date_created) }}</small></span>
+                                        <span>{{ comment.user.email }}&nbsp;<small>{{ comment.date_created | date:'medium'  }}</small></span>
                                     </div>
                                 </li>
                             </ul>
@@ -466,7 +466,7 @@
                                         <div>
                                             <pre
                                                 style="word-break: normal; white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word;">{{ comment.comment }}</pre>
-                                            <span>{{ comment.user.email }}&nbsp;<small>{{ pretty_date(comment.date_created) }}</small></span>
+                                            <span>{{ comment.user.email }}&nbsp;<small>{{ comment.date_created | date:'medium'  }}</small></span>
                                             <button type="button" class="btn btn-xs pull-right"
                                                     confirmed-click="delete_comment({{ c2ip.id }},{{ comment.id }})"
                                                     ng-confirm-click="Are you sure you want to delete comment?"><span
