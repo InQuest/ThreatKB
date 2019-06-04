@@ -566,8 +566,8 @@
                     <button ng-disabled="form.$invalid || form.$pristine" class="btn btn-primary">Save
                     </button>
                 </div>
-                <div class="pull-right" style="padding: 5px 10px 0 5px;">
-                    <input type="checkbox" class="pull-left" ng-model="yara_rule.do_not_bump_revision">
+                <div class="pull-right" style="padding: 5px 10px 0 5px;" ng-if="yara_rule.id">
+                    <input type="checkbox" class="pull-left" ng-model="do_not_bump_revision">
                     &nbsp;Do not bump revision
                 </div>
             </div>
