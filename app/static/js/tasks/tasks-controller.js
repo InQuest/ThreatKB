@@ -543,11 +543,21 @@ angular.module('ThreatKB')
             };
 
             $scope.ok = function () {
+                // Check if outstanding comment
+                if ($scope.task.new_comment && $scope.task.new_comment.trim() && confirm('There is a unsaved comment, do you wish to save it as well?')) {
+                    $scope.add_comment($scope.task.id);
+                }
+                // Close modal
                 $window.document.title = "ThreatKB";
                 $uibModalInstance.close($scope.task);
             };
 
             $scope.cancel = function () {
+                // Check if outstanding comment
+                if ($scope.task.new_comment && $scope.task.new_comment.trim() && confirm('There is a unsaved comment, do you wish to save it?')) {
+                    $scope.add_comment($scope.task.id);
+                }
+                // Close modal
                 $window.document.title = "ThreatKB";
                 $uibModalInstance.dismiss('cancel');
             };

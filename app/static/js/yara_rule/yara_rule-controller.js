@@ -880,11 +880,21 @@ angular.module('ThreatKB')
             };
 
             $scope.ok = function () {
+                // Check if outstanding comment
+                if ($scope.yara_rule.new_comment && $scope.yara_rule.new_comment.trim() && confirm('There is a unsaved comment, do you wish to save it as well?')) {
+                    $scope.add_comment($scope.yara_rule.id);
+                }
+                // Close modal
                 $window.document.title = "ThreatKB";
                 $uibModalInstance.close($scope.yara_rule);
             };
 
             $scope.cancel = function () {
+                // Check if outstanding comment
+                if ($scope.yara_rule.new_comment && $scope.yara_rule.new_comment.trim() && confirm('There is a unsaved comment, do you wish to save it?')) {
+                    $scope.add_comment($scope.yara_rule.id);
+                }
+                // Close modal
                 $window.document.title = "ThreatKB";
                 $uibModalInstance.dismiss('cancel');
             };

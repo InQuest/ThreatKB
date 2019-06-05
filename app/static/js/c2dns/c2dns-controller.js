@@ -720,11 +720,21 @@ angular.module('ThreatKB')
             };
 
             $scope.ok = function () {
+                // Check if outstanding comment
+                if ($scope.c2dns.new_comment && $scope.c2dns.new_comment.trim() && confirm('There is a unsaved comment, do you wish to save it as well?')) {
+                    $scope.add_comment($scope.c2dns.id);
+                }
+                // Close modal
                 $window.document.title = "ThreatKB";
                 $uibModalInstance.close($scope.c2dns);
             };
 
             $scope.cancel = function () {
+                // Check if outstanding comment
+                if ($scope.c2dns.new_comment && $scope.c2dns.new_comment.trim() && confirm('There is a unsaved comment, do you wish to save it?')) {
+                    $scope.add_comment($scope.c2dns.id);
+                }
+                // Close modal
                 $window.document.title = "ThreatKB";
                 $uibModalInstance.dismiss('cancel');
             };
