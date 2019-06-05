@@ -716,11 +716,21 @@ angular.module('ThreatKB')
             };
 
             $scope.ok = function () {
+                // Check if outstanding comment
+                if ($scope.c2ip.new_comment && $scope.c2ip.new_comment.trim() && confirm('There is a unsaved comment, do you wish to save it as well?')) {
+                    $scope.add_comment($scope.c2ip.id);
+                }
+                // Close modal
                 $window.document.title = "ThreatKB";
                 $uibModalInstance.close($scope.c2ip);
             };
 
             $scope.cancel = function () {
+                // Check if outstanding comment
+                if ($scope.c2ip.new_comment && $scope.c2ip.new_comment.trim() && confirm('There is a unsaved comment, do you wish to save it?')) {
+                    $scope.add_comment($scope.c2ip.id);
+                }
+                // Close modal
                 $window.document.title = "ThreatKB";
                 $uibModalInstance.dismiss('cancel');
             };
