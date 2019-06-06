@@ -42,6 +42,7 @@ ACTIVITY_TYPE = {"ARTIFACT_CREATED": "Artifact Created",
 def nocache(view):
     @wraps(view)
     def no_cache(*args, **kwargs):
+        import datetime as datetime
         response = make_response(view(*args, **kwargs))
         response.headers['Last-Modified'] = datetime.datetime.now()
         response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
