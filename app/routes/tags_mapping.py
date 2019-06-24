@@ -48,7 +48,11 @@ def get_tags_for_source(source_table, source_id):
         return list_of_tags
     else:
         for entity in entities:
-            entity = get_tags(entity.to_dict()['tag_id'])
+            try:
+                entity = get_tags(entity.to_dict()['tag_id'])
+            except:
+                continue
+
             if entity.status_code == 200:
                 list_of_tags.append(json.loads(entity.data))
 
