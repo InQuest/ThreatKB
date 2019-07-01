@@ -43,8 +43,8 @@ class KBUser(db.Model):
             admin=self.admin,
             active=self.active,
             id=self.id,
-            # first_name=self.first_name,
-            #last_name=self.last_name
+            first_name=self.first_name,
+            last_name=self.last_name
         )
 
     def generate_auth_token(self, s_key):
