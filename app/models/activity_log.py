@@ -5,7 +5,7 @@ from sqlalchemy import bindparam, inspect
 
 from app.models import users
 from app.models.cfg_states import Cfg_states
-
+import re
 
 class ActivityLog(db.Model):
     __tablename__ = "activity_log"
@@ -58,6 +58,8 @@ def get_modified_changes(target):
 
             if before != after:
                 changes.append("'%s' changed from '%s' to '%s'" % (attr.key, before, after))
+
+    changes = [re.sub("[^\x00-\x7F]", "", change) for change in changes]
     return changes
 
 
