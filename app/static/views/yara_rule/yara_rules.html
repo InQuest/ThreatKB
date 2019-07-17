@@ -78,10 +78,11 @@
         </div>
         <div class="modal-body">
             <div class="form-group">
-                <tkb-codemirror ng-model="yara_rule.yara_rule_string" 
+                <tkb-codemirror ng-model="yara_rule.yara_rule_string"
                                 mode="'yara'"
                                 line-numbers="true" line-wrapping="editor.wrap"
-                                contain-scroll-wheel="true" controls-wrap="false" controls-find="true">
+                                contain-scroll-wheel="true" controls-wrap="false" controls-find="true"
+                                read-only="true">
                     <span>Wrap</span>
                     <input type="checkbox" 
                            ng-model="editor.wrap"
