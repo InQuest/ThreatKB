@@ -203,7 +203,7 @@ class Yara_rule(db.Model):
         yr = Yara_rule()
         metadata_fields_to_show = ["creation_date", "last_revision_date", "revision",
                                     "name", "category", "eventid",
-                                    "description", "references"]
+                                   "description", "references", "mitre_tactics", "mitre_techniques"]
 
         metadata_field_mapping = [attr for attr in dir(yr) if
                                   not callable(getattr(yr, attr)) and not attr.startswith("__")]
