@@ -224,7 +224,7 @@ class Release(db.Model):
                                        entity["metadata_values"].get("Severity", {"value": "Severity"})["value"],
                                        "\n\t".join(entity.get("mitre_tactics", "")),
                                        "\n\t".join(entity.get("mitre_techniques", "")),
-                                       "\t\n%s" % (entity.get("description", "description")),
+                                       "\n\t%s" % (entity.get("description", "description")),
         ) for entity in self.release_data_dict["Signatures"]["Added"] if
                                    type(entity) == dict]) if \
             len(self.release_data_dict["Signatures"]["Added"]) > 0 else "NA"
@@ -245,7 +245,7 @@ class Release(db.Model):
                                        entity["metadata_values"].get("Severity", {"value": "Severity"})["value"],
                                        "\n\t".join(entity.get("mitre_tactics", "")),
                                        "\n\t".join(entity.get("mitre_techniques", "")),
-                                       "\t\n%s" % (entity.get("description", "description")),
+                                       "\n\t%s" % (entity.get("description", "description")),
         ) for entity in
                                    self.release_data_dict["Signatures"]["Modified"] if type(entity) == dict]) if \
             len(self.release_data_dict["Signatures"]["Modified"]) > 0 else "NA"
