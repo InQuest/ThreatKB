@@ -38,6 +38,23 @@
                     </ui-select>
                 </div>
                 <div class="form-group">
+                    <label>Category</label>
+                    <ui-select ng-model="batch.category" name="category">
+                        <ui-select-match placeholder="Select a category or press delete to clear...">
+                            <span ng-bind="$select.selected.category"></span>
+                        </ui-select-match>
+                        <ui-select-choices
+                            repeat="category in (cfg_category_range_mapping | filter: $select.search) track by category.id">
+                            <span ng-bind="category.category"></span>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea class="form-control" placeholder="Enter description..." rows="6"
+                              ng-model="batch.description"></textarea>
+                </div>
+                <div class="form-group">
                     <label>Tags</label>
                     <tags-input ng-model="batch.tags" add-on-paste="true">
                         <auto-complete source="loadTags($query)"

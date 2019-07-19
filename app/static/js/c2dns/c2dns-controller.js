@@ -386,6 +386,7 @@ angular.module('ThreatKB')
                 var c2dnsToUpdate = {
                     owner_user: $scope.batch.owner,
                     state: $scope.batch.state,
+                    description: $scope.batch.description,
                     tags: $scope.batch.tags,
                     ids: []
                 };
@@ -469,6 +470,7 @@ angular.module('ThreatKB')
                 $scope.batch = {
                     owner: null,
                     state: null,
+                    description: null,
                     tags: null
                 };
             };
