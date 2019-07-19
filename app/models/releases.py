@@ -216,17 +216,17 @@ class Release(db.Model):
         message = "%s\n\n" % (prepend_text) if prepend_text else ""
         message += "New Signatures\n%s\n" % ("-" * 10)
         message += "\n\n".join([
-                                   "EventID: %s\nName: %s\nCategory: %s\nConfidence: %s\nSeverity: %s\nMitre Tactics: %s\nMitre Techniques: %s\nDescription: %s" % (
-                                       entity.get("eventid", "eventid"),
-                                       entity.get("name", "name"),
-                                       entity.get("category", "category"),
-                                       entity["metadata_values"].get("Confidence", {"value": "Confidence"})["value"],
-                                       entity["metadata_values"].get("Severity", {"value": "Severity"})["value"],
+            "EventID: %s\nName: %s\nCategory: %s\nConfidence: %s\nSeverity: %s\nDescription: %s\nMitre Tactics: %s\nMitre Techniques: %s" % (
+                entity.get("eventid", "eventid"),
+                entity.get("name", "name"),
+                entity.get("category", "category"),
+                entity["metadata_values"].get("Confidence", {"value": "Confidence"})["value"],
+                entity["metadata_values"].get("Severity", {"value": "Severity"})["value"],
+                "\n    %s" % (entity.get("description", "description")),
                                        "\n    " + "\n    ".join(entity.get("mitre_tactics", "")),
                                        "\n    " + "\n    ".join(entity.get("mitre_techniques", "")),
-                                       "\n    %s" % (entity.get("description", "description")),
         ) for entity in self.release_data_dict["Signatures"]["Added"] if
-                                   type(entity) == dict]) if \
+            type(entity) == dict]) if \
             len(self.release_data_dict["Signatures"]["Added"]) > 0 else "NA"
         message += "\n\nRemoved Signatures\n%s\n" % ("-" * 10)
         message += "\n\n".join(["EventID: %s\nName: %s\nCategory: %s" % (
@@ -237,15 +237,15 @@ class Release(db.Model):
             len(self.release_data_dict["Signatures"]["Removed"]) > 0 else "NA"
         message += "\n\nModified Signatures\n%s\n" % ("-" * 10)
         message += "\n\n".join([
-                                   "EventID: %s\nName: %s\nCategory: %s\nConfidence: %s\nSeverity: %s\nMitre Tactics: %s\nMitre Techniques: %s\nDescription: %s" % (
-                                       entity.get("eventid", "eventid"),
-                                       entity.get("name", "name"),
-                                       entity.get("category", "category"),
-                                       entity["metadata_values"].get("Confidence", {"value": "Confidence"})["value"],
-                                       entity["metadata_values"].get("Severity", {"value": "Severity"})["value"],
+            "EventID: %s\nName: %s\nCategory: %s\nConfidence: %s\nSeverity: %s\nDescription: %s\nMitre Tactics: %s\nMitre Techniques: %s" % (
+                entity.get("eventid", "eventid"),
+                entity.get("name", "name"),
+                entity.get("category", "category"),
+                entity["metadata_values"].get("Confidence", {"value": "Confidence"})["value"],
+                entity["metadata_values"].get("Severity", {"value": "Severity"})["value"],
+                "\n    %s" % (entity.get("description", "description")),
                                        "\n    " + "\n    ".join(entity.get("mitre_tactics", "")),
                                        "\n    " + "\n    ".join(entity.get("mitre_techniques", "")),
-                                       "\n    %s" % (entity.get("description", "description")),
         ) for entity in
                                    self.release_data_dict["Signatures"]["Modified"] if type(entity) == dict]) if \
             len(self.release_data_dict["Signatures"]["Modified"]) > 0 else "NA"
