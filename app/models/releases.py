@@ -222,8 +222,8 @@ class Release(db.Model):
                                        entity.get("category", "category"),
                                        entity["metadata_values"].get("Confidence", {"value": "Confidence"})["value"],
                                        entity["metadata_values"].get("Severity", {"value": "Severity"})["value"],
-                                       "\n\t".join(entity.get("mitre_tactics", "")),
-                                       "\n\t".join(entity.get("mitre_techniques", "")),
+                                       "\n\t" + "\n\t".join(entity.get("mitre_tactics", "")),
+                                       "\n\t" + "\n\t".join(entity.get("mitre_techniques", "")),
                                        "\n\t%s" % (entity.get("description", "description")),
         ) for entity in self.release_data_dict["Signatures"]["Added"] if
                                    type(entity) == dict]) if \
@@ -243,8 +243,8 @@ class Release(db.Model):
                                        entity.get("category", "category"),
                                        entity["metadata_values"].get("Confidence", {"value": "Confidence"})["value"],
                                        entity["metadata_values"].get("Severity", {"value": "Severity"})["value"],
-                                       "\n\t".join(entity.get("mitre_tactics", "")),
-                                       "\n\t".join(entity.get("mitre_techniques", "")),
+                                       "\n\t" + "\n\t".join(entity.get("mitre_tactics", "")),
+                                       "\n\t" + "\n\t".join(entity.get("mitre_techniques", "")),
                                        "\n\t%s" % (entity.get("description", "description")),
         ) for entity in
                                    self.release_data_dict["Signatures"]["Modified"] if type(entity) == dict]) if \
