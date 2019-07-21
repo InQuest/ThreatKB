@@ -309,6 +309,7 @@ angular.module('ThreatKB')
                 var tasksToUpdate = {
                     owner_user: $scope.batch.owner,
                     state: $scope.batch.state,
+                    description: $scope.batch.description,
                     ids: []
                 };
                 for (var i = 0; i < $scope.checked_indexes.length; i++) {
@@ -348,7 +349,8 @@ angular.module('ThreatKB')
             $scope.clear_batch = function () {
                 $scope.batch = {
                     owner: null,
-                    state: null
+                    state: null,
+                    description: null
                 };
             };
 

@@ -433,6 +433,8 @@ angular.module('ThreatKB')
                 var sigsToUpdate = {
                     owner_user: $scope.batch.owner,
                     state: $scope.batch.state,
+                    description: $scope.batch.description,
+                    category: $scope.batch.category,
                     tags: $scope.batch.tags,
                     ids: []
                 };
@@ -525,6 +527,8 @@ angular.module('ThreatKB')
                 $scope.batch = {
                     owner: null,
                     state: null,
+                    description: null,
+                    category: null,
                     tags: null
                 };
             };
@@ -1018,13 +1022,15 @@ angular.module('ThreatKB')
             };
 
         }])
-    .controller('Yara_ruleBatchEditController', ['$scope', '$uibModalInstance', 'batch', 'Users', 'Cfg_states', 'Tags',
-        function ($scope, $uibModalInstance, batch, Users, Cfg_states, Tags) {
+    .controller('Yara_ruleBatchEditController', ['$scope', '$uibModalInstance', 'batch', 'Users', 'Cfg_states', 'Tags', 'CfgCategoryRangeMapping',
+        function ($scope, $uibModalInstance, batch, Users, Cfg_states, Tags, CfgCategoryRangeMapping) {
             $scope.batch = batch;
 
             $scope.users = Users.query();
 
             $scope.cfg_states = Cfg_states.query();
+
+            $scope.cfg_category_range_mapping = CfgCategoryRangeMapping.query();
 
             $scope.ok = function () {
                 $uibModalInstance.close($scope.batch);
