@@ -39,6 +39,12 @@ def batch_update(batch, artifact, session, include_tags=True):
             abort(403)
 
     fields_to_update = dict()
+    if 'description' in batch and batch['description']:
+        fields_to_update['description'] = batch['description']
+    if 'category' in batch and batch['category'] and hasattr(artifact, 'category'):
+        fields_to_update['category'] = batch['category']['category'] \
+            if batch['category'] and 'category' in batch['category'] \
+            else None
     if 'state' in batch and batch['state']:
         fields_to_update['state'] = verify_state(batch['state']['state']) \
             if batch['state'] and 'state' in batch['state'] \
