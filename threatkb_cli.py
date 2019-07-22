@@ -43,7 +43,7 @@ LOG = logging.getLogger()
 
 
 class ThreatKB:
-    def __init__(self, host, token, secret_key, filter_on_keys=[], base_uri='ThreatKB/', use_https=True, log=LOG):
+    def __init__(self, host, token, secret_key, filter_on_keys=[], base_uri='/ThreatKB/', use_https=True, log=LOG):
         self.host = host.lower().replace("http://", "").replace("https://", "")
         self.token = token
         self.secret_key = secret_key
@@ -53,6 +53,15 @@ class ThreatKB:
         self.filter_on_keys = filter_on_keys
         self.session = requests.Session()
 
+        # ensure base URI is wrapped in slashes or, if not specified, is a slash.
+        if self.base_uri:
+            if not self.base_uri.startswith("/"):
+                self.base_uri = "/" + self.base_uri
+            if not self.base_uri.endswith("/"):
+                self.base_uri = self.base_uri + "/"
+        else:
+            self.base_uri = "/"
+        
     def _request(self, method, uri, uri_params={}, body=None, files={},
                  headers={"Content-Type": "application/json;charset=UTF-8"}):
         uri_params["token"] = self.token
