@@ -14,6 +14,7 @@ import stat
 import argparse
 import logging
 
+# python2/3 compatability hacks.
 try:
     import ConfigParser
 except:
@@ -24,6 +25,8 @@ try:
 except ImportError:
     from io import StringIO
 
+raw_input = input
+    
 CREDENTIALS_FILE = os.path.expanduser('~/.threatkb/credentials')
 API_KEY = None
 SECRET_KEY = None
@@ -109,7 +112,7 @@ class ThreatKB:
 def initialize():
     global API_KEY, SECRET_KEY, API_HOST, THREATKB_CLI, FILTER_KEYS
 
-    config = ConfigParser.ConfigParser()
+    config = ConfigParser()
     try:
         config.read(CREDENTIALS_FILE)
         API_TOKEN = config.get("default", "token")
@@ -144,12 +147,12 @@ def configure():
     API_HOST = raw_input(
         "API Host [%s]: " % ("%s%s" % ("*" * (len(API_HOST) - 3), API_HOST[-3:]) if API_HOST else "*" * 10))
 
-    config = ConfigParser.ConfigParser()
+    config = ConfigParser()
     config.readfp(StringIO('[default]'))
     config.set('default', 'token', API_KEY)
     config.set('default', 'secret_key', SECRET_KEY)
     config.set('default', 'api_host', API_HOST)
-    with open(CREDENTIALS_FILE, "wb") as configfile:
+    with open(CREDENTIALS_FILE, "w+") as configfile:
         config.write(configfile)
 
     os.chmod(CREDENTIALS_FILE, stat.S_IRUSR | stat.S_IWUSR)
