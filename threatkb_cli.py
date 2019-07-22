@@ -10,11 +10,19 @@ import requests
 import json
 import sys
 import os
-import ConfigParser
 import stat
 import argparse
 import logging
-from StringIO import StringIO
+
+try:
+    import ConfigParser
+except:
+    from configparser import ConfigParser
+
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 CREDENTIALS_FILE = os.path.expanduser('~/.threatkb/credentials')
 API_KEY = None
