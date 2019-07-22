@@ -72,7 +72,7 @@ class ThreatKB:
                     results.append(dict(zip(self.filter_on_keys, [obj[k] for k in self.filter_on_keys])))
                 return results
                 # return project(o, self.filter_on_keys)
-        except Exception, e:
+        except Exception:
             return output
 
     def get(self, endpoint, id_=None, params={}):
@@ -122,7 +122,7 @@ def configure():
 
     try:
         initialize()
-    except Exception, e:
+    except Exception:
         pass
 
     try:
@@ -152,7 +152,7 @@ def attach(params):
 
     try:
         artifact, artifact_id, file = params[1:]
-    except Exception, e:
+    except Exception as e:
         help(extra_text="""%s attach <artifact> <artifact_id> <file>
         
         artifact: yara_rule, c2dns, c2ip, task
@@ -168,7 +168,7 @@ def comment(params):
 
     try:
         artifact, artifact_id, comment = params[1:]
-    except Exception, e:
+    except Exception as e:
         help(extra_text="""%s comment <artifact> <artifact_id> <comment>
         
         artifact: yara_rule, c2dns, c2ip, task
@@ -184,7 +184,7 @@ def release(params):
 
     try:
         release_id = params[1]
-    except Exception, e:
+    except Exception as e:
         release_id = None
 
     print THREATKB_CLI.get("releases", release_id, {"short": 0})
@@ -195,7 +195,7 @@ def search(params):
 
     try:
         filter_, filter_text = params[1:]
-    except Exception, e:
+    except Exception as e:
         help(extra_text="""%s search <filter> <filter_text>
         
         filter: all, tag, state, category
