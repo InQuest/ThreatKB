@@ -159,8 +159,8 @@ def attach(params):
         artifact_id: artifact id as an integer
         file: the file to attach to the entity""" % (params[0]), params=params)
 
-    print THREATKB_CLI.create("file_upload",
-                              files={"entity_type": artifact, "entity_id": artifact_id, "file": open(file, 'rb')})
+    print(THREATKB_CLI.create("file_upload",
+                              files={"entity_type": artifact, "entity_id": artifact_id, "file": open(file, 'rb')}))
 
 
 def comment(params):
@@ -175,8 +175,8 @@ def comment(params):
         artifact_id: artifact id as an integer
         comment: the comment to add to the artifact""" % (params[0]), params=params)
 
-    print THREATKB_CLI.create("comments", json.dumps(
-        {"comment": comment, "entity_type": ENTITY_TYPES.get(artifact), "entity_id": artifact_id}))
+    print(THREATKB_CLI.create("comments", json.dumps(
+        {"comment": comment, "entity_type": ENTITY_TYPES.get(artifact), "entity_id": artifact_id})))
 
 
 def release(params):
@@ -187,7 +187,7 @@ def release(params):
     except Exception as e:
         release_id = None
 
-    print THREATKB_CLI.get("releases", release_id, {"short": 0})
+    print(THREATKB_CLI.get("releases", release_id, {"short": 0}))
 
 
 def search(params):
@@ -201,7 +201,7 @@ def search(params):
         filter: all, tag, state, category
         filter_text: text to filter on""" % (params[0]), params=params)
 
-    print THREATKB_CLI.get("search", params={filter_: filter_text})
+    print(THREATKB_CLI.get("search", params={filter_: filter_text}))
 
 
 def help(params, extra_text="", exit=True):
@@ -246,7 +246,7 @@ def main():
     try:
         action = params[0]
     except:
-        print help(sys.argv)
+        print(help(sys.argv))
         sys.exit(1)
 
     if args.filter_keys_only:
