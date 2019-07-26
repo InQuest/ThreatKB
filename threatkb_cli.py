@@ -43,7 +43,7 @@ LOG = logging.getLogger()
 
 
 class ThreatKB:
-    def __init__(self, host, token, secret_key, filter_on_keys=[], base_uri='/ThreatKB/', use_https=True, log=LOG):
+    def __init__(self, host, token, secret_key, filter_on_keys=[], base_uri='/', use_https=True, log=LOG):
         self.host = host.lower().replace("http://", "").replace("https://", "")
         self.token = token
         self.secret_key = secret_key
