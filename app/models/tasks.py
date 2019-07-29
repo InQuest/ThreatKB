@@ -35,10 +35,8 @@ class Tasks(db.Model):
                                primaryjoin="and_(Comments.entity_id==Tasks.id, Comments.entity_type=='%s')" % (
                                    ENTITY_MAPPING["DNS"]))
 
-    def to_dict(self):
-        comments = Comments.query.filter_by(entity_id=self.id).filter_by(
-            entity_type=ENTITY_MAPPING["TASK"]).all()
-        return dict(
+    def to_dict(self, include_comments=True):
+        task = dict(
             date_created=self.date_created.isoformat(),
             date_modified=self.date_modified.isoformat(),
             state=self.state,
@@ -48,9 +46,14 @@ class Tasks(db.Model):
             id=self.id,
             created_user=self.created_user.to_dict(),
             modified_user=self.modified_user.to_dict(),
-            owner_user=self.owner_user.to_dict() if self.owner_user else None,
-            comments=[comment.to_dict() for comment in comments]
+            owner_user=self.owner_user.to_dict() if self.owner_user else None
         )
+
+        if include_comments:
+            task["comments"] = [comment.to_dict() for comment in Comments.query.filter_by(entity_id=self.id).filter_by(
+                entity_type=ENTITY_MAPPING["TASK"]).all()]
+
+        return task
 
     def __repr__(self):
         return '<Tasks %r>' % self.id

@@ -102,7 +102,8 @@ class Yara_rule(db.Model):
             .filter(MetadataMapping.artifact_id == self.id) \
             .all()
 
-    def to_dict(self, include_yara_rule_string=None, short=False, include_relationships=True, include_metadata=True):
+    def to_dict(self, include_yara_rule_string=None, short=False, include_relationships=True, include_metadata=True,
+                include_tags=True, include_comments=True):
         yara_dict = dict(
             creation_date=self.creation_date.isoformat() if self.creation_date else None,
             last_revision_date=self.last_revision_date.isoformat() if self.last_revision_date else None,
@@ -111,7 +112,6 @@ class Yara_rule(db.Model):
             category=self.category,
             eventid=self.eventid,
             id=self.id,
-            tags=tags_mapping.get_tags_for_source(self.__tablename__, self.id),
             description=self.description,
             references=self.references,
             revision=self.revision,
@@ -122,6 +122,14 @@ class Yara_rule(db.Model):
             mitre_techniques=self.mitre_techniques,
             active=self.active
         )
+
+        if include_tags:
+            yara_dict["tags"] = tags_mapping.get_tags_for_source(self.__tablename__, self.id)
+
+        if include_comments:
+            yara_dict["comments"] = [comment.to_dict() for comment in
+                                     Comments.query.filter_by(entity_id=self.id).filter_by(
+                                         entity_type=ENTITY_MAPPING["SIGNATURE"]).all()]
 
         if include_metadata:
             metadata_values_dict = {}

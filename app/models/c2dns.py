@@ -123,7 +123,7 @@ class C2dns(db.Model):
                                                             created_user_id=current_user.id))
         return metadata_to_save
 
-    def to_dict(self, include_metadata=True):
+    def to_dict(self, include_metadata=True, include_tags=True, include_comments=True):
         d = dict(
             active=self.active,
             date_created=self.date_created.isoformat() if self.date_created else None,
@@ -133,15 +133,19 @@ class C2dns(db.Model):
             match_type=self.match_type,
             expiration_timestamp=self.expiration_timestamp.isoformat() if self.expiration_timestamp else None,
             id=self.id,
-            tags=tags_mapping.get_tags_for_source(self.__tablename__, self.id),
             description=self.description,
             references=self.references,
             created_user=self.created_user.to_dict(),
             modified_user=self.modified_user.to_dict(),
             owner_user=self.owner_user.to_dict() if self.owner_user else None,
-            comments=[comment.to_dict() for comment in
-                      Comments.query.filter_by(entity_id=self.id).filter_by(entity_type=ENTITY_MAPPING["DNS"]).all()],
         )
+
+        if include_tags:
+            d["tags"] = tags_mapping.get_tags_for_source(self.__tablename__, self.id)
+
+        if include_comments:
+            d["comments"] = [comment.to_dict() for comment in Comments.query.filter_by(entity_id=self.id).filter_by(
+                entity_type=ENTITY_MAPPING["DNS"]).all()]
 
         if include_metadata:
             metadata_values_dict = {}

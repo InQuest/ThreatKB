@@ -53,6 +53,9 @@ def get_all_c2ips():
     sort_direction = request.args.get('sort_dir', 'ASC')
     exclude_totals = request.args.get('exclude_totals', False)
     include_metadata = bool(distutils.util.strtobool(request.args.get('include_metadata', "true")))
+    include_tags = bool(distutils.util.strtobool(request.args.get('include_tags', "true")))
+    include_comments = bool(distutils.util.strtobool(request.args.get('include_comments', "true")))
+
 
     response_dict = filter_entities(entity=c2ip.C2ip,
                                     artifact_type=ENTITY_MAPPING["IP"],
@@ -63,6 +66,8 @@ def get_all_c2ips():
                                     sort_direction=sort_direction,
                                     include_metadata=include_metadata,
                                     include_inactive=include_inactive,
+                                    include_tags=include_tags,
+                                    include_comments=include_comments,
                                     include_active=include_active,
                                     exclude_totals=exclude_totals,
                                     default_sort="c2ip.date_created",
