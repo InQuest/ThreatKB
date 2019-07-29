@@ -80,6 +80,8 @@ def filter_entities(entity,
                     sort_by,
                     sort_direction,
                     include_metadata,
+                    include_tags,
+                    include_comments,
                     exclude_totals,
                     default_sort,
                     include_inactive=False,
@@ -207,14 +209,17 @@ def filter_entities(entity,
     filtered_entities = filtered_entities.all()
 
     response_dict = dict()
-    if artifact_type in ("ACTIVITY_LOG", ENTITY_MAPPING["TASK"]):
+    if artifact_type == "ACTIVITY_LOG":
         response_dict['data'] = [entity.to_dict() for entity in filtered_entities]
+    elif artifact_type == ENTITY_MAPPING["TASK"]:
+        response_dict['data'] = [entity.to_dict(include_comments=include_comments) for entity in filtered_entities]
     elif artifact_type == ENTITY_MAPPING["SIGNATURE"]:
-        response_dict['data'] = [entity.to_dict(include_yara_rule_string=include_yara_string,
-                                                short=short,
-                                                include_metadata=include_metadata) for entity in filtered_entities]
+        response_dict['data'] = [
+            entity.to_dict(include_yara_rule_string=include_yara_string, short=short, include_metadata=include_metadata)
+            for entity in filtered_entities]
     else:
-        response_dict['data'] = [entity.to_dict(include_metadata=include_metadata) for entity in filtered_entities]
+        response_dict['data'] = [entity.to_dict(include_metadata=include_metadata, include_comments=include_comments,
+                                                include_tags=include_tags) for entity in filtered_entities]
     response_dict['total_count'] = total_count
 
     if exclude_totals:

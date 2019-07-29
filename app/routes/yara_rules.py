@@ -95,6 +95,9 @@ def get_all_yara_rules():
     include_yara_string = bool(distutils.util.strtobool(request.args.get("include_yara_string", "False")))
     short = bool(distutils.util.strtobool(request.args.get("short", "false")))
     include_metadata = bool(distutils.util.strtobool(request.args.get('include_metadata', "true")))
+    include_tags = bool(distutils.util.strtobool(request.args.get('include_tags', "true")))
+    include_comments = bool(distutils.util.strtobool(request.args.get('include_comments', "true")))
+
 
     if include_yara_string:
         include_yara_string = True
@@ -119,6 +122,8 @@ def get_all_yara_rules():
                                     exclude_totals=exclude_totals,
                                     default_sort="creation_date",
                                     include_inactive=include_inactive,
+                                    include_tags=include_tags,
+                                    include_comments=include_comments,
                                     include_active=include_active,
                                     include_merged=include_merged,
                                     include_yara_string=include_yara_string,

@@ -48,7 +48,7 @@ class ThreatKB:
         uri_params["secret_key"] = self.secret_key
         url = "%s://%s%s%s" % ("https" if self.use_https else "http", self.host, self.base_uri, uri)
 
-        self.log.debug("Sending %s API request to: %s" % (method, url))
+        self.log.debug("Sending %s API request to: %s?%s" % (method, url, uri_params))
         # Try hitting the uri
         if files:
             response = self.session.request(method, url, params=uri_params, data=body, verify=False, files=files)
@@ -65,7 +65,8 @@ class ThreatKB:
 
             o = json.loads(output)
             if type(o) == dict:
-                return dict(zip(self.filter_on_keys, [o[k] for k in self.filter_on_keys]))
+                return o
+                # return dict(zip(self.filter_on_keys, [o[k] for k in self.filter_on_keys]))
             else:
                 results = []
                 for obj in o:
