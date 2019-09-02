@@ -1,4 +1,3 @@
-from __future__ import print_function
 import distutils
 
 from app import app, db, auto, ENTITY_MAPPING
