@@ -1,7 +1,8 @@
+from __future__ import print_function
 import distutils
 
 from app import app, db, auto, ENTITY_MAPPING
-from app.models import tasks
+from app.models import tasks, cfg_settings
 from flask import abort, jsonify, request, Response
 from flask_login import login_required, current_user
 from app.routes.batch import batch_update
@@ -34,7 +35,6 @@ def get_all_tasks():
     include_tags = bool(distutils.util.strtobool(request.args.get('include_tags', "true")))
     include_comments = bool(distutils.util.strtobool(request.args.get('include_comments', "true")))
 
-
     response_dict = filter_entities(entity=tasks.Tasks,
                                     artifact_type=ENTITY_MAPPING["TASK"],
                                     searches=searches,
@@ -62,7 +62,11 @@ def get_tasks(id):
     if not entity:
         abort(404)
 
-    if not current_user.admin and not entity.owner_user_id == current_user.id and not entity.owner_user_id == None:
+    show_for_non_admin = cfg_settings.Cfg_settings.get_setting("ENABLE_NON_ADMIN_TASK_VISIBILITY")
+    show_for_non_admin = bool(distutils.util.strtobool(show_for_non_admin)) if show_for_non_admin else False
+
+    if not show_for_non_admin and \
+            not (current_user.admin or entity.owner_user_id == current_user.id or entity.owner_user_id is None):
         return jsonify({})
 
     return_dict = entity.to_dict()

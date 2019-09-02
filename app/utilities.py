@@ -1,3 +1,4 @@
+import distutils
 import re
 import json
 import sys
@@ -105,9 +106,14 @@ def filter_entities(entity,
     else:
         entities = entity.query
 
-    if not current_user.admin:
-        entities = entities.filter(or_(entity.owner_user_id == current_user.id, entity.owner_user_id == None)) \
-            if artifact_type == ENTITY_MAPPING["TASK"] else entities.filter_by(owner_user_id=current_user.id)
+    if artifact_type == ENTITY_MAPPING["TASK"]:
+        show_for_non_admin = cfg_settings.Cfg_settings.get_setting("ENABLE_NON_ADMIN_TASK_VISIBILITY")
+        show_for_non_admin = bool(distutils.util.strtobool(show_for_non_admin)) if show_for_non_admin else False
+
+        if not (show_for_non_admin or current_user.admin):
+            entities = entities.filter(or_(entity.owner_user_id == current_user.id, entity.owner_user_id == None))
+    elif not current_user.admin:
+        entities = entities.filter_by(owner_user_id=current_user.id)
 
     if include_inactive and not include_active and hasattr(entity, "active"):
         entities = entities.filter_by(active=False)
@@ -150,7 +156,7 @@ def filter_entities(entity,
 
         if column == "tags":
             if is_null:
-                entities = entities\
+                entities = entities \
                     .outerjoin(Tags_mapping,
                                and_(entity.id == Tags_mapping.source_id,
                                     entity.__tablename__ == Tags_mapping.source_table)) \
