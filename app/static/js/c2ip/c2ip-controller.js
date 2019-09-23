@@ -373,6 +373,7 @@ angular.module('ThreatKB')
                     owner_user: $scope.batch.owner,
                     state: $scope.batch.state,
                     description: $scope.batch.description,
+                    expiration_timestamp: $scope.batch.expiration_timestamp,
                     tags: $scope.batch.tags,
                     ids: []
                 };
@@ -457,6 +458,7 @@ angular.module('ThreatKB')
                     owner: null,
                     state: null,
                     description: null,
+                    expiration_timestamp: null,
                     tags: null
                 };
             };
@@ -795,6 +797,18 @@ angular.module('ThreatKB')
 
             $scope.cancel = function () {
                 $uibModalInstance.dismiss('cancel');
+            };
+
+            $scope.dateOptions = {
+                showWeeks: false,
+            };
+
+            $scope.openDatepicker = function() {
+                $scope.expiration_timestamp.opened = true;
+            };
+
+            $scope.expiration_timestamp = {
+                opened: false
             };
 
             $scope.loadTags = function (query) {
