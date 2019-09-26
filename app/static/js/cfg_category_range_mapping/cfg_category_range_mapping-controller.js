@@ -87,4 +87,16 @@ angular.module('ThreatKB')
             $scope.cancel = function () {
                 $uibModalInstance.dismiss('cancel');
             };
+
+            $scope.set_include_in_release = function (is_set) {
+                if ($scope.cfg_category_range_mapping.include_in_release) {
+                    $scope.clear();
+                } else {
+                    $scope.cfg_category_range_mapping.include_in_release = is_set;
+                }
+            };
+
+            $scope.clear = function () {
+                $scope.cfg_category_range_mapping.include_in_release = false;
+            };
         }]);
