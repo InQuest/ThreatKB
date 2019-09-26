@@ -1,5 +1,6 @@
 from app import db, ENTITY_MAPPING, ACTIVITY_TYPE
-from app.models import c2dns, c2ip, yara_rule, cfg_settings, cfg_states, metadata, users, activity_log
+from app.models import c2dns, c2ip, yara_rule, cfg_settings, cfg_states, metadata, users, activity_log, \
+    cfg_category_range_mapping
 from sqlalchemy import and_
 from dateutil import parser
 import json
@@ -90,8 +91,12 @@ class Release(db.Model):
 
         dns = c2dns.C2dns.query.filter(and_(c2dns.C2dns.state == release_state.state, c2dns.C2dns.active > 0)).all()
         ip = c2ip.C2ip.query.filter(and_(c2ip.C2ip.state == release_state.state, c2ip.C2ip.active > 0)).all()
-        yr = yara_rule.Yara_rule.query\
-            .filter(and_(yara_rule.Yara_rule.state == release_state.state, yara_rule.Yara_rule.active > 0))\
+        yr = yara_rule.Yara_rule.query \
+            .join(cfg_category_range_mapping.CfgCategoryRangeMapping,
+                  cfg_category_range_mapping.CfgCategoryRangeMapping.category == yara_rule.Yara_rule.category) \
+            .filter(and_(yara_rule.Yara_rule.state == release_state.state,
+                         yara_rule.Yara_rule.active > 0,
+                         cfg_category_range_mapping.CfgCategoryRangeMapping.include_in_release > 0))\
             .all()
 
         metadata_cache = metadata.Metadata.get_metadata_cache()
