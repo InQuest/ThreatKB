@@ -43,7 +43,9 @@ def get_all_activity_logs():
                                     sort_by=sort_by,
                                     sort_direction=sort_direction,
                                     include_metadata=False,
+                                    include_comments=False,
                                     exclude_totals=False,
+                                    include_tags=False,
                                     default_sort="activity_date",
                                     include_merged=True,
                                     since=since)
