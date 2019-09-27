@@ -95,8 +95,7 @@ class Release(db.Model):
             .join(cfg_category_range_mapping.CfgCategoryRangeMapping,
                   cfg_category_range_mapping.CfgCategoryRangeMapping.category == yara_rule.Yara_rule.category) \
             .filter(and_(yara_rule.Yara_rule.state == release_state.state,
-                         yara_rule.Yara_rule.active > 0,
-                         cfg_category_range_mapping.CfgCategoryRangeMapping.include_in_release > 0))\
+                         yara_rule.Yara_rule.active > 0)) \
             .all()
 
         metadata_cache = metadata.Metadata.get_metadata_cache()
@@ -218,7 +217,15 @@ class Release(db.Model):
         prepend_text = cfg_settings.Cfg_settings.get_setting("RELEASE_PREPEND_TEXT")
         postpend_text = cfg_settings.Cfg_settings.get_setting("RELEASE_APPEND_TEXT")
 
+        excluded_categories = cfg_category_range_mapping.CfgCategoryRangeMapping.query.filter(
+            cfg_category_range_mapping.CfgCategoryRangeMapping.include_in_release_notes == False).all()
+        excluded_categories = [cat.category for cat in excluded_categories]
+
         message = "%s\n\n" % (prepend_text) if prepend_text else ""
+
+        added = [entity for entity in self.release_data_dict["Signatures"]["Added"] if
+                 type(entity) == dict and not entity["category"] in excluded_categories]
+
         message += "New Signatures\n%s\n" % ("-" * 10)
         message += "\n\n".join([
             "EventID: %s\nName: %s\nCategory: %s\nConfidence: %s\nSeverity: %s\nDescription: %s\nMitre Tactics: %s\nMitre Techniques: %s" % (
@@ -230,16 +237,22 @@ class Release(db.Model):
                 "\n    %s" % (entity.get("description", "description")),
                                        "\n    " + "\n    ".join(entity.get("mitre_tactics", "")),
                                        "\n    " + "\n    ".join(entity.get("mitre_techniques", "")),
-        ) for entity in self.release_data_dict["Signatures"]["Added"] if
-            type(entity) == dict]) if \
-            len(self.release_data_dict["Signatures"]["Added"]) > 0 else "NA"
+            ) for entity in added]) if \
+            len(added) > 0 else "NA"
+
+        removed = [entity for entity in self.release_data_dict["Signatures"]["Removed"] if
+                   type(entity) == dict and not entity["category"] in excluded_categories]
+
         message += "\n\nRemoved Signatures\n%s\n" % ("-" * 10)
         message += "\n\n".join(["EventID: %s\nName: %s\nCategory: %s" % (
             entity.get("eventid", "eventid"),
             entity.get("name", "name"),
-            entity.get("category", "category")) for entity in self.release_data_dict["Signatures"]["Removed"] if
-                                type(entity) == dict]) if \
-            len(self.release_data_dict["Signatures"]["Removed"]) > 0 else "NA"
+            entity.get("category", "category")) for entity in removed]) if \
+            len(removed) > 0 else "NA"
+
+        modified = [entity for entity in self.release_data_dict["Signatures"]["Modified"] if
+                    type(entity) == dict and not entity["category"] in excluded_categories]
+
         message += "\n\nModified Signatures\n%s\n" % ("-" * 10)
         message += "\n\n".join([
             "EventID: %s\nName: %s\nCategory: %s\nConfidence: %s\nSeverity: %s\nDescription: %s\nMitre Tactics: %s\nMitre Techniques: %s" % (
@@ -252,8 +265,8 @@ class Release(db.Model):
                                        "\n    " + "\n    ".join(entity.get("mitre_tactics", "")),
                                        "\n    " + "\n    ".join(entity.get("mitre_techniques", "")),
         ) for entity in
-                                   self.release_data_dict["Signatures"]["Modified"] if type(entity) == dict]) if \
-            len(self.release_data_dict["Signatures"]["Modified"]) > 0 else "NA"
+            modified]) if \
+            len(modified) > 0 else "NA"
 
         message += "\n\nFeed Content\n%s\n" % ("-" * 10)
         message += "C2 IPs Added: %s\n" % (len(self.release_data_dict["IP"]["Added"]))

@@ -13,7 +13,7 @@ class CfgCategoryRangeMapping(db.Model):
     range_min = db.Column(db.Integer(unsigned=True), index=True, nullable=False)
     range_max = db.Column(db.Integer(unsigned=True), index=True, nullable=False)
     current = db.Column(db.Integer(unsigned=True), index=True, nullable=True)
-    include_in_release = db.Column(db.Boolean, nullable=False, default=True, index=True)
+    include_in_release_notes = db.Column(db.Boolean, nullable=False, default=True, index=True)
 
     def to_dict(self, include_inactive=False):
 
@@ -32,7 +32,7 @@ class CfgCategoryRangeMapping(db.Model):
             range_max=self.range_max,
             current=self.current,
             sig_count=sig_count,
-            include_in_release=self.include_in_release
+            include_in_release_notes=self.include_in_release_notes
         )
 
     @staticmethod
