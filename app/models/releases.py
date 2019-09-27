@@ -218,7 +218,7 @@ class Release(db.Model):
         postpend_text = cfg_settings.Cfg_settings.get_setting("RELEASE_APPEND_TEXT")
 
         excluded_categories = cfg_category_range_mapping.CfgCategoryRangeMapping.query.filter(
-            cfg_category_range_mapping.CfgCategoryRangeMapping.include_in_release == False).all()
+            cfg_category_range_mapping.CfgCategoryRangeMapping.include_in_release_notes == False).all()
         excluded_categories = [cat.category for cat in excluded_categories]
 
         message = "%s\n\n" % (prepend_text) if prepend_text else ""

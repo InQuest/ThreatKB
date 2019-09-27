@@ -43,7 +43,7 @@ def create_cfg_category_range_mapping():
         range_min=request.json['range_min'],
         range_max=request.json['range_max'],
         current=request.json['range_min'],
-        include_in_release=request.json['include_in_release']
+        include_in_release_notes=request.json['include_in_release_notes']
     )
     db.session.add(entity)
     db.session.commit()
@@ -65,7 +65,7 @@ def update_cfg_category_range_mapping(id):
         category=request.json['category'],
         range_min=request.json['range_min'],
         range_max=request.json['range_max'],
-        include_in_release=request.json['include_in_release'],
+        include_in_release_notes=request.json['include_in_release_notes'],
         id=id
     )
     db.session.merge(entity)
@@ -82,7 +82,7 @@ def update_cfg_category_range_mapping_current(id, current):
         range_min=entity.range_min,
         range_max=entity.range_max,
         current=current,
-        include_in_release=entity.include_in_release,
+        include_in_release_notes=entity.include_in_release_notes,
         id=id
     )
     db.session.merge(entity)

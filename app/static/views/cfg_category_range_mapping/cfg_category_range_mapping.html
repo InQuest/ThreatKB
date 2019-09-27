@@ -51,14 +51,16 @@
                 </div>
 
                 <div class="form-group">
-                    <label>include in release:</label><br>
+                    <label>include in release notes:</label><br>
                     <div class="btn-group" data-toggle="buttons">
-                        <label class="btn btn-default" ng-class="{active:cfg_category_range_mapping.include_in_release==true}"
-                               ng-click="set_include_in_release(true)">
+                        <label class="btn btn-default"
+                               ng-class="{active:cfg_category_range_mapping.include_in_release_notes==true}"
+                               ng-click="set_include_in_release_notes(true)">
                             Yes
                         </label>
-                        <label class="btn btn-default" ng-class="{active:cfg_category_range_mapping.include_in_release==false}"
-                               ng-click="set_include_in_release(false)">
+                        <label class="btn btn-default"
+                               ng-class="{active:cfg_category_range_mapping.include_in_release_notes==false}"
+                               ng-click="set_include_in_release_notes(false)">
                             No
                         </label>
                     </div>
@@ -101,7 +103,7 @@
 
                 <th>Signature Count</th>
 
-                <th>Include in Release</th>
+                <th>Include in Release Notes</th>
             </tr>
             </thead>
             <tbody>
@@ -118,8 +120,8 @@
 
                 <td ng-if="crm.id">{{ crm.sig_count }}</td>
 
-                <td ng-if="crm.include_in_release && crm.id">Yes</td>
-                <td ng-if="!crm.include_in_release && crm.id">No</td>
+                <td ng-if="crm.include_in_release_notes && crm.id">Yes</td>
+                <td ng-if="!crm.include_in_release_notes && crm.id">No</td>
 
                 <td ng-if="crm.id" style="float:right">
                     <button ng-click="update(crm.id)"
