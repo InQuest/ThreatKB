@@ -510,6 +510,11 @@
                 </ui-select-choices>
             </ui-select>
         </div>
+        <button type="button" class="btn btn-secondary" ng-disabled="!checked_counter" id="batchCopyBtn" aria-label=""
+                uib-tooltip="Copied {{ checked_counter }} DNS{{ checked_counter > 1 ? 's' : '' }}!"
+                tooltip-trigger="'outsideClick'">
+            Copy ({{ checked_counter }})
+        </button>
         <button type="button" class="btn btn-secondary" ng-disabled="!checked_counter || checked_counter<2"
                 ng-click="open_batch()">
             Batch Edit ({{ checked_counter }})
