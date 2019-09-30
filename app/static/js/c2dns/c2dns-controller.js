@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('C2dnsController', ['$scope', '$timeout', '$filter', '$q', '$http', '$uibModal', 'resolvedC2dns', 'C2dns', 'Cfg_states', 'growl', 'Users', 'openModalForId', 'uiGridConstants', 'Cfg_settings', '$routeParams', 'blockUI',
-        function ($scope, $timeout, $filter, $q, $http, $uibModal, resolvedC2dns, C2dns, Cfg_states, growl, Users, openModalForId, uiGridConstants, Cfg_settings, $routeParams, blockUI) {
+    .controller('C2dnsController', ['$scope', '$timeout', '$filter', '$q', '$http', '$uibModal', 'resolvedC2dns', 'C2dns', 'Cfg_states', 'growl', 'Users', 'openModalForId', 'uiGridConstants', 'Cfg_settings', '$routeParams', 'blockUI', 'FileSaver', 'Blob',
+        function ($scope, $timeout, $filter, $q, $http, $uibModal, resolvedC2dns, C2dns, Cfg_states, growl, Users, openModalForId, uiGridConstants, Cfg_settings, $routeParams, blockUI, FileSaver, Blob) {
 
             $scope.c2dns = resolvedC2dns;
 
@@ -102,6 +102,15 @@ angular.module('ThreatKB')
                 let copiedDns = $scope.get_dns_to_copy();
                 document.getElementById('batchCopyBtn').setAttribute("aria-label", copiedDns);
                 blockUI.stop();
+            };
+
+            $scope.download_dns = function () {
+                try {
+                    FileSaver.saveAs(new Blob([$scope.get_dns_to_copy()],
+                        {type: "text/plain"}), "c2dns.txt");
+                } catch (error) {
+                    growl.error("Error downloading dns.", {ttl: -1});
+                }
             };
 
             var paginationOptions = {

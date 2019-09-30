@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('C2ipController', ['$scope', '$timeout', '$filter', '$q', '$http', '$uibModal', 'resolvedC2ip', 'C2ip', 'Cfg_states', 'growl', 'Users', 'openModalForId', 'uiGridConstants', 'Cfg_settings', '$routeParams', 'blockUI',
-        function ($scope, $timeout, $filter, $q, $http, $uibModal, resolvedC2ip, C2ip, Cfg_states, growl, Users, openModalForId, uiGridConstants, Cfg_settings, $routeParams, blockUI) {
+    .controller('C2ipController', ['$scope', '$timeout', '$filter', '$q', '$http', '$uibModal', 'resolvedC2ip', 'C2ip', 'Cfg_states', 'growl', 'Users', 'openModalForId', 'uiGridConstants', 'Cfg_settings', '$routeParams', 'blockUI', 'FileSaver', 'Blob',
+        function ($scope, $timeout, $filter, $q, $http, $uibModal, resolvedC2ip, C2ip, Cfg_states, growl, Users, openModalForId, uiGridConstants, Cfg_settings, $routeParams, blockUI, FileSaver, Blob) {
 
             $scope.c2ips = resolvedC2ip;
 
@@ -102,6 +102,15 @@ angular.module('ThreatKB')
                 let copiedIps = $scope.get_ips_to_copy();
                 document.getElementById('batchCopyBtn').setAttribute("aria-label", copiedIps);
                 blockUI.stop();
+            };
+
+            $scope.download_ips = function () {
+                try {
+                    FileSaver.saveAs(new Blob([$scope.get_ips_to_copy()],
+                        {type: "text/plain"}), "c2ips.txt");
+                } catch (error) {
+                    growl.error("Error downloading ips.", {ttl: -1});
+                }
             };
 
             var paginationOptions = {
