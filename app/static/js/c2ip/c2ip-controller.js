@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('C2ipController', ['$scope', '$timeout', '$filter', '$q', '$http', '$uibModal', 'resolvedC2ip', 'C2ip', 'Cfg_states', 'growl', 'Users', 'openModalForId', 'uiGridConstants', 'Cfg_settings', '$routeParams',
-        function ($scope, $timeout, $filter, $q, $http, $uibModal, resolvedC2ip, C2ip, Cfg_states, growl, Users, openModalForId, uiGridConstants, Cfg_settings, $routeParams) {
+    .controller('C2ipController', ['$scope', '$timeout', '$filter', '$q', '$http', '$uibModal', 'resolvedC2ip', 'C2ip', 'Cfg_states', 'growl', 'Users', 'openModalForId', 'uiGridConstants', 'Cfg_settings', '$routeParams', 'blockUI', 'FileSaver', 'Blob',
+        function ($scope, $timeout, $filter, $q, $http, $uibModal, resolvedC2ip, C2ip, Cfg_states, growl, Users, openModalForId, uiGridConstants, Cfg_settings, $routeParams, blockUI, FileSaver, Blob) {
 
             $scope.c2ips = resolvedC2ip;
 
@@ -63,6 +63,7 @@ angular.module('ThreatKB')
                 } else {
                     $scope.checked_counter -= 1;
                 }
+                $scope.copy_ips();
             };
 
             $scope.uncheck_all = function () {
@@ -77,6 +78,39 @@ angular.module('ThreatKB')
                     $scope.checked_indexes[i] = true;
                 }
                 $scope.checked_counter = $scope.checked_indexes.length;
+                $scope.copy_ips();
+            };
+
+            var c = new ClipboardJS('#batchCopyBtn', {
+                text: function (trigger) {
+                    return trigger.getAttribute('aria-label');
+                }
+            });
+
+            $scope.get_ips_to_copy = function () {
+                var ipsToCopy = [];
+                for (var i = 0; i < $scope.checked_indexes.length; i++) {
+                    if ($scope.checked_indexes[i]) {
+                        ipsToCopy.push($scope.c2ips[i].ip);
+                    }
+                }
+                return ipsToCopy.join("\n");
+            };
+
+            $scope.copy_ips = function () {
+                blockUI.start("");
+                let copiedIps = $scope.get_ips_to_copy();
+                document.getElementById('batchCopyBtn').setAttribute("aria-label", copiedIps);
+                blockUI.stop();
+            };
+
+            $scope.download_ips = function () {
+                try {
+                    FileSaver.saveAs(new Blob([$scope.get_ips_to_copy()],
+                        {type: "text/plain"}), "c2ips.txt");
+                } catch (error) {
+                    growl.error("Error downloading ips.", {ttl: -1});
+                }
             };
 
             var paginationOptions = {
