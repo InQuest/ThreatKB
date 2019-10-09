@@ -79,7 +79,7 @@ setup(
         'pytz==2017.2',
         'pyzipcode==1.0',
         'redis==2.10.6',
-        'requests==2.18.4',
+        'requests==2.20.0',
         'six==1.10.0',
         'speaklater==1.3',
         'SQLAlchemy==0.7.9',
