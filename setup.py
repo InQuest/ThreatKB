@@ -42,7 +42,7 @@ setup(
         'decorator==4.0.11',
         'deepdiff==3.3.0',
         'dnspython==1.15.0',
-        'Flask==0.9',
+        'Flask==1.0',
         'Flask-Autodoc==0.1.2',
         'Flask-Babel==0.8',
         'Flask-Bcrypt==0.7.1',
