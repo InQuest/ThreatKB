@@ -46,9 +46,9 @@
                     <label>Expiration Timestamp</label>
                     <div class="input-group">
                         <input type="text" class="form-control" name="expiration_timestamp" ng-required="false"
-                               date-formatter uib-datepicker-popup="yyyy-MM-dd"
-                               is-open="expiration_timestamp.opened"
+                               date-formatter uib-datepicker-popup="yyyy-MM-dd" alt-input-formats="['yyyy-MM-ddTHH:mm:ss']"
                                datepicker-options="dateOptions" close-text="Close"
+                               is-open="expiration_timestamp.opened"
                                ng-model="batch.expiration_timestamp" />
                         <span class="input-group-btn">
                             <button type="button" class="btn btn-default" ng-click="openDatepicker()"><i class="glyphicon glyphicon-calendar"></i></button>
@@ -137,8 +137,9 @@
             <div class="form-group" ng-if="c2ip.expiration_timestamp">
                 <label>Expiration Timestamp</label>
                 <input readonly type="text" class="form-control" name="expiration_timestamp" ng-required="false"
-                       date-formatter uib-datepicker-popup="yyyy-MM-dd" is-open="expiration_timestamp.opened"
+                       date-formatter uib-datepicker-popup="yyyy-MM-dd" alt-input-formats="['yyyy-MM-ddTHH:mm:ss']"
                        datepicker-options="dateOptions" close-text="Close"
+                       is-open="expiration_timestamp.opened"
                        ng-model="c2ip.expiration_timestamp" />
             </div>
 
@@ -349,8 +350,9 @@
 
                     <div class="input-group">
                         <input type="text" class="form-control" name="expiration_timestamp" ng-required="false"
-                               date-formatter uib-datepicker-popup="yyyy-MM-dd" is-open="expiration_timestamp.opened"
+                               date-formatter uib-datepicker-popup="yyyy-MM-dd" alt-input-formats="['yyyy-MM-ddTHH:mm:ss']"
                                datepicker-options="dateOptions" close-text="Close"
+                               is-open="expiration_timestamp.opened"
                                ng-model="c2ip.expiration_timestamp" />
                         <span class="input-group-btn">
                             <button type="button" class="btn btn-default" ng-click="openDatepicker()"><i class="glyphicon glyphicon-calendar"></i></button>
