@@ -59,7 +59,7 @@
 
                     <td ng-if="release.name">{{ release.name }}</td>
 
-                    <td ng-if="release.date_created">{{ release.date_created }}</td>
+                    <td ng-if="release.date_created">{{ release.date_created | date:'yyyy-MM-dd hh:mm:ss' }}</td>
 
                     <td>{{ release.num_ips }}</td>
 
@@ -206,7 +206,7 @@
                 <tr>
                     <td>{{ version.version }}</td>
                     <td>{{ version.version_email }}</td>
-                    <td style="text-align:left;">{{ version.version_date }}</td>
+                    <td style="text-align:left;">{{ version.version_date | date:'yyyy-MM-dd hh:mm:ss' }}</td>
                 </tr>
                 </tbody>
             </table>
