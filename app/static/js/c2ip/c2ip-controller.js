@@ -678,12 +678,9 @@ angular.module('ThreatKB')
                 showWeeks: false,
             };
 
-            $scope.openDatepicker = function() {
-                $scope.expiration_timestamp.opened = true;
-            };
-
-            $scope.expiration_timestamp = {
-                opened: false
+            $scope.datepickers = {};
+            $scope.openDatepicker = function(id) {
+                $scope.datepickers[id] = true;
             };
 
             $scope.cfg_states = Cfg_states.query();
@@ -803,12 +800,9 @@ angular.module('ThreatKB')
                 showWeeks: false,
             };
 
-            $scope.openDatepicker = function() {
-                $scope.expiration_timestamp.opened = true;
-            };
-
-            $scope.expiration_timestamp = {
-                opened: false
+            $scope.datepickers = {};
+            $scope.openDatepicker = function(id) {
+                $scope.datepickers[id] = true;
             };
 
             $scope.loadTags = function (query) {
