@@ -113,14 +113,14 @@
                     <label>Date Created</label>
 
                     <label type="text" class="form-control" name="date_created"
-                           ng-model="task.date_created">{{ task.date_created }}</label>
+                           ng-model="task.date_created">{{ task.date_created | date:'yyyy-MM-dd hh:mm:ss' }}</label>
                 </div>
 
                 <div class="form-group" ng-if="task.date_modified">
                     <label>Date Modified</label>
 
                     <label type="text" class="form-control" name="date_modified"
-                           ng-model="task.date_modified">{{ task.date_modified }}</label>
+                           ng-model="task.date_modified">{{ task.date_modified | date:'yyyy-MM-dd hh:mm:ss' }}</label>
                 </div>
 
 

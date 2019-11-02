@@ -71,7 +71,7 @@
                 ng-if="release.date_created">
                 <td>{{ release.name }}</td>
 
-                <td>{{ release.date_created }}</td>
+                <td>{{ release.date_created | date:'yyyy-MM-dd hh:mm:ss' }}</td>
 
                 <td>{{ release.created_user.email }}</td>
 

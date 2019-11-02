@@ -108,12 +108,12 @@
 
             <div class="form-group" ng-if="c2dns.date_created">
                 <label>Date Created</label>
-                <input readonly type="text" class="form-control" ng-model="c2dns.date_created"/>
+                <input readonly type="text" class="form-control" ng-value="c2dns.date_created | date:'yyyy-MM-dd hh:mm:ss'"/>
             </div>
 
             <div class="form-group" ng-if="c2dns.date_modified">
                 <label>Date Modified</label>
-                <input readonly type="text" class="form-control" ng-model="c2dns.date_modified"/>
+                <input readonly type="text" class="form-control" ng-value="c2dns.date_modified | date:'yyyy-MM-dd hh:mm:ss'"/>
             </div>
 
             <div class="form-group" ng-if="c2dns.description">
@@ -312,14 +312,14 @@
                     <label>Date Created</label>
 
                     <label type="text" class="form-control" name="date_created"
-                           ng-model="c2dns.date_created">{{ c2dns.date_created }}</label>
+                           ng-model="c2dns.date_created">{{ c2dns.date_created | date:'yyyy-MM-dd hh:mm:ss' }}</label>
                 </div>
 
                 <div class="form-group" ng-if="c2dns.date_modified">
                     <label>Date Modified</label>
 
                     <label type="text" class="form-control" name="date_modified"
-                           ng-model="c2dns.date_modified">{{ c2dns.date_modified }}</label>
+                           ng-model="c2dns.date_modified">{{ c2dns.date_modified | date:'yyyy-MM-dd hh:mm:ss' }}</label>
                 </div>
 
                 <div class="form-group">
