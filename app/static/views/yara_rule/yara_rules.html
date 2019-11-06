@@ -496,7 +496,7 @@
                             <div uib-accordion-group class="panel-default"
                                  heading="See files">
                                 <ul class="list-group">
-                                    <li class="list-group-item justify-content-between"
+                                    <li class="list-group-item yara-files-list-item justify-content-between"
                                         ng-repeat="f in yara_rule.files | orderBy:'-last_revision_date'">
                                         <a title="{{ file_store_path.value }}/{{ entity_mapping.SIGNATURE }}/{{ f.entity_id }}/{{ f.filename }}"
                                            href="ThreatKB/files/{{ f.entity_type }}/{{ f.entity_id }}/{{ f.id }}">{{ f.filename }}</a>&nbsp;<span
