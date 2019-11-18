@@ -803,6 +803,15 @@ angular.module('ThreatKB')
                 return $location.absUrl();
             };
 
+            $scope.dateOptions = {
+                showWeeks: false,
+            };
+
+            $scope.datepickers = {};
+            $scope.openDatepicker = function(id) {
+                $scope.datepickers[id] = true;
+            };
+
             $scope.cfg_states = Cfg_states.query();
             $scope.cfg_category_range_mapping = CfgCategoryRangeMapping.query();
             $scope.do_not_bump_revision = true;
@@ -1038,6 +1047,15 @@ angular.module('ThreatKB')
 
             $scope.cancel = function () {
                 $uibModalInstance.dismiss('cancel');
+            };
+
+            $scope.dateOptions = {
+                showWeeks: false,
+            };
+
+            $scope.datepickers = {};
+            $scope.openDatepicker = function(id) {
+                $scope.datepickers[id] = true;
             };
 
             $scope.loadTags = function (query) {
