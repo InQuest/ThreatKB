@@ -149,7 +149,7 @@ class MetadataMapping(db.Model):
 
     def to_dict(self):
         if self.metadata_object.type_ == "date" and self.value:
-            value = datetime.datetime.strftime(parser.parse(self.value), "%m/%d/%YT%H:%M:%S")
+            value = datetime.datetime.strftime(parser.parse(self.value), "%Y-%m-%dT%H:%M:%S")
         elif self.metadata_object.type_ == "integer" and self.value:
             value = int(self.value)
         else:
