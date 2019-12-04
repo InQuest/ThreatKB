@@ -323,6 +323,7 @@ span.CodeMirror-selectedtext { background: none; }
 tkb-codemirror {
   position: relative;
   display: block;
+  margin-top: 10px;
 }
 
 tkb-codemirror > .tkb-codemirror-toolbar {
