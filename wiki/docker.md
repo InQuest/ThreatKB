@@ -2,7 +2,7 @@
 1. Edit docker-compose.yml if you change to change defaults such as ports or credentials
 2. Build the Docker image: `docker build -t threatkb .`
 3. Execute docker-compuse: `docker-compose up`
-4. Open your browser to htp://127.0.0.1:5000/#!/login
+4. Open your browser to http://127.0.0.1:5000/#!/login
 
 **Example output:**
 ```
