@@ -210,7 +210,7 @@
 
                 <div class="form-group" ng-if="yara_rule.id">
                     <label>Revision</label>
-                    <label type="text" class="form-control">{{ yara_rule.revision }} M{{ yara_rule.last_revision_date }}
+                    <label type="text" class="form-control">{{ yara_rule.revision }} M{{ yara_rule.last_revision_date | date:'yyyy-MM-dd' }}
                         by {{ yara_rule.modified_user.email }}</label>
                 </div>
 
@@ -551,29 +551,63 @@
                     </div>
                 </div>
 
-                <div ng-if="yara_rule.id">
-                    <label>Revisions ({{ yara_rule.revisions.length }})</label>
-                    <div ng-if="yara_rule.revisions && yara_rule.revisions.length" style="padding-top:3px;">
-                        <uib-accordion>
-                            <div uib-accordion-group class="panel-default"
-                                 heading="See revisions">
-                                <ul class="list-group">
-                                    <li class="list-group-item justify-content-between">
-                                        <div>
-                                            <uib-accordion>
-                                                <div uib-accordion-group class="panel-default"
-                                                     heading="{{ revision.revision }} @ {{ revision.date_created }} by {{ revision.user.email }}"
-                                                     ng-repeat="revision in yara_rule.revisions | orderBy:'-date_created'"
-                                                     is-open="revisionIsOpen">
-                                                    <pre ng-controller="Yara_revisionController"
-                                                         ng-show="revisionIsLoaded">{{ revision.yara_rule_string }}</pre>
-                                                </div>
-                                            </uib-accordion>
-                                        </div>
-                                    </li>
-                                </ul>
+                <div ng-if="yara_rule.id && yara_rule.revisions && yara_rule.revisions.length">
+                    <style type="text/css">
+                        .yara-revisions {
+                        }
+                        .yara-revisions > div.yara-revisions-select {
+                            display: flex;
+                        }
+                        .yara-revisions > div.yara-revisions-select > div {
+                            flex: 1;
+                            padding: 4px 8px;
+                        }
+                        .yara-revisions > div.yara-revisions-select > div > label {
+                            display: block;                            
+                        }
+                        .yara-revisions > div.yara-revisions-select > div > select {
+                            display: block;
+                            width: 100%;
+                        }
+                        .yara-revisions > div.yara-revisions-view {
+                            overflow-y: auto;
+                        }
+                        .yara-revisions > div.yara-revisions-view > pre {
+                            height: 320px;
+                        }
+                        .yara-revisions > div.yara-revisions-view > pre del { background: #fdaeb7; }
+                        .yara-revisions > div.yara-revisions-view > pre ins { background: #cdffd8; }
+                    </style>
+                    <label>Revisions ({{ yara_rule.revisions.length + 1 }})</label>
+                    <div class="yara-revisions">
+                        <div class="yara-revisions-select">
+                            <div>
+                                <label>View</label>
+                                <select ng-model="selectedRevisions.main">
+                                    <option ng-value="null">
+                                        CURRENT @{{ yara_rule.last_revision_date | date:'yyyy-MM-dd' }} by {{ yara_rule.modified_user.email }}
+                                    </option>
+                                    <option ng-repeat="rev in yara_rule.revisions | orderBy:'-date_created'"
+                                            ng-value="rev">
+                                        Rev. {{ rev.revision }} @{{ rev.date_created | date:'yyyy-MM-dd' }} by {{ rev.user.email }}
+                                    </option>
+                                </select>
                             </div>
-                        </uib-accordion>
+                            <div>
+                                <label>Diff</label>
+                                <select ng-model="selectedRevisions.compared">
+                                    <option ng-value="null"> None </option>
+                                    <option ng-repeat="rev in yara_rule.revisions | orderBy:'-date_created'"
+                                            ng-value="rev" ng-show="rev.revision < (selectedRevisions.main ? selectedRevisions.main.revision : yara_rule.revision)">
+                                        Rev. {{ rev.revision }} @{{ rev.date_created | date:'yyyy-MM-dd' }} by {{ rev.user.email }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="yara-revisions-view" ng-controller="Yara_revisionController">
+                                <pre ng-if="revision_diff"><code ng-bind-html="revision_diff"></code></pre>
+                                <pre ng-if="!revision_diff"><code> {{ selectedRevisions.main ? selectedRevisions.main.yara_rule_string : yara_rule.yara_rule_string }} </code></pre>
+                        </div>
                     </div>
 
                 </div>
