@@ -14,6 +14,7 @@ import datetime
 import logging
 import os
 import distutils
+from slack_helper import SlackHelper
 
 
 app = Flask(__name__, static_url_path='')
@@ -30,11 +31,17 @@ login_manager.init_app(app)
 bcrypt = Bcrypt(app)
 celery = None
 
+slack = {"webhook": os.getenv("SLACK_WEBHOOK", None),
+         "channel": os.getenv("SLACK_CHANNEL", None),
+         "user": os.getenv("SLACK_USER", "threatkb"),
+         "post_when": os.getenv("SLACK_POST_WHEN", "ARTIFACT_CREATED,ARTIFACT_MODIFIED,COMMENTS,RELEASES_MADE,STATE_TOGGLED").split(",")}
+
+
 ENTITY_MAPPING = {"SIGNATURE": 1, "DNS": 2, "IP": 3, "TASK": 4, "RELEASE": 5}
 ENTITY_MAPPING = {"SIGNATURE": 1, "DNS": 2, "IP": 3, "TASK": 4, "RELEASE": 5}
 ACTIVITY_TYPE = {"ARTIFACT_CREATED": "Artifact Created",
                  "ARTIFACT_MODIFIED": "Artifact Modified",
-                 "COMMENTS": 'Comment',
+                 "COMMENTS": 'Comxment',
                  "STATE_TOGGLED": 'State Toggled',
                  "RELEASES_MADE": 'Release Made'}
 
@@ -85,9 +92,13 @@ def set_celery_stuff(flask_app):
     if flask_app.config["MAX_MILLIS_PER_FILE_THRESHOLD"]:
         flask_app.config["MAX_MILLIS_PER_FILE_THRESHOLD"] = float(flask_app.config["MAX_MILLIS_PER_FILE_THRESHOLD"])
 
-set_celery_stuff(app)
 
 print("app config: %s" % (str(app.config)))
+print("print env")
+for key, val in os.environ.iteritems():
+    print "%s=%s" % (key, val)
+
+set_celery_stuff(app)
 
 from app.celeryapp import make_celery
 
