@@ -262,13 +262,13 @@ def get_users_ownership():
     include_artifacts = request.args.get("include_artifacts", False)
 
     ownership_data = {"!Unassigned": {"task": [], "ip": [], "dns": [], "signatures": []}}
-    u = {user.id: user for user in users.KBUser.query.all()}
+    u = {user.id: user for user in users.KBUser.query.filter(users.KBUser.active > 0).all()}
     for user_id, user in u.iteritems():
         ownership_data[user.email] = {"task": [], "ip": [], "dns": [], "signatures": []}
 
     t = tasks.Tasks.query.all() if not include_inactive else tasks.Tasks.query.filter(tasks.Tasks.active > 0).all()
     for task in t:
-        if task.owner_user_id:
+        if task.owner_user_id and task.owner_user_id in u:
             ownership_data[u[task.owner_user_id].email]["task"].append(task.to_dict() if include_artifacts else task.id)
         else:
             ownership_data["!Unassigned"]["task"].append(task.to_dict() if include_artifacts else task.id)

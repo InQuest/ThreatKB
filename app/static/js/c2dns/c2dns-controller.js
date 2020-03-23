@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('C2dnsController', ['$scope', '$timeout', '$filter', '$q', '$http', '$uibModal', 'resolvedC2dns', 'C2dns', 'Cfg_states', 'growl', 'Users', 'openModalForId', 'uiGridConstants', 'Cfg_settings', '$routeParams',
-        function ($scope, $timeout, $filter, $q, $http, $uibModal, resolvedC2dns, C2dns, Cfg_states, growl, Users, openModalForId, uiGridConstants, Cfg_settings, $routeParams) {
+    .controller('C2dnsController', ['$scope', '$timeout', '$filter', '$q', '$http', '$uibModal', 'resolvedC2dns', 'C2dns', 'Cfg_states', 'growl', 'Users', 'openModalForId', 'uiGridConstants', 'Cfg_settings', '$routeParams', 'blockUI', 'FileSaver', 'Blob',
+        function ($scope, $timeout, $filter, $q, $http, $uibModal, resolvedC2dns, C2dns, Cfg_states, growl, Users, openModalForId, uiGridConstants, Cfg_settings, $routeParams, blockUI, FileSaver, Blob) {
 
             $scope.c2dns = resolvedC2dns;
 
@@ -63,6 +63,7 @@ angular.module('ThreatKB')
                 } else {
                     $scope.checked_counter -= 1;
                 }
+                $scope.copy_dns();
             };
 
             $scope.uncheck_all = function () {
@@ -77,6 +78,39 @@ angular.module('ThreatKB')
                     $scope.checked_indexes[i] = true;
                 }
                 $scope.checked_counter = $scope.checked_indexes.length;
+                $scope.copy_dns();
+            };
+
+            var c = new ClipboardJS('#batchCopyBtn', {
+                text: function (trigger) {
+                    return trigger.getAttribute('aria-label');
+                }
+            });
+
+            $scope.get_dns_to_copy = function () {
+                var dnsToCopy = [];
+                for (var i = 0; i < $scope.checked_indexes.length; i++) {
+                    if ($scope.checked_indexes[i]) {
+                        dnsToCopy.push($scope.c2dns[i].domain_name);
+                    }
+                }
+                return dnsToCopy.join("\n");
+            };
+
+            $scope.copy_dns = function () {
+                blockUI.start("");
+                let copiedDns = $scope.get_dns_to_copy();
+                document.getElementById('batchCopyBtn').setAttribute("aria-label", copiedDns);
+                blockUI.stop();
+            };
+
+            $scope.download_dns = function () {
+                try {
+                    FileSaver.saveAs(new Blob([$scope.get_dns_to_copy()],
+                        {type: "text/plain"}), "c2dns.txt");
+                } catch (error) {
+                    growl.error("Error downloading dns.", {ttl: -1});
+                }
             };
 
             var paginationOptions = {
@@ -682,12 +716,9 @@ angular.module('ThreatKB')
                 showWeeks: false,
             };
 
-            $scope.openDatepicker = function() {
-                $scope.expiration_timestamp.opened = true;
-            };
-
-            $scope.expiration_timestamp = {
-                opened: false
+            $scope.datepickers = {};
+            $scope.openDatepicker = function(id) {
+                $scope.datepickers[id] = true;
             };
 
             $scope.cfg_states = Cfg_states.query();
@@ -807,12 +838,9 @@ angular.module('ThreatKB')
                 showWeeks: false,
             };
 
-            $scope.openDatepicker = function() {
-                $scope.expiration_timestamp.opened = true;
-            };
-
-            $scope.expiration_timestamp = {
-                opened: false
+            $scope.datepickers = {};
+            $scope.openDatepicker = function(id) {
+                $scope.datepickers[id] = true;
             };
 
             $scope.loadTags = function (query) {

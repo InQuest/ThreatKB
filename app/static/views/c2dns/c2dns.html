@@ -46,9 +46,9 @@
                     <label>Expiration Timestamp</label>
                     <div class="input-group">
                         <input type="text" class="form-control" name="expiration_timestamp" ng-required="false"
-                               date-formatter uib-datepicker-popup="yyyy-MM-dd"
-                               is-open="expiration_timestamp.opened"
+                               date-formatter uib-datepicker-popup="yyyy-MM-dd" alt-input-formats="['yyyy-MM-ddTHH:mm:ss']"
                                datepicker-options="dateOptions" close-text="Close"
+                               is-open="expiration_timestamp.opened"
                                ng-model="batch.expiration_timestamp" />
                         <span class="input-group-btn">
                             <button type="button" class="btn btn-default" ng-click="openDatepicker()"><i class="glyphicon glyphicon-calendar"></i></button>
@@ -80,6 +80,13 @@
             <button type="button" class="close"
                     ng-click="cancel()">&times;
             </button>
+            <button class="btn btn-sm  btn-primary" ng-if="c2dns.id"
+                    title="Copy DNS to clipboard" tooltip-placement="bottom"
+                    uib-tooltip="Copied DNS!"
+                    tooltip-trigger="'outsideClick'"
+                    ngclipboard data-clipboard-text="{{ c2dns.domain_name }}">
+                Copy To Clipboard
+            </button>
             <a class="btn btn-sm  btn-primary" ng-if="c2dns.id"
                ng-click="edit(c2dns.id)">Edit
             </a>
@@ -108,12 +115,12 @@
 
             <div class="form-group" ng-if="c2dns.date_created">
                 <label>Date Created</label>
-                <input readonly type="text" class="form-control" ng-model="c2dns.date_created"/>
+                <input readonly type="text" class="form-control" ng-value="c2dns.date_created | date:'yyyy-MM-dd hh:mm:ss'"/>
             </div>
 
             <div class="form-group" ng-if="c2dns.date_modified">
                 <label>Date Modified</label>
-                <input readonly type="text" class="form-control" ng-model="c2dns.date_modified"/>
+                <input readonly type="text" class="form-control" ng-value="c2dns.date_modified | date:'yyyy-MM-dd hh:mm:ss'"/>
             </div>
 
             <div class="form-group" ng-if="c2dns.description">
@@ -135,8 +142,9 @@
                 <label>Expiration Timestamp</label>
 
                 <input readonly type="text" class="form-control" name="expiration_timestamp" ng-required="false"
-                       date-formatter uib-datepicker-popup="yyyy-MM-dd" is-open="expiration_timestamp.opened"
+                       date-formatter uib-datepicker-popup="yyyy-MM-dd" alt-input-formats="['yyyy-MM-ddTHH:mm:ss']"
                        datepicker-options="dateOptions" close-text="Close"
+                       is-open="expiration_timestamp.opened"
                        ng-model="c2dns.expiration_timestamp" />
             </div>
 
@@ -163,13 +171,33 @@
 
             <div class="form-group" ng-repeat="m in metadata[0].date" ng-if="c2dns.id">
                 <label>{{ m.key }}</label>
-                <input readonly class="form-control" ng-model="c2dns.metadata_values[m.key].value" type="date"
-                       format-date/>
+                <!-- <input readonly class="form-control" ng-model="c2dns.metadata_values[m.key].value" type="date"
+                       format-date/> -->
+                <div class="input-group">
+                    <input type="text" class="form-control" ng-required="m.required"
+                        date-formatter uib-datepicker-popup="yyyy-MM-dd" alt-input-formats="['yyyy-MM-ddTHH:mm:ss']"
+                        datepicker-options="dateOptions" close-text="Close"
+                        is-open="datepickers[m.key]"
+                        ng-model="c2dns.metadata_values[m.key].value" />
+                    <span class="input-group-btn">
+                        <button type="button" class="btn btn-default" ng-click="openDatepicker(m.key)"><i class="glyphicon glyphicon-calendar"></i></button>
+                    </span>
+                </div>
             </div>
 
             <div class="form-group" ng-repeat="m in metadata[0].date" ng-if="!c2dns.id">
                 <label>{{ m.key }}</label>
-                <input readonly class="form-control" ng-model="m.default" type="date" format-date>
+                <!-- <input readonly class="form-control" ng-model="m.default" type="date" format-date> -->
+                <div class="input-group">
+                    <input type="text" class="form-control" ng-required="m.required"
+                        date-formatter uib-datepicker-popup="yyyy-MM-dd" alt-input-formats="['yyyy-MM-ddTHH:mm:ss']"
+                        datepicker-options="dateOptions" close-text="Close"
+                        is-open="datepickers[m.key]"
+                        ng-model="m.default" />
+                    <span class="input-group-btn">
+                        <button type="button" class="btn btn-default" ng-click="openDatepicker(m.key)"><i class="glyphicon glyphicon-calendar"></i></button>
+                    </span>
+                </div>
             </div>
 
             <div class="form-group" ng-repeat="m in metadata[0].multiline_comment" ng-if="c2dns.id">
@@ -229,14 +257,9 @@
               class="ng-scope ng-invalid ng-invalid-required ng-dirty"
               ng-submit="ok()">
 
-            <a class="btn btn-sm btn-primary modal-fullscreen-button modal-fullscreen-button-abs-pos"
-               ng-click="toggleFullscreen()">Toggle full screen</a>
-
             <div class="modal-header">
-                <button type="button" class="close"
-                        ng-click="cancel()">&times;
-                </button>
-                <h4 class="modal-title" id="myC2dnsLabel">
+                <button type="button" class="close" ng-click="cancel()">&times;</button>
+                <h4 class="modal-title" id="myC2dnsLabel" style="float: left;">
                     {{ c2dns.id ? 'Edit' : 'Create' }} DNS Artifact
                     <a><span ng-if="c2dns.id" class="glyphicon glyphicon-link" style="font-size: .8em"
                              title="Copy permalink to clipboard" tooltip-placement="bottom" uib-tooltip="Copied!"
@@ -256,6 +279,18 @@
                     </div>
                 </h4>
 
+                <div class="pull-right" ng-if="c2dns.id" style="margin: 0 35px 0 0;">
+                    <button class="btn btn-sm  btn-primary" ng-if="c2dns.id"
+                            title="Copy DNS to clipboard" tooltip-placement="bottom"
+                            uib-tooltip="Copied DNS!"
+                            tooltip-trigger="'outsideClick'"
+                            ngclipboard data-clipboard-text="{{ c2dns.domain_name }}">
+                        Copy To Clipboard
+                    </button>
+
+                    <a class="btn btn-sm btn-primary modal-fullscreen-button"
+                       ng-click="toggleFullscreen()">Toggle full screen</a>
+                </div>
             </div>
             <div class="modal-body">
                 <div class="form-group" ng-if="c2dns.id">
@@ -292,14 +327,14 @@
                     <label>Date Created</label>
 
                     <label type="text" class="form-control" name="date_created"
-                           ng-model="c2dns.date_created">{{ c2dns.date_created }}</label>
+                           ng-model="c2dns.date_created">{{ c2dns.date_created | date:'yyyy-MM-dd hh:mm:ss' }}</label>
                 </div>
 
                 <div class="form-group" ng-if="c2dns.date_modified">
                     <label>Date Modified</label>
 
                     <label type="text" class="form-control" name="date_modified"
-                           ng-model="c2dns.date_modified">{{ c2dns.date_modified }}</label>
+                           ng-model="c2dns.date_modified">{{ c2dns.date_modified | date:'yyyy-MM-dd hh:mm:ss' }}</label>
                 </div>
 
                 <div class="form-group">
@@ -341,11 +376,14 @@
 
                     <div class="input-group">
                         <input type="text" class="form-control" name="expiration_timestamp" ng-required="false"
-                               date-formatter uib-datepicker-popup="yyyy-MM-dd" is-open="expiration_timestamp.opened"
+                               date-formatter uib-datepicker-popup="yyyy-MM-dd" alt-input-formats="['yyyy-MM-ddTHH:mm:ss']"
                                datepicker-options="dateOptions" close-text="Close"
+                               is-open="datepickers['expiration_timestamp']"
                                ng-model="c2dns.expiration_timestamp" />
                         <span class="input-group-btn">
-                            <button type="button" class="btn btn-default" ng-click="openDatepicker()"><i class="glyphicon glyphicon-calendar"></i></button>
+                            <button type="button" class="btn btn-default" ng-click="openDatepicker('expiration_timestamp')">
+                                <i class="glyphicon glyphicon-calendar"></i>
+                            </button>
                         </span>
                     </div>
                 </div>
@@ -380,14 +418,34 @@
                 <div class="form-group" ng-repeat="m in metadata[0].date" ng-if="c2dns.id">
                     <label>{{ m.key }}</label>
                     <span class="error text-danger" ng-if="m.required">*</span>
-                    <input class="form-control" ng-model="c2dns.metadata_values[m.key].value" type="date"
-                           ng-required="m.required" format-date/>
+                    <!-- <input class="form-control" ng-model="c2dns.metadata_values[m.key].value" type="date"
+                           ng-required="m.required" format-date/> -->
+                    <div class="input-group">
+                        <input type="text" class="form-control" ng-required="m.required"
+                            date-formatter uib-datepicker-popup="yyyy-MM-dd" alt-input-formats="['yyyy-MM-ddTHH:mm:ss']"
+                            datepicker-options="dateOptions" close-text="Close"
+                            is-open="datepickers[m.key]"
+                            ng-model="c2dns.metadata_values[m.key].value" />
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-default" ng-click="openDatepicker(m.key)"><i class="glyphicon glyphicon-calendar"></i></button>
+                        </span>
+                    </div>
                 </div>
 
                 <div class="form-group" ng-repeat="m in metadata[0].date" ng-if="!c2dns.id">
                     <label>{{ m.key }}</label>
                     <span class="error text-danger" ng-if="m.required">*</span>
-                    <input class="form-control" ng-model="m.default" type="date" ng-required="m.required" format-date>
+                    <!-- <input class="form-control" ng-model="m.default" type="date" ng-required="m.required" format-date> -->
+                    <div class="input-group">
+                        <input type="text" class="form-control" ng-required="m.required"
+                            date-formatter uib-datepicker-popup="yyyy-MM-dd" alt-input-formats="['yyyy-MM-ddTHH:mm:ss']"
+                            datepicker-options="dateOptions" close-text="Close"
+                            is-open="datepickers[m.key]"
+                            ng-model="m.default" />
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-default" ng-click="openDatepicker(m.key)"><i class="glyphicon glyphicon-calendar"></i></button>
+                        </span>
+                    </div>
                 </div>
 
                 <div class="form-group" ng-repeat="m in metadata[0].multiline_comment" ng-if="c2dns.id">
@@ -510,6 +568,14 @@
                 </ui-select-choices>
             </ui-select>
         </div>
+        <button type="button" class="btn btn-secondary" ng-disabled="!checked_counter" id="batchCopyBtn" aria-label=""
+                uib-tooltip="Copied {{ checked_counter }} DNS{{ checked_counter > 1 ? 's' : '' }}!"
+                tooltip-trigger="'outsideClick'">
+            Copy ({{ checked_counter }})
+        </button>
+        <button type="button" class="btn btn-secondary" ng-disabled="!checked_counter" ng-click="download_dns()">
+            Download ({{ checked_counter }})
+        </button>
         <button type="button" class="btn btn-secondary" ng-disabled="!checked_counter || checked_counter<2"
                 ng-click="open_batch()">
             Batch Edit ({{ checked_counter }})

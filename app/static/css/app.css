@@ -184,6 +184,24 @@ body.modals-full-screen .modal-dialog {
     .modal-lg { width: 900px; }
     .modal-dialog { margin: 30px auto; }
 }
+
+/* Yara sign, files list */
+.yara-files-list-item {
+    display: flex;
+    align-items: end;
+    /* align-items: center; */
+}
+.list-group-item > * {
+    /*white-space: nowrap;*/
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 2px;
+}
+.list-group-item > *:first-child {
+    flex: 1;
+    white-space: pre-line;
+}
+
 /* Datepicker (uib-datepicker) sizing */
 .form-group .input-group .uib-datepicker-popup.dropdown-menu {
     width: 254px;

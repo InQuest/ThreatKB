@@ -691,7 +691,14 @@ angular.module('ThreatKB')
             $scope.Comments = Comments;
             $scope.Files = Files;
             $scope.selected_signature = null;
-
+            
+            $scope.selectedRevisions = {
+                main: null,
+                compared: null
+            };
+            $scope.selected_revision = null;
+            $scope.compared_revision = null;
+            
             $scope.users = Users.query();
 
             $scope.editor = {
@@ -801,6 +808,15 @@ angular.module('ThreatKB')
                     return $location.absUrl().replace(/\/[0-9]+$/, "/" + id)
                 }
                 return $location.absUrl();
+            };
+
+            $scope.dateOptions = {
+                showWeeks: false,
+            };
+
+            $scope.datepickers = {};
+            $scope.openDatepicker = function(id) {
+                $scope.datepickers[id] = true;
             };
 
             $scope.cfg_states = Cfg_states.query();
@@ -1040,25 +1056,71 @@ angular.module('ThreatKB')
                 $uibModalInstance.dismiss('cancel');
             };
 
+            $scope.dateOptions = {
+                showWeeks: false,
+            };
+
+            $scope.datepickers = {};
+            $scope.openDatepicker = function(id) {
+                $scope.datepickers[id] = true;
+            };
+
             $scope.loadTags = function (query) {
                 return Tags.loadTags(query);
             };
         }])
     .controller('Yara_revisionController', ['$scope', 'Yara_rule',
         function ($scope, Yara_rule) {
+            $scope.revision_diff = null
+            $scope.calculateRevisionDiff = function () {
+                if (!$scope.selectedRevisions.compared) {
+                    $scope.revision_diff = null;
+                } else {
+                    var dmp = new diff_match_patch(),
+                    diffs = dmp.diff_main(($scope.selectedRevisions.main ? $scope.selectedRevisions.main.yara_rule_string : $scope.yara_rule.yara_rule_string), $scope.selectedRevisions.compared.yara_rule_string);
+                    $scope.revision_diff = dmp.diff_prettyHtml(diffs).replace(/&para;/g, '');
+                }
+            };
+
             $scope.$watch(
-                'revisionIsOpen',
+                function () { return $scope.selectedRevisions.main; },
                 function (value) {
+                    $scope.selectedRevisions.compared = null;
                     if (value) {
-                        if (!$scope.revision.yara_rule_string) {
-                            Yara_rule.getSignatureFromRevision($scope.revision.yara_rule_id, $scope.revision.revision)
+                        if (!$scope.selectedRevisions.main.yara_rule_string) {
+                            Yara_rule.getSignatureFromRevision($scope.selectedRevisions.main.yara_rule_id, $scope.selectedRevisions.main.revision)
                                 .then(function (response) {
-                                    $scope.revision.yara_rule_string = response;
+                                    $scope.selectedRevisions.main.yara_rule_string = response;
                                     $scope.revisionIsLoaded = true;
+                                    $scope.calculateRevisionDiff();
                                 }, function (error) {
                                     growl.error(error.data, {ttl: -1});
                                 });
+                        } else {
+                            $scope.calculateRevisionDiff();
                         }
+                    } else {
+                        $scope.calculateRevisionDiff();
+                    }
+                }
+            );
+            $scope.$watch(
+                function () { return $scope.selectedRevisions.compared; },
+                function (value) {
+                    if (value) {
+                        if (!$scope.selectedRevisions.compared.yara_rule_string) {
+                            Yara_rule.getSignatureFromRevision($scope.selectedRevisions.compared.yara_rule_id, $scope.selectedRevisions.compared.revision)
+                                .then(function (response) {
+                                    $scope.selectedRevisions.compared.yara_rule_string = response;
+                                    $scope.calculateRevisionDiff();
+                                }, function (error) {
+                                    growl.error(error.data, {ttl: -1});
+                                });
+                        } else {
+                            $scope.calculateRevisionDiff();
+                        }
+                    } else {
+                        $scope.calculateRevisionDiff();
                     }
                 }
             );
