@@ -1,11 +1,14 @@
 from sqlalchemy.orm import class_mapper
 
-from app import db, ENTITY_MAPPING, ACTIVITY_TYPE
+from app import db, ENTITY_MAPPING, ACTIVITY_TYPE, slack, ENTITY_MAPPING_URI, app
 from sqlalchemy import bindparam, inspect
 
 from app.models import users
 from app.models.cfg_states import Cfg_states
 import re
+from flask import request
+
+from app.slack_helper import SlackHelper
 
 class ActivityLog(db.Model):
     __tablename__ = "activity_log"
@@ -96,6 +99,17 @@ def log_activity(connection,
                  entity_id,
                  user_id):
     transaction = connection.begin()
+
+    if activity_type in slack["post_when"] and slack["webhook"] and slack["user"] and slack["channel"]:
+        app.logger.debug("Slack is: %s" % (slack))
+        user = db.session.query(users.KBUser).filter(users.KBUser.id == user_id).first()
+        if user.email in slack["exclude_users"]:
+            app.logger.debug("Skipping slack because user %s in exclude list %s" % (user.email, slack["exclude_users"]))
+            return
+        url = "%s#!/%s/%s" % (request.url_root, ENTITY_MAPPING_URI[int(entity_type)], entity_id)
+        message = "%s activity from %s on %s\n\n%s" % (activity_type, user.email, url, activity_text)
+        SlackHelper.send_slack_message(slack["webhook"], slack["user"], slack["channel"], message)
+
     connection.execute(ActivityLog.__table__.insert().values(
         activity_type=bindparam("activity_type"),
         activity_text=bindparam("activity_text"),

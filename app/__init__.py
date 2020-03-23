@@ -34,11 +34,14 @@ celery = None
 slack = {"webhook": os.getenv("SLACK_WEBHOOK", None),
          "channel": os.getenv("SLACK_CHANNEL", None),
          "user": os.getenv("SLACK_USER", "threatkb"),
-         "post_when": os.getenv("SLACK_POST_WHEN", "ARTIFACT_CREATED,ARTIFACT_MODIFIED,COMMENTS,RELEASES_MADE,STATE_TOGGLED").split(",")}
+         "post_when": os.getenv("SLACK_POST_WHEN",
+                                "ARTIFACT_CREATED,ARTIFACT_MODIFIED,COMMENTS,RELEASES_MADE,STATE_TOGGLED").split(","),
+         "exclude_users": os.getenv("SLACK_EXCLUDE_USERS", "").split(",")}
 
 
 ENTITY_MAPPING = {"SIGNATURE": 1, "DNS": 2, "IP": 3, "TASK": 4, "RELEASE": 5}
-ENTITY_MAPPING = {"SIGNATURE": 1, "DNS": 2, "IP": 3, "TASK": 4, "RELEASE": 5}
+ENTITY_MAPPING_URI = {1: "yara_rules", 2: "c2dns", 3: "c2ips", 4: "tasks", 5: "releases"}
+
 ACTIVITY_TYPE = {"ARTIFACT_CREATED": "Artifact Created",
                  "ARTIFACT_MODIFIED": "Artifact Modified",
                  "COMMENTS": 'Comxment',
