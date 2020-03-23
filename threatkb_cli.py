@@ -10,11 +10,22 @@ import requests
 import json
 import sys
 import os
-import ConfigParser
 import stat
 import argparse
 import logging
-from StringIO import StringIO
+
+# python2/3 compatability hacks.
+try:
+    import ConfigParser
+except:
+    from configparser import ConfigParser
+
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
+
+raw_input = input
 
 CREDENTIALS_FILE = os.path.expanduser('~/.threatkb/credentials')
 API_KEY = None
@@ -32,7 +43,7 @@ LOG = logging.getLogger()
 
 
 class ThreatKB:
-    def __init__(self, host, token, secret_key, filter_on_keys=[], base_uri='ThreatKB/', use_https=True, log=LOG):
+    def __init__(self, host, token, secret_key, filter_on_keys=[], base_uri='/ThreatKB/', use_https=True, log=LOG):
         self.host = host.lower().replace("http://", "").replace("https://", "")
         self.token = token
         self.secret_key = secret_key
@@ -42,8 +53,20 @@ class ThreatKB:
         self.filter_on_keys = filter_on_keys
         self.session = requests.Session()
 
+        # ensure base URI is wrapped in slashes or, if not specified, is a slash.
+        if self.base_uri:
+            if not self.base_uri.startswith("/"):
+                self.base_uri = "/" + self.base_uri
+            if not self.base_uri.endswith("/"):
+                self.base_uri = self.base_uri + "/"
+        else:
+            self.base_uri = "/"
+
     def _request(self, method, uri, uri_params={}, body=None, files={},
                  headers={"Content-Type": "application/json;charset=UTF-8"}):
+        LOG.debug(
+            "method: %s - uri: %s - uri_params: %s - body: %s - files: %s" % (method, uri, uri_params, body, files))
+
         uri_params["token"] = self.token
         uri_params["secret_key"] = self.secret_key
         url = "%s://%s%s%s" % ("https" if self.use_https else "http", self.host, self.base_uri, uri)
@@ -71,7 +94,7 @@ class ThreatKB:
                     results.append(dict(zip(self.filter_on_keys, [obj[k] for k in self.filter_on_keys])))
                 return results
                 # return project(o, self.filter_on_keys)
-        except Exception, e:
+        except Exception:
             return output
 
     def get(self, endpoint, id_=None, params={}):
@@ -121,7 +144,7 @@ def configure():
 
     try:
         initialize()
-    except Exception, e:
+    except Exception:
         pass
 
     try:
@@ -140,7 +163,7 @@ def configure():
     config.set('default', 'token', API_KEY)
     config.set('default', 'secret_key', SECRET_KEY)
     config.set('default', 'api_host', API_HOST)
-    with open(CREDENTIALS_FILE, "wb") as configfile:
+    with open(CREDENTIALS_FILE, "w+") as configfile:
         config.write(configfile)
 
     os.chmod(CREDENTIALS_FILE, stat.S_IRUSR | stat.S_IWUSR)
@@ -152,15 +175,15 @@ def attach(params):
     try:
         artifact, artifact_id, file = params[1:]
     except Exception, e:
-        print help(extra_text="""%s attach <artifact> <artifact_id> <file>
-        
+        print help(extra_text="""%s <artifact> <artifact_id> <file>
+
         artifact: yara_rule, c2dns, c2ip, task
         artifact_id: artifact id as an integer
         file: the file to attach to the entity""" % (params[0]), params=params)
         sys.exit(1)
 
-    print THREATKB_CLI.create("file_upload",
-                              files={"entity_type": artifact, "entity_id": artifact_id, "file": open(file, 'rb')})
+    print(THREATKB_CLI.create("file_upload",
+                              files={"entity_type": artifact, "entity_id": artifact_id, "file": open(file, 'rb')}))
 
 
 def comment(params):
@@ -169,15 +192,15 @@ def comment(params):
     try:
         artifact, artifact_id, comment = params[1:]
     except Exception, e:
-        print help(extra_text="""%s comment <artifact> <artifact_id> <comment>
-        
+        print help(extra_text="""%s <artifact> <artifact_id> <comment>
+
         artifact: yara_rule, c2dns, c2ip, task
         artifact_id: artifact id as an integer
         comment: the comment to add to the artifact""" % (params[0]), params=params)
         sys.exit(1)
 
-    print THREATKB_CLI.create("comments", json.dumps(
-        {"comment": comment, "entity_type": ENTITY_TYPES.get(artifact), "entity_id": artifact_id}))
+    print(THREATKB_CLI.create("comments", json.dumps(
+        {"comment": comment, "entity_type": ENTITY_TYPES.get(artifact), "entity_id": artifact_id})))
 
 
 def release(params):
@@ -185,10 +208,10 @@ def release(params):
 
     try:
         release_id = params[1]
-    except Exception, e:
+    except Exception as e:
         release_id = None
 
-    print THREATKB_CLI.get("releases", release_id, {"short": 0})
+    print(THREATKB_CLI.get("releases", release_id, {"short": 0}))
 
 
 def search(params):
@@ -197,27 +220,26 @@ def search(params):
     try:
         filter_, filter_text = params[1:]
     except Exception, e:
-        print help(extra_text="""%s search <filter> <filter_text>
-        
+        print help(extra_text="""%s <filter> <filter_text>
+
         filter: all, tag, state, category
         filter_text: text to filter on""" % (params[0]), params=params)
         sys.exit(1)
 
-
-    print THREATKB_CLI.get("search", params={filter_: filter_text})
+    print(THREATKB_CLI.get("search", params={filter_: filter_text}))
 
 
 def help(params, extra_text="", exit=True):
     return """
-    %s <options> <command> 
-    
+    %s <options> <command>
+
     Options:
       --filter-on-field: Object field to filter on. (EX: You only want the IDs of some search result)
-    
+
     Commands:
       configure: Configure the cli api
       attach: attach a file to an artifact
-      comments: comment on an artifact
+      comment: comment on an artifact
       release: pull release data from a specific release
       search: search the database
 
@@ -236,6 +258,7 @@ def main():
         usage=help(sys.argv)
     )
 
+    # import pdb; pdb.set_trace()
     # Define accepted arguments and metadata.
     parser.add_argument('--filter-on-keys',
                         action='store',
@@ -249,7 +272,7 @@ def main():
     try:
         action = params[0]
     except:
-        print help(sys.argv)
+        print(help(sys.argv))
         sys.exit(1)
 
     if args.filter_keys_only:

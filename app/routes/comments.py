@@ -45,9 +45,16 @@ def create_comments():
     From Data: comment (str), entity_type (int) {"SIGNATURE": 1, "DNS": 2, "IP": 3, "TASK": 4}, entity_id
     Return: comment dictionary"""
 
-    return create_comment(request.json['comment'],
-                          request.json['entity_type'],
-                          request.json['entity_id'],
+    try:
+        data = json.loads(request.json)
+        app.logger.debug("assigned")
+    except:
+        data = request.json
+        app.logger.debug("except")
+
+    return create_comment(data['comment'],
+                          data['entity_type'],
+                          data['entity_id'],
                           current_user.id), 201
 
 
