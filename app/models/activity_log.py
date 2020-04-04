@@ -1,9 +1,9 @@
 from sqlalchemy.orm import class_mapper
 
-from app import db, ENTITY_MAPPING, ACTIVITY_TYPE, slack, ENTITY_MAPPING_URI, app
+from app import db, ENTITY_MAPPING, ACTIVITY_TYPE, ENTITY_MAPPING_URI, app
 from sqlalchemy import bindparam, inspect
 
-from app.models import users
+from app.models import users, cfg_settings, users
 from app.models.cfg_states import Cfg_states
 import re
 from flask import request
@@ -100,15 +100,36 @@ def log_activity(connection,
                  user_id):
     transaction = connection.begin()
 
-    if activity_type in slack["post_when"] and slack["webhook"] and slack["user"] and slack["channel"]:
-        app.logger.debug("Slack is: %s" % (slack))
-        user = db.session.query(users.KBUser).filter(users.KBUser.id == user_id).first()
-        if user.email in slack["exclude_users"]:
-            app.logger.debug("Skipping slack because user %s in exclude list %s" % (user.email, slack["exclude_users"]))
-            return
-        url = "%s#!/%s/%s" % (request.url_root, ENTITY_MAPPING_URI[int(entity_type)], entity_id)
-        message = "%s activity from %s on %s\n\n%s" % (activity_type, user.email, url, activity_text)
-        SlackHelper.send_slack_message(slack["webhook"], slack["user"], slack["channel"], message)
+    webhook = cfg_settings.Cfg_settings.get_setting(key="SLACK_WEBHOOK")
+
+    if webhook:
+        post_when = cfg_settings.Cfg_settings.get_setting(key="SLACK_POST_WHEN")
+        post_when = post_when.split(",") if post_when else []
+        exclude_users = cfg_settings.Cfg_settings.get_setting(key="SLACK_EXCLUDE_USERS")
+        exclude_users = exclude_users.split(",") if exclude_users else []
+        channel = cfg_settings.Cfg_settings.get_setting(key="SLACK_CHANNEL")
+        slack_user = cfg_settings.Cfg_settings.get_setting(key="SLACK_USER")
+        template = cfg_settings.Cfg_settings.get_setting(key="SLACK_TEMPLATE")
+
+        if activity_type in post_when and webhook and slack_user and channel:
+            user = db.session.query(users.KBUser).filter(users.KBUser.id == user_id).first()
+            if user.email in exclude_users:
+                app.logger.debug("Skipping slack because user %s in exclude list %s" % (user.email, exclude_users))
+                return
+            url = "%s#!/%s/%s" % (request.url_root, ENTITY_MAPPING_URI[int(entity_type)], entity_id)
+
+
+            template = template.replace("USER_EMAIL", user.email)
+            template = template.replace("USER_ID", str(user.id))
+            template = template.replace("USER_FIRSTNAME", user.first_name)
+            template = template.replace("USER_LASTNAME", user.last_name)
+            template = template.replace("URL", url)
+            template = template.replace("ACTIVITY_TYPE", activity_type)
+            template = template.replace("ACTIVITY_TEXT", activity_text)
+            template = template.replace("ACTIVITY_DATE", str(activity_date))
+            template = template.replace("ENTITY_TYPE", ENTITY_MAPPING_URI[int(entity_type)])
+            template = template.replace("ENTITY_ID", str(entity_id))
+            SlackHelper.send_slack_message(webhook, slack_user, channel, template)
 
     connection.execute(ActivityLog.__table__.insert().values(
         activity_type=bindparam("activity_type"),
