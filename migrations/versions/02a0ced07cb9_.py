@@ -71,7 +71,7 @@ def upgrade():
                 "public": True,
                 "date_created": date_created,
                 "date_modified": date_modified,
-                "description": "Template message to use when posting to Slack. Special variables available for use in the template are: USER_EMAIL, USER_ID, USER_FIRSTNAME, USER_LASTNAME, URL, ACTIVITY_TYPE, ACTIVITY_TEXT, ACTIVITY_DATE, ENTITY_TYPE, ENTITY_ID"
+                "description": "Template message to use when posting to Slack. Special variables available for use in the template are: USER_EMAIL, USER_ID, USER_FIRSTNAME, USER_LASTNAME, URL, ACTIVITY_TYPE, ACTIVITY_TEXT, ACTIVITY_TEXT_SHORT, ACTIVITY_DATE, ENTITY_TYPE, ENTITY_ID"
             },
         ]
     )
