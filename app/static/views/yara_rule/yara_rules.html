@@ -518,8 +518,8 @@
                                 <ul class="list-group">
                                     <li class="list-group-item yara-files-list-item justify-content-between"
                                         ng-repeat="f in yara_rule.files | orderBy:'-last_revision_date'">
-                                        <a title="{{ file_store_path.value }}/{{ entity_mapping.SIGNATURE }}/{{ f.entity_id }}/{{ f.filename }}"
-                                           href="ThreatKB/files/{{ f.entity_type }}/{{ f.entity_id }}/{{ f.id }}">{{ f.filename }}</a>&nbsp;<span
+                                        <a title="{{ file_store_path.value }}{{ entity_mapping.SIGNATURE }}/{{ f.entity_id }}/{{ f.directory }}/{{ f.filename }}"
+                                           href="ThreatKB/files/{{ f.entity_type }}/{{ f.entity_id }}/{{ f.id }}">{{ entity_mapping.SIGNATURE }}/{{ f.entity_id }}/{{ f.directory }}/{{ f.filename }}</a>&nbsp;<span
                                         ng-if="f.date_modified"
                                         style="font-size: 0.8em;">({{ pretty_date(f.date_modified) }} by {{ f.user.email }})</span>
                                         <div class="pull-right">

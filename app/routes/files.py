@@ -1,5 +1,6 @@
 from app import app, db, admin_only, auto, ENTITY_MAPPING
 from app.models import cfg_settings, files
+from app.utilities import sha1
 from flask import abort, jsonify, request, send_file, json, Response
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
@@ -45,12 +46,14 @@ def upload_file():
     files_added = {}
     files_skipped = {}
     if f:
-        file_store_path_root = cfg_settings.Cfg_settings.get_setting("FILE_STORE_PATH") or "/tmp"
         filename = secure_filename(f.filename)
-        full_path = os.path.join(file_store_path_root,
-                                 request.values['entity_type'] if 'entity_type' in request.values else "",
-                                 request.values['entity_id'] if 'entity_id' in request.values else "",
-                                 filename)
+
+        landing_zone_file = "%s%s%s" % (tempfile.gettempdir(), os.sep, filename)
+        f.save(landing_zone_file)
+        files_directory = sha1(landing_zone_file)
+        full_path = files.Files.get_path_for_file(request.values['entity_type'], request.values['entity_id'], files_directory)
+        file_path = "%s%s" % (full_path, filename)
+
         if not os.path.exists(os.path.dirname(full_path)):
             try:
                 os.makedirs(os.path.dirname(full_path))
@@ -58,14 +61,11 @@ def upload_file():
                 if exc.errno != errno.EEXIST:
                     raise
 
-        if os.path.exists(full_path):
-            try:
-                os.remove(full_path)
-            except OSError as exc:  # Guard against race condition
-                if exc.errno != errno.EEXIST:
-                    raise
+        if os.path.exists(file_path):
+            os.remove(file_path)
 
-        f.save(full_path)
+        shutil.move(landing_zone_file, file_path)
+
         files_added["UPLOADED"] = [filename]
 
         file_entity = files.Files.query.filter_by(
@@ -75,13 +75,14 @@ def upload_file():
         if not file_entity:
             file_entity = files.Files(
                 filename=f.filename,
+                directory=files_directory,
                 content_type=f.content_type,
                 entity_type=(request.values['entity_type'] if 'entity_type' in request.values else None),
                 entity_id=(request.values['entity_id'] if 'entity_id' in request.values else None),
                 user_id=current_user.id,
-                sha1=hashlib.sha1(open(full_path, 'rb').read()).hexdigest(),
-                md5=hashlib.md5(open(full_path, 'rb').read()).hexdigest(),
-                sha256=hashlib.sha256(open(full_path, 'rb').read()).hexdigest()
+                sha1=hashlib.sha1(open(file_path, 'rb').read()).hexdigest(),
+                md5=hashlib.md5(open(file_path, 'rb').read()).hexdigest(),
+                sha256=hashlib.sha256(open(file_path, 'rb').read()).hexdigest()
             )
             db.session.add(file_entity)
         else:
@@ -89,9 +90,9 @@ def upload_file():
                 id=file_entity.id,
                 user_id=current_user.id,
                 date_modified=db.func.current_timestamp(),
-                sha1=hashlib.sha1(open(full_path, 'rb').read()).hexdigest(),
-                md5=hashlib.md5(open(full_path, 'rb').read()).hexdigest(),
-                sha256=hashlib.sha256(open(full_path, 'rb').read()).hexdigest()
+                sha1=hashlib.sha1(open(file_path, 'rb').read()).hexdigest(),
+                md5=hashlib.md5(open(file_path, 'rb').read()).hexdigest(),
+                sha256=hashlib.sha256(open(file_path, 'rb').read()).hexdigest()
             )
             db.session.merge(file_entity)
 
@@ -102,12 +103,17 @@ def upload_file():
         for postprocessor in postprocessors:
             app.logger.debug("POSTPROCESSOR STARTING '%s'" % (postprocessor.key))
             postprocessing_tempdir = cfg_settings.Cfg_settings.get_setting("POSTPROCESSING_FILE_STORE_PATH") or "/tmp"
-            tempdir = "%s/%s" % (postprocessing_tempdir.rstrip(os.sep), uuid.uuid4())
+            tempdir = "%s/%s" % (postprocessing_tempdir.rstrip(os.sep), files_directory)
             files_added[postprocessor.key] = []
             files_skipped[postprocessor.key] = []
             try:
+                shutil.rmtree(tempdir)
+            except Exception, e:
+                pass
+
+            try:
                 os.makedirs(tempdir)
-                shutil.copy(full_path, tempdir)
+                shutil.copy(file_path, tempdir)
             except Exception, e:
                 pass
 
@@ -147,20 +153,28 @@ def upload_file():
                     except:
                         pass
 
-                    full_path_temp = os.path.join(file_store_path_root,
-                                                  request.values[
-                                                      'entity_type'] if 'entity_type' in request.values else "",
-                                                  request.values['entity_id'] if 'entity_id' in request.values else "",
-                                                  name)
+
+                    full_path_temp = os.path.join(full_path, root.replace(tempdir, "")[1:], name)
+                    if not os.path.isabs(full_path_temp):
+                        full_path_temp = "%s%s%s" % (current_path, os.sep, full_path_temp)
+
+                    if not os.path.exists(os.path.dirname(full_path_temp)):
+                        os.makedirs(os.path.dirname(full_path_temp))
+
                     shutil.copy(current_tempfile, full_path_temp)
+
+                    directory_for_file = os.path.dirname(full_path_temp[full_path_temp.find(files_directory):])
+
                     file_entity = files.Files.query.filter_by(
                         entity_type=(request.values['entity_type'] if 'entity_type' in request.values else None),
                         entity_id=(request.values['entity_id'] if 'entity_id' in request.values else None),
+                        directory=directory_for_file,
                         filename=name).first()
                     app.logger.debug("POSTPROCESSOR FILE ENTITY '%s'" % (file_entity))
                     if not file_entity:
                         file_entity = files.Files(
                             filename=name,
+                            directory=directory_for_file,
                             content_type=f.content_type,
                             entity_type=(request.values['entity_type'] if 'entity_type' in request.values else None),
                             entity_id=(request.values['entity_id'] if 'entity_id' in request.values else None),
@@ -175,6 +189,7 @@ def upload_file():
                     else:
                         file_entity = files.Files(
                             id=file_entity.id,
+                            directory=directory_for_file,
                             user_id=current_user.id,
                             date_modified=db.func.current_timestamp(),
                             sha1=hashlib.sha1(open(full_path_temp, 'rb').read()).hexdigest(),
@@ -203,10 +218,11 @@ def get_file_for_entity(entity_type, entity_id, file_id):
     if not file_entity:
         abort(404)
 
-    full_path = os.path.join(cfg_settings.Cfg_settings.get_setting("FILE_STORE_PATH"),
-                             str(ENTITY_MAPPING[entity_type]) if entity_type != "0" else "",
-                             str(entity_id) if entity_id != 0 else "",
-                             secure_filename(file_entity.filename))
+    full_path = file_entity.get_file_path()
+
+    if not os.path.isabs(full_path):
+        full_path = "%s%s%s" % (os.getcwd(), os.sep, full_path)
+
     if not os.path.exists(full_path):
         abort(404)
 
@@ -226,13 +242,13 @@ def delete_file(file_id):
     if not entity:
         abort(404)
 
-    full_path = os.path.join(app.config['FILE_STORE_PATH'],
-                             ENTITY_MAPPING[entity.entity_type] if entity.entity_type else "",
-                             entity.entity_id if entity.entity_id else "",
-                             secure_filename(entity.filename))
+    full_path = entity.get_file_path()
+
     if os.path.exists(full_path):
         os.remove(full_path)
 
     db.session.delete(entity)
     db.session.commit()
     return '', 204
+
+
