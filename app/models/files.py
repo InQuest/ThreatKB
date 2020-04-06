@@ -42,15 +42,15 @@ class Files(db.Model):
     def get_file_path(self):
         file_store_path = Cfg_settings.get_setting("FILE_STORE_PATH")
         return os.path.join(file_store_path,
-                     str(self.entity_type) if self.entity_type is not None else "",
-                     str(self.entity_id) if self.entity_id is not None else "",
-                     str(self.directory) if self.entity_id is not None else "",
-                     str(self.filename))
+                            str(self.entity_type) if self.entity_type is not None else "",
+                            str(self.entity_id) if self.entity_id is not None else "",
+                            str(self.directory) if self.directory is not None else "",
+                            str(self.filename))
 
     def get_relative_file_path(self):
         return os.path.join(str(self.entity_id) if self.entity_id is not None else "",
-                     str(self.directory) if self.entity_id is not None else "",
-                     str(self.filename))
+                            str(self.directory) if self.directory is not None else "",
+                            str(self.filename))
 
     @staticmethod
     def get_path_for_file(entity_type, entity_id, directory=None, filename=None):
