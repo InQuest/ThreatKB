@@ -97,11 +97,11 @@ def get_state_change(target, artifact):
 def log_activity(connection,
                  activity_type,
                  activity_text,
-                 activity_text_short,
                  activity_date,
                  entity_type,
                  entity_id,
-                 user_id):
+                 user_id,
+                 activity_text_short=""):
     transaction = connection.begin()
 
     webhook = cfg_settings.Cfg_settings.get_setting(key="SLACK_WEBHOOK")
