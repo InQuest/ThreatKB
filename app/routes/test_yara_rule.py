@@ -112,6 +112,7 @@ def test_yara_rule_rest(rule_id):
         is_neg_test = True if is_neg_test == "1" else False
         if not is_neg_test:
             for f in yara_rule_entity.files:
+                file_store_path = Cfg_settings.get_setting("FILE_STORE_PATH")
                 if not file_store_path:
                     raise Exception('FILE_STORE_PATH configuration setting not set.')
                 files_to_test.append(f.get_file_path())
