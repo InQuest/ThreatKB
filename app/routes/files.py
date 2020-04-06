@@ -224,7 +224,7 @@ def get_file_for_entity(entity_type, entity_id, file_id):
         full_path = "%s%s%s" % (os.getcwd(), os.sep, full_path)
 
     if not os.path.exists(full_path):
-        abort(404)
+        abort(404, "Path not found: %s" % (full_path))
 
     return send_file(full_path,
                      attachment_filename="{}".format(file_entity.filename),
@@ -240,7 +240,7 @@ def delete_file(file_id):
     Return: None"""
     entity = files.Files.query.get(file_id)
     if not entity:
-        abort(404)
+        abort(404, "File entity not found")
 
     full_path = entity.get_file_path()
 
