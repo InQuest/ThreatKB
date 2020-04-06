@@ -10,6 +10,7 @@ import yara
 import re
 import uuid
 import subprocess
+import tempfile
 
 from sqlalchemy import func, not_
 from sqlalchemy.ext.serializer import loads, dumps
