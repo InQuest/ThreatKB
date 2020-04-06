@@ -13,6 +13,7 @@ import os
 import stat
 import argparse
 import logging
+import urllib3
 
 # python2/3 compatability hacks.
 try:
@@ -34,6 +35,8 @@ API_HOST = None
 THREATKB_CLI = None
 ENTITY_TYPES = {"yara_rule": 1, "c2dns": 2, "c2ip": 3, "task": 4}
 FILTER_KEYS = None
+
+urllib3.disable_warnings()
 
 if os.getenv("THREATKB_DEBUG"):
     logging.basicConfig(level=logging.DEBUG,
@@ -174,6 +177,8 @@ def attach(params):
 
     try:
         artifact, artifact_id, file = params[1:]
+        if not all([i for i in [artifact, artifact_id, file]]):
+            raise Exception
     except Exception, e:
         print help(extra_text="""%s <artifact> <artifact_id> <file>
 
@@ -191,6 +196,8 @@ def comment(params):
 
     try:
         artifact, artifact_id, comment = params[1:]
+        if not all([i for i in [artifact, artifact_id, comment]]):
+            raise Exception
     except Exception, e:
         print help(extra_text="""%s <artifact> <artifact_id> <comment>
 
@@ -208,6 +215,8 @@ def release(params):
 
     try:
         release_id = params[1]
+        if not all([i for i in [release_id]]):
+            raise Exception
     except Exception as e:
         release_id = None
 
@@ -219,6 +228,8 @@ def search(params):
 
     try:
         filter_, filter_text = params[1:]
+        if not all([i for i in [filter_, filter_text]]):
+            raise Exception
     except Exception, e:
         print help(extra_text="""%s <filter> <filter_text>
 
@@ -227,6 +238,22 @@ def search(params):
         sys.exit(1)
 
     print(THREATKB_CLI.get("search", params={filter_: filter_text}))
+
+
+def test(params):
+    global THREATKB_CLI
+
+    try:
+        rule_id = params[1]
+        if not all([i for i in [rule_id]]):
+            raise Exception
+    except Exception, e:
+        print help(extra_text="""%s <rule_id>
+
+        rule_id: artifact id for the rule to test""" % (params[0]), params=params)
+        sys.exit(1)
+
+    print(THREATKB_CLI.create("tests/create/%s" % (rule_id)))
 
 
 def help(params, extra_text="", exit=True):
@@ -242,6 +269,7 @@ def help(params, extra_text="", exit=True):
       comment: comment on an artifact
       release: pull release data from a specific release
       search: search the database
+      test: test a signature against the attached files
 
     %s
     """ % (params[0], extra_text)
@@ -283,6 +311,9 @@ def main():
     elif action == "attach":
         initialize()
         attach(params)
+    elif action == "test":
+        initialize()
+        test(params)
     elif action == "comment":
         initialize()
         comment(params)
