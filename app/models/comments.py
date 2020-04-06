@@ -38,6 +38,7 @@ def comment_made(mapper, connection, target):
     activity_log.log_activity(connection=connection,
                               activity_type=ACTIVITY_TYPE.keys()[ACTIVITY_TYPE.keys().index("COMMENTS")],
                               activity_text=target.comment,
+                              activity_text_short=target.comment,
                               activity_date=target.date_created,
                               entity_type=target.entity_type,
                               entity_id=target.entity_id,
