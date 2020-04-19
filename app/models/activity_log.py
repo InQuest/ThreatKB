@@ -122,6 +122,14 @@ def log_activity(connection,
                 return
             url = "%s#!/%s/%s" % (request.url_root, ENTITY_MAPPING_URI[int(entity_type)], entity_id)
 
+            from app.models import yara_rule, c2dns, c2ip, tasks, releases
+            ENTITY_MAPPING_MODEL = {1: yara_rule.Yara_rule, 2: c2dns.C2dns, 3: c2ip.C2ip, 4: tasks.Tasks,
+                                    5: releases.Release}
+            name_mapping = {yara_rule.Yara_rule: "name", c2ip.C2ip: "ip", c2dns.C2dns: "domain_name",
+                            tasks.Tasks: "title", releases.Release: "name"}
+            model = ENTITY_MAPPING_MODEL[int(entity_type)]
+            entity = db.session.query(model).filter(model.id == entity_id).first()
+            entity_name = getattr(entity, name_mapping[model])
 
             template = template.replace("USER_EMAIL", user.email)
             template = template.replace("USER_ID", str(user.id))
@@ -134,6 +142,7 @@ def log_activity(connection,
             template = template.replace("ACTIVITY_DATE", str(activity_date))
             template = template.replace("ENTITY_TYPE", ENTITY_MAPPING_URI[int(entity_type)])
             template = template.replace("ENTITY_ID", str(entity_id))
+            template = template.replace("ENTITY_NAME", str(entity_name))
             SlackHelper.send_slack_message(webhook, slack_user, channel, template)
 
     connection.execute(ActivityLog.__table__.insert().values(
