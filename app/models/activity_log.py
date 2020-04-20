@@ -129,7 +129,10 @@ def log_activity(connection,
                             tasks.Tasks: "title", releases.Release: "name"}
             model = ENTITY_MAPPING_MODEL[int(entity_type)]
             entity = db.session.query(model).filter(model.id == entity_id).first()
-            entity_name = getattr(entity, name_mapping[model])
+            try:
+                entity_name = getattr(entity, name_mapping[model])
+            except:
+                entity_name = "NA"
 
             template = template.replace("USER_EMAIL", user.email)
             template = template.replace("USER_ID", str(user.id))

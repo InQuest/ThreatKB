@@ -74,7 +74,7 @@ def get_tasks(id):
     return jsonify(return_dict)
 
 
-@app.route('/ThreatKB/tasks', methods=['POST'])
+@app.route('/ThreatKB/tasks', methods=['POST', 'PUT'])
 @auto.doc()
 @login_required
 def create_tasks():

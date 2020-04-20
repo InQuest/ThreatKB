@@ -93,7 +93,7 @@ def get_c2dns(id):
     return jsonify(return_dict)
 
 
-@app.route('/ThreatKB/c2dns', methods=['POST'])
+@app.route('/ThreatKB/c2dns', methods=['POST', 'PUT'])
 @auto.doc()
 @login_required
 def create_c2dns():

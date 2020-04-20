@@ -98,7 +98,7 @@ def get_c2ip(id):
     return jsonify(return_dict)
 
 
-@app.route('/ThreatKB/c2ips', methods=['POST'])
+@app.route('/ThreatKB/c2ips', methods=['POST', 'PUT'])
 @auto.doc()
 @login_required
 def create_c2ip():

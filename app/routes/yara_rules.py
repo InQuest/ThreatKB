@@ -184,7 +184,7 @@ def get_yara_rule_string_from_revision(yara_rule_id, revision):
     return jsonify(yara_rule_string)
 
 
-@app.route('/ThreatKB/yara_rules', methods=['POST'])
+@app.route('/ThreatKB/yara_rules', methods=['PUT', 'POST'])
 @auto.doc()
 @login_required
 def create_yara_rule():
