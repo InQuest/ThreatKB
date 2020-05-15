@@ -289,11 +289,23 @@ class Yara_rule(db.Model):
         return yara_rule_text.encode("utf-8")
 
     @staticmethod
-    def expand_macros(yara_rule_text):
-        all_macros = macros.Macros.get_macros()
+    def expand_macros(yara_rule_text, all_macros=None):
+
+        try:
+            if len(all_macros) == 0:
+                return yara_rule_text
+        except:
+            all_macros = all_macros = macros.Macros.get_macros()
+
         tag_template = cfg_settings.Cfg_settings.get_setting("MACRO_TAG_TEMPLATE")
+
         for m in all_macros:
-            yara_rule_text = yara_rule_text.replace(tag_template % m['tag'], m['value'])
+            if m["tag"] in yara_rule_text:
+                yara_rule_text = yara_rule_text.replace(tag_template % m['tag'], m['value'])
+
+        if any([tag_template % m['tag'] in yara_rule_text for m in all_macros]):
+            return Yara_rule.expand_macros(yara_rule_text, [{"tag": m["tag"], "value": m["value"]} for m in all_macros])
+
         return yara_rule_text
 
     @staticmethod
