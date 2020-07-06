@@ -1,4 +1,9 @@
+import re
+
+from sqlalchemy import and_
+
 from app import app, db, auto, ENTITY_MAPPING
+from app.models.cfg_category_range_mapping import CfgCategoryRangeMapping
 from app.models.yara_rule import Yara_rule_history, Yara_rule
 from app.routes import test_yara_rule
 from app.models import yara_rule, cfg_states, comments
@@ -97,7 +102,6 @@ def get_all_yara_rules():
     include_metadata = bool(distutils.util.strtobool(request.args.get('include_metadata', "true")))
     include_tags = bool(distutils.util.strtobool(request.args.get('include_tags', "true")))
     include_comments = bool(distutils.util.strtobool(request.args.get('include_comments', "true")))
-
 
     if include_yara_string:
         include_yara_string = True
@@ -305,6 +309,7 @@ def activate_yara_rule(id):
     db.session.merge(entity)
     db.session.commit()
     return jsonify(entity.to_dict()), 201
+
 
 @app.route('/ThreatKB/yara_rules/<int:id>', methods=['PUT'])
 @auto.doc()
@@ -535,7 +540,7 @@ def copy_yara_rules():
     Return: yara strings for copy"""
 
     signatures = []
-    if 'copy' in request.json and request.json['copy']\
+    if 'copy' in request.json and request.json['copy'] \
             and 'ids' in request.json['copy'] and request.json['copy']['ids']:
         for sig_id in request.json['copy']['ids']:
             sig = yara_rule.Yara_rule.query.get(sig_id)
@@ -562,3 +567,99 @@ def delete_all_inactive_yara_rules():
     db.session.query(yara_rule.Yara_rule).filter(yara_rule.Yara_rule.active == 0).delete()
     db.session.commit()
     return jsonify(''), 200
+
+
+@app.route('/ThreatKB/yara_rules/<int:yara_rule_id>/revert-to-revision/<int:revision>', methods=['PUT'])
+@auto.doc()
+@login_required
+def revert_yara_rule_to_revision(yara_rule_id, revision):
+    """Revert given yara rule to provided revision number
+    Return: Success Code"""
+
+    current_entity = yara_rule.Yara_rule.query.get(yara_rule_id)
+    revision_entity = Yara_rule_history.query \
+        .filter_by(yara_rule_id=yara_rule_id) \
+        .filter_by(revision=revision) \
+        .first()
+
+    if not current_entity or not revision_entity:
+        abort(404)
+
+    if not current_user.admin and current_entity.owner_user_id != current_user.id:
+        abort(403)
+
+    revision_dict = revision_entity.to_dict()
+    yara_revision_dict = revision_dict["rule_json"]
+
+    temp_sig_id = current_entity.eventid
+    if not current_entity.category == yara_revision_dict['category']:
+        temp_sig_id = CfgCategoryRangeMapping.get_next_category_eventid(yara_revision_dict['category'])
+
+    db.session.add(yara_rule.Yara_rule_history(date_created=datetime.datetime.now(), revision=current_entity.revision,
+                                               rule_json=json.dumps(current_entity.to_revision_dict()),
+                                               user_id=current_user.id,
+                                               yara_rule_id=current_entity.id,
+                                               state=current_entity.state))
+
+    current_entity = yara_rule.Yara_rule(
+        state=yara_revision_dict['state'],
+        name=yara_revision_dict['name'],
+        description=yara_revision_dict['description'],
+        references=yara_revision_dict['references'],
+        category=yara_revision_dict['category'],
+        condition=re.sub('^condition:\\n\\t', '', yara_revision_dict['condition']),
+        strings=re.sub('^strings:\\n\\t', '', yara_revision_dict['strings']),
+        eventid=temp_sig_id,
+        id=yara_rule_id,
+        creation_date=yara_revision_dict['creation_date'],
+        modified_user_id=current_user.id,
+        last_revision_date=datetime.datetime.now(),
+        owner_user_id=yara_revision_dict['owner_user']['id'] if yara_revision_dict['owner_user'] else None,
+        revision=current_entity.revision + 1,
+        imports=yara_revision_dict['imports'],
+        active=yara_revision_dict['active'],
+        mitre_techniques=yara_revision_dict['mitre_techniques'],
+        mitre_tactics=yara_revision_dict['mitre_tactics'],
+        files=yara_revision_dict['files'],
+    )
+
+    mitre_techniques = Cfg_settings.get_setting("MITRE_TECHNIQUES").split(",")
+    matches = [technique for technique in current_entity.mitre_techniques if technique not in mitre_techniques]
+    if matches:
+        raise (Exception(
+            "The following techniques were not found in the configuration: %s. Check 'MITRE_TECHNIQUES' on the settings page" % (
+                matches)))
+
+    mitre_tactics = Cfg_settings.get_setting("MITRE_TACTICS").split(",")
+    matches = [tactic for tactic in current_entity.mitre_tactics if tactic not in mitre_tactics]
+    if matches:
+        raise (Exception(
+            "The following tactics were not found in the configuration: %s. Check 'MITRE_TACTICS' on the settings page" % (
+                matches)))
+
+    db.session.merge(current_entity)
+    db.session.commit()
+
+    dirty = False
+    for name, value_dict in yara_revision_dict['metadata_values'].iteritems():
+        if not name or not value_dict:
+            continue
+
+        m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
+            Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).filter(
+            MetadataMapping.artifact_id == current_entity.id).first()
+        if m:
+            m.value = value_dict["value"]
+            db.session.add(m)
+            dirty = True
+        else:
+            m = db.session.query(Metadata).filter(Metadata.key == name).filter(
+                Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).first()
+            db.session.add(MetadataMapping(value=value_dict["value"], metadata_id=m.id, artifact_id=current_entity.id,
+                                           created_user_id=current_user.id))
+            dirty = True
+
+    if dirty:
+        db.session.commit()
+
+    return jsonify(''), 204

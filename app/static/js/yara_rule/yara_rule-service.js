@@ -91,6 +91,17 @@ angular.module('ThreatKB')
                 }
             );
         }
+        function revertRevision(sig_id, revision) {
+            return $http.put('/ThreatKB/yara_rules/' + sig_id + '/revert-to-revision/' + revision)
+                .then(function (success) {
+                    if (success.status === 200) {
+                        return success.data;
+                    }
+                }, function (error) {
+                    return $q.reject(error.data);
+                }
+            );
+        }
         return {
             resource: $resource('ThreatKB/yara_rules/:id', {}, {
                 'query': {method: 'GET', isArray: true},
@@ -102,6 +113,7 @@ angular.module('ThreatKB')
             updateBatch: updateBatch,
             deleteBatch: deleteBatch,
             getSignatureFromRevision: getSignatureFromRevision,
+            revertRevision: revertRevision,
             activateRule: activateRule,
             delete_all_inactive: delete_all_inactive
         };

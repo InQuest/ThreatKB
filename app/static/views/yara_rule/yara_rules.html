@@ -603,6 +603,14 @@
                                     </option>
                                 </select>
                             </div>
+                            <div style="max-width: min-content">
+                                <label>&nbsp;</label>
+                                <button type="button" class="btn btn-danger"
+                                        ng-disabled="!selectedRevisions.compared"
+                                        confirmed-click="revertRevision(yara_rule.id, selectedRevisions.compared.revision)"
+                                        ng-confirm-click="Are you sure you want to revert to revision?">Revert
+                                </button>
+                            </div>
                         </div>
                         <div class="yara-revisions-view" ng-controller="Yara_revisionController">
                                 <pre ng-if="revision_diff"><code ng-bind-html="revision_diff"></code></pre>
@@ -639,7 +647,7 @@
                     </button>
                 </div>
                 <div class="pull-right" style="padding: 5px 10px 0 5px;" ng-if="yara_rule.id">
-                    <input type="checkbox" class="pull-left" ng-model="do_not_bump_revision">
+                    <input type="checkbox" class="pull-left" ng-model="do_not_bump_revision" ng-change="toggle_bump_release()">
                     &nbsp;Do not bump revision
                 </div>
             </div>
