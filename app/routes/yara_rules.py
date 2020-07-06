@@ -574,7 +574,7 @@ def delete_all_inactive_yara_rules():
 @login_required
 def revert_yara_rule_to_revision(yara_rule_id, revision):
     """Revert given yara rule to provided revision number
-    Return: yara_rule string representation"""
+    Return: Success Code"""
 
     current_entity = yara_rule.Yara_rule.query.get(yara_rule_id)
     revision_entity = Yara_rule_history.query \
@@ -661,7 +661,5 @@ def revert_yara_rule_to_revision(yara_rule_id, revision):
 
     if dirty:
         db.session.commit()
-
-    entity = yara_rule.Yara_rule.query.get(current_entity.id)
 
     return jsonify(''), 204
