@@ -459,6 +459,9 @@ angular.module('ThreatKB')
                         }, function (error) {
                             growl.error(error, {ttl: -1})
                         })
+                    } else if (id_or_rule.reverted) {
+                        growl.info("Successfully reverted '" + $scope.yara_rule.name + "' to revision '" + id_or_rule.revertedToRevision + "'", {ttl: 3000});
+                        getPage();
                     } else {
                         id = id_or_rule.id;
                         $scope.yara_rule = id_or_rule;
@@ -575,7 +578,7 @@ angular.module('ThreatKB')
                 });
 
                 yara_ruleSave.result.then(function (entity) {
-                    if (entity.merge) {
+                    if (entity.merge || entity.reverted) {
                         $scope.save(entity);
                     } else {
                         $scope.yara_rule = entity;
@@ -719,7 +722,7 @@ angular.module('ThreatKB')
             };
 
             $scope.save_artifact = function () {
-
+                $scope.yara_rule.do_not_bump_revision = $scope.do_not_bump_revision;
                 Yara_rule.resource.update({id: $scope.yara_rule.id}, $scope.yara_rule,
                     function (data) {
                         if (!data) {
@@ -821,7 +824,13 @@ angular.module('ThreatKB')
 
             $scope.cfg_states = Cfg_states.query();
             $scope.cfg_category_range_mapping = CfgCategoryRangeMapping.query();
-            $scope.do_not_bump_revision = true;
+            if ($scope.do_not_bump_revision == null) {
+                $scope.do_not_bump_revision = true;
+            }
+
+            $scope.toggle_bump_release = function () {
+                $scope.do_not_bump_revision = this.do_not_bump_revision;
+            };
 
             $scope.just_opened = true;
             $scope.negTestDir = Cfg_settings.get({key: "NEGATIVE_TESTING_FILE_DIRECTORY"});
@@ -900,6 +909,7 @@ angular.module('ThreatKB')
             };
 
             $scope.ok = function () {
+                $scope.yara_rule.do_not_bump_revision = $scope.do_not_bump_revision;
                 // Check if outstanding comment
                 if ($scope.yara_rule.new_comment && $scope.yara_rule.new_comment.trim() && confirm('There is a unsaved comment, do you wish to save it as well?')) {
                     $scope.add_comment($scope.yara_rule.id);
@@ -984,6 +994,18 @@ angular.module('ThreatKB')
 
                 $scope.selected_signature.merge = true;
                 $uibModalInstance.close($scope.selected_signature);
+            };
+
+            $scope.revertRevision = function (id, revision) {
+                Yara_rule.revertRevision(id, revision)
+                    .then(function (response) {
+                        $scope.yara_rule = Yara_rule.resource.get({id: id, include_yara_string: 1});
+                        $scope.yara_rule.reverted = true;
+                        $scope.yara_rule.revertedToRevision = revision;
+                        $uibModalInstance.close($scope.yara_rule);
+                    }, function (error) {
+                        growl.error(error.data, {ttl: -1});
+                    });
             };
 
         }])
@@ -1071,7 +1093,7 @@ angular.module('ThreatKB')
         }])
     .controller('Yara_revisionController', ['$scope', 'Yara_rule',
         function ($scope, Yara_rule) {
-            $scope.revision_diff = null
+            $scope.revision_diff = null;
             $scope.calculateRevisionDiff = function () {
                 if (!$scope.selectedRevisions.compared) {
                     $scope.revision_diff = null;
