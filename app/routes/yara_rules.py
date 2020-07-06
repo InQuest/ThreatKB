@@ -619,8 +619,7 @@ def revert_yara_rule_to_revision(yara_rule_id, revision):
         imports=yara_revision_dict['imports'],
         active=yara_revision_dict['active'],
         mitre_techniques=yara_revision_dict['mitre_techniques'],
-        mitre_tactics=yara_revision_dict['mitre_tactics'],
-        files=yara_revision_dict['files'],
+        mitre_tactics=yara_revision_dict['mitre_tactics']
     )
 
     mitre_techniques = Cfg_settings.get_setting("MITRE_TECHNIQUES").split(",")
