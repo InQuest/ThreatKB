@@ -1002,7 +1002,11 @@ angular.module('ThreatKB')
                         $scope.yara_rule = Yara_rule.resource.get({id: id, include_yara_string: 1});
                         $scope.yara_rule.reverted = true;
                         $scope.yara_rule.revertedToRevision = revision;
-                        $uibModalInstance.close($scope.yara_rule);
+                        if ($location.absUrl().includes("yara_rules")) {
+                            $window.location.href = $location.absUrl() + "/" + id;
+                        } else {
+                            $window.location.href = $location.absUrl() + "/yara_rules/" + id;
+                        }
                     }, function (error) {
                         growl.error(error.data, {ttl: -1});
                     });
