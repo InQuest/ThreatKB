@@ -658,8 +658,8 @@ angular.module('ThreatKB')
             $scope.revisionIsOpen = false;
 
         }])
-    .controller('Yara_ruleSaveController', ['$scope', '$http', '$cookies', '$uibModalInstance', '$location', '$window', 'yara_rule', 'yara_rules', 'metadata', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags', 'Yara_rule', 'Cfg_settings', 'Bookmarks', 'hotkeys',
-        function ($scope, $http, $cookies, $uibModalInstance, $location, $window, yara_rule, yara_rules, metadata, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags, Yara_rule, Cfg_settings, Bookmarks, hotkeys) {
+    .controller('Yara_ruleSaveController', ['$scope', '$http', '$cookies', '$uibModalInstance', '$location', '$window', 'yara_rule', 'yara_rules', 'metadata', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags', 'Yara_rule', 'Cfg_settings', 'Bookmarks', 'hotkeys', '$q',
+        function ($scope, $http, $cookies, $uibModalInstance, $location, $window, yara_rule, yara_rules, metadata, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags, Yara_rule, Cfg_settings, Bookmarks, hotkeys, $q) {
 
             if (yara_rule.$promise !== null && yara_rule.$promise !== undefined) {
                 yara_rule.$promise.then(
@@ -766,14 +766,12 @@ angular.module('ThreatKB')
                 $scope.yara_rule.metadata = metadata;
             }
 
-
             $scope.update_selected_metadata = function (m, selected) {
                 if (!$scope.yara_rule.metadata_values[m.key]) {
                     $scope.yara_rule.metadata_values[m.key] = {};
                 }
                 $scope.yara_rule.metadata_values[m.key].value = selected.choice;
             };
-
 
             $scope.file_store_path = Cfg_settings.get({key: "FILE_STORE_PATH"});
             $scope.entity_mapping = Comments.ENTITY_MAPPING;
@@ -1012,6 +1010,62 @@ angular.module('ThreatKB')
                     });
             };
 
+            $scope.clear_checked_files = function () {
+                $scope.checked_files = [];
+                $scope.checked_file_counter = 0;
+                if ($scope.all_files_checked == null) {
+                    $scope.all_files_checked = false;
+                }
+                $scope.initialized = false;
+            };
+
+            $scope.initialize_checked_files = function(files) {
+                if (!$scope.initialized) {
+                    files.forEach(function (item) {
+                        $scope.checked_files[item.id] = false;
+                    });
+                    $scope.initialized = true;
+                }
+            };
+
+            $scope.clear_checked_files();
+
+            $scope.toggle_checked_files = function () {
+                $scope.all_files_checked = this.all_files_checked;
+                if ($scope.all_files_checked) {
+                    $scope.check_all_files();
+                } else {
+                    $scope.uncheck_all_files();
+                }
+            };
+
+            $scope.update_checked_files = function (file_id) {
+                if ($scope.checked_files[file_id]) {
+                    $scope.checked_file_counter += 1;
+                } else {
+                    $scope.checked_file_counter -= 1;
+                }
+            };
+
+            $scope.uncheck_all_files = function () {
+                $scope.checked_files.forEach(function(item, index, arr) {
+                    arr[index] = false;
+                });
+                $scope.checked_file_counter = 0;
+            };
+
+            $scope.check_all_files = function () {
+                let i = 0;
+                $scope.checked_files.forEach(function(item, index, arr) {
+                    arr[index] = true;
+                    i++;
+                });
+                $scope.checked_file_counter = i;
+            };
+
+            $scope.delete_selected_files = function() {
+                console.log($scope.checked_files);
+            };
         }])
     .controller('Yara_ruleViewController', ['$scope', '$uibModalInstance', 'yara_rule', '$location', '$window', '$cookies',
         function ($scope, $uibModalInstance, yara_rule, $location, $window, $cookies) {
