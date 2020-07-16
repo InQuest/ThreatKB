@@ -13,6 +13,7 @@ import delegator
 import hashlib
 import re
 
+
 @app.route('/ThreatKB/files', methods=['GET'])
 @auto.doc()
 @login_required
@@ -51,7 +52,8 @@ def upload_file():
         landing_zone_file = "%s%s%s" % (tempfile.gettempdir(), os.sep, filename)
         f.save(landing_zone_file)
         files_directory = sha1(landing_zone_file)
-        full_path = files.Files.get_path_for_file(request.values['entity_type'], request.values['entity_id'], files_directory)
+        full_path = files.Files.get_path_for_file(request.values['entity_type'], request.values['entity_id'],
+                                                  files_directory)
         file_path = "%s%s" % (full_path, filename)
 
         if not os.path.exists(os.path.dirname(full_path)):
@@ -147,12 +149,11 @@ def upload_file():
                         if re.search(postprocessing_exclude_files_regex, name, re.IGNORECASE):
                             app.logger.debug(
                                 "Filename '%s' matched against postprocessing exclude regex of '%s'. Skipping." % (
-                                filename, postprocessing_exclude_files_regex))
+                                    filename, postprocessing_exclude_files_regex))
                             files_skipped[postprocessor.key].append(name)
                             continue
                     except:
                         pass
-
 
                     full_path_temp = os.path.join(full_path, root.replace(tempdir, "")[1:], name)
                     if not os.path.isabs(full_path_temp):
@@ -252,3 +253,30 @@ def delete_file(file_id):
     return '', 204
 
 
+@app.route('/ThreatKB/files/batch/delete', methods=['PUT'])
+@auto.doc()
+@login_required
+def batch_delete_files():
+    """Batch delete files
+    From Data: batch {
+                 ids (array)
+               }
+    Return: Success Code"""
+
+    if 'batch' in request.json and request.json['batch'] and \
+            'ids' in request.json['batch'] and request.json['batch']['ids']:
+        paths_of_files_to_delete = []
+        for b in request.json['batch']['ids']:
+            entity = files.Files.query.get(b)
+            if not entity:
+                abort(404)
+            paths_of_files_to_delete.append(entity.get_file_path())
+
+        for file_path in paths_of_files_to_delete:
+            if os.path.exists(file_path):
+                os.remove(file_path)
+        db.session.execute(files.Files.__table__.delete()
+                           .where(files.Files.id.in_(request.json['batch']['ids'])))
+        db.session.commit()
+
+    return jsonify(''), 200

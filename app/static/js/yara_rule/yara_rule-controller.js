@@ -893,6 +893,7 @@ angular.module('ThreatKB')
                                     entity_type: Files.ENTITY_MAPPING.SIGNATURE,
                                     entity_id: id
                                 });
+                                $scope.clear_checked_files();
                                 growl.info('Success ' + JSON.stringify(resp.data, null, 2));
                             }, function (resp) {
                                 console.log('Error status: ' + resp.status);
@@ -1013,7 +1014,7 @@ angular.module('ThreatKB')
             $scope.clear_checked_files = function () {
                 $scope.checked_files = [];
                 $scope.checked_file_counter = 0;
-                if ($scope.all_files_checked == null) {
+                if ($scope.all_files_checked == null || $scope.all_files_checked) {
                     $scope.all_files_checked = false;
                 }
                 $scope.initialized = false;
@@ -1065,6 +1066,24 @@ angular.module('ThreatKB')
 
             $scope.delete_selected_files = function() {
                 console.log($scope.checked_files);
+                let filesToDelete = {
+                    ids: []
+                };
+                $scope.checked_files.forEach(function (item, index, arr) {
+                    if (item) {
+                        filesToDelete.ids.push(index);
+                    }
+                });
+                Files.deleteBatch(filesToDelete).then(function (response) {
+                    $scope.yara_rule.files = $scope.Files.resource.query({
+                        entity_type: Files.ENTITY_MAPPING.SIGNATURE,
+                        entity_id: $scope.yara_rule.id
+                    });
+                    $scope.clear_checked_files();
+                    growl.info('Successfully deleted files', {ttl: 3000});
+                }, function (error) {
+                    growl.error(error.data, {ttl: -1});
+                });
             };
         }])
     .controller('Yara_ruleViewController', ['$scope', '$uibModalInstance', 'yara_rule', '$location', '$window', '$cookies',
