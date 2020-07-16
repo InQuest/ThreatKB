@@ -515,13 +515,29 @@
                         <uib-accordion>
                             <div uib-accordion-group class="panel-default"
                                  heading="See files">
+                                <div>
+                                    <input id="selectAllFiles" type="checkbox" style="margin: 0 10px 0 17px;"
+                                                       ng-model="all_files_checked"
+                                                       ng-change="toggle_checked_files()"/><label for="selectAllFiles">Select All</label>
+                                    <button type="button" class="btn btn-secondary pull-right" ng-disabled="!checked_file_counter || checked_file_counter<1"
+                                            confirmed-click="delete_selected_files()"
+                                            ng-confirm-click="Are you sure you want to delete selected files?"
+                                            style="padding: 0;">
+                                        Delete ({{ checked_file_counter }})
+                                    </button>
+                                    {{ initialize_checked_files(yara_rule.files) }}
+                                </div>
                                 <ul class="list-group">
                                     <li class="list-group-item yara-files-list-item justify-content-between"
                                         ng-repeat="f in yara_rule.files | orderBy:'-last_revision_date'">
-                                        <a title="{{ file_store_path.value }}/{{ entity_mapping.SIGNATURE }}/{{ f.entity_id }}/{{ f.directory }}/{{ f.filename }}"
-                                           href="ThreatKB/files/{{ f.entity_type }}/{{ f.entity_id }}/{{ f.id }}">{{ entity_mapping.SIGNATURE }}/{{ f.entity_id }}/{{ f.directory }}/{{ f.filename }}</a>&nbsp;<span
-                                        ng-if="f.date_modified"
-                                        style="font-size: 0.8em;">({{ pretty_date(f.date_modified) }} by {{ f.user.email }})</span>
+                                        <div style="white-space: normal;">
+                                            <input class="pull-left" style="margin-right: 10px;" type="checkbox"
+                                                   ng-model="checked_files[f.id]"
+                                                   ng-change="update_checked_files(f.id)"/>
+                                            <a title="{{ file_store_path.value }}/{{ entity_mapping.SIGNATURE }}/{{ f.entity_id }}/{{ f.directory }}/{{ f.filename }}"
+                                               href="ThreatKB/files/{{ f.entity_type }}/{{ f.entity_id }}/{{ f.id }}">{{ entity_mapping.SIGNATURE }}/{{ f.entity_id }}/{{ f.directory }}/{{ f.filename }}</a>&nbsp;
+                                        </div>
+                                        <span ng-if="f.date_modified" style="font-size: 0.8em;">({{ pretty_date(f.date_modified) }} by {{ f.user.email }})</span>
                                         <div class="pull-right">
                                             <div><a title="Search VirusTotal"
                                                     href="https://www.virustotal.com/#/file/{{ f.sha256 }}/detection"
