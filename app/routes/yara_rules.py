@@ -9,7 +9,7 @@ from app.routes import test_yara_rule
 from app.models import yara_rule, cfg_states, comments
 from flask import abort, jsonify, request, Response, json
 from flask_login import current_user, login_required
-import distutils
+from distutils import util
 
 from app.models.metadata import Metadata, MetadataMapping
 from app.routes.batch import batch_update, batch_delete
@@ -97,11 +97,11 @@ def get_all_yara_rules():
         include_inactive = False
         include_active = True
 
-    include_yara_string = bool(distutils.util.strtobool(request.args.get("include_yara_string", "False")))
-    short = bool(distutils.util.strtobool(request.args.get("short", "false")))
-    include_metadata = bool(distutils.util.strtobool(request.args.get('include_metadata', "true")))
-    include_tags = bool(distutils.util.strtobool(request.args.get('include_tags', "true")))
-    include_comments = bool(distutils.util.strtobool(request.args.get('include_comments', "true")))
+    include_yara_string = bool(util.strtobool(request.args.get("include_yara_string", "False")))
+    short = bool(util.strtobool(request.args.get("short", "false")))
+    include_metadata = bool(util.strtobool(request.args.get('include_metadata', "true")))
+    include_tags = bool(util.strtobool(request.args.get('include_tags', "true")))
+    include_comments = bool(util.strtobool(request.args.get('include_comments', "true")))
 
     if include_yara_string:
         include_yara_string = True
@@ -144,7 +144,7 @@ def get_yara_rule(id):
     """Return yara_rule artifact associated with the given id
     Return: yara_rule artifact dictionary"""
     include_yara_string = request.args.get("include_yara_string", False)
-    short = distutils.util.strtobool(request.args.get("short", "false"))
+    short = util.strtobool(request.args.get("short", "false"))
 
     if include_yara_string:
         include_yara_string = True
@@ -209,12 +209,12 @@ def create_yara_rule():
         rule_state = request.json.get("state", None)
 
     unique_rule_name_enforcement = Cfg_settings.get_setting("ENFORCE_UNIQUE_YARA_RULE_NAMES")
-    if unique_rule_name_enforcement and distutils.util.strtobool(unique_rule_name_enforcement):
+    if unique_rule_name_enforcement and util.strtobool(unique_rule_name_enforcement):
         if db.session.query(yara_rule.Yara_rule).filter(yara_rule.Yara_rule.name == request.json['name']).first():
             raise Exception("You cannot save two rules with the same name.")
 
     compile_on_save = Cfg_settings.get_setting("COMPILE_YARA_RULE_ON_SAVE")
-    if compile_on_save and distutils.util.strtobool(compile_on_save) and (
+    if compile_on_save and util.strtobool(compile_on_save) and (
             rule_state == release_state.state or rule_state == draft_state.state):
         test_result, return_code, stdout, stderr = test_yara_rule.does_rule_compile(request.json)
         if not test_result:
@@ -337,14 +337,14 @@ def update_yara_rule(id):
         rule_state = request.json.get("state", None)
 
     unique_rule_name_enforcement = Cfg_settings.get_setting("ENFORCE_UNIQUE_YARA_RULE_NAMES")
-    if unique_rule_name_enforcement and distutils.util.strtobool(unique_rule_name_enforcement):
+    if unique_rule_name_enforcement and util.strtobool(unique_rule_name_enforcement):
         if any([True for rule in
                 db.session.query(yara_rule.Yara_rule).filter(yara_rule.Yara_rule.name == request.json['name']).all() if
                 not rule.id == id]):
             raise Exception("You cannot save two rules with the same name.")
 
     compile_on_save = Cfg_settings.get_setting("COMPILE_YARA_RULE_ON_SAVE")
-    if compile_on_save and distutils.util.strtobool(compile_on_save) and (
+    if compile_on_save and util.strtobool(compile_on_save) and (
             rule_state == release_state.state or rule_state == draft_state.state):
         test_result, return_code, stdout, stderr = test_yara_rule.does_rule_compile(request.json)
         if not test_result:

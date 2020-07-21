@@ -1,4 +1,4 @@
-import distutils
+from distutils import util
 
 from app import app, db, auto, ENTITY_MAPPING
 from app.models import tasks, cfg_settings
@@ -30,9 +30,9 @@ def get_all_tasks():
     sort_by = request.args.get('sort_by', False)
     sort_direction = request.args.get('sort_dir', 'ASC')
     exclude_totals = request.args.get('exclude_totals', False)
-    include_metadata = bool(distutils.util.strtobool(request.args.get('include_metadata', "false")))
-    include_tags = bool(distutils.util.strtobool(request.args.get('include_tags', "true")))
-    include_comments = bool(distutils.util.strtobool(request.args.get('include_comments', "true")))
+    include_metadata = bool(util.strtobool(request.args.get('include_metadata', "false")))
+    include_tags = bool(util.strtobool(request.args.get('include_tags', "true")))
+    include_comments = bool(util.strtobool(request.args.get('include_comments', "true")))
 
     response_dict = filter_entities(entity=tasks.Tasks,
                                     artifact_type=ENTITY_MAPPING["TASK"],
@@ -62,7 +62,7 @@ def get_tasks(id):
         abort(404)
 
     show_for_non_admin = cfg_settings.Cfg_settings.get_setting("ENABLE_NON_ADMIN_TASK_VISIBILITY")
-    show_for_non_admin = bool(distutils.util.strtobool(show_for_non_admin)) if show_for_non_admin else False
+    show_for_non_admin = bool(util.strtobool(show_for_non_admin)) if show_for_non_admin else False
 
     if not show_for_non_admin and \
             not (current_user.admin or entity.owner_user_id == current_user.id or entity.owner_user_id is None):

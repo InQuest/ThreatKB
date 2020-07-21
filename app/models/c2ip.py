@@ -1,4 +1,4 @@
-import distutils
+from distutils import util
 import re
 
 from ipaddr import IPAddress, IPNetwork
@@ -222,7 +222,7 @@ def run_against_whitelist(mapper, connect, target):
     whitelist_enabled = cfg_settings.Cfg_settings.get_setting("ENABLE_IP_WHITELIST_CHECK_ON_SAVE")
     whitelist_states = cfg_settings.Cfg_settings.get_setting("WHITELIST_STATES")
 
-    if whitelist_enabled and distutils.util.strtobool(whitelist_enabled) and whitelist_states:
+    if whitelist_enabled and util.strtobool(whitelist_enabled) and whitelist_states:
         states = []
         for s in whitelist_states.split(","):
             if hasattr(cfg_states.Cfg_states, s):

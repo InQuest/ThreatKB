@@ -1,9 +1,11 @@
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 
 # Update OS Packages, Install OS Dependencies (Do this in one line to ensure Update always happens)
 RUN apt-get update && \
-    apt-get install -y git libsqlite3-dev python2.7 python-pip npm libffi-dev libssl-dev mysql-client \
-    libmysqlclient-dev python-dev libpython-dev git yara=3.4.0+dfsg-2build1 apt-transport-https ca-certificates curl \
+    apt-get install -y curl && \
+    curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
+    apt-get install -y git libsqlite3-dev python2.7 python-pip nodejs libffi-dev libssl-dev mysql-client \
+    libmysqlclient-dev python2.7-dev libpython2.7-dev file yara apt-transport-https ca-certificates curl \
     software-properties-common libpcre3 libpcre3-dev
 
 # Setup UWSGI Installation
@@ -15,10 +17,10 @@ WORKDIR /opt/threatkb
 COPY package.json .bowerrc bower.json Gruntfile.js requirements.txt ./
 
 # Install Python Dependencies
-RUN pip install --upgrade pip & pip install virtualenv && pip install -r requirements.txt
+RUN python -m pip install --upgrade pip & python -m pip install virtualenv && python -m pip install -r requirements.txt
 
 # Install Node Dependencies
-RUN npm install -g bower && ln -s /usr/bin/nodejs /usr/bin/node && bower install --allow-root
+RUN npm install -g bower && bower install --allow-root
 
 # Add Package Files
 COPY . /opt/threatkb
