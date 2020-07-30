@@ -17,7 +17,7 @@ WORKDIR /opt/threatkb
 COPY package.json .bowerrc bower.json Gruntfile.js requirements.txt ./
 
 # Install Python Dependencies
-RUN python -m pip install --upgrade pip & python -m pip install virtualenv && python -m pip install -r requirements.txt
+RUN python -m pip install --upgrade pip && python -m pip install -r requirements.txt
 
 # Install Node Dependencies
 RUN npm install -g bower && bower install --allow-root
