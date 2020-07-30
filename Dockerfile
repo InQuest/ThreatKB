@@ -5,7 +5,7 @@ RUN apt-get update && \
     apt-get install -y curl && \
     curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
     apt-get install -y git libsqlite3-dev python2.7 python-pip nodejs libffi-dev libssl-dev mysql-client \
-    libmysqlclient-dev python2.7-dev libpython2.7-dev file yara apt-transport-https ca-certificates curl \
+    libmysqlclient-dev python2.7-dev libpython2.7-dev file yara apt-transport-https ca-certificatesg \
     software-properties-common libpcre3 libpcre3-dev
 
 # Setup UWSGI Installation
