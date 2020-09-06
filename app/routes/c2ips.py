@@ -113,7 +113,8 @@ def create_c2ip():
         country=request.json['country'],
         description=request.json.get("description", None),
         references=request.json.get("references", None),
-        state=verify_state(request.json['state']['state']),
+        state=verify_state(request.json['state']['state'])
+        if request.json['state'] and 'state' in request.json['state'] else verify_state(request.json['state']),
         expiration_timestamp=parser.parse(request.json['expiration_timestamp'])
         if request.json.get("expiration_timestamp", None) else None,
         created_user_id=current_user.id,
@@ -226,6 +227,9 @@ def delete_c2ip(id):
     """Delete c2ip artifact associated with id
     Return: None"""
     entity = c2ip.C2ip.query.get(id)
+
+    if not entity:
+        return jsonify(''), 404
 
     if entity.active:
         entity.active = False

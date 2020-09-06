@@ -84,7 +84,7 @@ def create_tasks():
     entity = tasks.Tasks(
         title=request.json['title'],
         description=request.json['description'],
-        final_artifact=request.json['final_artifact'],
+        final_artifact=request.json['final_artifact'] if "final_artifact" in request.json else None,
         state=request.json['state']['state'] if 'state' in request.json['state'] else None,
         created_user_id=current_user.id,
         modified_user_id=current_user.id,
@@ -109,7 +109,7 @@ def update_tasks(id):
 
     entity.title = request.json['title']
     entity.description = request.json['description']
-    entity.final_artifact = request.json['final_artifact']
+    final_artifact = request.json['final_artifact'] if "final_artifact" in request.json else None,
     entity.state = request.json['state']['state'] if request.json['state'] and 'state' in request.json['state'] else \
         request.json['state']
     entity.created_user_id = current_user.id

@@ -102,7 +102,7 @@ def create_c2dns():
     Return: c2dns artifact dictionary"""
     entity = c2dns.C2dns(
         domain_name=request.json['domain_name'],
-        match_type=request.json['match_type'],
+        match_type=request.json.get('match_type', None),
         description=request.json.get("description", None),
         references=request.json.get("references", None),
         expiration_timestamp=parser.parse(request.json['expiration_timestamp'])
@@ -165,7 +165,7 @@ def update_c2dns(id):
         state=verify_state(request.json['state']['state']) if request.json['state'] and 'state' in request.json['state']
         else verify_state(request.json['state']),
         domain_name=request.json['domain_name'],
-        match_type=request.json['match_type'],
+        match_type=request.json.get('match_type', None),
         description=request.json.get("description", None),
         references=request.json.get("references", None),
         expiration_timestamp=parser.parse(request.json['expiration_timestamp']) if request.json.get(

@@ -10,6 +10,7 @@ from app.models import yara_rule, cfg_states, comments
 from flask import abort, jsonify, request, Response, json
 from flask_login import current_user, login_required
 import distutils
+from app.models.cfg_states import verify_state
 
 from app.models.metadata import Metadata, MetadataMapping
 from app.routes.batch import batch_update, batch_delete
@@ -227,7 +228,8 @@ def create_yara_rule():
         new_sig_id = request.json['category']['current'] + 1
 
     entity = yara_rule.Yara_rule(
-        state=request.json['state']['state'] if 'state' in request.json['state'] else None,
+        state=verify_state(request.json['state']['state'])
+        if request.json['state'] and 'state' in request.json['state'] else verify_state(request.json['state']),
         name=request.json['name'],
         description=request.json.get("description", None),
         references=request.json.get("references", None),
@@ -380,8 +382,8 @@ def update_yara_rule(id):
             abort(400)
 
     entity = yara_rule.Yara_rule(
-        state=request.json['state']['state'] if request.json['state'] and 'state' in request.json['state'] else
-        request.json['state'],
+        state=verify_state(request.json['state']['state'])
+        if request.json['state'] and 'state' in request.json['state'] else verify_state(request.json['state']),
         name=request.json['name'],
         description=request.json.get("description", None),
         references=request.json.get("references", None),
