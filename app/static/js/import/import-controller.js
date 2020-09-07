@@ -117,7 +117,11 @@ angular.module('ThreatKB').controller('ImportController',
                         disableCountDown: true
                     });
                     $scope.clear();
-                });
+                    },
+                    function (error) {
+                        blockUI.stop();
+                        growl.error(error, {ttl: -1});
+                    });
             };
 
             $scope.import_artifacts = function () {
@@ -167,7 +171,8 @@ angular.module('ThreatKB').controller('ImportController',
                             }
                         }
                     }, function (error) {
-                    growl.error(error.data, {ttl: -1});
+                    blockUI.stop();
+                    growl.error(error, {ttl: -1});
                     }
                 );
             };
