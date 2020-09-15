@@ -76,7 +76,7 @@ def get_all_c2ips():
     return Response(response_dict, mimetype="application/json")
 
 
-@app.route('/ThreatKB/c2ips/<int:id>', methods=['GET'])
+@app.route('/ThreatKB/c2ips/<id>', methods=['GET'])
 @auto.doc()
 @login_required
 def get_c2ip(id):
@@ -86,7 +86,12 @@ def get_c2ip(id):
     None
 
     Return: c2ip artifact dictionary"""
-    entity = c2ip.C2ip.query.get(id)
+    try:
+        id = int(id)
+        entity = c2ip.C2ip.query.get(id)
+    except:
+        entity = c2ip.C2ip.query.filter(c2ip.C2ip.ip == id).first()
+
     if not entity:
         abort(404)
     if not current_user.admin and entity.owner_user_id != current_user.id:

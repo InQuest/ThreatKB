@@ -76,12 +76,17 @@ def get_all_c2dns():
     return Response(response_dict, mimetype="application/json")
 
 
-@app.route('/ThreatKB/c2dns/<int:id>', methods=['GET'])
+@app.route('/ThreatKB/c2dns/<id>', methods=['GET'])
 @auto.doc()
 def get_c2dns(id):
     """Return c2dns artifact associated with the given id
     Return: c2dns artifact dictionary"""
-    entity = c2dns.C2dns.query.get(id)
+    try:
+        id = int(id)
+        entity = c2dns.C2dns.query.get(id)
+    except:
+        entity = c2dns.C2dns.query.filter(c2dns.C2dns.domain_name == id).first()
+
     if not entity:
         abort(404)
     if not current_user.admin and entity.owner_user_id != current_user.id:

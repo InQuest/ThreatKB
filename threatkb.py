@@ -117,7 +117,7 @@ class ThreatKBCommand:
         yara_rule   Interact with the yara rules api
         task        Interact with the task api
         search      Global search
-        import_api      Use the import api
+        import_api  Use the import api
         release     Pull release data from specific release
         configure   Configure the cli for api interaction
     """
@@ -140,7 +140,7 @@ class ThreatKBCommand:
         Interact with the c2ip api
 
         Usage:
-            c2ip (get|g) (ID | --all)
+            c2ip (get|g) (ID | --all| --ip=IP)
             c2ip (delete|d) ID
             c2ip (update|u) ID (--file=FILE | [-])
             c2ip (create|c) (--file=FILE | [-])
@@ -167,7 +167,7 @@ class ThreatKBCommand:
         print
         if options["get"] or options["g"]:
             action = "get"
-            params["id"] = options["ID"] if "ID" in options else None
+            params["id"] = options["ID"] if "ID" in options else options["--ip"] if "--ip" in options else None
 
         elif options["delete"] or options["d"]:
             action = "delete"
@@ -202,7 +202,7 @@ class ThreatKBCommand:
         Interact with the c2dns api
 
         Usage:
-            c2dns (get|g) (ID | --ids=<ids>| --all)
+            c2dns (get|g) (ID | --all| --name=NAME)
             c2dns (delete|d) ID
             c2dns (update|u) ID (--file=FILE | [-])
             c2dns (create|c) (--file=FILE | [-])
@@ -228,7 +228,7 @@ class ThreatKBCommand:
 
         if options["get"] or options["g"]:
             action = "get"
-            params["id"] = options["ID"] if "ID" in options else None
+            params["id"] = options["ID"] if "ID" in options else options["--name"] if "--name" in options else None
 
         elif options["delete"] or options["d"]:
             action = "delete"
@@ -572,7 +572,7 @@ class ThreatKBTransport:
     def get(self, endpoint, id_=None, params={}):
         """If index is None, list all; else get one"""
         r = self._request('GET', endpoint + ('/' + str(id_) if id_ else ''), uri_params=params)
-        return self.filter_output(r.content)
+        return r.content
 
     def update(self, endpoint, id_, json_data):
         r = self._request('PUT', '/'.join([endpoint, id_]), body=json_data)
