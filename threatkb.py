@@ -402,7 +402,7 @@ class ThreatKBCommand:
             search SEARCH_TEXT [--search-against=<against>] [--artifact-types=<artifact_types>]
 
         Options:
-            -s, --search-against AGAINST    Search against: all, tag, state, category
+            -s, --search-against AGAINST    Search against: all, tag, state, category, description, references
             -t, --artifact-types ARTIFACT_TYPES    Comma-separated types to filter against: c2ips, c2dns, yara_rules, tasks
         """
         params = {}
