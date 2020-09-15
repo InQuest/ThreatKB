@@ -51,15 +51,13 @@ urllib3.disable_warnings()
 
 ############################# configure logger  ################################
 
-if os.getenv("THREATKB_DEBUG"):
-    logging.basicConfig(level=logging.DEBUG,
-                        format='%(asctime)s - %(processName)s - %(name)s - %(lineno)s - %(levelname)s - %(message)s')
+level = logging.DEBUG if os.getenv("THREATKB_DEBUG") else logging.INFO
+logging.basicConfig(level=level, format='%(asctime)s - %(processName)s - %(name)s - %(lineno)s - %(levelname)s - %(message)s')
 
 LOG = logging.getLogger()
 
 if os.path.exists("./logger.ini"):
     fileConfig("./logger.ini")
-
 
 ################################################################################
 
