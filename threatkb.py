@@ -570,24 +570,24 @@ class ThreatKBTransport:
     def get(self, endpoint, id_=None, params={}):
         """If index is None, list all; else get one"""
         r = self._request('GET', endpoint + ('/' + str(id_) if id_ else ''), uri_params=params)
-        return r.content
+        return [r.content, r]
 
     def update(self, endpoint, id_, json_data):
         r = self._request('PUT', '/'.join([endpoint, id_]), body=json_data)
-        return r.content
+        return [r.content, r]
 
     def delete(self, endpoint, id_):
         """True if '200 OK' else False"""
-        return "SUCCESS" if self._request('DELETE', '/'.join([endpoint, id_])).status_code == 204 else "FAILED"
+        r = self._request('DELETE', '/'.join([endpoint, id_]))
+        return ["SUCCESS" if r.status_code == 204 else "FAILED", r]
 
     def create(self, endpoint, json_data={}, files={}):
         if files:
             r = self._request('POST', endpoint, files=files, uri_params=json_data)
         else:
             r = self._request('POST', endpoint, body=json_data)
-        if r.status_code == 412:
-            return None
-        return r.content
+
+        return [r.content, r]
 
 
 ################################################################################
@@ -596,9 +596,20 @@ class ThreatKB:
     CREDENTIALS_FILE = os.path.expanduser('~/.threatkb/credentials')
 
     def __init__(self, **kwargs):
+        """
+        optional arguments to overload credentials include: token, secret_key, host
+        """
+
         self.credentials = ThreatKB.load_credentials()
+
+        # manual overrides.
+        for k in ["token", "secret_key", "host"]:
+            if k in kwargs:
+                self.credentials[k] = kwargs[k]
+
         if not self.credentials:
             raise Exception("You must configure threatkb cli first.")
+
         if self.credentials["host"].startswith(("http://")):
             kwargs.update({"use_https": False})
         kwargs.update(self.credentials)
@@ -609,7 +620,7 @@ class ThreatKB:
         config = ConfigParser.ConfigParser()
         try:
             config.read(cls.CREDENTIALS_FILE)
-            API_TOKEN = config.get("default", "token") or config.get("default", "secret_key")
+            API_TOKEN = config.get("default", "token") or config.get("default", "access_key")
             API_SECRET_KEY = config.get("default", "secret_key")
             API_HOST = config.get("default", "host") or config.get("default", "api_host")
             if not API_HOST.endswith("/"):
@@ -619,7 +630,7 @@ class ThreatKB:
         except:
             pass
 
-        return None
+        return {}
 
     @classmethod
     def configure(cls):
@@ -762,11 +773,12 @@ if __name__ == "__main__":
     try:
         std_in = "".join(sys.stdin.readlines()) if not sys.stdin.isatty() else None
         result = main(std_in)
-        if "Trace" in result:
-            LOG.error("Server side error")
-            LOG.error(result.replace("<BR>", "\n").replace("\\n", "\n").replace("&nbsp;", " "))
+        if not str(result[1].status_code).startswith("2"):
+            LOG.error("Server side error of status code: %s" % (result[1].status_code))
+            if "Trace" in result[0]:
+                LOG.error(result[0].replace("<BR>", "\n").replace("\\n", "\n").replace("&nbsp;", " "))
         else:
-            print result
+            print result[0]
     except Exception, e:
         LOG.error("Exception when calling main")
         LOG.exception(e)

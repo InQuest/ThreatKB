@@ -41,7 +41,7 @@ def handle_exception(exception):
 
     stacktrace += str(exception.message)
 
-    return stacktrace, 500
+    return stacktrace, exception.code
 
 
 @app.route('/ThreatKB/error', methods=["GET"])
