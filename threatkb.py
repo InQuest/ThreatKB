@@ -596,9 +596,20 @@ class ThreatKB:
     CREDENTIALS_FILE = os.path.expanduser('~/.threatkb/credentials')
 
     def __init__(self, **kwargs):
+        """
+        optional arguments to overload credentials include: token, secret_key, host
+        """
+
         self.credentials = ThreatKB.load_credentials()
+
+        # manual overrides.
+        for k in ["token", "secret_key", "host"]:
+            if k in kwargs:
+                self.credentials[k] = kwargs[k]
+
         if not self.credentials:
             raise Exception("You must configure threatkb cli first.")
+
         if self.credentials["host"].startswith(("http://")):
             kwargs.update({"use_https": False})
         kwargs.update(self.credentials)
@@ -619,7 +630,7 @@ class ThreatKB:
         except:
             pass
 
-        return None
+        return {}
 
     @classmethod
     def configure(cls):
