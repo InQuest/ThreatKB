@@ -773,12 +773,15 @@ if __name__ == "__main__":
     try:
         std_in = "".join(sys.stdin.readlines()) if not sys.stdin.isatty() else None
         result = main(std_in)
-        if not str(result[1].status_code).startswith("2"):
+        if type(result) == list and len(result) > 1 and hasattr(result[1], "status_code") and not str(
+            result[1].status_code).startswith("2"):
             LOG.error("Server side error of status code: %s" % (result[1].status_code))
             if "Trace" in result[0]:
                 LOG.error(result[0].replace("<BR>", "\n").replace("\\n", "\n").replace("&nbsp;", " "))
+        elif type(result) == list:
+            sys.stdout.write(result[0] + "\n")
         else:
-            print result[0]
+            sys.stdout.write(result + "\n")
     except Exception, e:
         LOG.error("Exception when calling main")
         LOG.exception(e)
