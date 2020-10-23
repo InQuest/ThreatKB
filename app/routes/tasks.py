@@ -59,7 +59,7 @@ def get_tasks(id):
     Return: task dictionary"""
     entity = tasks.Tasks.query.get(id)
     if not entity:
-        abort(404)
+        abort(404, description="You have requested a resource that is not in the database")
 
     show_for_non_admin = cfg_settings.Cfg_settings.get_setting("ENABLE_NON_ADMIN_TASK_VISIBILITY")
     show_for_non_admin = bool(distutils.util.strtobool(show_for_non_admin)) if show_for_non_admin else False

@@ -606,6 +606,8 @@ class ThreatKB:
         for k in ["token", "secret_key", "host"]:
             if k in kwargs:
                 self.credentials[k] = kwargs[k]
+            if os.getenv(k):
+                self.credentials[k] = os.getenv(k)
 
         if not self.credentials:
             raise Exception("You must configure threatkb cli first.")
