@@ -88,9 +88,9 @@ def get_c2dns(id):
         entity = c2dns.C2dns.query.filter(c2dns.C2dns.domain_name == id).first()
 
     if not entity:
-        abort(404)
+        abort(404, description="You have requested a resource that is not in the database")
     if not current_user.admin and entity.owner_user_id != current_user.id:
-        abort(403)
+        abort(403, description="You do not have the permissions to make this request.")
 
     return_dict = entity.to_dict()
     return_dict["bookmarked"] = True if is_bookmarked(ENTITY_MAPPING["DNS"], id, current_user.id) else False
