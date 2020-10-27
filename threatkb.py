@@ -668,14 +668,14 @@ class ThreatKB:
             return self.threatkb_transport.get(endpoint=endpoint, id_=params["id"])
 
         elif action.lower() == "update":
-            json_data = params.get("json_data", json.loads(open(params["file"]).read()))
+            json_data = params.get("json_data") or json.loads(open(params["file"]).read())
             return self.threatkb_transport.update(endpoint=endpoint, id_=params["id"], json_data=json_data)
 
         elif action.lower() == "delete":
             return self.threatkb_transport.delete(endpoint=endpoint, id_=params["id"])
 
         elif action.lower() == "create":
-            json_data = params.get("json_data", json.loads(open(params["file"]).read()))
+            json_data = params.get("json_data") or json.loads(open(params["file"]).read())
             return self.threatkb_transport.create(endpoint=endpoint, id_=params["id"], json_data=json_data)
 
         elif action.lower() == "comment":
