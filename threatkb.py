@@ -22,7 +22,7 @@ from termcolor import colored
 
 # python2/3 compatability hacks.
 try:
-    import ConfigParser
+    from ConfigParser import ConfigParser
 except:
     from configparser import ConfigParser
 
@@ -617,7 +617,7 @@ class ThreatKB:
 
     @classmethod
     def load_credentials(cls):
-        config = ConfigParser.ConfigParser()
+        config = ConfigParser()
         try:
             config.read(cls.CREDENTIALS_FILE)
             API_TOKEN = config.get("default", "token") or config.get("default", "access_key")
@@ -650,7 +650,7 @@ class ThreatKB:
         print("API Host [%s]: " % ("%s" % (credentials["host"]) if credentials and "host" in credentials else "*" * 14)),
         HOST = sys.stdin.readline().strip()
 
-        config = ConfigParser.ConfigParser()
+        config = ConfigParser()
         config.readfp(StringIO('[default]'))
         config.set('default', 'token', TOKEN)
         config.set('default', 'secret_key', SECRET_KEY)
