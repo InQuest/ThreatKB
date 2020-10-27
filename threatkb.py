@@ -676,7 +676,7 @@ class ThreatKB:
 
         elif action.lower() == "create":
             json_data = params.get("json_data") or json.loads(open(params["file"]).read())
-            return self.threatkb_transport.create(endpoint=endpoint, id_=params["id"], json_data=json_data)
+            return self.threatkb_transport.create(endpoint=endpoint, json_data=json_data)
 
         elif action.lower() == "comment":
             comment = {"comment": params["comment"], "entity_type": ENTITY_TYPES.get(ENTITY_MAP[endpoint]), "entity_id": params["id"]}
