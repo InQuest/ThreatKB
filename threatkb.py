@@ -162,7 +162,6 @@ class ThreatKBCommand:
 
         """
         params = {}
-        print
         if options["get"] or options["g"]:
             action = "get"
             params["id"] = options["ID"] if "ID" in options else options["--ip"] if "--ip" in options else None
@@ -282,7 +281,6 @@ class ThreatKBCommand:
             }
         """
         params = {}
-        print
         if options["get"] or options["g"]:
             action = "get"
             params["id"] = options["ID"] if "ID" in options else None
@@ -643,13 +641,13 @@ class ThreatKB:
         except:
             pass
 
-        print "Token [%s]: " % (
-            "%s%s" % ("*" * 10, credentials["token"][-4:]) if credentials and "token" in credentials else "*" * 14),
+        print("Token [%s]: " % ("%s%s" % ("*" * 10, credentials["token"][-4:]) if credentials and "token" in credentials else "*" * 14)),
         TOKEN = sys.stdin.readline().strip()
-        print "Secret Key [%s]: " % ("%s%s" % (
-        "*" * 10, credentials["secret_key"][-4:]) if credentials and "secret_key" in credentials else "*" * 14),
+
+        print("Secret Key [%s]: " % ("%s%s" % ("*" * 10, credentials["secret_key"][-4:]) if credentials and "secret_key" in credentials else "*" * 14)),
         SECRET_KEY = sys.stdin.readline().strip()
-        print "API Host [%s]: " % ("%s" % (credentials["host"]) if credentials and "host" in credentials else "*" * 14),
+
+        print("API Host [%s]: " % ("%s" % (credentials["host"]) if credentials and "host" in credentials else "*" * 14)),
         HOST = sys.stdin.readline().strip()
 
         config = ConfigParser.ConfigParser()
