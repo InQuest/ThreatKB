@@ -154,7 +154,7 @@ def activate_c2dns(id):
     return jsonify(entity.to_dict()), 201
 
 
-@app.route('/ThreatKB/c2dns/<int:id>', methods=['PUT'])
+@app.route('/ThreatKB/c2dns/<id>', methods=['PUT'])
 @auto.doc()
 @login_required
 def update_c2dns(id):
