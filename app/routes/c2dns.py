@@ -161,7 +161,12 @@ def update_c2dns(id):
     """Update c2dns artifact
     From Data: domain_name (str), match_type (str), expiration_timestamp (date), state(str)
     Return: c2dns artifact dictionary"""
-    entity = c2dns.C2dns.query.get(id)
+    try:
+        id = int(id)
+        entity = c2dns.C2dns.query.get(id)
+    except:
+        entity = c2dns.C2dns.query.filter(c2dns.C2dns.domain_name == id).first()
+
     if not entity:
         abort(404)
     if not current_user.admin and entity.owner_user_id != current_user.id:
