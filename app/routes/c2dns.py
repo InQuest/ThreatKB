@@ -168,9 +168,10 @@ def update_c2dns(id):
         entity = c2dns.C2dns.query.filter(c2dns.C2dns.domain_name == id).first()
 
     if not entity:
-        abort(404)
+        abort(404, description="You have requested to update a resource that is not in the database")
     if not current_user.admin and entity.owner_user_id != current_user.id:
-        abort(403)
+        abort(403, description="You do not have the permissions to make this request.")
+
     entity = c2dns.C2dns(
         state=verify_state(request.json['state']['state']) if request.json['state'] and 'state' in request.json['state']
         else verify_state(request.json['state']),
