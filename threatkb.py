@@ -22,7 +22,7 @@ from termcolor import colored
 
 # python2/3 compatability hacks.
 try:
-    import ConfigParser
+    from ConfigParser import ConfigParser
 except:
     from configparser import ConfigParser
 
@@ -162,7 +162,6 @@ class ThreatKBCommand:
 
         """
         params = {}
-        print
         if options["get"] or options["g"]:
             action = "get"
             params["id"] = options["ID"] if "ID" in options else options["--ip"] if "--ip" in options else None
@@ -282,7 +281,6 @@ class ThreatKBCommand:
             }
         """
         params = {}
-        print
         if options["get"] or options["g"]:
             action = "get"
             params["id"] = options["ID"] if "ID" in options else None
@@ -619,7 +617,7 @@ class ThreatKB:
 
     @classmethod
     def load_credentials(cls):
-        config = ConfigParser.ConfigParser()
+        config = ConfigParser()
         try:
             config.read(cls.CREDENTIALS_FILE)
             API_TOKEN = config.get("default", "token") or config.get("default", "access_key")
@@ -643,16 +641,16 @@ class ThreatKB:
         except:
             pass
 
-        print "Token [%s]: " % (
-            "%s%s" % ("*" * 10, credentials["token"][-4:]) if credentials and "token" in credentials else "*" * 14),
+        print("Token [%s]: " % ("%s%s" % ("*" * 10, credentials["token"][-4:]) if credentials and "token" in credentials else "*" * 14)),
         TOKEN = sys.stdin.readline().strip()
-        print "Secret Key [%s]: " % ("%s%s" % (
-        "*" * 10, credentials["secret_key"][-4:]) if credentials and "secret_key" in credentials else "*" * 14),
+
+        print("Secret Key [%s]: " % ("%s%s" % ("*" * 10, credentials["secret_key"][-4:]) if credentials and "secret_key" in credentials else "*" * 14)),
         SECRET_KEY = sys.stdin.readline().strip()
-        print "API Host [%s]: " % ("%s" % (credentials["host"]) if credentials and "host" in credentials else "*" * 14),
+
+        print("API Host [%s]: " % ("%s" % (credentials["host"]) if credentials and "host" in credentials else "*" * 14)),
         HOST = sys.stdin.readline().strip()
 
-        config = ConfigParser.ConfigParser()
+        config = ConfigParser()
         config.readfp(StringIO('[default]'))
         config.set('default', 'token', TOKEN)
         config.set('default', 'secret_key', SECRET_KEY)
@@ -668,16 +666,20 @@ class ThreatKB:
 
         if action.lower() == "get":
             return self.threatkb_transport.get(endpoint=endpoint, id_=params["id"])
+
         elif action.lower() == "update":
-            return self.threatkb_transport.update(endpoint=endpoint, id_=params["id"],
-                                                  json_data=json.loads(open(params["file"]).read()))
+            json_data = params.get("json_data") or json.loads(open(params["file"]).read())
+            return self.threatkb_transport.update(endpoint=endpoint, id_=params["id"], json_data=json_data)
+
         elif action.lower() == "delete":
             return self.threatkb_transport.delete(endpoint=endpoint, id_=params["id"])
+
         elif action.lower() == "create":
-            return self.threatkb_transport.create(endpoint=endpoint, json_data=json.loads(open(params["file"]).read()))
+            json_data = params.get("json_data") or json.loads(open(params["file"]).read())
+            return self.threatkb_transport.create(endpoint=endpoint, json_data=json_data)
+
         elif action.lower() == "comment":
-            comment = {"comment": params["comment"], "entity_type": ENTITY_TYPES.get(ENTITY_MAP[endpoint]),
-                       "entity_id": params["id"]}
+            comment = {"comment": params["comment"], "entity_type": ENTITY_TYPES.get(ENTITY_MAP[endpoint]), "entity_id": params["id"]}
             return self.threatkb_transport.create(endpoint="comments", json_data=json.dumps(comment))
 
         raise Exception("Unsupport action '%s'" % (action))
@@ -784,6 +786,6 @@ if __name__ == "__main__":
             sys.stdout.write(result[0] + "\n")
         else:
             sys.stdout.write(result + "\n")
-    except Exception, e:
+    except Exception as e:
         LOG.error("Exception when calling main")
         LOG.exception(e)
