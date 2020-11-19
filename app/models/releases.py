@@ -228,12 +228,13 @@ class Release(db.Model):
 
         message += "New Signatures\n%s\n" % ("-" * 10)
         message += "\n\n".join([
-            "EventID: %s\nName: %s\nCategory: %s\nConfidence: %s\nSeverity: %s\nDescription: %s\nMitre Tactics: %s\nMitre Techniques: %s" % (
+            "EventID: %s\nName: %s\nCategory: %s\nConfidence: %s\nSeverity: %s\nCVE: %s\nDescription: %s\nMitre Tactics: %s\nMitre Techniques: %s" % (
                 entity.get("eventid", "eventid"),
                 entity.get("name", "name"),
                 entity.get("category", "category"),
                 entity["metadata_values"].get("Confidence", {"value": "Confidence"})["value"],
                 entity["metadata_values"].get("Severity", {"value": "Severity"})["value"],
+                entity["metadata_values"].get("CVE", {"value": "CVE"})["value"] or "NA",
                 "\n    %s" % (entity.get("description", "description")),
                                        "\n    " + "\n    ".join(entity.get("mitre_tactics", "")),
                                        "\n    " + "\n    ".join(entity.get("mitre_techniques", "")),
