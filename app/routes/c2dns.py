@@ -166,6 +166,7 @@ def update_c2dns(id):
         entity = c2dns.C2dns.query.get(id)
     except:
         entity = c2dns.C2dns.query.filter(c2dns.C2dns.domain_name == id).first()
+        id = entity.id
 
     if not entity:
         abort(404, description="You have requested to update a resource that is not in the database")
