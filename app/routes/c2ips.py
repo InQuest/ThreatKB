@@ -8,7 +8,7 @@ from sqlalchemy import exc
 from app.models.cfg_states import verify_state
 from app.routes.batch import batch_update, batch_delete
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
-from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
+from app.routes.tags_mapping import merge_tags_mapping, delete_tags_mapping
 from app.routes.comments import create_comment
 import distutils
 
@@ -137,7 +137,7 @@ def create_c2ip():
         app.logger.error("Whitelist validation failed.")
         abort(412, description="Whitelist validation failed.")
 
-    entity.tags = create_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
+    merge_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
 
     if request.json.get('new_comment', None):
         create_comment(request.json['new_comment'],
@@ -197,8 +197,7 @@ def update_c2ip(id):
         app.logger.error("Duplicate IP: '%s'" % entity.ip)
         abort(409, description="Duplicate IP: '%s'" % entity.ip)
 
-    delete_tags_mapping(entity.__tablename__, entity.id)
-    create_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
+    merge_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
 
     entity.save_metadata(request.json.get("metadata_values", {}))
 
