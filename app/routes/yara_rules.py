@@ -16,7 +16,7 @@ from app.models.metadata import Metadata, MetadataMapping
 from app.routes.batch import batch_update, batch_delete
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
 from app.routes.cfg_category_range_mapping import update_cfg_category_range_mapping_current
-from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
+from app.routes.tags_mapping import merge_tags_mapping, delete_tags_mapping
 from app.routes.comments import create_comment
 from app.models.cfg_settings import Cfg_settings
 from app.utilities import filter_entities
@@ -266,7 +266,7 @@ def create_yara_rule():
     db.session.add(entity)
     db.session.commit()
 
-    entity.tags = create_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
+    entity.tags = merge_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
 
     if request.json.get('new_comment', None):
         create_comment(request.json['new_comment'],
@@ -454,8 +454,7 @@ def update_yara_rule(id):
     if get_new_sig_id:
         update_cfg_category_range_mapping_current(request.json['category']['id'], temp_sig_id)
 
-    delete_tags_mapping(entity.__tablename__, entity.id)
-    create_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
+    merge_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
 
     return jsonify(entity.to_dict()), 200
 
@@ -499,7 +498,7 @@ def delete_yara_rule(id):
         db.session.merge(entity)
         db.session.commit()
 
-        # delete_tags_mapping(entity.__tablename__, entity.id)
+        delete_tags_mapping(entity.__tablename__, entity.id)
         delete_bookmarks(ENTITY_MAPPING["SIGNATURE"], id, current_user.id)
     else:
 

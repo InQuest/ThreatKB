@@ -36,9 +36,11 @@ ENTITY_MAPPING_URI = {1: "yara_rules", 2: "c2dns", 3: "c2ips", 4: "tasks", 5: "r
 
 ACTIVITY_TYPE = {"ARTIFACT_CREATED": "Artifact Created",
                  "ARTIFACT_MODIFIED": "Artifact Modified",
-                 "COMMENTS": 'Comxment',
+                 "COMMENTS": 'Comment',
                  "STATE_TOGGLED": 'State Toggled',
-                 "RELEASES_MADE": 'Release Made'}
+                 "RELEASES_MADE": 'Release Made',
+                 "TAG_CREATED": 'Tag Created',
+                 "TAG_REMOVED": 'Tag Removed'}
 
 
 def nocache(view):

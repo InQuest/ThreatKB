@@ -33,7 +33,7 @@ class ActivityLog(db.Model):
             activity_date=self.activity_date.isoformat(),
             entity_type=ENTITY_MAPPING.keys()[ENTITY_MAPPING.values().index(self.entity_type)],
             entity_id=self.entity_id,
-            user=self.user.to_dict()
+            user=self.user.to_dict() if self.user else "Unknown"
         )
 
 

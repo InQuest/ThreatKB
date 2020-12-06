@@ -27,7 +27,7 @@ def get_all_activity_logs():
     page_number = request.args.get('page_number', False)
     page_size = request.args.get('page_size', False)
     sort_by = request.args.get('sort_by', False)
-    sort_direction = request.args.get('sort_dir', 'ASC')
+    sort_direction = request.args.get('sort_dir', 'DESC')
     try:
         since_days = int(request.args.get('since', 45))
     except:
