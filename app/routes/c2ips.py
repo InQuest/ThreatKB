@@ -70,7 +70,7 @@ def get_all_c2ips():
                                     include_comments=include_comments,
                                     include_active=include_active,
                                     exclude_totals=exclude_totals,
-                                    default_sort="c2ip.date_created",
+                                    default_sort="date_created",
                                     operator=operator)
 
     return Response(response_dict, mimetype="application/json")
