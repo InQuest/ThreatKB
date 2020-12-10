@@ -85,7 +85,11 @@ def merge_tags_mapping(table_name, entity_id, entity_tags, no_delete=False):
     removed_tags = [current_tag[1].text for current_tag in current_tags]
 
     for tag in entity_tags:
-        tag = tag["text"]
+        try:
+            tag = tag["text"]
+        except TypeError, e:
+            pass
+
         if not tag in current_tags_text:
             new_tag_mapping = tags_mapping.Tags_mapping()
             new_tag_mapping.source_id = entity_id

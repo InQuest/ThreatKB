@@ -130,7 +130,7 @@ def create_c2dns():
         app.logger.error("Whitelist validation failed.")
         abort(412, description="Whitelist validation failed.")
 
-    entity.tags = create_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
+    entity.tags = merge_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
 
     if request.json.get('new_comment', None):
         create_comment(request.json['new_comment'],
