@@ -785,6 +785,8 @@ if __name__ == "__main__":
         elif type(result) == list:
             sys.stdout.write(result[0] + "\n")
         else:
+            if not result:
+                result = "Not found."
             sys.stdout.write(result + "\n")
     except Exception as e:
         LOG.error("Exception when calling main")
