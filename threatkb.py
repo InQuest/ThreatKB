@@ -618,19 +618,34 @@ class ThreatKB:
     @classmethod
     def load_credentials(cls):
         config = ConfigParser()
-        try:
-            config.read(cls.CREDENTIALS_FILE)
-            API_TOKEN = config.get("default", "token") or config.get("default", "access_key")
+        if not os.path.exists(cls.CREDENTIALS_FILE):
+            return {}
+        config.read(cls.CREDENTIALS_FILE)
+        # token (aka access_key).
+        if config.has_option("default", "token"):
+            API_TOKEN = config.get("default", "token")
+        elif config.has_option("default", "access_key"):
+            API_TOKEN = config.get("default", "access_key")
+        else:
+            raise Exception("%s missing token (aka access_key)") % cls.CREDENTIALS_FILE
+        # secret key
+        if config.has_option("default", "secret"):
+            API_SECRET_KEY = config.get("default", "secret")
+        elif config.has_option("default", "secret_key"):
             API_SECRET_KEY = config.get("default", "secret_key")
-            API_HOST = config.get("default", "host") or config.get("default", "api_host")
-            if not API_HOST.endswith("/"):
-                API_HOST = "%s/" % (API_HOST)
-
-            return {"token": API_TOKEN, "secret_key": API_SECRET_KEY, "host": API_HOST}
-        except:
-            pass
-
-        return {}
+        else:
+            raise Exception("%s missing secret (aka secret_key)") % cls.CREDENTIALS_FILE
+        # host (aka api_host)
+        if config.has_option("default", "host"):
+            API_HOST = config.get("default", "host")
+        elif config.has_option("default", "api_host"):
+            API_HOST = config.get("default", "api_host")
+        else:
+            raise Exception("%s missing host (aka api_host)") % cls.CREDENTIALS_FILE
+        # normalize host and return credentials dict.
+        if not API_HOST.endswith("/"):
+            API_HOST = "%s/" % (API_HOST)
+        return {"token": API_TOKEN, "secret_key": API_SECRET_KEY, "host": API_HOST}
 
     @classmethod
     def configure(cls):
