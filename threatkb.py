@@ -313,7 +313,7 @@ class ThreatKBCommand:
         except Exception as e:
             LOG.error(e)
 
-    def yara_rule(self, options):
+    def yara(self, options):
         """
         Interact with the yara api
 
@@ -386,7 +386,7 @@ class ThreatKBCommand:
             params["id"] = options["ID"]
 
         try:
-            return ThreatKB().yara_rule(action, params)
+            return ThreatKB().yara(action, params)
         except Exception as e:
             LOG.error(e)
 
