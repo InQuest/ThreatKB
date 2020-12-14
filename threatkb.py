@@ -115,7 +115,7 @@ class ThreatKBCommand:
         yara        Interact with the yara rules api
         task        Interact with the task api
         search      Global search
-        import      Use the import api
+        ingest      Use the import api
         release     Pull release data from specific release
         configure   Configure the cli for api interaction
     """
@@ -318,13 +318,13 @@ class ThreatKBCommand:
         Interact with the yara api
 
         Usage:
-            yara_rule|yara (get|g) (ID | --ids=<ids>| --all)
-            yara_rule|yara (delete|d) ID
-            yara_rule|yara (update|u) ID (--file=FILE | [-])
-            yara_rule|yara (create|c) (--file=FILE | [-])
-            yara_rule|yara (comment|co) ID (--comment=COMMENT)
-            yara_rule|yara (test|t) ID
-            yara_rule|yara (attach|a) ID (--file=FILE | [-])
+            yara (get|g) (ID | --ids=<ids>| --all)
+            yara (delete|d) ID
+            yara (update|u) ID (--file=FILE | [-])
+            yara (create|c) (--file=FILE | [-])
+            yara (comment|co) ID (--comment=COMMENT)
+            yara (test|t) ID
+            yara (attach|a) ID (--file=FILE | [-])
 
         Options:
             -f, --file FILE  Update or create json file or a file to atach to the yara rule
@@ -428,12 +428,12 @@ class ThreatKBCommand:
         except Exception as e:
             LOG.error(e)
 
-    def import_api(self, options):
+    def ingest(self, options):
         """
-        Use the import api
+        Use the ingest api
 
         Usage:
-            import_api|import (--file=FILE | [-]) [--autocommit] [--shared-state=STATE] [--shared-reference=REFERENCE] [--shared-description=DESCRIPTION] [--exclude-ip] [--exclude-dns] [--exclude-yara-rule] [--metadata-mapping-file]
+            ingest (--file=FILE | [-]) [--autocommit] [--shared-state=STATE] [--shared-reference=REFERENCE] [--shared-description=DESCRIPTION] [--exclude-ip] [--exclude-dns] [--exclude-yara-rule] [--metadata-mapping-file]
 
         Options:
             -f, --file FILE  File with import text
@@ -708,7 +708,7 @@ class ThreatKB:
     def task(self, action, params):
         return self._do_common_action(action, params, endpoint="tasks")
 
-    def yara_rule(self, action, params):
+    def yara(self, action, params):
         global ENTITY_MAP
 
         if action in ["get", "create", "update", "delete", "comment"]:
@@ -749,7 +749,7 @@ class ThreatKB:
 
         return self.threatkb_transport.get("search", params=uri_params)
 
-    def import_api(self, params):
+    def ingest(self, params):
         default_mapping = {
             "Author": "Author",
             "Category": "Category",
