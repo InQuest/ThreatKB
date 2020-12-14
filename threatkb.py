@@ -518,7 +518,7 @@ class ThreatKBCommand:
             else:
                 params["import_text"] = self.std_in
 
-            return ThreatKB().import_api(params)
+            return ThreatKB().ingest(params)
         except Exception as e:
             LOG.exception(e)
 
