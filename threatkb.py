@@ -112,10 +112,10 @@ class ThreatKBCommand:
     Commands:
         c2ip        Interact with the c2ip api
         c2dns       Interact with the c2dns api
-        yara_rule   Interact with the yara rules api
+        yara        Interact with the yara rules api
         task        Interact with the task api
         search      Global search
-        import_api  Use the import api
+        import      Use the import api
         release     Pull release data from specific release
         configure   Configure the cli for api interaction
     """
@@ -315,16 +315,16 @@ class ThreatKBCommand:
 
     def yara_rule(self, options):
         """
-        Interact with the yara_rule api
+        Interact with the yara api
 
         Usage:
-            yara_rule (get|g) (ID | --ids=<ids>| --all)
-            yara_rule (delete|d) ID
-            yara_rule (update|u) ID (--file=FILE | [-])
-            yara_rule (create|c) (--file=FILE | [-])
-            yara_rule (comment|co) ID (--comment=COMMENT)
-            yara_rule (test|t) ID
-            yara_rule (attach|a) ID (--file=FILE | [-])
+            yara_rule|yara (get|g) (ID | --ids=<ids>| --all)
+            yara_rule|yara (delete|d) ID
+            yara_rule|yara (update|u) ID (--file=FILE | [-])
+            yara_rule|yara (create|c) (--file=FILE | [-])
+            yara_rule|yara (comment|co) ID (--comment=COMMENT)
+            yara_rule|yara (test|t) ID
+            yara_rule|yara (attach|a) ID (--file=FILE | [-])
 
         Options:
             -f, --file FILE  Update or create json file or a file to atach to the yara rule
@@ -433,7 +433,7 @@ class ThreatKBCommand:
         Use the import api
 
         Usage:
-            import_api (--file=FILE | [-]) [--autocommit] [--shared-state=STATE] [--shared-reference=REFERENCE] [--shared-description=DESCRIPTION] [--exclude-ip] [--exclude-dns] [--exclude-yara-rule] [--metadata-mapping-file]
+            import_api|import (--file=FILE | [-]) [--autocommit] [--shared-state=STATE] [--shared-reference=REFERENCE] [--shared-description=DESCRIPTION] [--exclude-ip] [--exclude-dns] [--exclude-yara-rule] [--metadata-mapping-file]
 
         Options:
             -f, --file FILE  File with import text
@@ -732,6 +732,7 @@ class ThreatKB:
             "c2dns": "dns",
             "dns": "dns",
             "signature": "signature",
+            "yara": "signature",
             "yara_rule": "signature",
             "yara_rules": "signature",
             "task": "task"
