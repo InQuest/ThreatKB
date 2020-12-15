@@ -116,10 +116,10 @@ class ThreatKBCommand:
     Commands:
         c2ip        Interact with the c2ip api
         c2dns       Interact with the c2dns api
-        yara_rule   Interact with the yara rules api
+        yara        Interact with the yara rules api
         task        Interact with the task api
         search      Global search
-        import_api  Use the import api
+        ingest      Use the import api
         release     Pull release data from specific release
         configure   Configure the cli for api interaction
     """
@@ -317,18 +317,18 @@ class ThreatKBCommand:
         except Exception as e:
             LOG.error(e)
 
-    def yara_rule(self, options):
+    def yara(self, options):
         """
-        Interact with the yara_rule api
+        Interact with the yara api
 
         Usage:
-            yara_rule (get|g) (ID | --ids=<ids>| --all)
-            yara_rule (delete|d) ID
-            yara_rule (update|u) ID (--file=FILE | [-])
-            yara_rule (create|c) (--file=FILE | [-])
-            yara_rule (comment|co) ID (--comment=COMMENT)
-            yara_rule (test|t) ID
-            yara_rule (attach|a) ID (--file=FILE | [-])
+            yara (get|g) (ID | --ids=<ids>| --all)
+            yara (delete|d) ID
+            yara (update|u) ID (--file=FILE | [-])
+            yara (create|c) (--file=FILE | [-])
+            yara (comment|co) ID (--comment=COMMENT)
+            yara (test|t) ID
+            yara (attach|a) ID (--file=FILE | [-])
 
         Options:
             -f, --file FILE  Update or create json file or a file to atach to the yara rule
@@ -390,7 +390,7 @@ class ThreatKBCommand:
             params["id"] = options["ID"]
 
         try:
-            return ThreatKB().yara_rule(action, params)
+            return ThreatKB().yara(action, params)
         except Exception as e:
             LOG.error(e)
 
@@ -432,12 +432,12 @@ class ThreatKBCommand:
         except Exception as e:
             LOG.error(e)
 
-    def import_api(self, options):
+    def ingest(self, options):
         """
-        Use the import api
+        Use the ingest api
 
         Usage:
-            import_api (--file=FILE | [-]) [--autocommit] [--shared-state=STATE] [--shared-reference=REFERENCE] [--shared-description=DESCRIPTION] [--exclude-ip] [--exclude-dns] [--exclude-yara-rule] [--metadata-mapping-file]
+            ingest (--file=FILE | [-]) [--autocommit] [--shared-state=STATE] [--shared-reference=REFERENCE] [--shared-description=DESCRIPTION] [--exclude-ip] [--exclude-dns] [--exclude-yara-rule] [--metadata-mapping-file]
 
         Options:
             -f, --file FILE  File with import text
@@ -522,7 +522,7 @@ class ThreatKBCommand:
             else:
                 params["import_text"] = self.std_in
 
-            return ThreatKB().import_api(params)
+            return ThreatKB().ingest(params)
         except Exception as e:
             LOG.exception(e)
 
@@ -622,19 +622,34 @@ class ThreatKB:
     @classmethod
     def load_credentials(cls):
         config = ConfigParser()
-        try:
-            config.read(cls.CREDENTIALS_FILE)
-            API_TOKEN = config.get("default", "token") or config.get("default", "access_key")
+        if not os.path.exists(cls.CREDENTIALS_FILE):
+            return {}
+        config.read(cls.CREDENTIALS_FILE)
+        # token (aka access_key).
+        if config.has_option("default", "token"):
+            API_TOKEN = config.get("default", "token")
+        elif config.has_option("default", "access_key"):
+            API_TOKEN = config.get("default", "access_key")
+        else:
+            raise Exception("%s missing token (aka access_key)") % cls.CREDENTIALS_FILE
+        # secret key
+        if config.has_option("default", "secret"):
+            API_SECRET_KEY = config.get("default", "secret")
+        elif config.has_option("default", "secret_key"):
             API_SECRET_KEY = config.get("default", "secret_key")
-            API_HOST = config.get("default", "host") or config.get("default", "api_host")
-            if not API_HOST.endswith("/"):
-                API_HOST = "%s/" % (API_HOST)
-
-            return {"token": API_TOKEN, "secret_key": API_SECRET_KEY, "host": API_HOST}
-        except:
-            pass
-
-        return {}
+        else:
+            raise Exception("%s missing secret (aka secret_key)") % cls.CREDENTIALS_FILE
+        # host (aka api_host)
+        if config.has_option("default", "host"):
+            API_HOST = config.get("default", "host")
+        elif config.has_option("default", "api_host"):
+            API_HOST = config.get("default", "api_host")
+        else:
+            raise Exception("%s missing host (aka api_host)") % cls.CREDENTIALS_FILE
+        # normalize host and return credentials dict.
+        if not API_HOST.endswith("/"):
+            API_HOST = "%s/" % (API_HOST)
+        return {"token": API_TOKEN, "secret_key": API_SECRET_KEY, "host": API_HOST}
 
     @classmethod
     def configure(cls):
@@ -697,7 +712,7 @@ class ThreatKB:
     def task(self, action, params):
         return self._do_common_action(action, params, endpoint="tasks")
 
-    def yara_rule(self, action, params):
+    def yara(self, action, params):
         global ENTITY_MAP
 
         if action in ["get", "create", "update", "delete", "comment"]:
@@ -721,6 +736,7 @@ class ThreatKB:
             "c2dns": "dns",
             "dns": "dns",
             "signature": "signature",
+            "yara": "signature",
             "yara_rule": "signature",
             "yara_rules": "signature",
             "task": "task"
@@ -737,7 +753,7 @@ class ThreatKB:
 
         return self.threatkb_transport.get("search", params=uri_params)
 
-    def import_api(self, params):
+    def ingest(self, params):
         default_mapping = {
             "Author": "Author",
             "Category": "Category",
@@ -789,6 +805,8 @@ if __name__ == "__main__":
         elif type(result) == list:
             sys.stdout.write(result[0] + "\n")
         else:
+            if not result:
+                result = "Not found."
             sys.stdout.write(result + "\n")
     except Exception as e:
         LOG.error("Exception when calling main")
