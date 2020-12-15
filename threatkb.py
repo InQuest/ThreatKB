@@ -96,7 +96,11 @@ class DocoptDispatcher:
 
 
 def create_tempfile(contents):
-    fp = tempfile.TemporaryFile()
+    fp = tempfile.NamedTemporaryFile(delete=False)
+    try:
+        os.makedirs(os.path.dirname(fp.name))
+    except:
+        pass
     fp.write(contents)
     fp.close()
     return fp.name
