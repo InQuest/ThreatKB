@@ -8,7 +8,7 @@ from sqlalchemy import exc
 from app.models.cfg_states import verify_state
 from app.routes.batch import batch_update, batch_delete
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
-from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
+from app.routes.tags_mapping import merge_tags_mapping, delete_tags_mapping
 from app.routes.comments import create_comment
 from distutils import util
 
@@ -70,13 +70,13 @@ def get_all_c2ips():
                                     include_comments=include_comments,
                                     include_active=include_active,
                                     exclude_totals=exclude_totals,
-                                    default_sort="c2ip.date_created",
+                                    default_sort="date_created",
                                     operator=operator)
 
     return Response(response_dict, mimetype="application/json")
 
 
-@app.route('/ThreatKB/c2ips/<int:id>', methods=['GET'])
+@app.route('/ThreatKB/c2ips/<id>', methods=['GET'])
 @auto.doc()
 @login_required
 def get_c2ip(id):
@@ -86,11 +86,16 @@ def get_c2ip(id):
     None
 
     Return: c2ip artifact dictionary"""
-    entity = c2ip.C2ip.query.get(id)
+    try:
+        id = int(id)
+        entity = c2ip.C2ip.query.get(id)
+    except:
+        entity = c2ip.C2ip.query.filter(c2ip.C2ip.ip == id).first()
+
     if not entity:
-        abort(404)
+        abort(404, description="You have requested a resource that is not in the database")
     if not current_user.admin and entity.owner_user_id != current_user.id:
-        abort(403)
+        abort(403, description="You do not have the permissions to make this request.")
 
     return_dict = entity.to_dict()
     return_dict["bookmarked"] = True if is_bookmarked(ENTITY_MAPPING["IP"], id, current_user.id) else False
@@ -113,7 +118,8 @@ def create_c2ip():
         country=request.json['country'],
         description=request.json.get("description", None),
         references=request.json.get("references", None),
-        state=verify_state(request.json['state']['state']),
+        state=verify_state(request.json['state']['state'])
+        if request.json['state'] and 'state' in request.json['state'] else verify_state(request.json['state']),
         expiration_timestamp=parser.parse(request.json['expiration_timestamp'])
         if request.json.get("expiration_timestamp", None) else None,
         created_user_id=current_user.id,
@@ -131,7 +137,7 @@ def create_c2ip():
         app.logger.error("Whitelist validation failed.")
         abort(412, description="Whitelist validation failed.")
 
-    entity.tags = create_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
+    merge_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
 
     if request.json.get('new_comment', None):
         create_comment(request.json['new_comment'],
@@ -191,8 +197,7 @@ def update_c2ip(id):
         app.logger.error("Duplicate IP: '%s'" % entity.ip)
         abort(409, description="Duplicate IP: '%s'" % entity.ip)
 
-    delete_tags_mapping(entity.__tablename__, entity.id)
-    create_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
+    merge_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
 
     entity.save_metadata(request.json.get("metadata_values", {}))
 
@@ -226,6 +231,9 @@ def delete_c2ip(id):
     """Delete c2ip artifact associated with id
     Return: None"""
     entity = c2ip.C2ip.query.get(id)
+
+    if not entity:
+        return jsonify(''), 404
 
     if entity.active:
         entity.active = False

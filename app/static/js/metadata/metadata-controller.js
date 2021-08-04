@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('MetadataController', ['$scope', '$rootScope', '$uibModal', 'resolvedMetadatas', 'Metadata', 'Comments',
-        function ($scope, $rootScope, $uibModal, resolvedMetadatas, Metadata, Comments) {
+    .controller('MetadataController', ['$scope', '$rootScope', '$uibModal', 'resolvedMetadatas', 'Metadata', 'Comments', 'growl',
+        function ($scope, $rootScope, $uibModal, resolvedMetadatas, Metadata, Comments, growl) {
 
             $scope.metadatas = resolvedMetadatas;
             $scope.metadata_short_choice_string = function (metadata) {
@@ -89,6 +89,8 @@ angular.module('ThreatKB')
                         function () {
                             $scope.metadatas = Metadata.query();
                             //$scope.clear();
+                        }, function (error) {
+                            growl.error(error.data, {ttl: -1});
                         });
                 }
             };

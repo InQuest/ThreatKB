@@ -649,6 +649,9 @@ angular.module('ThreatKB')
                         } else {
                             growl.info("Successfully saved dns artifact '" + $scope.c2dns.domain_name + "'.", {ttl: 2000});
                         }
+                    },
+                    function (error) {
+                        growl.error(error.data, {ttl: -1});
                     });
             };
 

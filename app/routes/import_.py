@@ -5,7 +5,7 @@ from app.models import c2ip, c2dns, yara_rule, cfg_states, comments, cfg_setting
 from app.models.metadata import Metadata
 from app.utilities import extract_artifacts
 from distutils import util
-
+import json
 
 #####################################################################
 
@@ -168,6 +168,10 @@ def import_artifacts():
     extract_dns = request.json.get('extract_dns', True)
     extract_signature = request.json.get('extract_signature', True)
     metadata_field_mapping = request.json.get('metadata_field_mapping', {})
+    try:
+        metadata_field_mapping = json.loads(metadata_field_mapping)
+    except:
+        pass
 
     if not shared_owner:
         shared_owner = int(current_user.id)

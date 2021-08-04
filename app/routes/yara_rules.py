@@ -10,12 +10,13 @@ from app.models import yara_rule, cfg_states, comments
 from flask import abort, jsonify, request, Response, json
 from flask_login import current_user, login_required
 from distutils import util
+from app.models.cfg_states import verify_state
 
 from app.models.metadata import Metadata, MetadataMapping
 from app.routes.batch import batch_update, batch_delete
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
 from app.routes.cfg_category_range_mapping import update_cfg_category_range_mapping_current
-from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
+from app.routes.tags_mapping import merge_tags_mapping, delete_tags_mapping
 from app.routes.comments import create_comment
 from app.models.cfg_settings import Cfg_settings
 from app.utilities import filter_entities
@@ -151,9 +152,9 @@ def get_yara_rule(id):
 
     entity = yara_rule.Yara_rule.query.get(id)
     if not entity:
-        abort(404)
+        abort(404, description="You have requested a resource that is not in the database")
     if not current_user.admin and entity.owner_user_id != current_user.id:
-        abort(403)
+        abort(403, description="You do not have the permissions to make this request.")
 
     return_dict = entity.to_dict(include_yara_string, short)
     return_dict["bookmarked"] = True if is_bookmarked(ENTITY_MAPPING["SIGNATURE"], id, current_user.id) \
@@ -227,7 +228,8 @@ def create_yara_rule():
         new_sig_id = request.json['category']['current'] + 1
 
     entity = yara_rule.Yara_rule(
-        state=request.json['state']['state'] if 'state' in request.json['state'] else None,
+        state=verify_state(request.json['state']['state'])
+        if request.json['state'] and 'state' in request.json['state'] else verify_state(request.json['state']),
         name=request.json['name'],
         description=request.json.get("description", None),
         references=request.json.get("references", None),
@@ -264,7 +266,7 @@ def create_yara_rule():
     db.session.add(entity)
     db.session.commit()
 
-    entity.tags = create_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
+    entity.tags = merge_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
 
     if request.json.get('new_comment', None):
         create_comment(request.json['new_comment'],
@@ -380,8 +382,8 @@ def update_yara_rule(id):
             abort(400)
 
     entity = yara_rule.Yara_rule(
-        state=request.json['state']['state'] if request.json['state'] and 'state' in request.json['state'] else
-        request.json['state'],
+        state=verify_state(request.json['state']['state'])
+        if request.json['state'] and 'state' in request.json['state'] else verify_state(request.json['state']),
         name=request.json['name'],
         description=request.json.get("description", None),
         references=request.json.get("references", None),
@@ -452,8 +454,7 @@ def update_yara_rule(id):
     if get_new_sig_id:
         update_cfg_category_range_mapping_current(request.json['category']['id'], temp_sig_id)
 
-    delete_tags_mapping(entity.__tablename__, entity.id)
-    create_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
+    merge_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
 
     return jsonify(entity.to_dict()), 200
 
@@ -497,7 +498,7 @@ def delete_yara_rule(id):
         db.session.merge(entity)
         db.session.commit()
 
-        # delete_tags_mapping(entity.__tablename__, entity.id)
+        delete_tags_mapping(entity.__tablename__, entity.id)
         delete_bookmarks(ENTITY_MAPPING["SIGNATURE"], id, current_user.id)
     else:
 
