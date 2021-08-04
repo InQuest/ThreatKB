@@ -4,7 +4,7 @@ from app import app, db, admin_only, auto, ENTITY_MAPPING
 from app.models import c2ip, c2dns, yara_rule, cfg_states, comments, cfg_settings
 from app.models.metadata import Metadata
 from app.utilities import extract_artifacts
-import distutils
+from distutils import util
 import json
 
 #####################################################################
@@ -201,16 +201,16 @@ def import_artifacts_by_filek():
     From Data: import_text (str),
     Optional Arguments: autocommit (int), shared_state (str), shared_reference (str), shared_description(str), shared_owner (int)
     Return: list of artifact dictionaries [{"type":"IP": "artifact": {}}, {"type":"DNS": "artifact": {}}, ...]"""
-    autocommit = distutils.util.strtobool(request.values.get("autocommit", 0))
+    autocommit = util.strtobool(request.values.get("autocommit", 0))
     import_text = request.files['file'].stream.read()
     import_text = import_text.strip()
     shared_state = request.values.get('shared_state', None)
     shared_reference = request.values.get("shared_reference", None) or None
     shared_description = request.values.get("shared_description", None) or None
     shared_owner = request.values.get("shared_owner", None) or None
-    extract_ip = distutils.util.strtobool(request.values.get('extract_ip', True))
-    extract_dns = distutils.util.strtobool(request.values.get('extract_dns', True))
-    extract_signature = distutils.util.strtobool(request.values.get('extract_signature', True))
+    extract_ip = util.strtobool(request.values.get('extract_ip', True))
+    extract_dns = util.strtobool(request.values.get('extract_dns', True))
+    extract_signature = util.strtobool(request.values.get('extract_signature', True))
     metadata_field_mapping = request.values.get('metadata_field_mapping', {})
 
     if not shared_owner:

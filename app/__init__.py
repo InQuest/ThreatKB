@@ -13,7 +13,7 @@ from flask_selfdoc import Autodoc
 import datetime
 import logging
 import os
-import distutils
+from distutils import util
 from slack_helper import SlackHelper
 
 

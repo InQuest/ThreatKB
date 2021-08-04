@@ -10,7 +10,7 @@ from app.routes.batch import batch_update, batch_delete
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
 from app.routes.tags_mapping import merge_tags_mapping, delete_tags_mapping
 from app.routes.comments import create_comment
-import distutils
+from distutils import util
 
 from app.utilities import filter_entities
 
@@ -53,9 +53,9 @@ def get_all_c2dns():
     sort_direction = request.args.get('sort_dir', 'ASC')
     operator = request.args.get('operator', 'and')
     exclude_totals = request.args.get('exclude_totals', False)
-    include_metadata = bool(distutils.util.strtobool(request.args.get('include_metadata', "true")))
-    include_tags = bool(distutils.util.strtobool(request.args.get('include_tags', "true")))
-    include_comments = bool(distutils.util.strtobool(request.args.get('include_comments', "true")))
+    include_metadata = bool(util.strtobool(request.args.get('include_metadata', "true")))
+    include_tags = bool(util.strtobool(request.args.get('include_tags', "true")))
+    include_comments = bool(util.strtobool(request.args.get('include_comments', "true")))
 
     response_dict = filter_entities(entity=c2dns.C2dns,
                                     artifact_type=ENTITY_MAPPING["DNS"],

@@ -1,4 +1,4 @@
-import distutils
+from distutils import util
 import re
 
 from ipaddr import IPAddress, IPNetwork

@@ -5,7 +5,7 @@ from app.models import releases, cfg_settings
 import tempfile
 import uuid
 import time
-import distutils
+from distutils import util
 
 @app.route('/ThreatKB/releases', methods=['GET'])
 @auto.doc()
@@ -42,7 +42,7 @@ def get_releases_latest():
     Return: list of release dictionaries"""
 
     count = request.args.get("count", None)
-    short = distutils.util.strtobool(request.args.get("short", "True"))
+    short = util.strtobool(request.args.get("short", "True"))
 
     try:
         count = int(count)
@@ -119,7 +119,7 @@ def create_release():
     """Create new release
     From Data: name (str), is_test_release (bool)
     Return: release dictionary"""
-    short = distutils.util.strtobool(request.args.get('short', "true"))
+    short = util.strtobool(request.args.get('short', "true"))
 
     start_time = time.time()
 

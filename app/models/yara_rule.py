@@ -12,7 +12,7 @@ from dateutil import parser
 import datetime
 import json
 import re
-import distutils
+from distutils import util
 import zlib
 
 from flask import abort
@@ -331,7 +331,7 @@ class Yara_rule(db.Model):
 
         clobber_on_import = cfg_settings.Cfg_settings.get_setting("IMPORT_CLOBBER")
         try:
-            clobber_on_import = distutils.util.strtobool(clobber_on_import)
+            clobber_on_import = util.strtobool(clobber_on_import)
         except:
             clobber_on_import = clobber_on_import
 
