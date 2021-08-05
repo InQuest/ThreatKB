@@ -85,7 +85,7 @@ setup(
         'SQLAlchemy==0.7.9',
         'sqlalchemy-migrate==0.7.2',
         'Tempita==0.5.2',
-        'urllib3==1.25.6',
+        'urllib3==1.26.5',
         'vine==1.1.4',
         'Werkzeug==0.15.3',
         'Whoosh==2.7.4',
