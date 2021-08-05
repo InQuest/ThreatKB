@@ -82,7 +82,7 @@ setup(
         'requests==2.20.0',
         'six==1.10.0',
         'speaklater==1.3',
-        'SQLAlchemy==0.7.9',
+        'SQLAlchemy==1.3.0',
         'sqlalchemy-migrate==0.7.2',
         'Tempita==0.5.2',
         'urllib3==1.25.6',
