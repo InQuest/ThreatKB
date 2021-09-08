@@ -98,11 +98,11 @@ def get_all_yara_rules():
         include_inactive = False
         include_active = True
 
-    include_yara_string = bool(util.strtobool(request.args.get("include_yara_string", "False")))
-    short = bool(util.strtobool(request.args.get("short", "false")))
-    include_metadata = bool(util.strtobool(request.args.get('include_metadata', "true")))
-    include_tags = bool(util.strtobool(request.args.get('include_tags', "true")))
-    include_comments = bool(util.strtobool(request.args.get('include_comments', "true")))
+    include_yara_string = bool(distutils.util.strtobool(request.args.get("include_yara_string", "False")))
+    short = bool(distutils.util.strtobool(request.args.get("short", "false")))
+    include_metadata = bool(distutils.util.strtobool(request.args.get('include_metadata', "true")))
+    include_tags = bool(distutils.util.strtobool(request.args.get('include_tags', "true")))
+    include_comments = bool(distutils.util.strtobool(request.args.get('include_comments', "true")))
 
     if include_yara_string:
         include_yara_string = True
@@ -475,7 +475,8 @@ def batch_update_yara_rules():
     if 'batch' in request.json and request.json['batch']:
         return batch_update(batch=request.json['batch'],
                             artifact=yara_rule.Yara_rule,
-                            session=db.session)
+                            session=db.session,
+                            entity_mapping=ENTITY_MAPPING["SIGNATURE"])
 
 
 @app.route('/ThreatKB/yara_rules/<int:id>', methods=['DELETE'])

@@ -1,6 +1,6 @@
 from app import app, db, auto, ENTITY_MAPPING
 from app.models import c2ip
-from flask import abort, jsonify, request, Response, json
+from flask import abort, jsonify, request, Response
 from flask_login import current_user, login_required
 from dateutil import parser
 from sqlalchemy import exc
@@ -55,7 +55,6 @@ def get_all_c2ips():
     include_metadata = bool(util.strtobool(request.args.get('include_metadata', "true")))
     include_tags = bool(util.strtobool(request.args.get('include_tags', "true")))
     include_comments = bool(util.strtobool(request.args.get('include_comments', "true")))
-
 
     response_dict = filter_entities(entity=c2ip.C2ip,
                                     artifact_type=ENTITY_MAPPING["IP"],
@@ -221,6 +220,7 @@ def batch_update_c2ip():
     if 'batch' in request.json and request.json['batch']:
         return batch_update(batch=request.json['batch'],
                             artifact=c2ip.C2ip,
+                            entity_mapping=ENTITY_MAPPING["IP"],
                             session=db.session)
 
 
