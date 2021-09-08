@@ -30,7 +30,7 @@ def upgrade():
         [
             {
                 "key": "BATCH_EDIT_CONFIGURATION",
-                "value": "{\"c2ip\" : [\"description\", \"tags\", \"state\", \"owner_user\", \"expiration_timestamp\"]}",
+                "value": "{\"c2ip\" : [\"description\", \"tags\", \"state\", \"owner_user\", \"expiration_timestamp\", \"comments\", {\"metadata\": []}], \"c2dns\" : [\"description\", \"tags\", \"state\", \"owner_user\", \"expiration_timestamp\", \"comments\", {\"metadata\": []}], \"yara_rules\" : [\"description\", \"tags\", \"state\", \"owner_user\", \"category\", \"comments\", {\"metadata\": []}], \"tasks\" : [\"description\", \"state\", \"owner_user\", \"comments\"]}",
                 "public": True,
                 "date_created": date_created,
                 "date_modified": date_modified,
