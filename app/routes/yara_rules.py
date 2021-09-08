@@ -475,7 +475,8 @@ def batch_update_yara_rules():
     if 'batch' in request.json and request.json['batch']:
         return batch_update(batch=request.json['batch'],
                             artifact=yara_rule.Yara_rule,
-                            session=db.session)
+                            session=db.session,
+                            entity_mapping=ENTITY_MAPPING["SIGNATURE"])
 
 
 @app.route('/ThreatKB/yara_rules/<int:id>', methods=['DELETE'])

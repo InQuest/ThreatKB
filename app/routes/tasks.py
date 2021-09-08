@@ -139,6 +139,7 @@ def batch_update_tasks():
         return batch_update(batch=request.json['batch'],
                             artifact=tasks.Tasks,
                             session=db.session,
+                            entity_mapping=ENTITY_MAPPING["TASK"],
                             include_tags=False)
 
 

@@ -1,3 +1,5 @@
+from sqlalchemy import bindparam
+
 from app import app, db, admin_only, auto
 from app.models import comments
 from flask import abort, jsonify, request, Response
@@ -83,3 +85,23 @@ def delete_comments(id):
     db.session.delete(entity)
     db.session.commit()
     return jsonify(''), 204
+
+
+def create_batch_comments(comment, entity_type, list_of_ids, user_id):
+    comments_to_create = []
+    for entity_id in list_of_ids:
+        comments_to_create.append({
+            "comment": comment,
+            "entity_type": entity_type,
+            "entity_id": entity_id,
+            "user_id": user_id
+        })
+
+    if comments_to_create:
+        db.session.execute(comments.Comments.__table__.insert().values(
+            comment=bindparam("comment"),
+            entity_type=bindparam("entity_type"),
+            entity_id=bindparam("entity_id"),
+            user_id=bindparam("user_id")
+        ), comments_to_create)
+        db.session.commit()

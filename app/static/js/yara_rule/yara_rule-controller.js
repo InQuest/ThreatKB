@@ -10,6 +10,22 @@ angular.module('ThreatKB')
 
             $scope.start_filter_requests_length = Cfg_settings.get({key: "START_FILTER_REQUESTS_LENGTH"});
 
+            $scope.batchEditableColumns = [];
+            $scope.batchEditableMetadata = [];
+            Cfg_settings.get({key: "BATCH_EDIT_CONFIGURATION"}).$promise.then(function (batchEditConfig) {
+                    let batchEditableJson = JSON.parse(batchEditConfig.value);
+                    if (batchEditableJson !== undefined && batchEditableJson.hasOwnProperty('yara_rules')) {
+                        for (const value of batchEditableJson.yara_rules) {
+                            if (value instanceof Object && value.hasOwnProperty('metadata')) {
+                                $scope.batchEditableMetadata = value.metadata;
+                            } else {
+                                $scope.batchEditableColumns.push(value);
+                            }
+                        }
+                    }
+                }
+            );
+
             $('input[type=number]').on('mousewheel', function () {
                 var el = $(this);
                 el.blur();
@@ -354,7 +370,7 @@ angular.module('ThreatKB')
                     // Set new request cancelation trigger
                     cancelGetPage = $q.defer();
                     // ... and fire off a cancelable request
-                    $http.get(url, { timeout: cancelGetPage.promise })
+                    $http.get(url, {timeout: cancelGetPage.promise})
                         .then(function (response) {
                             $scope.gridOptions.totalItems = response.data.total_count;
                             $scope.gridOptions.data = response.data.data;
@@ -430,15 +446,17 @@ angular.module('ThreatKB')
             };
 
             $scope.save_batch = function () {
-                var sigsToUpdate = {
-                    owner_user: $scope.batch.owner,
-                    state: $scope.batch.state,
-                    description: $scope.batch.description,
-                    category: $scope.batch.category,
-                    tags: $scope.batch.tags,
+                let sigsToUpdate = {
                     ids: []
                 };
-                for (var i = 0; i < $scope.checked_indexes.length; i++) {
+                for (const property in $scope.batch) {
+                    if (property === "owner") {
+                        sigsToUpdate.owner_user = $scope.batch[property];
+                    } else if (property !== "metadata") {
+                        sigsToUpdate[property] = $scope.batch[property];
+                    }
+                }
+                for (let i = 0; i < $scope.checked_indexes.length; i++) {
                     if ($scope.checked_indexes[i]) {
                         sigsToUpdate.ids.push($scope.yara_rules[i].id);
                     }
@@ -618,7 +636,19 @@ angular.module('ThreatKB')
                     resolve: {
                         batch: function () {
                             return $scope.batch;
-                        }
+                        },
+                        batchFields: function () {
+                            return $scope.batchEditableColumns;
+                        },
+                        batchMetadata: function () {
+                            return $scope.batchEditableMetadata;
+                        },
+                        metadata: ['Metadata', function (Metadata) {
+                            return Metadata.query({
+                                filter: "signature",
+                                format: "dict"
+                            });
+                        }]
                     }
                 });
 
@@ -694,14 +724,14 @@ angular.module('ThreatKB')
             $scope.Comments = Comments;
             $scope.Files = Files;
             $scope.selected_signature = null;
-            
+
             $scope.selectedRevisions = {
                 main: null,
                 compared: null
             };
             $scope.selected_revision = null;
             $scope.compared_revision = null;
-            
+
             $scope.users = Users.query();
 
             $scope.editor = {
@@ -816,7 +846,7 @@ angular.module('ThreatKB')
             };
 
             $scope.datepickers = {};
-            $scope.openDatepicker = function(id) {
+            $scope.openDatepicker = function (id) {
                 $scope.datepickers[id] = true;
             };
 
@@ -1020,7 +1050,7 @@ angular.module('ThreatKB')
                 $scope.initialized = false;
             };
 
-            $scope.initialize_checked_files = function(files) {
+            $scope.initialize_checked_files = function (files) {
                 if (!$scope.initialized) {
                     files.forEach(function (item) {
                         $scope.checked_files[item.id] = false;
@@ -1049,7 +1079,7 @@ angular.module('ThreatKB')
             };
 
             $scope.uncheck_all_files = function () {
-                $scope.checked_files.forEach(function(item, index, arr) {
+                $scope.checked_files.forEach(function (item, index, arr) {
                     arr[index] = false;
                 });
                 $scope.checked_file_counter = 0;
@@ -1057,14 +1087,14 @@ angular.module('ThreatKB')
 
             $scope.check_all_files = function () {
                 let i = 0;
-                $scope.checked_files.forEach(function(item, index, arr) {
+                $scope.checked_files.forEach(function (item, index, arr) {
                     arr[index] = true;
                     i++;
                 });
                 $scope.checked_file_counter = i;
             };
 
-            $scope.delete_selected_files = function() {
+            $scope.delete_selected_files = function () {
                 console.log($scope.checked_files);
                 let filesToDelete = {
                     ids: []
@@ -1137,15 +1167,47 @@ angular.module('ThreatKB')
             };
 
         }])
-    .controller('Yara_ruleBatchEditController', ['$scope', '$uibModalInstance', 'batch', 'Users', 'Cfg_states', 'Tags', 'CfgCategoryRangeMapping',
-        function ($scope, $uibModalInstance, batch, Users, Cfg_states, Tags, CfgCategoryRangeMapping) {
+    .controller('Yara_ruleBatchEditController', ['$scope', '$uibModalInstance', 'batch', 'Users', 'Cfg_states', 'Tags', 'CfgCategoryRangeMapping', 'Cfg_settings', 'batchFields', 'batchMetadata', 'metadata',
+        function ($scope, $uibModalInstance, batch, Users, Cfg_states, Tags, CfgCategoryRangeMapping, Cfg_settings, batchFields, batchMetadata, metadata) {
             $scope.batch = batch;
+
+            $scope.batchFields = batchFields;
+
+            $scope.batchMetadata = batchMetadata;
+
+            $scope.batch.metadata = metadata;
+            $scope.metadata = metadata;
 
             $scope.users = Users.query();
 
             $scope.cfg_states = Cfg_states.query();
 
+            $scope.update_selected_metadata = function (m, selected) {
+                if (!$scope.batch.metadata_values[m.key]) {
+                    $scope.batch.metadata_values[m.key] = {};
+                }
+                $scope.batch.metadata_values[m.key].value = selected.choice;
+            };
+
             $scope.cfg_category_range_mapping = CfgCategoryRangeMapping.query();
+
+            let mitre_techniques = Cfg_settings.get({key: "MITRE_TECHNIQUES"});
+            if (mitre_techniques.$promise !== null && mitre_techniques.$promise !== undefined) {
+                mitre_techniques.$promise.then(
+                    function (techniques) {
+                        $scope.mitre_techniques = techniques.value.split(",");
+                    }
+                );
+            }
+
+            let mitre_tactics = Cfg_settings.get({key: "MITRE_TACTICS"});
+            if (mitre_tactics.$promise !== null && mitre_tactics.$promise !== undefined) {
+                mitre_tactics.$promise.then(
+                    function (tactics) {
+                        $scope.mitre_tactics = tactics.value.split(",");
+                    }
+                );
+            }
 
             $scope.ok = function () {
                 $uibModalInstance.close($scope.batch);
@@ -1160,7 +1222,7 @@ angular.module('ThreatKB')
             };
 
             $scope.datepickers = {};
-            $scope.openDatepicker = function(id) {
+            $scope.openDatepicker = function (id) {
                 $scope.datepickers[id] = true;
             };
 
@@ -1182,7 +1244,9 @@ angular.module('ThreatKB')
             };
 
             $scope.$watch(
-                function () { return $scope.selectedRevisions.main; },
+                function () {
+                    return $scope.selectedRevisions.main;
+                },
                 function (value) {
                     $scope.selectedRevisions.compared = null;
                     if (value) {
@@ -1204,7 +1268,9 @@ angular.module('ThreatKB')
                 }
             );
             $scope.$watch(
-                function () { return $scope.selectedRevisions.compared; },
+                function () {
+                    return $scope.selectedRevisions.compared;
+                },
                 function (value) {
                     if (value) {
                         if (!$scope.selectedRevisions.compared.yara_rule_string) {

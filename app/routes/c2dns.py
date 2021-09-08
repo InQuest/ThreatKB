@@ -1,6 +1,6 @@
 from app import app, db, auto, ENTITY_MAPPING
 from app.models import c2dns
-from flask import abort, jsonify, request, Response, json
+from flask import abort, jsonify, request, Response
 from flask_login import login_required, current_user
 from dateutil import parser
 from sqlalchemy import exc
@@ -220,7 +220,8 @@ def batch_update_c2dns():
     if 'batch' in request.json and request.json['batch']:
         return batch_update(batch=request.json['batch'],
                             artifact=c2dns.C2dns,
-                            session=db.session)
+                            session=db.session,
+                            entity_mapping=ENTITY_MAPPING["DNS"])
 
 
 @app.route('/ThreatKB/c2dns/<int:id>', methods=['DELETE'])
