@@ -30,7 +30,7 @@ setup(
         'alembic==0.9.4',
         'amqp==2.2.1',
         'app==0.0.1',
-        'Babel==2.4.0',
+        'Babel==2.9.1',
         'bcrypt==3.1.3',
         'billiard==3.5.0.3',
         'blinker==1.4',
