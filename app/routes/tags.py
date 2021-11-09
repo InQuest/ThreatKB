@@ -1,7 +1,7 @@
 from app import app, db, admin_only, auto
 from app.models import tags
 from flask import abort, jsonify, request, Response
-from flask_login import login_required
+from flask_login import login_required, current_user
 import json
 
 from app.models.tags_mapping import Tags_mapping
@@ -39,14 +39,16 @@ def create_tags():
     return jsonify(created_tag.to_dict()), 201
 
 
-def create_tag(tag_text):
+def create_tag(tag_text, commit=True):
     entity = tags.Tags.query.filter(tags.Tags.text == tag_text).first()
     if not entity:
         entity = tags.Tags(
-            text=tag_text
+            text=tag_text,
+            created_user_id=current_user.id
         )
         db.session.add(entity)
-        db.session.commit()
+        if commit:
+            db.session.commit()
     return entity
 
 
@@ -55,7 +57,7 @@ def create_tag(tag_text):
 @login_required
 @admin_only()
 def update_tags(id):
-    """Update tag associatd with given id
+    """Update tag associated with given id
     From Data: text
     Return: tag dictionary"""
     entity = tags.Tags.query.get(id)
@@ -66,7 +68,8 @@ def update_tags(id):
     if not entity1:
         entity = tags.Tags(
             text=request.json['text'],
-            id=id
+            id=id,
+            created_user_id=current_user.id
         )
         db.session.merge(entity)
         db.session.commit()
