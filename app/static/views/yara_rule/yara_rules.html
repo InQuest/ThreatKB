@@ -792,6 +792,10 @@
         <button type="button" class="btn btn-secondary" ng-disabled="!checked_counter" ng-click="download_rules()">
             Download ({{ checked_counter }})
         </button>
+        <button type="button" class="btn btn-secondary" ng-disabled="!checked_counter || checked_counter > 1"
+                ng-click="duplicate_rule()">
+            Duplicate
+        </button>
         <button type="button" class="btn btn-secondary" ng-if="batchEditableColumns.length > 0"
                 ng-disabled="!checked_counter || checked_counter<2"
                 ng-click="open_batch()">

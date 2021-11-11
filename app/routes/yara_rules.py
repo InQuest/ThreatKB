@@ -664,3 +664,93 @@ def revert_yara_rule_to_revision(yara_rule_id, revision):
         db.session.commit()
 
     return jsonify(''), 204
+
+
+@app.route('/ThreatKB/yara_rules/duplicate', methods=['POST'])
+@auto.doc()
+@login_required
+def duplicate_yara_rule():
+    """Duplicate yara rule
+    From Data: id
+    Return: yara_rule artifact dictionary"""
+
+    original_id = 0
+    if 'id' in request.json and request.json['id']:
+        original_id = request.json['id']
+    else:
+        abort(404)
+
+    original_entity = yara_rule.Yara_rule.query.get(original_id).to_dict()
+
+    if not original_entity:
+        abort(404)
+    if not current_user.admin:
+        abort(403)
+
+    release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
+    draft_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_staging_state > 0).first()
+
+    if not release_state or not draft_state:
+        raise Exception("You must set a release, draft, and retirement state before modifying signatures")
+
+    new_rule_name = original_entity["name"] + "_dup"
+    unique_rule_name_enforcement = Cfg_settings.get_setting("ENFORCE_UNIQUE_YARA_RULE_NAMES")
+    if unique_rule_name_enforcement and util.strtobool(unique_rule_name_enforcement):
+        if any([True for rule in
+                db.session.query(yara_rule.Yara_rule).filter(yara_rule.Yara_rule.name == new_rule_name).all() if
+                not rule.id == id]):
+            raise Exception("You cannot save two rules with the same name.")
+
+    entity = yara_rule.Yara_rule(
+        state=original_entity["state"],
+        name=new_rule_name,
+        description=original_entity["description"],
+        references=original_entity["references"],
+        category=original_entity["category"],
+        condition=original_entity["condition"],
+        strings=original_entity["strings"],
+        created_user_id=current_user.id,
+        modified_user_id=current_user.id,
+        owner_user_id=current_user.id,
+        imports=original_entity["imports"],
+        active=True
+    )
+
+    mitre_techniques = Cfg_settings.get_setting("MITRE_TECHNIQUES").split(",")
+    entity.mitre_techniques = original_entity["mitre_techniques"]
+    matches = [technique for technique in entity.mitre_techniques if technique not in mitre_techniques]
+    if matches:
+        raise (Exception(
+            "The following techniques were not found in the configuration: %s. Check 'MITRE_TECHNIQUES' on the settings page" % (
+                matches)))
+
+    mitre_tactics = Cfg_settings.get_setting("MITRE_TACTICS").split(",")
+    entity.mitre_tactics = original_entity["mitre_tactics"]
+    matches = [tactic for tactic in entity.mitre_tactics if tactic not in mitre_tactics]
+    if matches:
+        raise (Exception(
+            "The following tactics were not found in the configuration: %s. Check 'MITRE_TACTICS' on the settings page" % (
+                matches)))
+
+    if entity.state == release_state:
+        entity.state = draft_state.state
+
+    db.session.add(entity)
+    db.session.commit()
+
+    entity.tags = merge_tags_mapping(entity.__tablename__, entity.id, original_entity["tags"])
+
+    dirty = False
+    for name, value_dict in original_entity["metadata_values"].iteritems():
+        if not name or not value_dict:
+            continue
+        m = db.session.query(Metadata).filter(Metadata.key == name).filter(
+            Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).first()
+        db.session.add(MetadataMapping(value=value_dict["value"], metadata_id=m.id, artifact_id=entity.id,
+                                       created_user_id=current_user.id))
+        dirty = True
+
+    if dirty:
+        db.session.commit()
+
+    return jsonify(entity.to_dict()), 201

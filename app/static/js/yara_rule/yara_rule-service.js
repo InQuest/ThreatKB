@@ -102,6 +102,18 @@ angular.module('ThreatKB')
                 }
             );
         }
+        function duplicateSignature(sigId) {
+            return $http.post('/ThreatKB/yara_rules/duplicate', {
+                id: sigId
+            }).then(function (success) {
+                    if (success.status === 201 && success.data) {
+                        return success.data;
+                    }
+                }, function (error) {
+                    return $q.reject(error.data);
+                }
+            );
+        }
         return {
             resource: $resource('ThreatKB/yara_rules/:id', {}, {
                 'query': {method: 'GET', isArray: true},
@@ -115,6 +127,7 @@ angular.module('ThreatKB')
             getSignatureFromRevision: getSignatureFromRevision,
             revertRevision: revertRevision,
             activateRule: activateRule,
-            delete_all_inactive: delete_all_inactive
+            delete_all_inactive: delete_all_inactive,
+            duplicateSignature: duplicateSignature
         };
     }]);
