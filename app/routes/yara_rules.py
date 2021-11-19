@@ -1,7 +1,5 @@
 import re
 
-from sqlalchemy import and_
-
 from app import app, db, auto, ENTITY_MAPPING
 from app.models.cfg_category_range_mapping import CfgCategoryRangeMapping
 from app.models.yara_rule import Yara_rule_history, Yara_rule
@@ -209,20 +207,8 @@ def create_yara_rule():
     except:
         rule_state = request.json.get("state", None)
 
-    unique_rule_name_enforcement = Cfg_settings.get_setting("ENFORCE_UNIQUE_YARA_RULE_NAMES")
-    if unique_rule_name_enforcement and util.strtobool(unique_rule_name_enforcement):
-        if db.session.query(yara_rule.Yara_rule).filter(yara_rule.Yara_rule.name == request.json['name']).first():
-            raise Exception("You cannot save two rules with the same name.")
-
-    compile_on_save = Cfg_settings.get_setting("COMPILE_YARA_RULE_ON_SAVE")
-    if compile_on_save and util.strtobool(compile_on_save) and (
-            rule_state == release_state.state or rule_state == draft_state.state):
-        test_result, return_code, stdout, stderr = test_yara_rule.does_rule_compile(request.json)
-        if not test_result:
-            raise Exception(
-                "State submitted is " + str(
-                    rule_state) + " and the rule could not be saved because it does not compile.\n\nerror_code=" + str(
-                    return_code) + "\n\n" + stderr)
+    validate_unique_rule_name(request.json['name'], True)
+    validate_compilation(request.json, rule_state, release_state, draft_state)
 
     if request.json['category'] and 'category' in request.json['category']:
         new_sig_id = request.json['category']['current'] + 1
@@ -244,21 +230,11 @@ def create_yara_rule():
         active=request.json.get("active", True)
     )
 
-    mitre_techniques = Cfg_settings.get_setting("MITRE_TECHNIQUES").split(",")
     entity.mitre_techniques = request.json.get("mitre_techniques", [])
-    matches = [technique for technique in entity.mitre_techniques if technique not in mitre_techniques]
-    if matches:
-        raise (Exception(
-            "The following techniques were not found in the configuration: %s. Check 'MITRE_TECHNIQUES' on the settings page" % (
-                matches)))
+    validate_mitre_techniques(entity.mitre_techniques)
 
-    mitre_tactics = Cfg_settings.get_setting("MITRE_TACTICS").split(",")
     entity.mitre_tactics = request.json.get("mitre_tactics", [])
-    matches = [tactic for tactic in entity.mitre_tactics if tactic not in mitre_tactics]
-    if matches:
-        raise (Exception(
-            "The following tactics were not found in the configuration: %s. Check 'MITRE_TACTICS' on the settings page" % (
-                matches)))
+    validate_mitre_tactics(entity.mitre_tactics)
 
     if entity.state == release_state:
         entity.state = draft_state.state
@@ -277,25 +253,7 @@ def create_yara_rule():
     if new_sig_id > 0:
         update_cfg_category_range_mapping_current(request.json['category']['id'], new_sig_id)
 
-    dirty = False
-    for name, value_dict in request.json.get("metadata_values", {}).iteritems():
-        if not name or not value_dict:
-            continue
-
-        m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
-            Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).filter(
-            MetadataMapping.artifact_id == entity.id).first()
-        if m:
-            m.value = value_dict["value"]
-            db.session.add(m)
-            dirty = True
-        else:
-            m = db.session.query(Metadata).filter(Metadata.key == name).filter(
-                Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).first()
-            db.session.add(MetadataMapping(value=value_dict["value"], metadata_id=m.id, artifact_id=entity.id,
-                                           created_user_id=current_user.id))
-            dirty = True
-
+    dirty = add_or_update_metadata_mapping(request.json.get("metadata_values", {}), entity.id)
     if dirty:
         db.session.commit()
 
@@ -338,22 +296,8 @@ def update_yara_rule(id):
     except:
         rule_state = request.json.get("state", None)
 
-    unique_rule_name_enforcement = Cfg_settings.get_setting("ENFORCE_UNIQUE_YARA_RULE_NAMES")
-    if unique_rule_name_enforcement and util.strtobool(unique_rule_name_enforcement):
-        if any([True for rule in
-                db.session.query(yara_rule.Yara_rule).filter(yara_rule.Yara_rule.name == request.json['name']).all() if
-                not rule.id == id]):
-            raise Exception("You cannot save two rules with the same name.")
-
-    compile_on_save = Cfg_settings.get_setting("COMPILE_YARA_RULE_ON_SAVE")
-    if compile_on_save and util.strtobool(compile_on_save) and (
-            rule_state == release_state.state or rule_state == draft_state.state):
-        test_result, return_code, stdout, stderr = test_yara_rule.does_rule_compile(request.json)
-        if not test_result:
-            raise Exception(
-                "State submitted is " + str(
-                    rule_state) + " and the rule could not be saved because it does not compile.\n\nerror_code=" + str(
-                    return_code) + "\n\n" + stderr)
+    validate_unique_rule_name(request.json['name'], False)
+    validate_compilation(request.json, rule_state, release_state, draft_state)
 
     if not release_state or not draft_state:
         raise Exception("You must set a release, draft, and retirement state before modifying signatures")
@@ -404,21 +348,11 @@ def update_yara_rule(id):
         active=request.json.get("active", entity.active)
     )
 
-    mitre_techniques = Cfg_settings.get_setting("MITRE_TECHNIQUES").split(",")
     entity.mitre_techniques = request.json.get("mitre_techniques", [])
-    matches = [technique for technique in entity.mitre_techniques if technique not in mitre_techniques]
-    if matches:
-        raise (Exception(
-            "The following techniques were not found in the configuration: %s. Check 'MITRE_TECHNIQUES' on the settings page" % (
-                matches)))
+    validate_mitre_techniques(entity.mitre_techniques)
 
-    mitre_tactics = Cfg_settings.get_setting("MITRE_TACTICS").split(",")
     entity.mitre_tactics = request.json.get("mitre_tactics", [])
-    matches = [tactic for tactic in entity.mitre_tactics if tactic not in mitre_tactics]
-    if matches:
-        raise (Exception(
-            "The following tactics were not found in the configuration: %s. Check 'MITRE_TACTICS' on the settings page" % (
-                matches)))
+    validate_mitre_tactics(entity.mitre_tactics)
 
     if old_state == release_state.state and entity.state == release_state.state and not do_not_bump_revision:
         entity.state = draft_state.state
@@ -426,25 +360,7 @@ def update_yara_rule(id):
     db.session.merge(entity)
     db.session.commit()
 
-    dirty = False
-    for name, value_dict in request.json.get("metadata_values", {}).iteritems():
-        if not name or not value_dict:
-            continue
-
-        m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
-            Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).filter(
-            MetadataMapping.artifact_id == entity.id).first()
-        if m:
-            m.value = value_dict["value"]
-            db.session.add(m)
-            dirty = True
-        else:
-            m = db.session.query(Metadata).filter(Metadata.key == name).filter(
-                Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).first()
-            db.session.add(MetadataMapping(value=value_dict["value"], metadata_id=m.id, artifact_id=entity.id,
-                                           created_user_id=current_user.id))
-            dirty = True
-
+    dirty = add_or_update_metadata_mapping(request.json.get("metadata_values", {}), entity.id)
     if dirty:
         db.session.commit()
 
@@ -502,7 +418,6 @@ def delete_yara_rule(id):
         delete_tags_mapping(entity.__tablename__, entity.id)
         delete_bookmarks(ENTITY_MAPPING["SIGNATURE"], id, current_user.id)
     else:
-
         db.session.query(yara_rule.Yara_testing_history).filter(
             yara_rule.Yara_testing_history.yara_rule_id.in_([entity.id])).delete(synchronize_session='fetch')
         db.session.query(yara_rule.Yara_rule_history).filter(
@@ -586,7 +501,6 @@ def revert_yara_rule_to_revision(yara_rule_id, revision):
 
     if not current_entity or not revision_entity:
         abort(404)
-
     if not current_user.admin and current_entity.owner_user_id != current_user.id:
         abort(403)
 
@@ -624,31 +538,128 @@ def revert_yara_rule_to_revision(yara_rule_id, revision):
         mitre_tactics=yara_revision_dict['mitre_tactics']
     )
 
+    validate_mitre_techniques(current_entity.mitre_techniques)
+    validate_mitre_tactics(current_entity.mitre_tactics)
+
+    db.session.merge(current_entity)
+    db.session.commit()
+
+    dirty = add_or_update_metadata_mapping(yara_revision_dict['metadata_values'], current_entity.id)
+    if dirty:
+        db.session.commit()
+
+    return jsonify(''), 204
+
+
+@app.route('/ThreatKB/yara_rules/duplicate', methods=['POST'])
+@auto.doc()
+@login_required
+def duplicate_yara_rule():
+    """Duplicate yara rule
+    From Data: id
+    Return: yara_rule artifact dictionary"""
+
+    original_id = 0
+    if 'id' in request.json and request.json['id']:
+        original_id = request.json['id']
+    else:
+        abort(404)
+
+    original_entity = yara_rule.Yara_rule.query.get(original_id).to_dict()
+
+    if not original_entity:
+        abort(404)
+    if not current_user.admin:
+        abort(403)
+
+    release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
+    draft_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_staging_state > 0).first()
+
+    if not release_state or not draft_state:
+        raise Exception("You must set a release, draft, and retirement state before modifying signatures")
+
+    new_rule_name = original_entity["name"] + "_dup"
+    validate_unique_rule_name(new_rule_name, True)
+
+    entity = yara_rule.Yara_rule(
+        state=original_entity["state"],
+        name=new_rule_name,
+        description=original_entity["description"],
+        references=original_entity["references"],
+        category=original_entity["category"],
+        condition=original_entity["condition"],
+        strings=original_entity["strings"],
+        created_user_id=current_user.id,
+        modified_user_id=current_user.id,
+        owner_user_id=current_user.id,
+        imports=original_entity["imports"],
+        active=True
+    )
+
+    entity.mitre_techniques = original_entity["mitre_techniques"]
+    validate_mitre_techniques(entity.mitre_techniques)
+
+    entity.mitre_tactics = original_entity["mitre_tactics"]
+    validate_mitre_tactics(entity.mitre_tactics)
+
+    if entity.state == release_state:
+        entity.state = draft_state.state
+
+    db.session.add(entity)
+    db.session.commit()
+
+    entity.tags = merge_tags_mapping(entity.__tablename__, entity.id, original_entity["tags"])
+
+    dirty = add_or_update_metadata_mapping(original_entity["metadata_values"], entity.id)
+    if dirty:
+        db.session.commit()
+
+    return jsonify(entity.to_dict()), 201
+
+
+def validate_unique_rule_name(new_rule_name, is_new_rule):
+    unique_rule_name_enforcement = Cfg_settings.get_setting("ENFORCE_UNIQUE_YARA_RULE_NAMES")
+    if unique_rule_name_enforcement and util.strtobool(unique_rule_name_enforcement):
+        rule_broken = False
+        if is_new_rule and db.session.query(yara_rule.Yara_rule).filter(
+                yara_rule.Yara_rule.name == new_rule_name).first():
+            rule_broken = True
+        if not is_new_rule and any([True for rule in
+                                    db.session.query(yara_rule.Yara_rule).filter(
+                                        yara_rule.Yara_rule.name == new_rule_name).all() if
+                                    not rule.id == id]):
+            rule_broken = True
+        if rule_broken:
+            raise Exception("You cannot save two rules with the same name.")
+
+
+def validate_mitre_techniques(entity_mitre_techniques):
     mitre_techniques = Cfg_settings.get_setting("MITRE_TECHNIQUES").split(",")
-    matches = [technique for technique in current_entity.mitre_techniques if technique not in mitre_techniques]
+    matches = [technique for technique in entity_mitre_techniques if technique not in mitre_techniques]
     if matches:
         raise (Exception(
             "The following techniques were not found in the configuration: %s. Check 'MITRE_TECHNIQUES' on the settings page" % (
                 matches)))
 
+
+def validate_mitre_tactics(entity_mitre_tactics):
     mitre_tactics = Cfg_settings.get_setting("MITRE_TACTICS").split(",")
-    matches = [tactic for tactic in current_entity.mitre_tactics if tactic not in mitre_tactics]
+    matches = [tactic for tactic in entity_mitre_tactics if tactic not in mitre_tactics]
     if matches:
         raise (Exception(
             "The following tactics were not found in the configuration: %s. Check 'MITRE_TACTICS' on the settings page" % (
                 matches)))
 
-    db.session.merge(current_entity)
-    db.session.commit()
 
+def add_or_update_metadata_mapping(metadata_values, entity_id):
     dirty = False
-    for name, value_dict in yara_revision_dict['metadata_values'].iteritems():
+    for name, value_dict in metadata_values.iteritems():
         if not name or not value_dict:
             continue
 
         m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
             Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).filter(
-            MetadataMapping.artifact_id == current_entity.id).first()
+            MetadataMapping.artifact_id == entity_id).first()
         if m:
             m.value = value_dict["value"]
             db.session.add(m)
@@ -656,11 +667,19 @@ def revert_yara_rule_to_revision(yara_rule_id, revision):
         else:
             m = db.session.query(Metadata).filter(Metadata.key == name).filter(
                 Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).first()
-            db.session.add(MetadataMapping(value=value_dict["value"], metadata_id=m.id, artifact_id=current_entity.id,
+            db.session.add(MetadataMapping(value=value_dict["value"], metadata_id=m.id, artifact_id=entity_id,
                                            created_user_id=current_user.id))
             dirty = True
+    return dirty
 
-    if dirty:
-        db.session.commit()
 
-    return jsonify(''), 204
+def validate_compilation(json_dict, rule_state, release_state, draft_state):
+    compile_on_save = Cfg_settings.get_setting("COMPILE_YARA_RULE_ON_SAVE")
+    if compile_on_save and util.strtobool(compile_on_save) and (
+            rule_state == release_state.state or rule_state == draft_state.state):
+        test_result, return_code, stdout, stderr = test_yara_rule.does_rule_compile(json_dict)
+        if not test_result:
+            raise Exception(
+                "State submitted is " + str(
+                    rule_state) + " and the rule could not be saved because it does not compile.\n\nerror_code=" + str(
+                    return_code) + "\n\n" + stderr)

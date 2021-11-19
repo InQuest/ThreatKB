@@ -100,20 +100,20 @@ angular.module('ThreatKB')
                     return trigger.getAttribute('aria-label');
                 }
             });
-            $scope.get_sigs_to_copy = function () {
-                var sigsToCopy = {
+            $scope.getSelectedSigIds = function () {
+                let selectedSigs = {
                     ids: []
                 };
-                for (var i = 0; i < $scope.checked_indexes.length; i++) {
+                for (let i = 0; i < $scope.checked_indexes.length; i++) {
                     if ($scope.checked_indexes[i]) {
-                        sigsToCopy.ids.push($scope.yara_rules[i].id);
+                        selectedSigs.ids.push($scope.yara_rules[i].id);
                     }
                 }
-                return sigsToCopy;
+                return selectedSigs;
             };
             $scope.copy_rules = function () {
                 blockUI.start("");
-                Yara_rule.copySignatures($scope.get_sigs_to_copy()).then(function (response) {
+                Yara_rule.copySignatures($scope.getSelectedSigIds()).then(function (response) {
                     blockUI.stop();
                     document.getElementById('batchCopyBtn').setAttribute("aria-label", response);
                 }, function (error) {
@@ -121,7 +121,7 @@ angular.module('ThreatKB')
             };
 
             $scope.download_rules = function () {
-                Yara_rule.copySignatures($scope.get_sigs_to_copy()).then(function (response) {
+                Yara_rule.copySignatures($scope.getSelectedSigIds()).then(function (response) {
                     try {
                         FileSaver.saveAs(new Blob([response], {type: "text/plain"}), "yara_rules.txt");
                     } catch (error) {
@@ -130,7 +130,28 @@ angular.module('ThreatKB')
                 }, function (error) {
                     growl.error(error.data, {ttl: -1});
                 });
+            };
 
+            $scope.duplicate_rule = function () {
+                blockUI.start("");
+                let selectedIds = $scope.getSelectedSigIds();
+                if (selectedIds.hasOwnProperty("ids")) {
+                    if (selectedIds.ids.length === 1) {
+                        Yara_rule.duplicateSignature(selectedIds.ids[0]).then(function (response) {
+                            blockUI.stop();
+                            $scope.update(response.id);
+                        }, function (error) {
+                            blockUI.stop();
+                            growl.error(error.data, {ttl: -1});
+                        });
+                    } else {
+                        blockUI.stop();
+                        growl.error("Only one Signature should be selected", {ttl: -1});
+                    }
+                } else {
+                    blockUI.stop();
+                    growl.error("No Signature Selected", {ttl: -1});
+                }
             };
 
             var paginationOptions = {
