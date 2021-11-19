@@ -793,7 +793,8 @@
             Download ({{ checked_counter }})
         </button>
         <button type="button" class="btn btn-secondary" ng-disabled="!checked_counter || checked_counter > 1"
-                ng-click="duplicate_rule()">
+                confirmed-click="duplicate_rule()"
+                ng-confirm-click="Are you sure you want to duplicate selected signature?">
             Duplicate
         </button>
         <button type="button" class="btn btn-secondary" ng-if="batchEditableColumns.length > 0"
