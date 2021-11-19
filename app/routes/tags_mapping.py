@@ -90,17 +90,14 @@ def merge_tags_mapping(table_name, entity_id, entity_tags, no_delete=False):
         except TypeError, e:
             pass
 
-        if not tag in current_tags_text:
+        if tag not in current_tags_text:
             new_tag_mapping = tags_mapping.Tags_mapping()
             new_tag_mapping.source_id = entity_id
             new_tag_mapping.source_table = table_name
             if tag in current_tags_text:
                 new_tag_mapping.tag_id = current_tags[current_tags_text.index(tag)][1].id
             else:
-                new_tag = tags.Tags()
-                new_tag.text = tag
-                new_tag.created_user_id = current_user.id
-                db.session.add(new_tag)
+                new_tag = create_tag(tag, False)
                 db.session.flush()
                 new_tag_mapping.tag_id = new_tag.id
             new_tag_mapping.created_user_id = current_user.id
@@ -133,6 +130,7 @@ def batch_delete_tags_mapping(table, list_of_source_ids):
         db.session.delete(tag)
     db.session.commit()
     return
+
 
 @app.route('/ThreatKB/tags_mapping/<int:id>', methods=['DELETE'])
 @login_required
