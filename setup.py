@@ -34,7 +34,7 @@ setup(
         'bcrypt==3.1.3',
         'billiard==3.5.0.3',
         'blinker==1.4',
-        'celery==4.1.0',
+        'celery==5.2.2',
         'certifi==2017.11.5',
         'cffi==1.10.0',
         'chardet==3.0.4',
