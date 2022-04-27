@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="260px" height="170px" viewBox="0 0 260 170" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 40.2 (33826) - http://www.bohemiancoding.com/sketch -->
+    <title>icon-flag-ax</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="3" fill="#0053A5" x="0" y="0" width="260" height="170"></rect>
+        <polygon id="2" fill="#FFCE00" points="130 60 130 0 80 0 80 60 0 60 0 110 80 110 80 170 130 170 130 110 260 110 260 60"></polygon>
+        <polygon id="1" fill="#D21034" points="115 75 115 0 95 0 95 75 0 75 0 95 95 95 95 170 115 170 115 95 260 95 260 75"></polygon>
+    </g>
+</svg>

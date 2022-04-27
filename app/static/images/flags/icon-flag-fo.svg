@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="180px" height="120px" viewBox="0 0 180 120" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 40.2 (33826) - http://www.bohemiancoding.com/sketch -->
+    <title>icon-flag-fo</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="icon-flag-fo">
+            <rect id="Rectangle-path" fill="#FFFFFF" x="0" y="0" width="180" height="120"></rect>
+            <g id="Group" fill="#0065BD">
+                <rect id="Rectangle-path" x="49.0909091" y="0" width="32.7272727" height="120"></rect>
+                <rect id="Rectangle-path" x="0" y="45" width="180" height="30"></rect>
+            </g>
+            <g id="Group" fill="#ED2939">
+                <rect id="Rectangle-path" x="57.2727273" y="0" width="16.3636364" height="120"></rect>
+                <rect id="Rectangle-path" x="0" y="52.5" width="180" height="15"></rect>
+            </g>
+        </g>
+    </g>
+</svg>

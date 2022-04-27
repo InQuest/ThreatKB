@@ -4,6 +4,7 @@ from flask import abort, jsonify, request, Response
 from flask_login import login_required, current_user
 from dateutil import parser
 import json
+import pycountry
 
 @app.route('/ThreatKB/cfg_settings', methods=['GET'])
 @auto.doc()
@@ -13,6 +14,7 @@ def get_all_cfg_settings():
     """Return all public config settings
     Return: list of config settings dictionaries"""
     entities = cfg_settings.Cfg_settings.query.filter_by(public=True).all()
+    pycountry.countries.__class__
     return Response(json.dumps([entity.to_dict() for entity in entities]), mimetype='application/json')
 
 

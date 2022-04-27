@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="180px" height="120px" viewBox="0 0 180 120" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 40.2 (33826) - http://www.bohemiancoding.com/sketch -->
+    <title>icon-flag-ps</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="Rectangle-path" fill="#007A3D" x="0" y="0" width="180" height="120"></rect>
+        <rect id="Rectangle-path" fill="#FFFFFF" x="0" y="0" width="180" height="80"></rect>
+        <rect id="Rectangle-path" fill="#000000" x="0" y="0" width="180" height="40"></rect>
+        <polygon id="Shape" fill="#CE1126" points="0 0 60 60 0 120"></polygon>
+    </g>
+</svg>
