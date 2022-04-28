@@ -27,8 +27,8 @@ def upgrade():
     sa.Column('value', sa.String(length=2048), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(u'ix_config_key', 'config', ['key'], unique=False)
-    op.create_index(u'ix_config_public', 'config', ['public'], unique=False)
+    op.create_index('ix_config_key', 'config', ['key'], unique=False)
+    op.create_index('ix_config_public', 'config', ['public'], unique=False)
     # ### end Alembic commands ###
 
 

@@ -7,7 +7,7 @@ from flask_login import current_user
 from plyara import Plyara
 
 from more_itertools import unique_everseen
-from sqlalchemy import and_, not_, or_
+from sqlalchemy import and_, not_, or_, text
 
 from app import ENTITY_MAPPING
 from app.models import cfg_settings
@@ -98,9 +98,9 @@ def filter_entities(entity,
 
     clauses = []
 
-    if searches and any([search_key not in entity.__table__.columns.keys()
+    if searches and any([search_key not in list(entity.__table__.columns.keys())
                          and search_key not in ("tags", "owner_user.email", "user.email")
-                         for search_key, val in searches.items()]):
+                         for search_key, val in list(searches.items())]):
         entities = entity.query.outerjoin(Metadata, Metadata.artifact_type == artifact_type).join(
             MetadataMapping, and_(MetadataMapping.metadata_id == Metadata.id, MetadataMapping.artifact_id == entity.id))
     else:
@@ -120,7 +120,7 @@ def filter_entities(entity,
     elif not include_inactive and include_active and hasattr(entity, "active"):
         entities = entities.filter_by(active=True)
 
-    for column, value in searches.items():
+    for column, value in list(searches.items()):
         if not value:
             continue
 
@@ -202,9 +202,9 @@ def filter_entities(entity,
     total_count = entities.count()
 
     if sort_by:
-        filtered_entities = filtered_entities.order_by("%s %s" % (sort_by, sort_direction))
+        filtered_entities = filtered_entities.order_by(text("%s %s" % (sort_by, sort_direction)))
     else:
-        filtered_entities = filtered_entities.order_by("%s DESC" % default_sort)
+        filtered_entities = filtered_entities.order_by(text("%s DESC" % default_sort))
 
     if page_size:
         filtered_entities = filtered_entities.limit(int(page_size))
@@ -250,7 +250,7 @@ def get_strings_and_conditions(rule):
     SEGMENT = None
     for line in rule.splitlines():
         segment_change = False
-        for header, rx in segment_headers.items():
+        for header, rx in list(segment_headers.items()):
             if re.match(rx, line):
                 SEGMENT = header
                 segment_change = True
@@ -280,10 +280,10 @@ def extract_artifacts_by_type(type_, import_objects):
 
         processed.add(import_object[type_])
         temp_object = {"type": type_, "metadata": {}, "artifact": import_object[type_]}
-        for key, val in import_object.iteritems():
+        for key, val in import_object.items():
             if key.lower() == type_ or key.lower() == "artifact":
                 continue
-            elif key in table_mapping[type_].__table__.columns.keys():
+            elif key in list(table_mapping[type_].__table__.columns.keys()):
                 temp_object[key] = val
             else:
                 temp_object["metadata"][key] = val

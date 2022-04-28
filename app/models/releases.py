@@ -5,7 +5,7 @@ from sqlalchemy import and_
 from dateutil import parser
 import json
 from sqlalchemy.event import listens_for
-import StringIO
+import io
 import zipfile
 import zlib
 import re
@@ -144,21 +144,21 @@ class Release(db.Model):
         if not last_release or not all(
             [artifact in last_release.release_data_dict for artifact in ["Signatures", "IP", "DNS"]]):
             release_data["Signatures"]["Added"] = [sig for id_, sig in
-                                                   release_data["Signatures"]["Signatures"].iteritems()]
-            release_data["IP"]["Added"] = [ip for id_, ip in release_data["IP"]["IP"].iteritems()]
-            release_data["DNS"]["Added"] = [dns for id_, dns in release_data["DNS"]["DNS"].iteritems()]
+                                                   release_data["Signatures"]["Signatures"].items()]
+            release_data["IP"]["Added"] = [ip for id_, ip in release_data["IP"]["IP"].items()]
+            release_data["DNS"]["Added"] = [dns for id_, dns in release_data["DNS"]["DNS"].items()]
             return json.dumps(release_data)
 
         last_release_date = last_release.date_created
         last_release = last_release.release_data_dict
 
         ##### SIGNATURES #######
-        release_eventids = release_data["Signatures"]["Signatures"].keys()
-        last_release_eventids = [long(release_id) for release_id in
-                                 last_release["Signatures"]["Signatures"].keys()]
+        release_eventids = list(release_data["Signatures"]["Signatures"].keys())
+        last_release_eventids = [int(release_id) for release_id in
+                                 list(last_release["Signatures"]["Signatures"].keys())]
 
         try:
-            for signature in release_data["Signatures"]["Signatures"].values():
+            for signature in list(release_data["Signatures"]["Signatures"].values()):
                 eventid = signature["id"]
                 if not eventid in last_release_eventids:
                     release_data["Signatures"]["Added"].append(signature)
@@ -168,17 +168,17 @@ class Release(db.Model):
                         release_data["Signatures"]["Modified"].append(signature)
                     del last_release["Signatures"]["Signatures"][str(eventid)]
 
-            for signature in last_release["Signatures"]["Signatures"].values():
+            for signature in list(last_release["Signatures"]["Signatures"].values()):
                 release_data["Signatures"]["Removed"].append(signature)
         except Exception as e:
             raise Exception(e.message + "\nSignature: id=%s, description=%s" % (signature["id"], signature["name"]))
 
         ###### IPs ########
-        release_ips = release_data["IP"]["IP"].keys()
-        last_release_ips = [long(release_id) for release_id in last_release["IP"]["IP"].keys()]
+        release_ips = list(release_data["IP"]["IP"].keys())
+        last_release_ips = [int(release_id) for release_id in list(last_release["IP"]["IP"].keys())]
 
         try:
-            for ip in release_data["IP"]["IP"].values():
+            for ip in list(release_data["IP"]["IP"].values()):
                 ip_id = ip["id"]
                 if not ip_id in last_release_ips:
                     release_data["IP"]["Added"].append(ip)
@@ -187,17 +187,17 @@ class Release(db.Model):
                         release_data["IP"]["Modified"].append(ip)
                     del last_release["IP"]["IP"][str(ip_id)]
 
-            for ip in last_release["IP"]["IP"].values():
+            for ip in list(last_release["IP"]["IP"].values()):
                 release_data["IP"]["Removed"].append(ip)
         except Exception as e:
             raise Exception(e.message + "\n IP: id=%s,ip=%s" % (ip["id"], ip["ip"]))
 
         ###### DNS #######
-        release_dns = release_data["DNS"]["DNS"].keys()
-        last_release_dns = [long(release_id) for release_id in last_release["DNS"]["DNS"].keys()]
+        release_dns = list(release_data["DNS"]["DNS"].keys())
+        last_release_dns = [int(release_id) for release_id in list(last_release["DNS"]["DNS"].keys())]
 
         try:
-            for dns in release_data["DNS"]["DNS"].values():
+            for dns in list(release_data["DNS"]["DNS"].values()):
                 dns_id = dns["id"]
                 if not dns_id in last_release_dns:
                     release_data["DNS"]["Added"].append(dns)
@@ -206,7 +206,7 @@ class Release(db.Model):
                         release_data["DNS"]["Modified"].append(dns)
                     del last_release["DNS"]["DNS"][str(dns_id)]
 
-            for ip in last_release["DNS"]["DNS"].values():
+            for ip in list(last_release["DNS"]["DNS"].values()):
                 release_data["DNS"]["Removed"].append(ip)
         except Exception as e:
             raise Exception(e.message + "\n DNS: id=%s,domain_name=%s" % (dns["id"], dns["domain_name"]))
@@ -276,7 +276,7 @@ class Release(db.Model):
 
         message += "\n\n%s" % (postpend_text) if postpend_text else ""
 
-        stream = StringIO.StringIO()
+        stream = io.StringIO()
         stream.write(message)
         return stream
 
@@ -295,7 +295,7 @@ class Release(db.Model):
             raise Exception("You need to specify a production release state first.")
 
         combined_rules = {}
-        for signature in sorted(self.release_data_dict["Signatures"]["Signatures"].values(),
+        for signature in sorted(list(self.release_data_dict["Signatures"]["Signatures"].values()),
                                 key=lambda x: x["eventid"]):
             category = signature.get("category")
             if not signature["category"] in combined_rules:
@@ -304,9 +304,9 @@ class Release(db.Model):
             combined_rules[category].append(signature)
 
         ips = []
-        for ip in self.release_data_dict["IP"]["IP"].values():
+        for ip in list(self.release_data_dict["IP"]["IP"].values()):
             output = "%s,%s" % (parser.parse(ip.get("date_created")).strftime(date_format), ip.get("ip"))
-            if "description" in ip.keys():
+            if "description" in list(ip.keys()):
                 output += "," + (ip.get("description", None) or "")
             elif "Description" in ip.get("metadata_values", {}):
                 output += "," + (ip["metadata_values"].get("Description", {}).get("value", None) or "")
@@ -317,9 +317,9 @@ class Release(db.Model):
         ips.sort()
 
         dns = []
-        for d in self.release_data_dict["DNS"]["DNS"].values():
+        for d in list(self.release_data_dict["DNS"]["DNS"].values()):
             output = "%s,%s" % (parser.parse(d.get("date_created")).strftime(date_format), d.get("domain_name"))
-            if "description" in d.keys():
+            if "description" in list(d.keys()):
                 output += "," + (d.get("description", None) or "")
             elif "Description" in d.get("metadata_values", {}):
                 output += "," + (d["metadata_values"].get("Description", {}).get("value", None) or "")
@@ -330,9 +330,9 @@ class Release(db.Model):
 
         dns.sort()
 
-        memzip = StringIO.StringIO()
+        memzip = io.StringIO()
         z = zipfile.ZipFile(memzip, mode="w", compression=zipfile.ZIP_DEFLATED)
-        for category, rules in combined_rules.iteritems():
+        for category, rules in combined_rules.items():
             imports = []
             for rule in rules:
                 if rule.get("imports", None):
@@ -369,7 +369,7 @@ def generate_eventid(mapper, connect, target):
 @listens_for(Release, "after_insert")
 def release_made(mapper, connection, target):
     activity_log.log_activity(connection=connection,
-                              activity_type=ACTIVITY_TYPE.keys()[ACTIVITY_TYPE.keys().index("RELEASES_MADE")],
+                              activity_type=list(ACTIVITY_TYPE.keys())[list(ACTIVITY_TYPE.keys()).index("RELEASES_MADE")],
                               activity_text=target.name,
                               activity_date=target.date_created,
                               entity_type=ENTITY_MAPPING["RELEASE"],

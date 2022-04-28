@@ -62,7 +62,7 @@ class Tasks(db.Model):
 @listens_for(Tasks, "after_insert")
 def task_created(mapper, connection, target):
     activity_log.log_activity(connection=connection,
-                              activity_type=ACTIVITY_TYPE.keys()[ACTIVITY_TYPE.keys().index("ARTIFACT_CREATED")],
+                              activity_type=list(ACTIVITY_TYPE.keys())[list(ACTIVITY_TYPE.keys()).index("ARTIFACT_CREATED")],
                               activity_text=target.title,
                               activity_date=target.date_created,
                               entity_type=ENTITY_MAPPING["TASK"],
@@ -78,7 +78,7 @@ def task_modified(mapper, connection, target):
         state_activity_text = activity_log.get_state_change(target, target.title)
         if state_activity_text:
             activity_log.log_activity(connection=connection,
-                                      activity_type=ACTIVITY_TYPE.keys()[ACTIVITY_TYPE.keys().index("STATE_TOGGLED")],
+                                      activity_type=list(ACTIVITY_TYPE.keys())[list(ACTIVITY_TYPE.keys()).index("STATE_TOGGLED")],
                                       activity_text=state_activity_text,
                                       activity_date=target.date_modified,
                                       entity_type=ENTITY_MAPPING["TASK"],
@@ -88,7 +88,7 @@ def task_modified(mapper, connection, target):
         changes = activity_log.get_modified_changes(target)
         if changes.__len__() > 0:
             activity_log.log_activity(connection=connection,
-                                      activity_type=ACTIVITY_TYPE.keys()[ACTIVITY_TYPE.keys().index("ARTIFACT_MODIFIED")],
+                                      activity_type=list(ACTIVITY_TYPE.keys())[list(ACTIVITY_TYPE.keys()).index("ARTIFACT_MODIFIED")],
                                       activity_text="'%s' modified with changes: %s"
                                                     % (target.title, ', '.join(map(str, changes))),
                                       activity_date=target.date_modified,

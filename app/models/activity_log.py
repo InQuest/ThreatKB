@@ -15,8 +15,8 @@ class ActivityLog(db.Model):
     activity_text = db.Column(db.String(65000))
     activity_date = db.Column(db.DateTime(timezone=True))
 
-    entity_type = db.Column(db.Integer(unsigned=True), index=True, nullable=False)
-    entity_id = db.Column(db.Integer(unsigned=True), index=True, nullable=False)
+    entity_type = db.Column(db.Integer(), index=True, nullable=False)
+    entity_id = db.Column(db.Integer(), index=True, nullable=False)
 
     user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=True)
     user = db.relationship('KBUser', foreign_keys=user_id)
@@ -24,12 +24,12 @@ class ActivityLog(db.Model):
     def to_dict(self):
         return dict(
             id=self.id,
-            activity_type=ACTIVITY_TYPE.values()[ACTIVITY_TYPE.keys().index(self.activity_type)],
+            activity_type=list(ACTIVITY_TYPE.values())[list(ACTIVITY_TYPE.keys()).index(self.activity_type)],
             activity_text=self.activity_text,
             activity_date=self.activity_date.isoformat(),
-            entity_type=ENTITY_MAPPING.keys()[ENTITY_MAPPING.values().index(self.entity_type)],
+            entity_type=list(ENTITY_MAPPING.keys())[list(ENTITY_MAPPING.values()).index(self.entity_type)],
             entity_id=self.entity_id,
-            user=self.user.to_dict()
+            user=self.user.to_dict() if self.user else {}
         )
 
 

@@ -108,7 +108,7 @@ def upload_file():
             try:
                 os.makedirs(tempdir)
                 shutil.copy(full_path, tempdir)
-            except Exception, e:
+            except Exception as e:
                 pass
 
             current_path = os.getcwd()
@@ -126,7 +126,7 @@ def upload_file():
                 app.logger.debug("POSTPROCESSOR STDOUT is:\n\n%s" % (stdout))
                 app.logger.debug("POSTPROCESSOR STDERR is: \n\n%s" % (stderr))
                 app.logger.debug("POSTPROCESSOR RETCODE is: \n\n%s" % (return_code))
-            except Exception, e:
+            except Exception as e:
                 app.logger.exception(e)
 
             app.logger.debug("POSTPROCESSOR DIRLIST is now:\n\n%s" % (os.listdir(".")))

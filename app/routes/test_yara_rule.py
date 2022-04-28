@@ -1,17 +1,17 @@
-from __future__ import print_function
-from __future__ import division
+
+
 import multiprocessing
 import ntpath
 import os
 import time
 import datetime
-import StringIO
+import io
 import yara
 import re
 import uuid
 import subprocess
 
-from sqlalchemy import func, not_
+from sqlalchemy import func, not_, text
 from sqlalchemy.ext.serializer import loads, dumps
 
 from app import app, db, admin_only, auto
@@ -51,7 +51,7 @@ def get_all_tests():
     entity = Yara_testing_history
     entities = entity.query
 
-    for column, value in searches.items():
+    for column, value in list(searches.items()):
         if not value:
             continue
 
@@ -77,9 +77,9 @@ def get_all_tests():
     total_count = entities.count()
 
     if sort_by:
-        filtered_entities = filtered_entities.order_by("%s %s" % (sort_by, sort_direction))
+        filtered_entities = filtered_entities.order_by(text("%s %s" % (sort_by, sort_direction)))
     else:
-        filtered_entities = filtered_entities.order_by("start_time DESC")
+        filtered_entities = filtered_entities.order_by(text("start_time DESC"))
 
     if page_size:
         filtered_entities = filtered_entities.limit(int(page_size))

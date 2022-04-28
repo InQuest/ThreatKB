@@ -12,8 +12,8 @@ class Files(db.Model):
                               onupdate=db.func.current_timestamp())
     filename = db.Column(db.String(65000))
     content_type = db.Column(db.String(100))
-    entity_type = db.Column(db.Integer(unsigned=True), index=True, nullable=True)
-    entity_id = db.Column(db.Integer(unsigned=True), index=True, nullable=True)
+    entity_type = db.Column(db.Integer(), index=True, nullable=True)
+    entity_id = db.Column(db.Integer(), index=True, nullable=True)
     sha256 = db.Column(db.String(64), nullable=True)
     md5 = db.Column(db.String(32), nullable=True)
     sha1 = db.Column(db.String(40), nullable=True)
@@ -26,7 +26,7 @@ class Files(db.Model):
             date_modified=self.date_modified.isoformat(),
             filename=self.filename,
             content_type=self.content_type,
-            entity_type=ENTITY_MAPPING.keys()[ENTITY_MAPPING.values().index(self.entity_type)]
+            entity_type=list(ENTITY_MAPPING.keys())[list(ENTITY_MAPPING.values()).index(self.entity_type)]
             if self.entity_type else None,
             entity_id=self.entity_id if self.entity_id else None,
             id=self.id,

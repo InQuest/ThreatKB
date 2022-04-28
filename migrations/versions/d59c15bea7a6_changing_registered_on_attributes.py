@@ -21,7 +21,7 @@ def upgrade():
     op.alter_column('kb_users', 'registered_on',
                existing_type=sa.DATETIME(),
                nullable=True,
-               existing_server_default=sa.text(u'CURRENT_TIMESTAMP'))
+               existing_server_default=sa.text('CURRENT_TIMESTAMP'))
     # ### end Alembic commands ###
 
 
@@ -30,5 +30,5 @@ def downgrade():
     op.alter_column('kb_users', 'registered_on',
                existing_type=sa.DATETIME(),
                nullable=False,
-               existing_server_default=sa.text(u'CURRENT_TIMESTAMP'))
+               existing_server_default=sa.text('CURRENT_TIMESTAMP'))
     # ### end Alembic commands ###

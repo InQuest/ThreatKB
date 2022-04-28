@@ -120,7 +120,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
 
     db.session.commit()
     if fields_to_add:
-        for yr, fields in fields_to_add.iteritems():
+        for yr, fields in fields_to_add.items():
             for field in fields:
                 field.artifact_id = yr.id
                 field.created_user_id = current_user.id

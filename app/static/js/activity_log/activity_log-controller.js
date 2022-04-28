@@ -2,7 +2,7 @@
 
 angular.module('ThreatKB')
     .controller('ActivityLogController', ['$scope', '$location', '$timeout', '$filter', '$http', 'resolvedActivityLog', 'ActivityLog', 'uiGridConstants', '$routeParams', 'Cfg_settings', 'Users',
-        function ($scope, $location, $timeout, $filter, $http, resolvedActivityLog, ActivityLog, uiGridConstants, $routeParams, Cfg_settings, Users) {
+        function ($scope, $location, $timeout, $filter, $http,  resolvedActivityLog, ActivityLog, uiGridConstants, $routeParams, Cfg_settings, Users) {
 
             $scope.activity_logs = resolvedActivityLog;
 

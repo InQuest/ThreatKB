@@ -36,8 +36,9 @@ ACTIVITY_TYPE = {"ARTIFACT_CREATED": "Artifact Created",
                  "ARTIFACT_MODIFIED": "Artifact Modified",
                  "COMMENTS": 'Comment',
                  "STATE_TOGGLED": 'State Toggled',
-                 "RELEASES_MADE": 'Release Made'}
-
+                 "RELEASES_MADE": 'Release Made',
+                 "TAG_CREATED": 'Tag Created',
+                 "TAG_REMOVED": 'Tag Removed'}
 
 def nocache(view):
     @wraps(view)
@@ -87,7 +88,7 @@ def set_celery_stuff(flask_app):
 
 set_celery_stuff(app)
 
-print("app config: %s" % (str(app.config)))
+print(("app config: %s" % (str(app.config))))
 
 from app.celeryapp import make_celery
 

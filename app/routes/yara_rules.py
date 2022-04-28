@@ -242,17 +242,13 @@ def create_yara_rule():
     entity.mitre_techniques = request.json.get("mitre_techniques", [])
     matches = [technique for technique in entity.mitre_techniques if technique not in mitre_techniques]
     if matches:
-        raise (Exception(
-            "The following techniques were not found in the configuration: %s. Check 'MITRE_TECHNIQUES' on the settings page" % (
-                matches)))
+        raise Exception
 
     mitre_tactics = Cfg_settings.get_setting("MITRE_TACTICS").split(",")
     entity.mitre_tactics = request.json.get("mitre_tactics", [])
     matches = [tactic for tactic in entity.mitre_tactics if tactic not in mitre_tactics]
     if matches:
-        raise (Exception(
-            "The following tactics were not found in the configuration: %s. Check 'MITRE_TACTICS' on the settings page" % (
-                matches)))
+        raise Exception
 
     if entity.state == release_state:
         entity.state = draft_state.state
@@ -272,7 +268,7 @@ def create_yara_rule():
         update_cfg_category_range_mapping_current(request.json['category']['id'], new_sig_id)
 
     dirty = False
-    for name, value_dict in request.json.get("metadata_values", {}).iteritems():
+    for name, value_dict in request.json.get("metadata_values", {}).items():
         if not name or not value_dict:
             continue
 
@@ -401,17 +397,13 @@ def update_yara_rule(id):
     entity.mitre_techniques = request.json.get("mitre_techniques", [])
     matches = [technique for technique in entity.mitre_techniques if technique not in mitre_techniques]
     if matches:
-        raise (Exception(
-            "The following techniques were not found in the configuration: %s. Check 'MITRE_TECHNIQUES' on the settings page" % (
-                matches)))
+        raise Exception
 
     mitre_tactics = Cfg_settings.get_setting("MITRE_TACTICS").split(",")
     entity.mitre_tactics = request.json.get("mitre_tactics", [])
     matches = [tactic for tactic in entity.mitre_tactics if tactic not in mitre_tactics]
     if matches:
-        raise (Exception(
-            "The following tactics were not found in the configuration: %s. Check 'MITRE_TACTICS' on the settings page" % (
-                matches)))
+        raise Exception
 
     if old_state == release_state.state and entity.state == release_state.state and not do_not_bump_revision:
         entity.state = draft_state.state
@@ -420,7 +412,7 @@ def update_yara_rule(id):
     db.session.commit()
 
     dirty = False
-    for name, value_dict in request.json.get("metadata_values", {}).iteritems():
+    for name, value_dict in request.json.get("metadata_values", {}).items():
         if not name or not value_dict:
             continue
 
