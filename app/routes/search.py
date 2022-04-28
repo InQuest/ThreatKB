@@ -17,6 +17,8 @@ def do_search():
     all = request.args.get("all", None)
     artifact_type = request.args.get('artifact_type', None)
     category = request.args.get('category', None)
+    references = request.args.get('references', None)
+    description = request.args.get('description', None)
 
     if not tag and not state and not category and not artifact_type and not all:
         abort(400)
@@ -57,6 +59,17 @@ def do_search():
 
     if category:
         signatures = signatures.filter(yara_rule.Yara_rule.category == category)
+
+    if references:
+        signatures = signatures.filter(yara_rule.Yara_rule.references.like("%" + references + "%"))
+        ips = ips.filter(c2ip.C2ip.references.like("%" + references + "%"))
+        dns = dns.filter(c2dns.C2dns.references.like("%" + references + "%"))
+
+    if description:
+        signatures = signatures.filter(yara_rule.Yara_rule.description.like("%" + description + "%"))
+        ips = ips.filter(c2ip.C2ip.description.like("%" + description + "%"))
+        dns = dns.filter(c2dns.C2dns.description.like("%" + description + "%"))
+        task = task.filter(tasks.Tasks.description.like("%" + description + "%"))
 
     if all:
         signatures = signatures.filter(

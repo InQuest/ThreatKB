@@ -8,7 +8,6 @@ uwsgi:
     max-requests:         1000
     module:               app
     callable:             app
-    virtualenv:           /opt/threatkb/env
     python-path:          /opt/threatkb
     ignore-sigpipe:       true
     ignore-write-errors:  true

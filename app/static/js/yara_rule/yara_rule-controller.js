@@ -10,6 +10,22 @@ angular.module('ThreatKB')
 
             $scope.start_filter_requests_length = Cfg_settings.get({key: "START_FILTER_REQUESTS_LENGTH"});
 
+            $scope.batchEditableColumns = [];
+            $scope.batchEditableMetadata = [];
+            Cfg_settings.get({key: "BATCH_EDIT_CONFIGURATION"}).$promise.then(function (batchEditConfig) {
+                    let batchEditableJson = JSON.parse(batchEditConfig.value);
+                    if (batchEditableJson !== undefined && batchEditableJson.hasOwnProperty('yara_rules')) {
+                        for (const value of batchEditableJson.yara_rules) {
+                            if (value instanceof Object && value.hasOwnProperty('metadata')) {
+                                $scope.batchEditableMetadata = value.metadata;
+                            } else {
+                                $scope.batchEditableColumns.push(value);
+                            }
+                        }
+                    }
+                }
+            );
+
             $('input[type=number]').on('mousewheel', function () {
                 var el = $(this);
                 el.blur();
@@ -84,20 +100,20 @@ angular.module('ThreatKB')
                     return trigger.getAttribute('aria-label');
                 }
             });
-            $scope.get_sigs_to_copy = function () {
-                var sigsToCopy = {
+            $scope.getSelectedSigIds = function () {
+                let selectedSigs = {
                     ids: []
                 };
-                for (var i = 0; i < $scope.checked_indexes.length; i++) {
+                for (let i = 0; i < $scope.checked_indexes.length; i++) {
                     if ($scope.checked_indexes[i]) {
-                        sigsToCopy.ids.push($scope.yara_rules[i].id);
+                        selectedSigs.ids.push($scope.yara_rules[i].id);
                     }
                 }
-                return sigsToCopy;
+                return selectedSigs;
             };
             $scope.copy_rules = function () {
                 blockUI.start("");
-                Yara_rule.copySignatures($scope.get_sigs_to_copy()).then(function (response) {
+                Yara_rule.copySignatures($scope.getSelectedSigIds()).then(function (response) {
                     blockUI.stop();
                     document.getElementById('batchCopyBtn').setAttribute("aria-label", response);
                 }, function (error) {
@@ -105,7 +121,7 @@ angular.module('ThreatKB')
             };
 
             $scope.download_rules = function () {
-                Yara_rule.copySignatures($scope.get_sigs_to_copy()).then(function (response) {
+                Yara_rule.copySignatures($scope.getSelectedSigIds()).then(function (response) {
                     try {
                         FileSaver.saveAs(new Blob([response], {type: "text/plain"}), "yara_rules.txt");
                     } catch (error) {
@@ -114,7 +130,28 @@ angular.module('ThreatKB')
                 }, function (error) {
                     growl.error(error.data, {ttl: -1});
                 });
+            };
 
+            $scope.duplicate_rule = function () {
+                blockUI.start("");
+                let selectedIds = $scope.getSelectedSigIds();
+                if (selectedIds.hasOwnProperty("ids")) {
+                    if (selectedIds.ids.length === 1) {
+                        Yara_rule.duplicateSignature(selectedIds.ids[0]).then(function (response) {
+                            blockUI.stop();
+                            $scope.update(response.id);
+                        }, function (error) {
+                            blockUI.stop();
+                            growl.error(error.data, {ttl: -1});
+                        });
+                    } else {
+                        blockUI.stop();
+                        growl.error("Only one Signature should be selected", {ttl: -1});
+                    }
+                } else {
+                    blockUI.stop();
+                    growl.error("No Signature Selected", {ttl: -1});
+                }
             };
 
             var paginationOptions = {
@@ -354,7 +391,7 @@ angular.module('ThreatKB')
                     // Set new request cancelation trigger
                     cancelGetPage = $q.defer();
                     // ... and fire off a cancelable request
-                    $http.get(url, { timeout: cancelGetPage.promise })
+                    $http.get(url, {timeout: cancelGetPage.promise})
                         .then(function (response) {
                             $scope.gridOptions.totalItems = response.data.total_count;
                             $scope.gridOptions.data = response.data.data;
@@ -430,15 +467,17 @@ angular.module('ThreatKB')
             };
 
             $scope.save_batch = function () {
-                var sigsToUpdate = {
-                    owner_user: $scope.batch.owner,
-                    state: $scope.batch.state,
-                    description: $scope.batch.description,
-                    category: $scope.batch.category,
-                    tags: $scope.batch.tags,
+                let sigsToUpdate = {
                     ids: []
                 };
-                for (var i = 0; i < $scope.checked_indexes.length; i++) {
+                for (const property in $scope.batch) {
+                    if (property === "owner") {
+                        sigsToUpdate.owner_user = $scope.batch[property];
+                    } else if (property !== "metadata") {
+                        sigsToUpdate[property] = $scope.batch[property];
+                    }
+                }
+                for (let i = 0; i < $scope.checked_indexes.length; i++) {
                     if ($scope.checked_indexes[i]) {
                         sigsToUpdate.ids.push($scope.yara_rules[i].id);
                     }
@@ -459,6 +498,9 @@ angular.module('ThreatKB')
                         }, function (error) {
                             growl.error(error, {ttl: -1})
                         })
+                    } else if (id_or_rule.reverted) {
+                        growl.info("Successfully reverted '" + $scope.yara_rule.name + "' to revision '" + id_or_rule.revertedToRevision + "'", {ttl: 3000});
+                        getPage();
                     } else {
                         id = id_or_rule.id;
                         $scope.yara_rule = id_or_rule;
@@ -575,7 +617,7 @@ angular.module('ThreatKB')
                 });
 
                 yara_ruleSave.result.then(function (entity) {
-                    if (entity.merge) {
+                    if (entity.merge || entity.reverted) {
                         $scope.save(entity);
                     } else {
                         $scope.yara_rule = entity;
@@ -615,7 +657,19 @@ angular.module('ThreatKB')
                     resolve: {
                         batch: function () {
                             return $scope.batch;
-                        }
+                        },
+                        batchFields: function () {
+                            return $scope.batchEditableColumns;
+                        },
+                        batchMetadata: function () {
+                            return $scope.batchEditableMetadata;
+                        },
+                        metadata: ['Metadata', function (Metadata) {
+                            return Metadata.query({
+                                filter: "signature",
+                                format: "dict"
+                            });
+                        }]
                     }
                 });
 
@@ -691,14 +745,14 @@ angular.module('ThreatKB')
             $scope.Comments = Comments;
             $scope.Files = Files;
             $scope.selected_signature = null;
-            
+
             $scope.selectedRevisions = {
                 main: null,
                 compared: null
             };
             $scope.selected_revision = null;
             $scope.compared_revision = null;
-            
+
             $scope.users = Users.query();
 
             $scope.editor = {
@@ -719,7 +773,7 @@ angular.module('ThreatKB')
             };
 
             $scope.save_artifact = function () {
-
+                $scope.yara_rule.do_not_bump_revision = $scope.do_not_bump_revision;
                 Yara_rule.resource.update({id: $scope.yara_rule.id}, $scope.yara_rule,
                     function (data) {
                         if (!data) {
@@ -763,14 +817,12 @@ angular.module('ThreatKB')
                 $scope.yara_rule.metadata = metadata;
             }
 
-
             $scope.update_selected_metadata = function (m, selected) {
                 if (!$scope.yara_rule.metadata_values[m.key]) {
                     $scope.yara_rule.metadata_values[m.key] = {};
                 }
                 $scope.yara_rule.metadata_values[m.key].value = selected.choice;
             };
-
 
             $scope.file_store_path = Cfg_settings.get({key: "FILE_STORE_PATH"});
             $scope.entity_mapping = Comments.ENTITY_MAPPING;
@@ -815,13 +867,19 @@ angular.module('ThreatKB')
             };
 
             $scope.datepickers = {};
-            $scope.openDatepicker = function(id) {
+            $scope.openDatepicker = function (id) {
                 $scope.datepickers[id] = true;
             };
 
             $scope.cfg_states = Cfg_states.query();
             $scope.cfg_category_range_mapping = CfgCategoryRangeMapping.query();
-            $scope.do_not_bump_revision = true;
+            if ($scope.do_not_bump_revision == null) {
+                $scope.do_not_bump_revision = true;
+            }
+
+            $scope.toggle_bump_release = function () {
+                $scope.do_not_bump_revision = this.do_not_bump_revision;
+            };
 
             $scope.just_opened = true;
             $scope.negTestDir = Cfg_settings.get({key: "NEGATIVE_TESTING_FILE_DIRECTORY"});
@@ -886,6 +944,7 @@ angular.module('ThreatKB')
                                     entity_type: Files.ENTITY_MAPPING.SIGNATURE,
                                     entity_id: id
                                 });
+                                $scope.clear_checked_files();
                                 growl.info('Success ' + JSON.stringify(resp.data, null, 2));
                             }, function (resp) {
                                 console.log('Error status: ' + resp.status);
@@ -900,6 +959,7 @@ angular.module('ThreatKB')
             };
 
             $scope.ok = function () {
+                $scope.yara_rule.do_not_bump_revision = $scope.do_not_bump_revision;
                 // Check if outstanding comment
                 if ($scope.yara_rule.new_comment && $scope.yara_rule.new_comment.trim() && confirm('There is a unsaved comment, do you wish to save it as well?')) {
                     $scope.add_comment($scope.yara_rule.id);
@@ -986,6 +1046,96 @@ angular.module('ThreatKB')
                 $uibModalInstance.close($scope.selected_signature);
             };
 
+            $scope.revertRevision = function (id, revision) {
+                Yara_rule.revertRevision(id, revision)
+                    .then(function (response) {
+                        $scope.yara_rule = Yara_rule.resource.get({id: id, include_yara_string: 1});
+                        $scope.yara_rule.reverted = true;
+                        $scope.yara_rule.revertedToRevision = revision;
+                        if ($location.absUrl().includes("yara_rules")) {
+                            $window.location.href = $location.absUrl() + "/" + id;
+                        } else {
+                            $window.location.href = $location.absUrl() + "/yara_rules/" + id;
+                        }
+                    }, function (error) {
+                        growl.error(error.data, {ttl: -1});
+                    });
+            };
+
+            $scope.clear_checked_files = function () {
+                $scope.checked_files = [];
+                $scope.checked_file_counter = 0;
+                if ($scope.all_files_checked == null || $scope.all_files_checked) {
+                    $scope.all_files_checked = false;
+                }
+                $scope.initialized = false;
+            };
+
+            $scope.initialize_checked_files = function (files) {
+                if (!$scope.initialized) {
+                    files.forEach(function (item) {
+                        $scope.checked_files[item.id] = false;
+                    });
+                    $scope.initialized = true;
+                }
+            };
+
+            $scope.clear_checked_files();
+
+            $scope.toggle_checked_files = function () {
+                $scope.all_files_checked = this.all_files_checked;
+                if ($scope.all_files_checked) {
+                    $scope.check_all_files();
+                } else {
+                    $scope.uncheck_all_files();
+                }
+            };
+
+            $scope.update_checked_files = function (file_id) {
+                if ($scope.checked_files[file_id]) {
+                    $scope.checked_file_counter += 1;
+                } else {
+                    $scope.checked_file_counter -= 1;
+                }
+            };
+
+            $scope.uncheck_all_files = function () {
+                $scope.checked_files.forEach(function (item, index, arr) {
+                    arr[index] = false;
+                });
+                $scope.checked_file_counter = 0;
+            };
+
+            $scope.check_all_files = function () {
+                let i = 0;
+                $scope.checked_files.forEach(function (item, index, arr) {
+                    arr[index] = true;
+                    i++;
+                });
+                $scope.checked_file_counter = i;
+            };
+
+            $scope.delete_selected_files = function () {
+                console.log($scope.checked_files);
+                let filesToDelete = {
+                    ids: []
+                };
+                $scope.checked_files.forEach(function (item, index, arr) {
+                    if (item) {
+                        filesToDelete.ids.push(index);
+                    }
+                });
+                Files.deleteBatch(filesToDelete).then(function (response) {
+                    $scope.yara_rule.files = $scope.Files.resource.query({
+                        entity_type: Files.ENTITY_MAPPING.SIGNATURE,
+                        entity_id: $scope.yara_rule.id
+                    });
+                    $scope.clear_checked_files();
+                    growl.info('Successfully deleted files', {ttl: 3000});
+                }, function (error) {
+                    growl.error(error.data, {ttl: -1});
+                });
+            };
         }])
     .controller('Yara_ruleViewController', ['$scope', '$uibModalInstance', 'yara_rule', '$location', '$window', '$cookies',
         function ($scope, $uibModalInstance, yara_rule, $location, $window, $cookies) {
@@ -1038,15 +1188,47 @@ angular.module('ThreatKB')
             };
 
         }])
-    .controller('Yara_ruleBatchEditController', ['$scope', '$uibModalInstance', 'batch', 'Users', 'Cfg_states', 'Tags', 'CfgCategoryRangeMapping',
-        function ($scope, $uibModalInstance, batch, Users, Cfg_states, Tags, CfgCategoryRangeMapping) {
+    .controller('Yara_ruleBatchEditController', ['$scope', '$uibModalInstance', 'batch', 'Users', 'Cfg_states', 'Tags', 'CfgCategoryRangeMapping', 'Cfg_settings', 'batchFields', 'batchMetadata', 'metadata',
+        function ($scope, $uibModalInstance, batch, Users, Cfg_states, Tags, CfgCategoryRangeMapping, Cfg_settings, batchFields, batchMetadata, metadata) {
             $scope.batch = batch;
+
+            $scope.batchFields = batchFields;
+
+            $scope.batchMetadata = batchMetadata;
+
+            $scope.batch.metadata = metadata;
+            $scope.metadata = metadata;
 
             $scope.users = Users.query();
 
             $scope.cfg_states = Cfg_states.query();
 
+            $scope.update_selected_metadata = function (m, selected) {
+                if (!$scope.batch.metadata_values[m.key]) {
+                    $scope.batch.metadata_values[m.key] = {};
+                }
+                $scope.batch.metadata_values[m.key].value = selected.choice;
+            };
+
             $scope.cfg_category_range_mapping = CfgCategoryRangeMapping.query();
+
+            let mitre_techniques = Cfg_settings.get({key: "MITRE_TECHNIQUES"});
+            if (mitre_techniques.$promise !== null && mitre_techniques.$promise !== undefined) {
+                mitre_techniques.$promise.then(
+                    function (techniques) {
+                        $scope.mitre_techniques = techniques.value.split(",");
+                    }
+                );
+            }
+
+            let mitre_tactics = Cfg_settings.get({key: "MITRE_TACTICS"});
+            if (mitre_tactics.$promise !== null && mitre_tactics.$promise !== undefined) {
+                mitre_tactics.$promise.then(
+                    function (tactics) {
+                        $scope.mitre_tactics = tactics.value.split(",");
+                    }
+                );
+            }
 
             $scope.ok = function () {
                 $uibModalInstance.close($scope.batch);
@@ -1061,7 +1243,7 @@ angular.module('ThreatKB')
             };
 
             $scope.datepickers = {};
-            $scope.openDatepicker = function(id) {
+            $scope.openDatepicker = function (id) {
                 $scope.datepickers[id] = true;
             };
 
@@ -1071,19 +1253,21 @@ angular.module('ThreatKB')
         }])
     .controller('Yara_revisionController', ['$scope', 'Yara_rule',
         function ($scope, Yara_rule) {
-            $scope.revision_diff = null
+            $scope.revision_diff = null;
             $scope.calculateRevisionDiff = function () {
                 if (!$scope.selectedRevisions.compared) {
                     $scope.revision_diff = null;
                 } else {
                     var dmp = new diff_match_patch(),
-                    diffs = dmp.diff_main(($scope.selectedRevisions.main ? $scope.selectedRevisions.main.yara_rule_string : $scope.yara_rule.yara_rule_string), $scope.selectedRevisions.compared.yara_rule_string);
+                        diffs = dmp.diff_main($scope.selectedRevisions.compared.yara_rule_string, ($scope.selectedRevisions.main ? $scope.selectedRevisions.main.yara_rule_string : $scope.yara_rule.yara_rule_string));
                     $scope.revision_diff = dmp.diff_prettyHtml(diffs).replace(/&para;/g, '');
                 }
             };
 
             $scope.$watch(
-                function () { return $scope.selectedRevisions.main; },
+                function () {
+                    return $scope.selectedRevisions.main;
+                },
                 function (value) {
                     $scope.selectedRevisions.compared = null;
                     if (value) {
@@ -1105,7 +1289,9 @@ angular.module('ThreatKB')
                 }
             );
             $scope.$watch(
-                function () { return $scope.selectedRevisions.compared; },
+                function () {
+                    return $scope.selectedRevisions.compared;
+                },
                 function (value) {
                     if (value) {
                         if (!$scope.selectedRevisions.compared.yara_rule_string) {

@@ -12,7 +12,7 @@ from dateutil import parser
 import datetime
 import json
 import re
-import distutils
+from distutils import util
 import zlib
 
 from flask import abort
@@ -289,11 +289,23 @@ class Yara_rule(db.Model):
         return yara_rule_text
 
     @staticmethod
-    def expand_macros(yara_rule_text):
-        all_macros = macros.Macros.get_macros()
+    def expand_macros(yara_rule_text, all_macros=None):
+
+        try:
+            if len(all_macros) == 0:
+                return yara_rule_text
+        except:
+            all_macros = all_macros = macros.Macros.get_macros()
+
         tag_template = cfg_settings.Cfg_settings.get_setting("MACRO_TAG_TEMPLATE")
+
         for m in all_macros:
-            yara_rule_text = yara_rule_text.replace(tag_template % m['tag'], m['value'])
+            if m["tag"] in yara_rule_text:
+                yara_rule_text = yara_rule_text.replace(tag_template % m['tag'], m['value'])
+
+        if any([tag_template % m['tag'] in yara_rule_text for m in all_macros]):
+            return Yara_rule.expand_macros(yara_rule_text, [{"tag": m["tag"], "value": m["value"]} for m in all_macros])
+
         return yara_rule_text
 
     @staticmethod
@@ -319,7 +331,7 @@ class Yara_rule(db.Model):
 
         clobber_on_import = cfg_settings.Cfg_settings.get_setting("IMPORT_CLOBBER")
         try:
-            clobber_on_import = distutils.util.strtobool(clobber_on_import)
+            clobber_on_import = util.strtobool(clobber_on_import)
         except:
             clobber_on_import = clobber_on_import
 
@@ -406,7 +418,7 @@ def yara_created(mapper, connection, target):
                               activity_type=list(ACTIVITY_TYPE.keys())[list(ACTIVITY_TYPE.keys()).index("ARTIFACT_CREATED")],
                               activity_text=target.name,
                               activity_date=target.creation_date,
-                              entity_type=ENTITY_MAPPING["TASK"],
+                              entity_type=ENTITY_MAPPING["SIGNATURE"],
                               entity_id=target.id,
                               user_id=target.created_user_id)
 
@@ -427,11 +439,13 @@ def yara_modified(mapper, connection, target):
                                       user_id=target.modified_user_id)
 
         changes = activity_log.get_modified_changes(target)
-        if changes.__len__() > 0:
+        if changes["long"].__len__() > 0:
             activity_log.log_activity(connection=connection,
                                       activity_type=list(ACTIVITY_TYPE.keys())[list(ACTIVITY_TYPE.keys()).index("ARTIFACT_MODIFIED")],
                                       activity_text="'%s' modified with changes: %s"
-                                                    % (target.name, ', '.join(map(str, changes))),
+                                                    % (target.name, ', '.join(map(str, changes["long"]))),
+                                      activity_text_short="'%s' modified fields are: %s"
+                                                    % (target.name, ', '.join(map(str, changes["short"]))),
                                       activity_date=target.last_revision_date,
                                       entity_type=ENTITY_MAPPING["SIGNATURE"],
                                       entity_id=target.id,

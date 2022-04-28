@@ -1,9 +1,9 @@
-from sqlalchemy import bindparam
+from sqlalchemy import bindparam, and_
 
 from app import app, db, admin_only, auto
-from app.models import tags_mapping
+from app.models import tags_mapping, tags
 from flask import abort, jsonify, request, Response
-from flask_login import login_required
+from flask_login import login_required, current_user
 import json
 
 from app.routes.tags import create_tag, get_tags
@@ -63,93 +63,73 @@ def get_tags_for_source(source_table, source_id):
 @auto.doc()
 @login_required
 def create_tags_mapping_rest():
-    create_tags_mapping(request.json['source'], request.json['source_id'], request.json['tags'])
+    merge_tags_mapping(request.json['source'], request.json['source_id'], request.json['tags'])
 
     return jsonify(''), 201
 
 
-def batch_create_tags_mapping(table, list_of_source_ids, list_of_tags):
-    tags_mapping_to_create = []
-    for tag in list_of_tags:
-        if 'id' in tag:
-            t_id = tag['id']
-        else:
-            created_tag = create_tag(tag['text'])
-            t_id = created_tag.id
-            tag['id'] = t_id
-
-        for s_id in list_of_source_ids:
-            entity = tags_mapping.Tags_mapping.query.filter_by(
-                source_table=table,
-                source_id=s_id,
-                tag_id=t_id
-            ).first()
-            if not entity:
-                tags_mapping_to_create.append({
-                    "source_table": table,
-                    "source_id": s_id,
-                    "tag_id": t_id
-                })
-
-    if tags_mapping_to_create:
-        db.session.execute(tags_mapping.Tags_mapping.__table__.insert().values(
-            source_table=bindparam("source_table"),
-            source_id=bindparam("source_id"),
-            tag_id=bindparam("tag_id")
-        ), tags_mapping_to_create)
-        db.session.commit()
+def batch_create_tags_mapping(table, list_of_source_ids, list_of_tags, no_delete=True):
+    for entity_id in list_of_source_ids:
+        merge_tags_mapping(table, entity_id, list_of_tags, no_delete)
 
     return list_of_tags
 
 
-def create_tags_mapping(table, s_id, list_of_tags):
-    tags_mapping_to_create = []
-    for tag in list_of_tags:
-        if 'id' in tag:
-            t_id = tag['id']
+def merge_tags_mapping(table_name, entity_id, entity_tags, no_delete=False):
+    current_tags = db.session.query(tags_mapping.Tags_mapping, tags.Tags) \
+        .filter(tags_mapping.Tags_mapping.source_table == table_name) \
+        .filter(tags_mapping.Tags_mapping.source_id == entity_id) \
+        .filter(tags_mapping.Tags_mapping.tag_id == tags.Tags.id) \
+        .all()
+    current_tags_text = [current_tag[1].text for current_tag in current_tags]
+    removed_tags = [current_tag[1].text for current_tag in current_tags]
+
+    for tag in entity_tags:
+        try:
+            tag = tag["text"]
+        except TypeError, e:
+            pass
+
+        if tag not in current_tags_text:
+            new_tag_mapping = tags_mapping.Tags_mapping()
+            new_tag_mapping.source_id = entity_id
+            new_tag_mapping.source_table = table_name
+            if tag in current_tags_text:
+                new_tag_mapping.tag_id = current_tags[current_tags_text.index(tag)][1].id
+            else:
+                new_tag = create_tag(tag, False)
+                db.session.flush()
+                new_tag_mapping.tag_id = new_tag.id
+            new_tag_mapping.created_user_id = current_user.id
+            db.session.add(new_tag_mapping)
         else:
-            created_tag = create_tag(tag['text'])
-            t_id = created_tag.id
-            tag['id'] = t_id
+            removed_tags.remove(tag)
 
-        entity = tags_mapping.Tags_mapping.query.filter_by(
-            source_table=table,
-            source_id=s_id,
-            tag_id=t_id
-        ).first()
-        if not entity:
-            tags_mapping_to_create.append({
-                "source_table": table,
-                "source_id": s_id,
-                "tag_id": t_id
-            })
+    if not no_delete:
+        for tag in removed_tags:
+            removed_tag = current_tags[current_tags_text.index(tag)][0]
+            db.session.delete(removed_tag)
 
-    if tags_mapping_to_create:
-        db.session.execute(tags_mapping.Tags_mapping.__table__.insert().values(
-            source_table=bindparam("source_table"),
-            source_id=bindparam("source_id"),
-            tag_id=bindparam("tag_id")
-        ), tags_mapping_to_create)
-        db.session.commit()
-
-    return list_of_tags
+    db.session.commit()
 
 
 def delete_tags_mapping(table, s_id):
-    tags_mapping.Tags_mapping.query.filter_by(
-        source_table=table,
-        source_id=s_id
-    ).delete()
+    tags_to_delete = db.session.query(tags_mapping.Tags_mapping).filter(
+        and_(tags_mapping.Tags_mapping.source_table == table, tags_mapping.Tags_mapping.source_id == s_id)).all()
+    for tag in tags_to_delete:
+        db.session.delete(tag)
     db.session.commit()
     return
 
 
 def batch_delete_tags_mapping(table, list_of_source_ids):
-    db.session.execute(tags_mapping.Tags_mapping.__table__
-                       .delete()
-                       .where(tags_mapping.Tags_mapping.source_table == table
-                              and tags_mapping.Tags_mapping.source_id.in_(list_of_source_ids)))
+    tags_to_delete = db.session.query(tags_mapping.Tags_mapping).filter(
+        and_(tags_mapping.Tags_mapping.source_table == table,
+             tags_mapping.Tags_mapping.source_id.in_(list_of_source_ids))).all()
+    for tag in tags_to_delete:
+        db.session.delete(tag)
     db.session.commit()
+    return
 
 
 @app.route('/ThreatKB/tags_mapping/<int:id>', methods=['DELETE'])

@@ -86,11 +86,13 @@ def task_modified(mapper, connection, target):
                                       user_id=target.modified_user_id)
 
         changes = activity_log.get_modified_changes(target)
-        if changes.__len__() > 0:
+        if changes["long"].__len__() > 0:
             activity_log.log_activity(connection=connection,
                                       activity_type=list(ACTIVITY_TYPE.keys())[list(ACTIVITY_TYPE.keys()).index("ARTIFACT_MODIFIED")],
                                       activity_text="'%s' modified with changes: %s"
-                                                    % (target.title, ', '.join(map(str, changes))),
+                                                    % (target.title, ', '.join(map(str, changes["long"]))),
+                                      activity_text_short="'%s' modified fields are: %s"
+                                                    % (target.title, ', '.join(map(str, changes["short"]))),
                                       activity_date=target.date_modified,
                                       entity_type=ENTITY_MAPPING["TASK"],
                                       entity_id=target.id,

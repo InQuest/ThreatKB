@@ -13,7 +13,8 @@ from flask_selfdoc import Autodoc
 import datetime
 import logging
 import os
-import distutils
+from distutils import util
+from slack_helper import SlackHelper
 
 
 app = Flask(__name__, static_url_path='')
@@ -87,9 +88,13 @@ def set_celery_stuff(flask_app):
     if flask_app.config["MAX_MILLIS_PER_FILE_THRESHOLD"]:
         flask_app.config["MAX_MILLIS_PER_FILE_THRESHOLD"] = float(flask_app.config["MAX_MILLIS_PER_FILE_THRESHOLD"])
 
-set_celery_stuff(app)
 
-print(("app config: %s" % (str(app.config))))
+print("app config: %s" % (str(app.config)))
+print("print env")
+for key, val in os.environ.iteritems():
+    print "%s=%s" % (key, val)
+
+set_celery_stuff(app)
 
 from app.celeryapp import make_celery
 
