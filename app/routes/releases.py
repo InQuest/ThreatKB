@@ -106,7 +106,7 @@ def generate_artifact_export(release_id):
     content.seek(0)
 
     tfile = "%s/%s" % (tempfile.gettempdir(), str(uuid.uuid4()).replace("-", ""))
-    with open(tfile, "w") as t:
+    with open(tfile, "wb") as t:
         t.write(content.read())
     return send_file(tfile, attachment_filename=filename, as_attachment=True)
 

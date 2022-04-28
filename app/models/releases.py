@@ -30,13 +30,13 @@ class Release(db.Model):
     @property
     def release_data(self):
         try:
-            return zlib.decompress(self._release_data)
+            return zlib.decompress(self._release_data).decode()
         except:
-            return self._release_data
+            return self._release_data.decode() if not self._release_data == None else None
 
     @release_data.setter
     def release_data(self, value):
-        self._release_data = zlib.compress(value, 8)
+        self._release_data = zlib.compress(value.encode() if type(value) == str else value, 8)
 
     @property
     def release_data_dict(self):
@@ -330,7 +330,7 @@ class Release(db.Model):
 
         dns.sort()
 
-        memzip = io.StringIO()
+        memzip = io.BytesIO()
         z = zipfile.ZipFile(memzip, mode="w", compression=zipfile.ZIP_DEFLATED)
         for category, rules in combined_rules.items():
             imports = []
@@ -347,13 +347,14 @@ class Release(db.Model):
                     raise Exception(e.message + "\nYaraRule: id=%s,name=%s" % (signature["id"], signature["name"]))
 
             rules = "%s\n\n%s" % (imports, rules_string)
-            z.writestr("%s/%s.yar" % (signature_directory, category), rules)
+            filename = "%s/%s.yar" % (signature_directory.decode() if type(signature_directory) == bytes else signature_directory, category.decode() if type(category) == bytes else category)
+            z.writestr(filename, rules)
 
         if ips:
-            z.writestr(ip_text_filename, "\n".join([ip.encode("utf-8") for ip in ips]))
+            z.writestr(ip_text_filename, "\n".join([ip for ip in ips]))
 
         if dns:
-            z.writestr(dns_text_filename, "\n".join([d.encode("utf-8") for d in dns]))
+            z.writestr(dns_text_filename, "\n".join([d for d in dns]))
 
         return memzip
 
