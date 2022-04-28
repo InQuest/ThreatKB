@@ -42,7 +42,6 @@ ACTIVITY_TYPE = {"ARTIFACT_CREATED": "Artifact Created",
                  "TAG_CREATED": 'Tag Created',
                  "TAG_REMOVED": 'Tag Removed'}
 
-
 def nocache(view):
     @wraps(view)
     def no_cache(*args, **kwargs):

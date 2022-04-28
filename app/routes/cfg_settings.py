@@ -1,4 +1,4 @@
-from app import app, db, admin_only, auto
+from app import app, db, admin_only, auto, cache
 from app.models import cfg_settings
 from flask import abort, jsonify, request, Response
 from flask_login import login_required, current_user
@@ -18,6 +18,7 @@ def get_all_cfg_settings():
 
 @app.route('/ThreatKB/cfg_settings/<key>', methods=['GET'])
 @auto.doc()
+@cache.cached(timeout=60)
 def get_cfg_settings(key):
     """Return config settings associated with key if it is public
     Return: config settings dictionary"""

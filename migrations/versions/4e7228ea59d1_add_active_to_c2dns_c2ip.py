@@ -18,17 +18,17 @@ depends_on = None
 
 def upgrade():
     op.add_column('c2dns', sa.Column('active', sa.Boolean(), nullable=False))
-    op.create_index(u'ix_c2dns_active', 'c2dns', ['active'], unique=False)
+    op.create_index('ix_c2dns_active', 'c2dns', ['active'], unique=False)
     op.execute("""UPDATE c2dns set active=1;""")
     op.add_column('c2ip', sa.Column('active', sa.Boolean(), nullable=False))
-    op.create_index(u'ix_c2ip_active', 'c2ip', ['active'], unique=False)
+    op.create_index('ix_c2ip_active', 'c2ip', ['active'], unique=False)
     op.execute("""UPDATE c2ip set active=1;""")
-    op.create_index(u'ix_yara_rules_active', 'yara_rules', ['active'], unique=False)
+    op.create_index('ix_yara_rules_active', 'yara_rules', ['active'], unique=False)
 
 
 def downgrade():
-    op.drop_index(u'ix_yara_rules_active', table_name='yara_rules')
-    op.drop_index(u'ix_c2ip_active', table_name='c2ip')
+    op.drop_index('ix_yara_rules_active', table_name='yara_rules')
+    op.drop_index('ix_c2ip_active', table_name='c2ip')
     op.drop_column('c2ip', 'active')
-    op.drop_index(u'ix_c2dns_active', table_name='c2dns')
+    op.drop_index('ix_c2dns_active', table_name='c2dns')
     op.drop_column('c2dns', 'active')

@@ -34,7 +34,7 @@ class Metadata(db.Model):
         for metadata in [entity.to_dict() for entity in db.session.query(Metadata).filter(
                 Metadata.artifact_type == ENTITY_MAPPING[entity_type]).filter(Metadata.active > 0).order_by(
             Metadata.type_).order_by(Metadata.key).all()]:
-            if metadata["type"] not in metadata_dict.keys():
+            if metadata["type"] not in list(metadata_dict.keys()):
                 metadata_dict[metadata["type"]] = []
             metadata_dict[metadata["type"]].append(metadata)
 

@@ -68,7 +68,7 @@ class C2dns(db.Model):
             .all()
 
     def save_metadata(self, metadata):
-        for name, val in metadata.iteritems():
+        for name, val in metadata.items():
             val = val if not type(val) == dict else val.get("value", None)
             if not val:
                 continue
@@ -97,11 +97,11 @@ class C2dns(db.Model):
         metas = {}
 
         for meta in db.session.query(Metadata).all():
-            if not meta.artifact_type in metas.keys():
+            if not meta.artifact_type in list(metas.keys()):
                 metas[meta.artifact_type] = {}
             metas[meta.artifact_type][meta.key] = meta
 
-        for name, val in metadata.iteritems():
+        for name, val in metadata.items():
             val = val if not type(val) == dict else val["value"]
 
             if metadata_cache:
@@ -192,7 +192,7 @@ class C2dns(db.Model):
         c2dns.domain_name = hostname
 
         if artifact and metadata_field_mapping:
-            for key, val in metadata_field_mapping.iteritems():
+            for key, val in metadata_field_mapping.items():
                 try:
                     setattr(c2dns, val, artifact["metadata"][key])
                 except:
@@ -329,7 +329,7 @@ def c2dns_before_update(mapper, connect, target):
 @listens_for(C2dns, "after_insert")
 def dns_created(mapper, connection, target):
     activity_log.log_activity(connection=connection,
-                              activity_type=ACTIVITY_TYPE.keys()[ACTIVITY_TYPE.keys().index("ARTIFACT_CREATED")],
+                              activity_type=list(ACTIVITY_TYPE.keys())[list(ACTIVITY_TYPE.keys()).index("ARTIFACT_CREATED")],
                               activity_text=target.domain_name,
                               activity_date=target.date_created,
                               entity_type=ENTITY_MAPPING["DNS"],
@@ -345,7 +345,7 @@ def dns_modified(mapper, connection, target):
         state_activity_text = activity_log.get_state_change(target, target.domain_name)
         if state_activity_text:
             activity_log.log_activity(connection=connection,
-                                      activity_type=ACTIVITY_TYPE.keys()[ACTIVITY_TYPE.keys().index("STATE_TOGGLED")],
+                                      activity_type=list(ACTIVITY_TYPE.keys())[list(ACTIVITY_TYPE.keys()).index("STATE_TOGGLED")],
                                       activity_text=state_activity_text,
                                       activity_date=target.date_modified,
                                       entity_type=ENTITY_MAPPING["DNS"],
@@ -355,7 +355,7 @@ def dns_modified(mapper, connection, target):
         changes = activity_log.get_modified_changes(target)
         if changes["long"].__len__() > 0:
             activity_log.log_activity(connection=connection,
-                                      activity_type=ACTIVITY_TYPE.keys()[ACTIVITY_TYPE.keys().index("ARTIFACT_MODIFIED")],
+                                      activity_type=list(ACTIVITY_TYPE.keys())[list(ACTIVITY_TYPE.keys()).index("ARTIFACT_MODIFIED")],
                                       activity_text="'%s' modified with changes: %s"
                                                     % (target.domain_name, ', '.join(map(str, changes["long"]))),
                                       activity_text_short="'%s' modified fields are: %s"

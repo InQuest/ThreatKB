@@ -107,8 +107,8 @@ tactics = ["TA0001 - Initial Access", "TA0002 - Execution", "TA0003 - Persistenc
 def upgrade():
     op.add_column('yara_rules', sa.Column('_mitre_tactics', sa.String(256), nullable=True))
     op.add_column('yara_rules', sa.Column('_mitre_techniques', sa.String(256), nullable=True))
-    op.create_index(u'ix_yara_rules__mitre_tactics', 'yara_rules', ['_mitre_tactics'], unique=False)
-    op.create_index(u'ix_yara_rules__mitre_techniques', 'yara_rules', ['_mitre_techniques'], unique=False)
+    op.create_index('ix_yara_rules__mitre_tactics', 'yara_rules', ['_mitre_tactics'], unique=False)
+    op.create_index('ix_yara_rules__mitre_techniques', 'yara_rules', ['_mitre_techniques'], unique=False)
 
     date_created = datetime.datetime.now().isoformat()
     date_modified = datetime.datetime.now().isoformat()
@@ -137,8 +137,8 @@ def upgrade():
 
 
 def downgrade():
-    op.drop_index(u'ix_yara_rules__mitre_techniques', table_name='yara_rules')
-    op.drop_index(u'ix_yara_rules__mitre_tactics', table_name='yara_rules')
+    op.drop_index('ix_yara_rules__mitre_techniques', table_name='yara_rules')
+    op.drop_index('ix_yara_rules__mitre_tactics', table_name='yara_rules')
     op.drop_column('yara_rules', '_mitre_techniques')
     op.drop_column('yara_rules', '_mitre_tactics')
     keys = ["MITRE_TECHNIQUES", "MITRE_TACTICS"]

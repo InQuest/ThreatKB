@@ -8,6 +8,7 @@
     "angular-sanitize": "1.6.8",
     "angular": "1.6.8",
     "bootstrap-css": "3.3.7",
+    "angular-bootstrap": "2.5.0",
     "jquery": "~2.1.0",
     "lodash": "~2.4.1",
     "angular-ui-select": "^0.19.8",
@@ -29,7 +30,8 @@
     "angular-cookies": "^1.6.8",
     "moment": "^2.24.0",
     "angular-animate": "^1.7.8",
-    "google-diff-match-patch": "^0.1.0"
+    "google-diff-match-patch": "^0.1.0",
+    "file-saver": "2.0.4"
   },
   "devDependencies": {
     "angular-mocks": "~1.2.13",
@@ -38,5 +40,16 @@
   "resolutions": {
     "angular-bootstrap": "2.5.0",
     "angular": "1.6.8"
+  },
+  "overrides": {
+    "angular-file-saver": {
+      "dependencies": {},
+      "main": [
+        "dist/angular-file-saver.js"
+      ]
+    },
+    "file-saver": {
+      "main": "dist/FileSaver.js"
+    }
   }
 }
