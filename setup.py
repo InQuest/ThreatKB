@@ -61,7 +61,7 @@ setup(
         'ipaddress==1.0.18',
         'ipwhois==1.0.0',
         'itsdangerous==0.24',
-        'Jinja2==2.9.6',
+        'Jinja2==2.11.3',
         'jsonpickle==0.9.5',
         'kombu==4.1.0',
         'Mako==1.0.7',
