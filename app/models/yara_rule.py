@@ -463,7 +463,7 @@ class Yara_rule_history(db.Model):
 
     @rule_json.setter
     def rule_json(self, value):
-        self._rule_json = zlib.compress(value, 8)
+        self._rule_json = zlib.compress(value.encode(), 8)
 
     @property
     def release_data_dict(self):
