@@ -1,4 +1,4 @@
-from app import app, db, admin_only, auto, current_user
+from app import app, db, admin_only, auto, current_user, cache
 from app.models import cfg_states
 from flask import abort, jsonify, request, Response
 from flask_login import login_required
@@ -9,6 +9,7 @@ import json
 @app.route('/ThreatKB/cfg_states', methods=['GET'])
 @auto.doc()
 @login_required
+@cache.memoize(timeout=300)
 def get_all_cfg_states():
     """Return all config states
     Return: list of config state dictionaries"""
@@ -69,6 +70,7 @@ def create_cfg_states():
 
     db.session.add(entity)
     db.session.commit()
+    cache.delete_memoized(get_all_cfg_states)
     return jsonify(entity.to_dict()), 201
 
 
@@ -109,6 +111,7 @@ def update_cfg_states(id):
 
     db.session.merge(entity)
     db.session.commit()
+    cache.delete_memoized(get_all_cfg_states)
     return jsonify(entity.to_dict()), 200
 
 
@@ -124,4 +127,5 @@ def delete_cfg_states(id):
         abort(404)
     db.session.delete(entity)
     db.session.commit()
+    cache.delete_memoized(get_all_cfg_states)
     return jsonify(''), 204

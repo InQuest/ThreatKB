@@ -146,4 +146,4 @@ def update_key(key_id):
 def get_cli():
     """Download the cli script
      Return: cli file"""
-    return send_file(os.path.join(os.getcwd(), "threatkb_cli.py"))
+    return send_file(os.path.join(os.getcwd(), "threatkb.py"))

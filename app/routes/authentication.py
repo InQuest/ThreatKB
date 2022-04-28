@@ -1,4 +1,4 @@
-from app import app, db, bcrypt, admin_only, auto
+from app import app, db, bcrypt, admin_only, auto, cache
 from app.models.users import KBUser
 from app.models import yara_rule, c2dns, c2ip, tasks, users, access_keys
 from flask import request, jsonify, session, json, abort, send_file, Response
@@ -43,6 +43,7 @@ def logout():
 @app.route('/ThreatKB/users', methods=['GET'])
 @auto.doc()
 @login_required
+@cache.memoize(timeout=300)
 def get_all_users():
     """Return all users.
     Optional Arguments: include_inactive
@@ -88,6 +89,7 @@ def delete_user_by_id(user_id):
         {"status": "inactive", "deleted": datetime.datetime.now()})
     db.session.add(user)
     db.session.commit()
+    cache.delete_memoized(get_all_users)
     return jsonify(''), 204
 
 
@@ -131,7 +133,7 @@ def update_user_me_picture():
     db.session.add(current_user)
     db.session.commit()
     # db.engine.execute("UPDATE kb_users SET picture=:picture WHERE kb_users.id=:id", {"picture": picture, "id": current_user.id})
-
+    cache.delete_memoized(get_all_users)
     return get_user_picture_by_id(current_user.id)
 
 
@@ -197,7 +199,7 @@ def create_user():
 
     db.session.add(user)
     db.session.commit()
-
+    cache.delete_memoized(get_all_users)
     return jsonify(user.to_dict()), 201
 
 
@@ -234,7 +236,7 @@ def update_user(user_id):
     db.session.merge(user)
     db.session.commit()
     user = KBUser.query.get(user_id)
-
+    cache.delete_memoized(get_all_users)
     return jsonify(user.to_dict()), 200
 
 

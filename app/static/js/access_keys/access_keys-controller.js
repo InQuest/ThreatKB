@@ -19,7 +19,7 @@ angular.module('ThreatKB')
                     var header = response.headers()['content-disposition'];
                     //var startIndex = header.indexOf('filename=');
                     //var filename = header.slice(startIndex + 9);
-                    var filename = "threatkb_cli.py";
+                    var filename = "threatkb.py";
                     try {
                         FileSaver.saveAs(new Blob([response.data], {type: response.headers()["Content-Type"]}), filename);
                     }
