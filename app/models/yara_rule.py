@@ -286,7 +286,7 @@ class Yara_rule(db.Model):
 
         yara_rule_text = Yara_rule.expand_macros(yara_rule_text)
 
-        return yara_rule_text.encode("utf-8")
+        return yara_rule_text
 
     @staticmethod
     def expand_macros(yara_rule_text):
