@@ -1,5 +1,5 @@
 from app import db
-import yara_rule
+from . import yara_rule
 
 
 class CfgCategoryRangeMapping(db.Model):
@@ -10,9 +10,9 @@ class CfgCategoryRangeMapping(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     category = db.Column(db.String(255), unique=True, nullable=False)
-    range_min = db.Column(db.Integer(unsigned=True), index=True, nullable=False)
-    range_max = db.Column(db.Integer(unsigned=True), index=True, nullable=False)
-    current = db.Column(db.Integer(unsigned=True), index=True, nullable=True)
+    range_min = db.Column(db.Integer(), index=True, nullable=False)
+    range_max = db.Column(db.Integer(), index=True, nullable=False)
+    current = db.Column(db.Integer(), index=True, nullable=True)
     include_in_release_notes = db.Column(db.Boolean, nullable=False, default=True, index=True)
 
     def to_dict(self, include_inactive=False):

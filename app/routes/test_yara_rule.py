@@ -1,17 +1,18 @@
-from __future__ import print_function
-from __future__ import division
+
+
 import multiprocessing
 import ntpath
 import os
 import time
 import datetime
-import StringIO
+import io
 import yara
 import re
 import uuid
 import subprocess
+import tempfile
 
-from sqlalchemy import func, not_
+from sqlalchemy import func, not_, text
 from sqlalchemy.ext.serializer import loads, dumps
 
 from app import app, db, admin_only, auto
@@ -51,7 +52,7 @@ def get_all_tests():
     entity = Yara_testing_history
     entities = entity.query
 
-    for column, value in searches.items():
+    for column, value in list(searches.items()):
         if not value:
             continue
 
@@ -77,9 +78,9 @@ def get_all_tests():
     total_count = entities.count()
 
     if sort_by:
-        filtered_entities = filtered_entities.order_by("%s %s" % (sort_by, sort_direction))
+        filtered_entities = filtered_entities.order_by(text("%s %s" % (sort_by, sort_direction)))
     else:
-        filtered_entities = filtered_entities.order_by("start_time DESC")
+        filtered_entities = filtered_entities.order_by(text("start_time DESC"))
 
     if page_size:
         filtered_entities = filtered_entities.limit(int(page_size))
@@ -115,10 +116,7 @@ def test_yara_rule_rest(rule_id):
                 file_store_path = Cfg_settings.get_setting("FILE_STORE_PATH")
                 if not file_store_path:
                     raise Exception('FILE_STORE_PATH configuration setting not set.')
-                files_to_test.append(os.path.join(file_store_path,
-                                                  str(f.entity_type) if f.entity_type is not None else "",
-                                                  str(f.entity_id) if f.entity_id is not None else "",
-                                                  str(f.filename)))
+                files_to_test.append(f.get_file_path())
         if not is_neg_test:
             return jsonify(test_yara_rule(yara_rule_entity, files_to_test, current_user.id, False, is_neg_test)), 200
         else:
@@ -303,7 +301,8 @@ def get_yara_rule(yara_rule_entity):
 
 def perform_rule_match(rule, file_path, manager_dict, yara_command, yara_test_regex):
     start = time.time()
-    rule_temp_path = "/tmp/%s.yar" % (str(uuid.uuid4()).replace("-", ""))
+    temp_dir = tempfile.gettempdir()
+    rule_temp_path = "%s%s%s.yar" % (temp_dir, os.sep, str(uuid.uuid4()).replace("-", ""))
     with open(rule_temp_path, "w") as f:
         f.write(rule)
 

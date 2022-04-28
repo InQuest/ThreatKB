@@ -132,7 +132,7 @@ class C2ip(db.Model):
         )
 
     def save_metadata(self, metadata):
-        for name, val in metadata.iteritems():
+        for name, val in metadata.items():
             val = val if not type(val) == dict else val.get("value", None)
             if not val:
                 continue
@@ -161,11 +161,11 @@ class C2ip(db.Model):
         metas = {}
 
         for meta in db.session.query(Metadata).all():
-            if not meta.artifact_type in metas.keys():
+            if not meta.artifact_type in list(metas.keys()):
                 metas[meta.artifact_type] = {}
             metas[meta.artifact_type][meta.key] = meta
 
-        for name, val in metadata.iteritems():
+        for name, val in metadata.items():
             val = val if not type(val) == dict else val["value"]
 
             if metadata_cache:
@@ -201,7 +201,7 @@ class C2ip(db.Model):
         c2ip.ip = ip
 
         if artifact and metadata_field_mapping:
-            for key, val in metadata_field_mapping.iteritems():
+            for key, val in metadata_field_mapping.items():
                 try:
                     setattr(c2ip, val, artifact["metadata"][key])
                 except:
@@ -223,14 +223,8 @@ def run_against_whitelist(mapper, connect, target):
     whitelist_states = cfg_settings.Cfg_settings.get_setting("WHITELIST_STATES")
 
     if whitelist_enabled and distutils.util.strtobool(whitelist_enabled) and whitelist_states:
-        states = []
-        for s in whitelist_states.split(","):
-            if hasattr(cfg_states.Cfg_states, s):
-                result = cfg_states.Cfg_states.query.filter(getattr(cfg_states.Cfg_states, s) > 0).first()
-                if result:
-                    states.append(result.state)
 
-        if target.state in states:
+        if target.state in whitelist_states.split(","):
             new_ip = target.ip
 
             abort_import = False
@@ -242,12 +236,15 @@ def run_against_whitelist(mapper, connect, target):
 
             whitelists = C2ip.WHITELIST_CACHE
 
+            hit = None
+
             for whitelist in whitelists:
                 wa = str(whitelist.whitelist_artifact)
 
                 try:
                     if str(IPAddress(new_ip)) == str(IPAddress(wa)):
                         abort_import = True
+                        hit = wa
                         break
                 except ValueError:
                     pass
@@ -255,6 +252,7 @@ def run_against_whitelist(mapper, connect, target):
                 try:
                     if IPAddress(new_ip) in IPNetwork(wa):
                         abort_import = True
+                        hit = wa
                         break
                 except ValueError:
                     pass
@@ -270,7 +268,7 @@ def run_against_whitelist(mapper, connect, target):
                     break
 
             if abort_import:
-                raise Exception('Failed Whitelist Validation')
+                raise Exception('Failed Whitelist Validation on whitelist entry \'%s\'' % (hit))
 
             # Verify the ip is well formed
             IPAddress(new_ip)
@@ -280,6 +278,67 @@ def run_against_whitelist(mapper, connect, target):
                 if release_state and target.state == release_state.state:
                     abort(403)
 
+
+@listens_for(C2ip, "before_update")
+def run_against_whitelist(mapper, connect, target):
+    whitelist_enabled = cfg_settings.Cfg_settings.get_setting("ENABLE_IP_WHITELIST_CHECK_ON_SAVE")
+    whitelist_states = cfg_settings.Cfg_settings.get_setting("WHITELIST_STATES")
+
+    if whitelist_enabled and distutils.util.strtobool(whitelist_enabled) and whitelist_states:
+
+        if target.state in whitelist_states.split(","):
+            new_ip = target.ip
+
+            abort_import = False
+
+            if not C2ip.WHITELIST_CACHE_LAST_UPDATE or not C2ip.WHITELIST_CACHE or (
+                time.time() - C2ip.WHITELIST_CACHE_LAST_UPDATE) > 60:
+                C2ip.WHITELIST_CACHE = Whitelist.query.all()
+                C2ip.WHITELIST_CACHE_LAST_UPDATE = time.time()
+
+            whitelists = C2ip.WHITELIST_CACHE
+
+            hit = None
+
+            for whitelist in whitelists:
+                wa = str(whitelist.whitelist_artifact)
+
+                try:
+                    if str(IPAddress(new_ip)) == str(IPAddress(wa)):
+                        abort_import = True
+                        hit = wa
+                        break
+                except ValueError:
+                    pass
+
+                try:
+                    if IPAddress(new_ip) in IPNetwork(wa):
+                        abort_import = True
+                        hit = wa
+                        break
+                except ValueError:
+                    pass
+
+                try:
+                    regex = re.compile(wa)
+                    result = regex.search(new_ip)
+                except:
+                    result = False
+
+                if result:
+                    abort_import = True
+                    break
+
+            if abort_import:
+                raise Exception('Failed Whitelist Validation on whitelist entry \'%s\'' % (hit))
+
+            # Verify the ip is well formed
+            IPAddress(new_ip)
+
+            if not current_user.admin:
+                release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
+                if release_state and target.state == release_state.state:
+                    abort(403)
 
 @listens_for(C2ip, "before_update")
 def c2ip_before_update(mapper, connect, target):
@@ -292,7 +351,7 @@ def c2ip_before_update(mapper, connect, target):
 @listens_for(C2ip, "after_insert")
 def ip_created(mapper, connection, target):
     activity_log.log_activity(connection=connection,
-                              activity_type=ACTIVITY_TYPE.keys()[ACTIVITY_TYPE.keys().index("ARTIFACT_CREATED")],
+                              activity_type=list(ACTIVITY_TYPE.keys())[list(ACTIVITY_TYPE.keys()).index("ARTIFACT_CREATED")],
                               activity_text=target.ip,
                               activity_date=target.date_created,
                               entity_type=ENTITY_MAPPING["IP"],
@@ -308,7 +367,7 @@ def ip_modified(mapper, connection, target):
         state_activity_text = activity_log.get_state_change(target, target.ip)
         if state_activity_text:
             activity_log.log_activity(connection=connection,
-                                      activity_type=app.ACTIVITY_TYPE.keys()[ACTIVITY_TYPE.keys().index("STATE_TOGGLED")],
+                                      activity_type=list(app.ACTIVITY_TYPE.keys())[list(ACTIVITY_TYPE.keys()).index("STATE_TOGGLED")],
                                       activity_text=state_activity_text,
                                       activity_date=target.date_modified,
                                       entity_type=ENTITY_MAPPING["IP"],
@@ -316,11 +375,13 @@ def ip_modified(mapper, connection, target):
                                       user_id=target.modified_user_id)
 
         changes = activity_log.get_modified_changes(target)
-        if changes.__len__() > 0:
+        if changes["long"].__len__() > 0:
             activity_log.log_activity(connection=connection,
-                                      activity_type=ACTIVITY_TYPE.keys()[ACTIVITY_TYPE.keys().index("ARTIFACT_MODIFIED")],
+                                      activity_type=list(ACTIVITY_TYPE.keys())[list(ACTIVITY_TYPE.keys()).index("ARTIFACT_MODIFIED")],
                                       activity_text="'%s' modified with changes: %s"
-                                                    % (target.ip, ', '.join(map(str, changes))),
+                                                    % (target.ip, ', '.join(map(str, changes["long"]))),
+                                      activity_text_short="'%s' modified fields are: %s"
+                                                    % (target.ip, ', '.join(map(str, changes["short"]))),
                                       activity_date=target.date_modified,
                                       entity_type=ENTITY_MAPPING["IP"],
                                       entity_id=target.id,

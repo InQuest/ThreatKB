@@ -11,8 +11,8 @@ class Comments(db.Model):
     date_modified = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp(),
                               onupdate=db.func.current_timestamp())
     comment = db.Column(db.String(65000))
-    entity_type = db.Column(db.Integer(unsigned=True), index=True, nullable=False)
-    entity_id = db.Column(db.Integer(unsigned=True), index=True, nullable=False)
+    entity_type = db.Column(db.Integer(), index=True, nullable=False)
+    entity_id = db.Column(db.Integer(), index=True, nullable=False)
 
     user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
 
@@ -23,7 +23,7 @@ class Comments(db.Model):
             date_created=self.date_created.isoformat(),
             date_modified=self.date_modified.isoformat(),
             comment=self.comment,
-            entity_type=ENTITY_MAPPING.keys()[ENTITY_MAPPING.values().index(self.entity_type)],
+            entity_type=list(ENTITY_MAPPING.keys())[list(ENTITY_MAPPING.values()).index(self.entity_type)],
             entity_id=self.entity_id,
             id=self.id,
             user=self.user.to_dict()
@@ -36,8 +36,9 @@ class Comments(db.Model):
 @listens_for(Comments, "after_insert")
 def comment_made(mapper, connection, target):
     activity_log.log_activity(connection=connection,
-                              activity_type=ACTIVITY_TYPE.keys()[ACTIVITY_TYPE.keys().index("COMMENTS")],
+                              activity_type=list(ACTIVITY_TYPE.keys())[list(ACTIVITY_TYPE.keys()).index("COMMENTS")],
                               activity_text=target.comment,
+                              activity_text_short=target.comment,
                               activity_date=target.date_created,
                               entity_type=target.entity_type,
                               entity_id=target.entity_id,

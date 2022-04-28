@@ -1,13 +1,14 @@
-import distutils
+from distutils import util
 import re
 import json
 import sys
+import hashlib
 
 from flask_login import current_user
 from plyara import Plyara
 
 from more_itertools import unique_everseen
-from sqlalchemy import and_, not_, or_
+from sqlalchemy import and_, not_, or_, text
 
 from app import ENTITY_MAPPING
 from app.models import cfg_settings
@@ -98,9 +99,9 @@ def filter_entities(entity,
 
     clauses = []
 
-    if searches and any([search_key not in entity.__table__.columns.keys()
+    if searches and any([search_key not in list(entity.__table__.columns.keys())
                          and search_key not in ("tags", "owner_user.email", "user.email")
-                         for search_key, val in searches.items()]):
+                         for search_key, val in list(searches.items())]):
         entities = entity.query.outerjoin(Metadata, Metadata.artifact_type == artifact_type).join(
             MetadataMapping, and_(MetadataMapping.metadata_id == Metadata.id, MetadataMapping.artifact_id == entity.id))
     else:
@@ -108,7 +109,7 @@ def filter_entities(entity,
 
     if artifact_type == ENTITY_MAPPING["TASK"]:
         show_for_non_admin = cfg_settings.Cfg_settings.get_setting("ENABLE_NON_ADMIN_TASK_VISIBILITY")
-        show_for_non_admin = bool(distutils.util.strtobool(show_for_non_admin)) if show_for_non_admin else False
+        show_for_non_admin = bool(util.strtobool(show_for_non_admin)) if show_for_non_admin else False
 
         if not (show_for_non_admin or current_user.admin):
             entities = entities.filter(or_(entity.owner_user_id == current_user.id, entity.owner_user_id == None))
@@ -120,7 +121,7 @@ def filter_entities(entity,
     elif not include_inactive and include_active and hasattr(entity, "active"):
         entities = entities.filter_by(active=True)
 
-    for column, value in searches.items():
+    for column, value in list(searches.items()):
         if not value:
             continue
 
@@ -202,9 +203,9 @@ def filter_entities(entity,
     total_count = entities.count()
 
     if sort_by:
-        filtered_entities = filtered_entities.order_by("%s %s" % (sort_by, sort_direction))
+        filtered_entities = filtered_entities.order_by(text("%s %s" % (sort_by, sort_direction)))
     else:
-        filtered_entities = filtered_entities.order_by("%s DESC" % default_sort)
+        filtered_entities = filtered_entities.order_by(text("%s DESC" % default_sort))
 
     if page_size:
         filtered_entities = filtered_entities.limit(int(page_size))
@@ -250,7 +251,7 @@ def get_strings_and_conditions(rule):
     SEGMENT = None
     for line in rule.splitlines():
         segment_change = False
-        for header, rx in segment_headers.items():
+        for header, rx in list(segment_headers.items()):
             if re.match(rx, line):
                 SEGMENT = header
                 segment_change = True
@@ -280,10 +281,10 @@ def extract_artifacts_by_type(type_, import_objects):
 
         processed.add(import_object[type_])
         temp_object = {"type": type_, "metadata": {}, "artifact": import_object[type_]}
-        for key, val in import_object.iteritems():
+        for key, val in import_object.items():
             if key.lower() == type_ or key.lower() == "artifact":
                 continue
-            elif key in table_mapping[type_].__table__.columns.keys():
+            elif key in list(table_mapping[type_].__table__.columns.keys()):
                 temp_object[key] = val
             else:
                 temp_object["metadata"][key] = val
@@ -361,3 +362,64 @@ def parse_yara_rules_text(text):
     return Plyara().parse_string(text)
 
 #####################################################################
+
+def chunks (l, n):
+    """
+    Yield successive n-sized chunks from l.
+    @type  l: list
+    @param l: List we wish to chunk
+    @type  n: int
+    @param n: Chunk sizes to break l into.
+    @rtype: generator.
+    """
+    for i in xrange(0, len(l), n):
+        yield l[i:i+n]
+
+
+def hash_gen (path=None, bytes=None, algorithm="md5", block_size=16384, fmt="digest"):
+    """
+    Return the selected algorithms crytographic hash hex digest of the given file.
+    @type  path:       str
+    @param path:       Path to file to hash or None if supplying bytes.
+    @type  bytes:      str
+    @param bytes:      str bytes to hash or None if supplying a path to a file.
+    @type  algorithm:  str
+    @param algorithm:  One of "md5", "sha1", "sha256" or "sha512".
+    @type  block_size: int
+    @param block_size: Size of blocks to process.
+    @type  fmt:        str
+    @param fmt:        One of "digest" (str), "raw" (hashlib object), "parts" (array of numeric parts).
+    @rtype:  str
+    @return: Hash as hex digest.
+    """
+    algorithm = algorithm.lower()
+    if   algorithm == "md5":    hashfunc = hashlib.md5()
+    elif algorithm == "sha1":   hashfunc = hashlib.sha1()
+    elif algorithm == "sha256": hashfunc = hashlib.sha256()
+    elif algorithm == "sha512": hashfunc = hashlib.sha512()
+    # hash a file.
+    if path:
+        with open(path, "rb") as fh:
+            while 1:
+                data = fh.read(block_size)
+                if not data:
+                    break
+                hashfunc.update(data)
+    # hash a stream of bytes.
+    elif bytes:
+        hashfunc.update(bytes)
+    # error.
+    else:
+        raise Exception("hash expects either 'path' or 'bytes'.")
+    # return multiplexor.
+    if fmt == "raw":
+        return hashfunc
+    elif fmt == "parts":
+        return map(lambda x: int(x, 16), list(chunks(hashfunc.hexdigest(), 8)))
+    else: # digest
+        return hashfunc.hexdigest()
+
+def md5    (path=None, bytes=None): return hash_gen(path=path, bytes=bytes, algorithm="md5")
+def sha1   (path=None, bytes=None): return hash_gen(path=path, bytes=bytes, algorithm="sha1")
+def sha256 (path=None, bytes=None): return hash_gen(path=path, bytes=bytes, algorithm="sha256")
+def sha512 (path=None, bytes=None): return hash_gen(path=path, bytes=bytes, algorithm="sha512")

@@ -34,14 +34,14 @@ def main():
 
     for i in range(len(c2ips)):
         try:
-            print("IP: %s\tASN: %s->%s\tCountry: %s->%s" % (
-                c2ips[i].ip, c2ips[i].asn, fixed_ips[i].asn, c2ips[i].country, fixed_ips[i].country))
+            print(("IP: %s\tASN: %s->%s\tCountry: %s->%s" % (
+                c2ips[i].ip, c2ips[i].asn, fixed_ips[i].asn, c2ips[i].country, fixed_ips[i].country)))
         except:
             pass
 
     response = ""
     while response not in ("Y", "N"):
-        response = raw_input("Changes to be made above. There are %s total. Proceed? (Y/N) " % (len(fixed_ips)))
+        response = input("Changes to be made above. There are %s total. Proceed? (Y/N) " % (len(fixed_ips)))
 
     not_fully_fixed = []
     if response == "Y":
@@ -55,7 +55,7 @@ def main():
         if len(not_fully_fixed) > 0:
             print("We did not find or set ASN or country for the following because it couldn't be looked up")
             for ip in not_fully_fixed:
-                print("IP: %s\tASN: %s\tCountry: %s" % (ip.ip, ip.asn, ip.country))
+                print(("IP: %s\tASN: %s\tCountry: %s" % (ip.ip, ip.asn, ip.country)))
             print("We did not find or set ASN or country for the above because it couldn't be looked up")
 
     print("All done.")

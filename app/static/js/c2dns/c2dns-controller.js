@@ -12,6 +12,22 @@ angular.module('ThreatKB')
 
             $scope.start_filter_requests_length = Cfg_settings.get({key: "START_FILTER_REQUESTS_LENGTH"});
 
+            $scope.batchEditableColumns = [];
+            $scope.batchEditableMetadata = [];
+            Cfg_settings.get({key: "BATCH_EDIT_CONFIGURATION"}).$promise.then(function (batchEditConfig) {
+                    let batchEditableJson = JSON.parse(batchEditConfig.value);
+                    if (batchEditableJson !== undefined && batchEditableJson.hasOwnProperty('c2dns')) {
+                        for (const value of batchEditableJson.c2dns) {
+                            if (value instanceof Object && value.hasOwnProperty('metadata')) {
+                                $scope.batchEditableMetadata = value.metadata;
+                            } else {
+                                $scope.batchEditableColumns.push(value);
+                            }
+                        }
+                    }
+                }
+            );
+
             $('input[type=number]').on('mousewheel', function () {
                 var el = $(this);
                 el.blur();
@@ -340,7 +356,7 @@ angular.module('ThreatKB')
                     // Set new request cancelation trigger
                     cancelGetPage = $q.defer();
                     // ... and fire off a cancelable request
-                    $http.get(url, { timeout: cancelGetPage.promise })
+                    $http.get(url, {timeout: cancelGetPage.promise})
                     $http.get(url)
                         .then(function (response) {
                             $scope.gridOptions.totalItems = response.data.total_count;
@@ -417,15 +433,17 @@ angular.module('ThreatKB')
             };
 
             $scope.save_batch = function () {
-                var c2dnsToUpdate = {
-                    owner_user: $scope.batch.owner,
-                    state: $scope.batch.state,
-                    description: $scope.batch.description,
-                    expiration_timestamp: $scope.batch.expiration_timestamp,
-                    tags: $scope.batch.tags,
+                let c2dnsToUpdate = {
                     ids: []
                 };
-                for (var i = 0; i < $scope.checked_indexes.length; i++) {
+                for (const property in $scope.batch) {
+                    if (property === "owner") {
+                        c2dnsToUpdate.owner_user = $scope.batch[property];
+                    } else if (property !== "metadata") {
+                        c2dnsToUpdate[property] = $scope.batch[property];
+                    }
+                }
+                for (let i = 0; i < $scope.checked_indexes.length; i++) {
                     if ($scope.checked_indexes[i]) {
                         c2dnsToUpdate.ids.push($scope.c2dns[i].id);
                     }
@@ -583,7 +601,19 @@ angular.module('ThreatKB')
                     resolve: {
                         batch: function () {
                             return $scope.batch;
-                        }
+                        },
+                        batchFields: function () {
+                            return $scope.batchEditableColumns;
+                        },
+                        batchMetadata: function () {
+                            return $scope.batchEditableMetadata;
+                        },
+                        metadata: ['Metadata', function (Metadata) {
+                            return Metadata.query({
+                                filter: "dns",
+                                format: "dict"
+                            });
+                        }]
                     }
                 });
 
@@ -649,6 +679,9 @@ angular.module('ThreatKB')
                         } else {
                             growl.info("Successfully saved dns artifact '" + $scope.c2dns.domain_name + "'.", {ttl: 2000});
                         }
+                    },
+                    function (error) {
+                        growl.error(error.data, {ttl: -1});
                     });
             };
 
@@ -717,7 +750,7 @@ angular.module('ThreatKB')
             };
 
             $scope.datepickers = {};
-            $scope.openDatepicker = function(id) {
+            $scope.openDatepicker = function (id) {
                 $scope.datepickers[id] = true;
             };
 
@@ -818,13 +851,27 @@ angular.module('ThreatKB')
             };
 
         }])
-    .controller('C2dnsBatchEditController', ['$scope', '$uibModalInstance', 'batch', 'Users', 'Cfg_states', 'Tags',
-        function ($scope, $uibModalInstance, batch, Users, Cfg_states, Tags) {
+    .controller('C2dnsBatchEditController', ['$scope', '$uibModalInstance', 'batch', 'Users', 'Cfg_states', 'Tags', 'batchFields', 'batchMetadata', 'metadata',
+        function ($scope, $uibModalInstance, batch, Users, Cfg_states, Tags, batchFields, batchMetadata, metadata) {
             $scope.batch = batch;
+
+            $scope.batchFields = batchFields;
+
+            $scope.batchMetadata = batchMetadata;
+
+            $scope.batch.metadata = metadata;
+            $scope.metadata = metadata;
 
             $scope.users = Users.query();
 
             $scope.cfg_states = Cfg_states.query();
+
+            $scope.update_selected_metadata = function (m, selected) {
+                if (!$scope.batch.metadata_values[m.key]) {
+                    $scope.batch.metadata_values[m.key] = {};
+                }
+                $scope.batch.metadata_values[m.key].value = selected.choice;
+            };
 
             $scope.ok = function () {
                 $uibModalInstance.close($scope.batch);
@@ -834,12 +881,17 @@ angular.module('ThreatKB')
                 $uibModalInstance.dismiss('cancel');
             };
 
+            $scope.match_types = ['exact', 'wildcard'];
+            if (!$scope.batch.match_type) {
+                $scope.batch.match_type = $scope.match_types[0];
+            }
+
             $scope.dateOptions = {
                 showWeeks: false,
             };
 
             $scope.datepickers = {};
-            $scope.openDatepicker = function(id) {
+            $scope.openDatepicker = function (id) {
                 $scope.datepickers[id] = true;
             };
 

@@ -1,3 +1,6 @@
 {
-    "directory": "app/static/lib"
+    "directory": "app/static/lib",
+    "ignoredDependencies": [
+        "file-saver.js"
+    ]
 }

@@ -1,11 +1,13 @@
 'use strict';
 
 angular.module('ThreatKB')
-    .controller('MacrosController', ['$scope', '$uibModal', 'resolvedMacros', 'Macros', 'growl', '$rootScope',
-        function ($scope, $uibModal, resolvedMacros, Macros, growl, $rootScope) {
+    .controller('MacrosController', ['$scope', '$uibModal', 'resolvedMacros', 'Macros', 'growl', 'Cfg_settings', '$rootScope',
+        function ($scope, $uibModal, resolvedMacros, Macros, growl, Cfg_settings, $rootScope) {
 
             $scope.macros = resolvedMacros;
             $scope.macro = {};
+
+            $scope.macro_tag_template = Cfg_settings.get({key: "MACRO_TAG_TEMPLATE"});
 
             const dateRegex = new RegExp(/\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d/);
 
