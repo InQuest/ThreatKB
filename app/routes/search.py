@@ -83,13 +83,13 @@ def do_search():
                                tasks.Tasks.final_artifact.like("%" + all + "%")))
 
     if not artifact_type or "signature" in artifact_type:
-        results["signatures"] = [signature.to_dict() for signature in signatures.all()]
+        results["signatures"] = [signature.to_dict(include_metadata=False, include_comments=False, include_tags=False) for signature in signatures.all()]
 
     if not artifact_type or "ip" in artifact_type:
-        results["ips"] = [ip.to_dict() for ip in ips.all()]
+        results["ips"] = [ip.to_dict(include_metadata=False, include_comments=False, include_tags=False) for ip in ips.all()]
 
     if not artifact_type or "dns" in artifact_type:
-        results["dns"] = [d.to_dict() for d in dns.all()]
+        results["dns"] = [d.to_dict(include_metadata=False, include_comments=False, include_tags=False) for d in dns.all()]
 
     if not artifact_type or "task" in artifact_type:
         results["tasks"] = [t.to_dict() for t in task.all()]
