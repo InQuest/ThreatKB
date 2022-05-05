@@ -1,4 +1,5 @@
 from app import db
+from app.models import tags_mapping
 
 
 class Tags_mapping(db.Model):
@@ -19,6 +20,22 @@ class Tags_mapping(db.Model):
             tag_id = self.tag_id,
             id = self.id
         )
+
+    @staticmethod
+    def get_tags_mapping_cache():
+        from app.models import tags
+        r = {}
+        mapping = tags_mapping.Tags_mapping.query.all()
+        tags = {tag.id: tag for tag in tags.Tags.query.all()}
+        for map in mapping:
+            if not r.get(map.source_table, []):
+                r[map.source_table] = {}
+            if not r[map.source_table].get(map.source_id,[]):
+                r[map.source_table][map.source_id] = []
+            if map.tag_id in tags:
+                r[map.source_table][map.source_id].append(tags[map.tag_id].text)
+
+        return r
 
     def __repr__(self):
         return '<Tags_mapping %r>' % (self.id)

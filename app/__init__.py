@@ -17,10 +17,14 @@ import distutils
 
 
 app = Flask(__name__, static_url_path='')
-cache = Cache(app, config={'CACHE_TYPE': 'simple'})
+app.config.from_object("config")
+
+if app.config.get('REDIS_CACHE_URL', None):
+    cache = Cache(app, config={'CACHE_TYPE': 'redis', 'CACHE_REDIS_URL': app.config.get('REDIS_CACHE_URL')})
+else:
+    cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 cache.init_app(app)
 app.secret_key = "a" * 24  # os.urandom(24)
-app.config.from_object("config")
 
 auto = Autodoc(app)
 

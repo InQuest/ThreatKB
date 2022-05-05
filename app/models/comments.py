@@ -1,7 +1,7 @@
 from sqlalchemy.event import listens_for
 
-from app import db, ENTITY_MAPPING, ACTIVITY_TYPE
-from app.models import activity_log
+from app import db, ENTITY_MAPPING, ACTIVITY_TYPE, ENTITY_MAPPING_URI
+from app.models import activity_log, yara_rule
 
 
 class Comments(db.Model):
@@ -28,6 +28,20 @@ class Comments(db.Model):
             id=self.id,
             user=self.user.to_dict()
         )
+
+    @staticmethod
+    def get_comment_cache():
+        mapper = {1: "yara_rules", 2: "c2dns", 3: "c2ip", 4: "tasks"}
+        r = {}
+        comments = Comments.query.all()
+        for comment in comments:
+            t = mapper[comment.entity_type]
+            if not r.get(t, []):
+                r[t] = {}
+            if not r[t].get(comment.entity_id, []):
+                r[t][comment.entity_id] = []
+            r[t][comment.entity_id].append(comment.to_dict())
+        return r
 
     def __repr__(self):
         return '<Comments %r>' % (self.id)
