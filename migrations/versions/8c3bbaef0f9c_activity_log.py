@@ -21,7 +21,7 @@ def upgrade():
     op.create_table('activity_log',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('activity_type', sa.String(length=256), nullable=True),
-    sa.Column('activity_text', sa.String(length=65000), nullable=True),
+    sa.Column('activity_text', sa.TEXT(), nullable=True),
     sa.Column('activity_date', sa.DateTime(timezone=True), nullable=True),
     sa.Column('entity_type', sa.Integer(), nullable=False),
     sa.Column('entity_id', sa.Integer(), nullable=False),

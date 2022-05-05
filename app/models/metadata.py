@@ -134,7 +134,7 @@ class MetadataMapping(db.Model):
     __tablename__ = "metadata_mapping"
 
     id = db.Column(db.Integer, primary_key=True)
-    value = db.Column(db.String(60000), nullable=True)
+    value = db.Column(db.TEXT(), nullable=True)
 
     date_created = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp())
     date_modified = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp(),

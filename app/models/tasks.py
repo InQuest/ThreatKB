@@ -16,7 +16,7 @@ class Tasks(db.Model):
     state = db.Column(db.String(32), index=True)
     active = db.Column(db.Boolean, nullable=False, default=True)
     title = db.Column(db.String(256), index=True)
-    description = db.Column(db.String(2048), index=True)
+    description = db.Column(db.TEXT(), index=True)
     final_artifact = db.Column(db.String(4096))
 
     created_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)

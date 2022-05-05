@@ -11,7 +11,7 @@ class Scripts(db.Model):
     name = db.Column(db.String(128), nullable=False)
     description = db.Column(db.String(128), nullable=True)
     interpreter = db.Column(db.String(64), nullable=False)
-    code = db.Column(db.String(60000), nullable=True)
+    code = db.Column(db.TEXT(), nullable=True)
     match_regex = db.Column(db.String(4096), nullable=True)
     date_created = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp())
     date_modified = db.Column(db.DateTime(timezone=True), default=db.func.current_timestamp(),

@@ -34,7 +34,7 @@ def upgrade():
                     )
     op.create_table('metadata_mapping',
                     sa.Column('id', sa.Integer(), nullable=False),
-                    sa.Column('value', sa.String(length=60000), nullable=True),
+                    sa.Column('value', sa.TEXT(), nullable=True),
                     sa.Column('date_created', sa.DateTime(timezone=True), nullable=True),
                     sa.Column('date_modified', sa.DateTime(timezone=True), nullable=True),
                     sa.Column('metadata_id', sa.Integer(), nullable=False),
