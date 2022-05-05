@@ -202,9 +202,9 @@ def filter_entities(entity,
     total_count = entities.count()
 
     if sort_by:
-        filtered_entities = filtered_entities.order_by(text("%s.%s %s" % (entity.__tablename__, sort_by, sort_direction)))
+        filtered_entities = filtered_entities.order_by(text("%s %s" % (f"{entity.__tablename__}.{sort_by}" if not "." in sort_by else sort_by, sort_direction)))
     else:
-        filtered_entities = filtered_entities.order_by(text("%s.%s DESC" % (entity.__tablename__, default_sort)))
+        filtered_entities = filtered_entities.order_by(text("%s DESC" % (f"{entity.__tablename__}.{default_sort}" if not "." in default_sort else default_sort)))
 
     if page_size:
         filtered_entities = filtered_entities.limit(int(page_size))
