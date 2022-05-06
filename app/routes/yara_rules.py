@@ -416,17 +416,17 @@ def update_yara_rule(id):
         if not name or not value_dict:
             continue
 
-        m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
+        m = db.session.query(MetadataMapping, Metadata).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
             Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).filter(
             MetadataMapping.artifact_id == entity.id).first()
-        if m:
-            m.value = value_dict["value"]
-            db.session.add(m)
+        if m[0]:
+            m[0].value = value_dict.get("value", None) if not m[1].required else value_dict["value"]
+            db.session.add(m[0])
             dirty = True
         else:
             m = db.session.query(Metadata).filter(Metadata.key == name).filter(
                 Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).first()
-            db.session.add(MetadataMapping(value=value_dict["value"], metadata_id=m.id, artifact_id=entity.id,
+            db.session.add(MetadataMapping(value=value_dict["value"] if m.required else value_dict.get("value", None), metadata_id=m.id, artifact_id=entity.id,
                                            created_user_id=current_user.id))
             dirty = True
 
