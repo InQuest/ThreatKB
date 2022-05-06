@@ -10,7 +10,7 @@ class Files(db.Model):
     date_modified = db.Column(db.DateTime(timezone=True),
                               default=db.func.current_timestamp(),
                               onupdate=db.func.current_timestamp())
-    filename = db.Column(db.String(65000))
+    filename = db.Column(db.TEXT())
     content_type = db.Column(db.String(100))
     entity_type = db.Column(db.Integer(), index=True, nullable=True)
     entity_id = db.Column(db.Integer(), index=True, nullable=True)

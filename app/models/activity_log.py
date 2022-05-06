@@ -15,7 +15,7 @@ class ActivityLog(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     activity_type = db.Column(db.String(256))
-    activity_text = db.Column(db.String(65000))
+    activity_text = db.Column(db.TEXT())
     activity_date = db.Column(db.DateTime(timezone=True))
 
     entity_type = db.Column(db.Integer(), index=True, nullable=False)

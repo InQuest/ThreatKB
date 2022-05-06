@@ -2,17 +2,18 @@ version: '3'
 
 services:
    db:
-     image: mysql:5.7.20
+     image: mysql:8.0.29
+     command: mysqld --default-authentication-plugin=mysql_native_password --skip-mysqlx
      volumes:
        - db_data:/var/lib/docker/mysql
      restart: always
      ports:
-        - 3307:3306
+        - 3306:3306
      environment:
-       MYSQL_ROOT_PASSWORD: P@sswordsRC00l
+       MYSQL_ROOT_PASSWORD: b5vXcqzUtn4suyS
        MYSQL_DATABASE: threatkb
        MYSQL_USER: threatkb
-       MYSQL_PASSWORD: P@sswordsRC00l
+       MYSQL_PASSWORD: b5vXcqzUtn4suyS
    redis:
      depends_on:
        - db
@@ -29,23 +30,28 @@ services:
      restart: always
      environment:
        THREATKB_USER: admin@inquest.net
-       THREATKB_PASS: P@sswordsRC00l
-       MYSQL_ROOT_PASSWORD: P@sswordsRC00l
+       THREATKB_PASS: b5vXcqzUtn4suyS
+       MYSQL_ROOT_PASSWORD: b5vXcqzUtn4suyS
        SQL_DATABASE: threatkb
        SQL_USERNAME: threatkb
-       SQL_PASSWORD: P@sswordsRC00l
+       SQL_PASSWORD: b5vXcqzUtn4suyS
        SQL_PORT: 3306
        SQL_HOST: db
        SQL_PROTOCOL: mysql
        LISTEN_ON: 0.0.0.0
        LISTEN_PORT: 5000
+       REDIS_CACHE_URL: redis://localhost:6379/0
    threatkb_agent:
      depends_on:
        - db
      image: threatkb:latest
      restart: always
      environment:
-       - RUN_AGENT=1
-       - C_FORCE_ROOT=true
+       RUN_AGENT: 1
+       C_FORCE_ROOT: true
+       REDIS_ACCEPT_CONTENT: '["json"]'
+       REDIS_RESULT_SERIALIZER: json
+       REDIS_TASK_SERIALIZER: json
+       REDIS_BROKER_URL: redis://redis:6379/0 
 volumes:
     db_data:
