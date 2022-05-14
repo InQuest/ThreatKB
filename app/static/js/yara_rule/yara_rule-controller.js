@@ -666,6 +666,7 @@ angular.module('ThreatKB')
                 );
             }
 
+
             var mitre_techniques = Cfg_settings.get({key: "MITRE_TECHNIQUES"});
             if (mitre_techniques.$promise !== null && mitre_techniques.$promise !== undefined) {
                 mitre_techniques.$promise.then(
@@ -863,18 +864,24 @@ angular.module('ThreatKB')
                 });
             };
 
-            $scope.delete_comment = function (id, comment_id) {
-                $scope.Comments.resource.delete({id: comment_id}, function () {
-                    $scope.yara_rule.comments = $scope.Comments.resource.query({
-                        entity_type: Comments.ENTITY_MAPPING.SIGNATURE,
-                        entity_id: id
-                    });
-                });
-            };
+
 
             $scope.$watch('files', function () {
                 $scope.upload($scope.files);
             });
+
+
+            $scope.delete_file = function (file_id) {
+                Yara_rule.deleteFile({id: file_id}).then(function (resp) {
+		        growl.info("Successfully deleted file", {ttl: 3000});
+                        $scope.yara_rule.files = $scope.Files.resource.query({
+                        entity_type: Files.ENTITY_MAPPING.SIGNATURE,
+                        entity_id: $scope.yara_rule.id
+                    });
+                }, function (error) {
+                    console.log('Error status: ' + error.status);
+                    growl.error(error);
+                })};
 
             $scope.upload = function (id, files) {
                 if (files && files.length) {

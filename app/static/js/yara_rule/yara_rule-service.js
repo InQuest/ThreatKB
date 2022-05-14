@@ -92,8 +92,8 @@ angular.module('ThreatKB')
             );
         }
 
-        function deleteFile(file_id) {
-            return $http.put('/ThreatKB/files/' + rule_id).then(function (success) {
+        function deleteFile(file) {
+            return $http.delete('/ThreatKB/files/' + file.id).then(function (success) {
                     if (success.status === 200) {
                         return success.data;
                     }
@@ -119,3 +119,4 @@ angular.module('ThreatKB')
             deleteFile: deleteFile
         };
     }]);
+

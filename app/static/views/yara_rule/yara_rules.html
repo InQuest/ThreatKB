@@ -560,11 +560,11 @@
                                                       data-clipboard-text="{{ file_store_path.value }}/{{ entity_mapping.SIGNATURE }}/{{ f.entity_id }}/{{ f.filename }}">
                                             </span>
                                                 </a>
-                                                <span>
-                                                    <button type="button" class="btn btn-xs pull-right"
-                                                            confirmed-click="deleteFile({{ f.id }})"
-                                                            ng-confirm-click="Are you sure you want to delete {{ f.filename }}"><span
-                                                            style="color: red;"
+						&nbsp;
+                                                <span>:<button type="button" class="btn btn-xs pull-right"
+                                                            confirmed-click="delete_file({{ f.id }})"
+							    ng-confirm-click="Are you sure you want to delete {{ f.filename }}?" style="background: white;"><span
+                                                            style="color: red; vertical-align: middle;"
                                                             class="glyphicon glyphicon-remove-circle"></span></button></span>
 
                                             </div>
@@ -753,3 +753,4 @@
          ui-grid-pagination ui-grid-auto-resize>
     </div>
 </div>
+

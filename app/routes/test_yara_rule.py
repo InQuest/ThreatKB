@@ -313,13 +313,13 @@ def perform_rule_match(rule, file_path, manager_dict, yara_command, yara_test_re
     stdout, stderr = proc.communicate()
     end = time.time()
     manager_dict['duration'] = end - start
-    manager_dict['stdout'] = stdout
-    manager_dict['stderr'] = stderr
+    manager_dict['stdout'] = stdout.decode()
+    manager_dict['stderr'] = stderr.decode()
     manager_dict['file_path'] = file_path
     manager_dict['command'] = yara_command
     manager_dict['command_match_test_regex'] = yara_test_regex
 
-    if re.search(yara_test_regex, stdout):
+    if re.search(yara_test_regex, manager_dict['stdout']):
         manager_dict['match'] = True
     else:
         manager_dict['match'] = False
