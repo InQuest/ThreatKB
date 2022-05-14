@@ -399,6 +399,12 @@ def update_yara_rule(id):
     if matches:
         raise Exception
 
+    mitre_sub_techniques = Cfg_settings.get_setting("MITRE_SUB_TECHNIQUES").split(",")
+    entity.mitre_sub_techniques = request.json.get("mitre_sub_techniques", [])
+    matches = [technique for technique in entity.mitre_sub_techniques if technique not in mitre_sub_techniques]
+    if matches:
+        raise Exception
+
     mitre_tactics = Cfg_settings.get_setting("MITRE_TACTICS").split(",")
     entity.mitre_tactics = request.json.get("mitre_tactics", [])
     matches = [tactic for tactic in entity.mitre_tactics if tactic not in mitre_tactics]

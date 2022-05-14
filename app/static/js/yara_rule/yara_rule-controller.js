@@ -675,6 +675,15 @@ angular.module('ThreatKB')
                 );
             }
 
+            var mitre_sub_techniques = Cfg_settings.get({key: "MITRE_SUB_TECHNIQUES"});
+            if (mitre_sub_techniques.$promise !== null && mitre_sub_techniques.$promise !== undefined) {
+                mitre_sub_techniques.$promise.then(
+                    function (subtechniques) {
+                        $scope.mitre_sub_techniques = subtechniques.value.split(",");
+                    }
+                );
+            }
+
             var mitre_tactics = Cfg_settings.get({key: "MITRE_TACTICS"});
             if (mitre_tactics.$promise !== null && mitre_tactics.$promise !== undefined) {
                 mitre_tactics.$promise.then(
@@ -691,14 +700,14 @@ angular.module('ThreatKB')
             $scope.Comments = Comments;
             $scope.Files = Files;
             $scope.selected_signature = null;
-            
+
             $scope.selectedRevisions = {
                 main: null,
                 compared: null
             };
             $scope.selected_revision = null;
             $scope.compared_revision = null;
-            
+
             $scope.users = Users.query();
 
             $scope.editor = {

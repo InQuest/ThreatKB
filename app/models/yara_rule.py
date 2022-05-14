@@ -38,6 +38,7 @@ class Yara_rule(db.Model):
     eventid = db.Column(db.Integer(), index=True, nullable=False)
     _mitre_techniques = db.Column(db.String(256), index=True)
     _mitre_tactics = db.Column(db.String(256), index=True)
+    _mitre_sub_techniques = db.Column(db.String(256), index=True)
 
     tags = []
 
@@ -72,7 +73,19 @@ class Yara_rule(db.Model):
     @property
     def mitre_techniques(self):
         if self._mitre_techniques:
-            return self._mitre_techniques.split(",") or []
+            return list(set(self._mitre_techniques.split(",")))
+        return []
+
+    @property
+    def mitre_tactics(self):
+        if self._mitre_tactics:
+            return list(set(self._mitre_tactics.split(",")))
+        return []
+
+    @property
+    def mitre_sub_techniques(self):
+        if self._mitre_sub_techniques:
+            return list(set(self._mitre_sub_techniques.split(",")))
         return []
 
     @property
@@ -80,6 +93,10 @@ class Yara_rule(db.Model):
         if self._mitre_tactics:
             return self._mitre_tactics.split(",")
         return []
+
+    @mitre_sub_techniques.setter
+    def mitre_sub_techniques(self, value):
+        self._mitre_sub_techniques = ",".join(value)
 
     @mitre_techniques.setter
     def mitre_techniques(self, value):
@@ -121,6 +138,7 @@ class Yara_rule(db.Model):
             imports=self.imports,
             mitre_tactics=self.mitre_tactics,
             mitre_techniques=self.mitre_techniques,
+            mitre_sub_techniques=self.mitre_sub_techniques,
             active=self.active
         )
 

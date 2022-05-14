@@ -11,7 +11,7 @@ if [[ ! -z "${RUN_AGENT}" ]]; then
   env/bin/celery -A app.celery worker --uid uwsgi --loglevel=info
 else
   find . -name "*.pyc" -exec rm -f {} \;
-  env/bin/python3.8 manage.py db upgrade
+  env/bin/flask db upgrade
 
   num_users=`echo "select count(*) from kb_users;" | mysql -u ${SQL_USERNAME} -p"${SQL_PASSWORD}" -h ${SQL_HOST} ${SQL_DATABASE} | sed 's/[^0-9]//g'`
   if [ $num_users -lt 1 ]; then

@@ -13,9 +13,9 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-env/bin/python manage.py db upgrade
+env/bin/flask db upgrade
 if [ $? -ne 0 ]; then
-    echo "error: failed to run 'manage.py db upgrade'"
+    echo "error: failed to run 'flask db upgrade'"
     exit 1
 fi
 

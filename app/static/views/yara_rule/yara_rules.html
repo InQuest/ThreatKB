@@ -326,6 +326,18 @@
                 </div>
 
                 <div class="form-group">
+                    <label>Mitre ATT&CK Sub-Techniques</label>
+                    <ui-select multiple ng-model="yara_rule.mitre_sub_techniques" theme="bootstrap"
+                               close-on-select="false"
+                               title="Choose sub-techniques">
+                        <ui-select-match placeholder="Choose sub-techniques...">{{$item}}</ui-select-match>
+                        <ui-select-choices repeat="tactic in mitre_sub_techniques | filter:$select.search">
+                            {{ tactic }}
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+
+                <div class="form-group">
                     <label>Category</label>
                     <span class="error text-danger">*</span>
                     <ui-select ng-model="yara_rule.category" ng-required="true">
