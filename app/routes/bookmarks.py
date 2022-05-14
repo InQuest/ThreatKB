@@ -56,7 +56,7 @@ def get_all_bookmarks():
                     mimetype='application/json')
 
 
-@app.route('/ThreatKB/bookmarks', methods=['POST'])
+@app.route('/ThreatKB/bookmarks', methods=['POST', 'PUT'])
 @auto.doc()
 @login_required
 def create_bookmark():

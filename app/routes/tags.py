@@ -29,7 +29,7 @@ def get_tags(id):
     return jsonify(entity.to_dict())
 
 
-@app.route('/ThreatKB/tags', methods=['POST'])
+@app.route('/ThreatKB/tags', methods=['POST', 'PUT'])
 @auto.doc()
 @login_required
 def create_tags():

@@ -5,7 +5,7 @@ from app.models import c2ip, c2dns, yara_rule, cfg_states, comments, cfg_setting
 from app.models.metadata import Metadata
 from app.utilities import extract_artifacts
 import distutils
-
+from app.models.whitelist import Whitelist
 
 #####################################################################
 
@@ -47,6 +47,10 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                     ip = c2ip.C2ip.get_c2ip_from_ip(artifact, metadata_field_mapping)
                     ip.created_user_id, ip.modified_user_id = current_user.id, current_user.id
                     ip.state = default_state if not shared_state else shared_state
+                    if Whitelist.hits_whitelist(ip.ip, ip.state):
+                        error_artifacts.append((ip.ip, f"Whitelist validation failed {ip.ip}"))
+                        continue
+
                     if shared_reference:
                         ip.references = shared_reference
 
@@ -60,6 +64,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                         metadata_to_save_ip.append((ip, artifact["metadata"]))
 
                     db.session.add(ip)
+                    db.session.commit()
                     return_artifacts.append(ip)
             elif artifact["type"].lower() in ["dns", "domain_name"] and extract_dns:
                 # old_dns = c2dns.C2dns.query.filter(c2dns.C2dns.domain_name == artifact["artifact"]).first()
@@ -77,6 +82,10 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                     dns = c2dns.C2dns.get_c2dns_from_hostname(artifact, metadata_field_mapping)
                     dns.created_user_id, dns.modified_user_id = current_user.id, current_user.id
                     dns.state = default_state if not shared_state else shared_state
+                    if Whitelist.hits_whitelist(dns.domain_name, dns.state):
+                        error_artifacts.append((dns.domain_name, f"Whitelist validation failed {dns.domain_name}"))
+                        continue
+
                     if shared_reference:
                         dns.references = shared_reference
                     if shared_description:
@@ -90,6 +99,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                         metadata_to_save_dns.append((dns, artifact["metadata"]))
 
                     db.session.add(dns)
+                    db.session.commit()
                     return_artifacts.append(dns)
             elif artifact["type"].lower() == "yara_rule" and extract_signature:
                 yr = yara_rules.get(artifact["rule"]["rule_name"], None)
@@ -108,6 +118,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                     yr.owner_user_id = shared_owner
 
                 db.session.add(yr)
+                db.session.commit()
                 return_artifacts.append(yr)
                 fields_to_add[yr] = fta
         except Exception as e:
@@ -119,6 +130,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
             app.logger.error("Failed to commit artifacts '%s'" % artifact)
 
     db.session.commit()
+
     if fields_to_add:
         for yr, fields in fields_to_add.items():
             for field in fields:

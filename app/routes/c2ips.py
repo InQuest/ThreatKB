@@ -6,6 +6,7 @@ from dateutil import parser
 from sqlalchemy import exc
 
 from app.models.cfg_states import verify_state
+from app.models.whitelist import WhitelistException
 from app.routes.batch import batch_update, batch_delete
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
 from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
@@ -98,7 +99,7 @@ def get_c2ip(id):
     return jsonify(return_dict)
 
 
-@app.route('/ThreatKB/c2ips', methods=['POST'])
+@app.route('/ThreatKB/c2ips', methods=['POST', 'PUT'])
 @auto.doc()
 @login_required
 def create_c2ip():
@@ -127,7 +128,7 @@ def create_c2ip():
     except exc.IntegrityError:
         app.logger.error("Duplicate IP: '%s'" % entity.ip)
         abort(409, description="Duplicate IP: '%s'" % entity.ip)
-    except Exception:
+    except WhitelistException:
         app.logger.error("Whitelist validation failed.")
         abort(412, description="Whitelist validation failed.")
 
@@ -190,6 +191,9 @@ def update_c2ip(id):
     except exc.IntegrityError:
         app.logger.error("Duplicate IP: '%s'" % entity.ip)
         abort(409, description="Duplicate IP: '%s'" % entity.ip)
+    except WhitelistException:
+        app.logger.error("Whitelist validation failed.")
+        abort(412, description="Whitelist validation failed.")
 
     delete_tags_mapping(entity.__tablename__, entity.id)
     create_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])

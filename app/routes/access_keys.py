@@ -63,7 +63,7 @@ def get_access_key(key_id):
     return jsonify(key.to_dict())
 
 
-@app.route('/ThreatKB/access_keys', methods=['POST'])
+@app.route('/ThreatKB/access_keys', methods=['POST', 'PUT'])
 @login_required
 def create_access_key():
     """Create new access key if user has less than two active/inactive access keys.

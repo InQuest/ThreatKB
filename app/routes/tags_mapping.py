@@ -59,7 +59,7 @@ def get_tags_for_source(source_table, source_id):
     return list_of_tags
 
 
-@app.route('/ThreatKB/tags_mapping', methods=['POST'])
+@app.route('/ThreatKB/tags_mapping', methods=['POST', 'PUT'])
 @auto.doc()
 @login_required
 def create_tags_mapping_rest():

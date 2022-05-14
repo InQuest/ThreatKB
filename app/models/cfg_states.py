@@ -1,5 +1,10 @@
-from app import db
+from app import db, cache
 from sqlalchemy.event import listens_for
+
+
+@cache.memoize(timeout=60)
+def get_cfg_states():
+    return [c.state for c in Cfg_states.query.all()]
 
 
 class Cfg_states(db.Model):

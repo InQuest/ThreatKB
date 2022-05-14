@@ -75,7 +75,7 @@ def update_script(id):
     return jsonify(script.to_dict()), 200
 
 
-@app.route('/ThreatKB/scripts', methods=['POST'])
+@app.route('/ThreatKB/scripts', methods=['POST', 'PUT'])
 @auto.doc()
 @login_required
 @admin_only()

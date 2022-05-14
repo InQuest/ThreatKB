@@ -111,7 +111,7 @@ def generate_artifact_export(release_id):
     return send_file(tfile, attachment_filename=filename, as_attachment=True)
 
 
-@app.route('/ThreatKB/releases', methods=['POST'])
+@app.route('/ThreatKB/releases', methods=['POST', 'PUT'])
 @auto.doc()
 @login_required
 @admin_only()

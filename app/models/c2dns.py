@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 import app
 from app import db, current_user, ENTITY_MAPPING, ACTIVITY_TYPE
-from app.models.whitelist import Whitelist
+from app.models.whitelist import Whitelist, WhitelistException
 from app.models.metadata import Metadata, MetadataMapping
 from app.routes import tags_mapping
 from app.models.comments import Comments
@@ -225,66 +225,20 @@ class C2dns(db.Model):
 
 @listens_for(C2dns, "before_insert")
 def run_against_whitelist(mapper, connect, target):
-    whitelist_enabled = cfg_settings.Cfg_settings.get_setting("ENABLE_DNS_WHITELIST_CHECK_ON_SAVE")
-    whitelist_states = cfg_settings.Cfg_settings.get_setting("WHITELIST_STATES")
+    if Whitelist.hits_whitelist(target.domain_name, target.state):
+        abort(412, f"Failed whitelist validation {target.domain_name}")
 
-    if whitelist_enabled and distutils.util.strtobool(whitelist_enabled) and whitelist_states:
-        states = []
-        for s in whitelist_states.split(","):
-            if hasattr(cfg_states.Cfg_states, s):
-                result = cfg_states.Cfg_states.query.filter(getattr(cfg_states.Cfg_states, s) > 0).first()
-                if result:
-                    states.append(result.state)
-
-        if target.state in states:
-            domain_name = target.domain_name
-            target.domain_name = str(target.domain_name).lower()
-
-            abort_import = False
-
-            if not C2dns.WHITELIST_CACHE_LAST_UPDATE or not C2dns.WHITELIST_CACHE \
-                    or (time.time() - C2dns.WHITELIST_CACHE_LAST_UPDATE) > 60:
-                C2dns.WHITELIST_CACHE = Whitelist.query.all()
-                C2dns.WHITELIST_CACHE_LAST_UPDATE = time.time()
-
-            whitelists = C2dns.WHITELIST_CACHE
-
-            for whitelist in whitelists:
-                wa = str(whitelist.whitelist_artifact)
-
-                try:
-                    ip = IPAddress(wa)
-                    continue
-                except ValueError:
-                    pass
-
-                try:
-                    cidr = IPNetwork(wa)
-                    continue
-                except ValueError:
-                    pass
-
-                try:
-                    regex = re.compile(wa)
-                    result = regex.search(domain_name)
-                except:
-                    result = False
-
-                if result:
-                    abort_import = True
-                    break
-
-            if abort_import:
-                raise Exception('Failed Whitelist Validation')
-
-            if not current_user.admin:
-                release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
-                if release_state and target.state == release_state.state:
-                    abort(403)
+    if not current_user.admin:
+        release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
+        if release_state and target.state == release_state.state:
+            abort(403)
 
 
 @listens_for(C2dns, "before_update")
 def c2dns_before_update(mapper, connect, target):
+    if Whitelist.hits_whitelist(target.domain_name, target.state):
+        abort(412, f"Failed whitelist validation {target.domain_name}")
+
     if not current_user.admin:
         release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
         if release_state and target.state == release_state.state:

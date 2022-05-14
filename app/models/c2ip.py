@@ -1,7 +1,3 @@
-import distutils
-import re
-
-from ipaddr import IPAddress, IPNetwork
 from sqlalchemy.event import listens_for
 from sqlalchemy.orm import Session
 
@@ -9,14 +5,12 @@ import app
 from app import db, current_user, ENTITY_MAPPING, ACTIVITY_TYPE
 from app.geo_ip_helper import get_geo_for_ip
 from app.models.comments import Comments
-from app.models.whitelist import Whitelist
+from app.models.whitelist import Whitelist, WhitelistException
 from app.routes import tags_mapping
 from app.models.metadata import Metadata, MetadataMapping
-from app.models import cfg_states, cfg_settings, activity_log
-
+from app.models import cfg_states, activity_log
+from ipaddr import IPAddress, IPNetwork
 from flask import abort
-
-import time
 
 
 class C2ip(db.Model):
@@ -52,9 +46,6 @@ class C2ip(db.Model):
                                    ENTITY_MAPPING["IP"]), uselist=True)
 
     tags = []
-
-    WHITELIST_CACHE = None
-    WHITELIST_CACHE_LAST_UPDATE = None
 
     @property
     def metadata_fields(self):
@@ -238,70 +229,25 @@ class C2ip(db.Model):
 
 @listens_for(C2ip, "before_insert")
 def run_against_whitelist(mapper, connect, target):
-    whitelist_enabled = cfg_settings.Cfg_settings.get_setting("ENABLE_IP_WHITELIST_CHECK_ON_SAVE")
-    whitelist_states = cfg_settings.Cfg_settings.get_setting("WHITELIST_STATES")
+    if Whitelist.hits_whitelist(target.ip, target.state):
+        abort(412, f"Failed whitelist validation {target.ip}")
 
-    if whitelist_enabled and distutils.util.strtobool(whitelist_enabled) and whitelist_states:
-        states = []
-        for s in whitelist_states.split(","):
-            if hasattr(cfg_states.Cfg_states, s):
-                result = cfg_states.Cfg_states.query.filter(getattr(cfg_states.Cfg_states, s) > 0).first()
-                if result:
-                    states.append(result.state)
-
-        if target.state in states:
-            new_ip = target.ip
-
-            abort_import = False
-
-            if not C2ip.WHITELIST_CACHE_LAST_UPDATE or not C2ip.WHITELIST_CACHE or (
-                time.time() - C2ip.WHITELIST_CACHE_LAST_UPDATE) > 60:
-                C2ip.WHITELIST_CACHE = Whitelist.query.all()
-                C2ip.WHITELIST_CACHE_LAST_UPDATE = time.time()
-
-            whitelists = C2ip.WHITELIST_CACHE
-
-            for whitelist in whitelists:
-                wa = str(whitelist.whitelist_artifact)
-
-                try:
-                    if str(IPAddress(new_ip)) == str(IPAddress(wa)):
-                        abort_import = True
-                        break
-                except ValueError:
-                    pass
-
-                try:
-                    if IPAddress(new_ip) in IPNetwork(wa):
-                        abort_import = True
-                        break
-                except ValueError:
-                    pass
-
-                try:
-                    regex = re.compile(wa)
-                    result = regex.search(new_ip)
-                except:
-                    result = False
-
-                if result:
-                    abort_import = True
-                    break
-
-            if abort_import:
-                raise Exception('Failed Whitelist Validation')
-
-            # Verify the ip is well formed
-            IPAddress(new_ip)
-
-            if not current_user.admin:
-                release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
-                if release_state and target.state == release_state.state:
-                    abort(403)
+    if not current_user.admin:
+        release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
+        if release_state and target.state == release_state.state:
+            abort(403)
 
 
 @listens_for(C2ip, "before_update")
 def c2ip_before_update(mapper, connect, target):
+    try:
+        IPAddress(target.ip)
+    except:
+        abort(412, f"Not a welformed IP address {target.ip}")
+
+    if Whitelist.hits_whitelist(target.ip, target.state):
+        abort(412, f"Failed whitelist validation {target.ip}")
+
     if current_user and not current_user.admin:
         release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
         if release_state and target.state == release_state.state:

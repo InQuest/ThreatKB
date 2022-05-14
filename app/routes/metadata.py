@@ -45,7 +45,7 @@ def get_metadata(id):
     return jsonify(entity.to_dict())
 
 
-@app.route('/ThreatKB/metadata', methods=['POST'])
+@app.route('/ThreatKB/metadata', methods=['POST', 'PUT'])
 @auto.doc()
 @login_required
 @admin_only()

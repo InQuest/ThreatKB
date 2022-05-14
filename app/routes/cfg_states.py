@@ -35,7 +35,7 @@ def get_cfg_states(id):
     return jsonify(entity.to_dict())
 
 
-@app.route('/ThreatKB/cfg_states', methods=['POST'])
+@app.route('/ThreatKB/cfg_states', methods=['POST', 'PUT'])
 @auto.doc()
 @login_required
 @admin_only()

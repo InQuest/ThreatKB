@@ -180,7 +180,7 @@ def get_user_picture_by_id(user_id):
 
     return send_file(temp_file)
 
-@app.route('/ThreatKB/users', methods=['POST'])
+@app.route('/ThreatKB/users', methods=['POST', 'PUT'])
 @auto.doc()
 @login_required
 @admin_only()

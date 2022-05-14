@@ -37,7 +37,7 @@ def get_comments(id):
     return jsonify(entity.to_dict())
 
 
-@app.route('/ThreatKB/comments', methods=['POST'])
+@app.route('/ThreatKB/comments', methods=['POST', 'PUT'])
 @auto.doc()
 @login_required
 def create_comments():

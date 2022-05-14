@@ -5,6 +5,7 @@ from flask_login import login_required, current_user
 from dateutil import parser
 from sqlalchemy import exc
 
+from app.models.whitelist import WhitelistException
 from app.models.cfg_states import verify_state
 from app.routes.batch import batch_update, batch_delete
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
@@ -93,7 +94,7 @@ def get_c2dns(id):
     return jsonify(return_dict)
 
 
-@app.route('/ThreatKB/c2dns', methods=['POST'])
+@app.route('/ThreatKB/c2dns', methods=['POST', 'PUT'])
 @auto.doc()
 @login_required
 def create_c2dns():
@@ -121,7 +122,7 @@ def create_c2dns():
     except exc.IntegrityError:
         app.logger.error("Duplicate DNS: '%s'" % entity.domain_name)
         abort(409)
-    except Exception as e:
+    except WhitelistException as e:
         app.logger.error("Whitelist validation failed.")
         abort(412, description="Whitelist validation failed.")
 
@@ -183,6 +184,9 @@ def update_c2dns(id):
     except exc.IntegrityError:
         app.logger.error("Duplicate DNS: '%s'" % entity.domain_name)
         abort(409, description="Duplicate DNS: '%s'" % entity.domain_name)
+    except WhitelistException as e:
+        app.logger.error("Whitelist validation failed.")
+        abort(412, description="Whitelist validation failed.")
 
     delete_tags_mapping(entity.__tablename__, entity.id)
     create_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])

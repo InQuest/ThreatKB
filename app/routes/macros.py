@@ -50,7 +50,7 @@ def get_macro(tag):
     return jsonify(entity.to_dict())
 
 
-@app.route('/ThreatKB/macros', methods=['POST'])
+@app.route('/ThreatKB/macros', methods=['POST', 'PUT'])
 @auto.doc()
 @login_required
 def create_macro():
