@@ -228,15 +228,16 @@ class Release(db.Model):
 
         message += "New Signatures\n%s\n" % ("-" * 10)
         message += "\n\n".join([
-            "EventID: %s\nName: %s\nCategory: %s\nConfidence: %s\nSeverity: %s\nDescription: %s\nMitre Tactics: %s\nMitre Techniques: %s" % (
+            "EventID: %s\nName: %s\nCategory: %s\nConfidence: %s\nSeverity: %s\nDescription: %s\nMitre Tactics: %s\nMitre Techniques: %s\nMitre Sub-techniques: %s" % (
                 entity.get("eventid", "eventid"),
                 entity.get("name", "name"),
                 entity.get("category", "category"),
                 entity["metadata_values"].get("Confidence", {"value": "Confidence"})["value"],
                 entity["metadata_values"].get("Severity", {"value": "Severity"})["value"],
                 "\n    %s" % (entity.get("description", "description")),
-                                       "\n    " + "\n    ".join(entity.get("mitre_tactics", "")),
-                                       "\n    " + "\n    ".join(entity.get("mitre_techniques", "")),
+                "\n    " + "\n    ".join(entity.get("mitre_tactics", "")),
+                "\n    " + "\n    ".join(entity.get("mitre_techniques", "")),
+                "\n    " + "\n    ".join(entity.get("mitre_sub_techniques", "")),
             ) for entity in added]) if \
             len(added) > 0 else "NA"
 
@@ -255,16 +256,17 @@ class Release(db.Model):
 
         message += "\n\nModified Signatures\n%s\n" % ("-" * 10)
         message += "\n\n".join([
-            "EventID: %s\nName: %s\nCategory: %s\nConfidence: %s\nSeverity: %s\nDescription: %s\nMitre Tactics: %s\nMitre Techniques: %s" % (
+            "EventID: %s\nName: %s\nCategory: %s\nConfidence: %s\nSeverity: %s\nDescription: %s\nMitre Tactics: %s\nMitre Techniques: %s\nMitre Sub-techniques: %s" % (
                 entity.get("eventid", "eventid"),
                 entity.get("name", "name"),
                 entity.get("category", "category"),
                 entity["metadata_values"].get("Confidence", {"value": "Confidence"})["value"],
                 entity["metadata_values"].get("Severity", {"value": "Severity"})["value"],
                 "\n    %s" % (entity.get("description", "description")),
-                                       "\n    " + "\n    ".join(entity.get("mitre_tactics", "")),
-                                       "\n    " + "\n    ".join(entity.get("mitre_techniques", "")),
-        ) for entity in
+                "\n    " + "\n    ".join(entity.get("mitre_tactics", "")),
+                "\n    " + "\n    ".join(entity.get("mitre_techniques", "")),
+                "\n    " + "\n    ".join(entity.get("mitre_sub_techniques", "")),
+            ) for entity in
             modified]) if \
             len(modified) > 0 else "NA"
 

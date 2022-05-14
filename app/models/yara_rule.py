@@ -227,7 +227,8 @@ class Yara_rule(db.Model):
             strings="strings:\n\t%s" % self.strings if self.strings and self.strings.strip() else "",
             imports=self.imports,
             mitre_tactics=self.mitre_tactics,
-            mitre_techniques=self.mitre_techniques
+            mitre_techniques=self.mitre_techniques,
+            mitre_sub_techniques=self.mitre_sub_techniques
         )
 
     def __repr__(self):
