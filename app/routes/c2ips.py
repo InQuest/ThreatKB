@@ -77,17 +77,21 @@ def get_all_c2ips():
     return Response(response_dict, mimetype="application/json")
 
 
-@app.route('/ThreatKB/c2ips/<int:id>', methods=['GET'])
+@app.route('/ThreatKB/c2ips/<id_or_ip>', methods=['GET'])
 @auto.doc()
 @login_required
-def get_c2ip(id):
+def get_c2ip(id_or_ip):
     """Return c2ip artifact associated with the given id
 
     Optional URI Parameters:
     None
 
     Return: c2ip artifact dictionary"""
-    entity = c2ip.C2ip.query.get(id)
+    if id_or_ip.isdigit():
+        entity = c2ip.C2ip.query.get(int(id_or_ip))
+    else:
+        entity = c2ip.C2ip.query.filter(c2ip.C2ip.ip == id_or_ip).first()
+
     if not entity:
         abort(404)
     if not current_user.admin and entity.owner_user_id != current_user.id:
@@ -145,25 +149,33 @@ def create_c2ip():
     return jsonify(entity.to_dict()), 201
 
 
-@app.route('/ThreatKB/c2ip/activate/<int:id>', methods=['PUT'])
+@app.route('/ThreatKB/c2ip/activate/<id_or_ip>', methods=['PUT'])
 @auto.doc()
 @login_required
-def activate_c2ip(id):
-    entity = c2ip.C2ip.query.get(id)
+def activate_c2ip(id_or_ip):
+    if id_or_ip.isdigit():
+        entity = c2ip.C2ip.query.get(int(id_or_ip))
+    else:
+        entity = c2ip.C2ip.query.filter(c2ip.C2ip.ip == id_or_ip).first()
+
     entity.active = 1
     db.session.merge(entity)
     db.session.commit()
     return jsonify(entity.to_dict()), 201
 
 
-@app.route('/ThreatKB/c2ips/<int:id>', methods=['PUT'])
+@app.route('/ThreatKB/c2ips/<id_or_ip>', methods=['PUT'])
 @auto.doc()
 @login_required
-def update_c2ip(id):
+def update_c2ip(id_or_ip):
     """Update c2ip artifact
     From Data: ip (str), asn (str), country (str), expiration_timestamp (date), state(str)
     Return: c2dns artifact dictionary"""
-    entity = c2ip.C2ip.query.get(id)
+    if id_or_ip.isdigit():
+        entity = c2ip.C2ip.query.get(int(id_or_ip))
+    else:
+        entity = c2ip.C2ip.query.filter(c2ip.C2ip.ip == id_or_ip).first()
+
     if not entity:
         abort(404)
     if not current_user.admin and entity.owner_user_id != current_user.id:
@@ -223,13 +235,16 @@ def batch_update_c2ip():
                             session=db.session)
 
 
-@app.route('/ThreatKB/c2ips/<int:id>', methods=['DELETE'])
+@app.route('/ThreatKB/c2ips/<id_or_ip>', methods=['DELETE'])
 @auto.doc()
 @login_required
-def delete_c2ip(id):
+def delete_c2ip(id_or_ip):
     """Delete c2ip artifact associated with id
     Return: None"""
-    entity = c2ip.C2ip.query.get(id)
+    if id_or_ip.isdigit():
+        entity = c2ip.C2ip.query.get(int(id_or_ip))
+    else:
+        entity = c2ip.C2ip.query.filter(c2ip.C2ip.ip == id_or_ip).first()
 
     if entity.active:
         entity.active = False

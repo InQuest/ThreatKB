@@ -77,12 +77,16 @@ def get_all_c2dns():
     return Response(response_dict, mimetype="application/json")
 
 
-@app.route('/ThreatKB/c2dns/<int:id>', methods=['GET'])
+@app.route('/ThreatKB/c2dns/<id_or_name>', methods=['GET'])
 @auto.doc()
-def get_c2dns(id):
+def get_c2dns(id_or_name):
     """Return c2dns artifact associated with the given id
     Return: c2dns artifact dictionary"""
-    entity = c2dns.C2dns.query.get(id)
+    if id_or_name.isdigit():
+        entity = c2dns.C2dns.query.get(int(id_or_name))
+    else:
+        entity = c2dns.C2dns.query.filter(c2dns.C2dns.domain_name == id_or_name).first()
+
     if not entity:
         abort(404)
     if not current_user.admin and entity.owner_user_id != current_user.id:
@@ -139,25 +143,33 @@ def create_c2dns():
     return jsonify(entity.to_dict()), 201
 
 
-@app.route('/ThreatKB/c2dns/activate/<int:id>', methods=['PUT'])
+@app.route('/ThreatKB/c2dns/activate/<id_or_name>', methods=['PUT'])
 @auto.doc()
 @login_required
-def activate_c2dns(id):
-    entity = c2dns.C2dns.query.get(id)
+def activate_c2dns(id_or_name):
+    if id_or_name.isdigit():
+        entity = c2dns.C2dns.query.get(int(id))
+    else:
+        entity = c2dns.C2dns.query.filter(c2dns.C2dns.domain_name == id_or_name).first()
+
     entity.active = 1
     db.session.merge(entity)
     db.session.commit()
     return jsonify(entity.to_dict()), 201
 
 
-@app.route('/ThreatKB/c2dns/<int:id>', methods=['PUT'])
+@app.route('/ThreatKB/c2dns/<id_or_name>', methods=['PUT'])
 @auto.doc()
 @login_required
-def update_c2dns(id):
+def update_c2dns(id_or_name):
     """Update c2dns artifact
     From Data: domain_name (str), match_type (str), expiration_timestamp (date), state(str)
     Return: c2dns artifact dictionary"""
-    entity = c2dns.C2dns.query.get(id)
+    if id_or_name.isdigit():
+        entity = c2dns.C2dns.query.get(int(id_or_name))
+    else:
+        entity = c2dns.C2dns.query.filter(c2dns.C2dns.domain_name == id_or_name).first()
+
     if not entity:
         abort(404)
     if not current_user.admin and entity.owner_user_id != current_user.id:
@@ -216,13 +228,16 @@ def batch_update_c2dns():
                             session=db.session)
 
 
-@app.route('/ThreatKB/c2dns/<int:id>', methods=['DELETE'])
+@app.route('/ThreatKB/c2dns/<id_or_name>', methods=['DELETE'])
 @auto.doc()
 @login_required
-def delete_c2dns(id):
+def delete_c2dns(id_or_name):
     """Delete c2dns artifact associated with id
     Return: None"""
-    entity = c2dns.C2dns.query.get(id)
+    if id_or_name.isdigit():
+        entity = c2dns.C2dns.query.get(id_or_name)
+    else:
+        entity = c2dns.C2dns.query.filter(c2dns.C2dns.domain_name == id_or_name).first()
 
     if entity.active:
         entity.active = False
