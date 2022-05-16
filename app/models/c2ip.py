@@ -13,6 +13,7 @@ from app.models.whitelist import Whitelist
 from app.routes import tags_mapping
 from app.models.metadata import Metadata, MetadataMapping
 from app.models import cfg_states, cfg_settings, activity_log
+from app.routes.countries import get_country
 
 from flask import abort
 
@@ -76,7 +77,7 @@ class C2ip(db.Model):
             date_modified=self.date_modified.isoformat() if self.date_modified else None,
             ip=self.ip,
             asn=self.asn,
-            country=self.country,
+            country=get_country(self.country),
             state=self.state,
             description=self.description,
             references=self.references,
@@ -112,7 +113,7 @@ class C2ip(db.Model):
             date_modified=self.date_modified.isoformat() if self.date_modified else None,
             ip=self.ip,
             asn=self.asn,
-            country=self.country,
+            country=get_country(self.country),
             state=self.state,
             description=self.description,
             references=self.references,

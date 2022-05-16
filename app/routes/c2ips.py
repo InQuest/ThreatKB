@@ -110,7 +110,8 @@ def create_c2ip():
     entity = c2ip.C2ip(
         ip=request.json['ip'],
         asn=request.json['asn'],
-        country=request.json['country'],
+        country=request.json['country']['countryCode2'] if request.json.get("country", None) and request.json[
+            "country"].get("countryCode2", None) else None,
         description=request.json.get("description", None),
         references=request.json.get("references", None),
         state=verify_state(request.json['state']['state']),
@@ -170,7 +171,8 @@ def update_c2ip(id):
     entity = c2ip.C2ip(
         ip=request.json['ip'],
         asn=request.json['asn'],
-        country=request.json['country'],
+        country=request.json['country']['countryCode2'] if request.json.get("country", None) and request.json[
+            "country"].get("countryCode2", None) else None,
         description=request.json.get("description", None),
         references=request.json.get("references", None),
         state=verify_state(request.json['state']['state']) if request.json['state'] and 'state' in request.json['state']

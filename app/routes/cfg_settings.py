@@ -14,7 +14,6 @@ def get_all_cfg_settings():
     """Return all public config settings
     Return: list of config settings dictionaries"""
     entities = cfg_settings.Cfg_settings.query.filter_by(public=True).all()
-    pycountry.countries.__class__
     return Response(json.dumps([entity.to_dict() for entity in entities]), mimetype='application/json')
 
 
