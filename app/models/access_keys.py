@@ -16,7 +16,7 @@ class AccessKeys(db.Model):
         return dict(
             id=self.id,
             user=self.user.to_dict(),
-            token=self.token.decode('ascii'),
+            token=self.token,
             created=self.created.isoformat(),
             deleted=None if not self.deleted else self.deleted.isoformat(),
             status=self.status
