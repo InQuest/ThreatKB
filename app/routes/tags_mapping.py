@@ -108,9 +108,8 @@ def create_tags_mapping(table, s_id, list_of_tags):
         if 'id' in tag:
             t_id = tag['id']
         else:
-            created_tag = create_tag(tag['text'])
+            created_tag = create_tag(tag['text']) if type(tag) is dict else create_tag(tag)
             t_id = created_tag.id
-            tag['id'] = t_id
 
         entity = tags_mapping.Tags_mapping.query.filter_by(
             source_table=table,
