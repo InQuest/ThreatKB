@@ -107,7 +107,6 @@ def create_c2dns():
     Return: c2dns artifact dictionary"""
     entity = c2dns.C2dns(
         domain_name=request.json['domain_name'],
-        match_type=request.json['match_type'],
         description=request.json.get("description", None),
         references=request.json.get("references", None),
         expiration_timestamp=parser.parse(request.json['expiration_timestamp'])
@@ -119,6 +118,12 @@ def create_c2dns():
         owner_user_id=current_user.id,
         active=request.json.get("active", True)
     )
+
+    if 'match_type' in request.json:
+        entity.match_type = request.json['match_type']
+    else:
+        entity.match_type = "wildcard" if "*" in entity.domain_name else "exact"
+
     db.session.add(entity)
 
     try:
@@ -178,7 +183,6 @@ def update_c2dns(id_or_name):
         state=verify_state(request.json['state']['state']) if request.json['state'] and 'state' in request.json['state']
         else verify_state(request.json['state']),
         domain_name=request.json['domain_name'],
-        match_type=request.json['match_type'],
         description=request.json.get("description", None),
         references=request.json.get("references", None),
         expiration_timestamp=parser.parse(request.json['expiration_timestamp']) if request.json.get(
@@ -189,6 +193,12 @@ def update_c2dns(id_or_name):
         modified_user_id=current_user.id,
         active=request.json.get("active", entity.active)
     )
+    
+    if 'match_type' in request.json:
+        entity.match_type = request.json['match_type']
+    else:
+        entity.match_type = "wildcard" if "*" in entity.domain_name else "exact"
+
     db.session.merge(entity)
 
     try:
