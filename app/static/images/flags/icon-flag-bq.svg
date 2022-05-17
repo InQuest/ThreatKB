@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="600px" height="400px" viewBox="0 0 600 400" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 40.2 (33826) - http://www.bohemiancoding.com/sketch -->
+    <title>icon-flag-bq</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="Rectangle-path" fill="#FFFFFF" x="0" y="0" width="600" height="400"></rect>
+        <polygon id="Shape" fill="#012A87" points="600 400 0 400 600 0"></polygon>
+        <polygon id="Shape" fill="#F9D90F" points="0 0 0 166.666667 250 0"></polygon>
+        <circle id="Oval" stroke="#000000" stroke-width="11" cx="165" cy="173" r="80"></circle>
+        <polygon id="a" fill="#000000" points="165 69.834474 180 95.8152361 150 95.8152361"></polygon>
+        <polygon id="a" fill="#000000" transform="translate(165.000000, 263.175145) rotate(180.000000) translate(-165.000000, -263.175145) " points="165 250.184764 180 276.165526 150 276.165526"></polygon>
+        <polygon id="a" fill="#000000" transform="translate(255.175145, 173.000000) rotate(90.000000) translate(-255.175145, -173.000000) " points="255.175145 160.009619 270.175145 185.990381 240.175145 185.990381"></polygon>
+        <polygon id="a" fill="#000000" transform="translate(74.824855, 173.000000) rotate(270.000000) translate(-74.824855, -173.000000) " points="74.8248551 160.009619 89.8248551 185.990381 59.8248551 185.990381"></polygon>
+        <polygon id="b" fill="#DC171D" points="165 122 209.167296 198.5 120.832704 198.5"></polygon>
+        <polygon id="b" fill="#DC171D" transform="translate(176.041824, 166.625000) rotate(60.000000) translate(-176.041824, -166.625000) " points="176.041824 128.375 220.209119 204.875 131.874528 204.875"></polygon>
+    </g>
+</svg>

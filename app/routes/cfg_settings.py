@@ -4,6 +4,7 @@ from flask import abort, jsonify, request, Response
 from flask_login import login_required, current_user
 from dateutil import parser
 import json
+import pycountry
 
 @app.route('/ThreatKB/cfg_settings', methods=['GET'])
 @auto.doc()

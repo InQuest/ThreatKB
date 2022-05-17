@@ -129,6 +129,7 @@ from app.routes.metadata import *
 from app.routes.errors import *
 from app.routes.activity_log import *
 from app.routes.macros import *
+from app.routes.countries import *
 
 from app.models import users
 from app.models import c2ip
@@ -293,6 +294,7 @@ def generate_app():
     from app.routes import errors
     from app.routes import activity_log
     from app.routes import macros
+    from app.routes import countries
 
     app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
 

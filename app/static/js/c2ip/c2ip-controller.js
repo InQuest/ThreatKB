@@ -621,8 +621,8 @@ angular.module('ThreatKB')
                 }
             }
         }])
-    .controller('C2ipSaveController', ['$scope', '$http', '$uibModalInstance', '$location', '$window', 'C2ip', 'c2ip', 'metadata', 'Comments', 'Cfg_states', 'Tags', 'growl', 'Bookmarks', 'hotkeys', 'Users',
-        function ($scope, $http, $uibModalInstance, $location, $window, C2ip, c2ip, metadata, Comments, Cfg_states, Tags, growl, Bookmarks, hotkeys, Users) {
+    .controller('C2ipSaveController', ['$scope', '$http', '$uibModalInstance', '$location', '$window', 'C2ip', 'c2ip', 'metadata', 'Comments', 'Cfg_states', 'Tags', 'growl', 'Bookmarks', 'hotkeys', 'Users', 'Countries',
+        function ($scope, $http, $uibModalInstance, $location, $window, C2ip, c2ip, metadata, Comments, Cfg_states, Tags, growl, Bookmarks, hotkeys, Users, Countries) {
 
             if (c2ip.$promise !== null && c2ip.$promise !== undefined) {
                 c2ip.$promise.then(
@@ -641,6 +641,7 @@ angular.module('ThreatKB')
             $scope.metadata = metadata;
 
             $scope.users = Users.query();
+            $scope.countries = Countries.query();
 
             $scope.save_artifact = function () {
                 C2ip.resource.update({id: $scope.c2ip.id}, $scope.c2ip,
@@ -721,6 +722,16 @@ angular.module('ThreatKB')
             };
 
             $scope.cfg_states = Cfg_states.query();
+
+            $scope.customSearch = function(actual, expected) {
+                if (expected.length < 3) {
+                    return true;
+                } else if (typeof actual !== "object") {
+                    return actual.toString().toLowerCase().indexOf(expected.toString().toLowerCase()) !== -1;
+                } else {
+                    return false;
+                }
+            };
 
             $scope.print_comment = function (comment) {
                 return comment.comment.replace(/(?:\r\n|\r|\n)/g, "<BR>");

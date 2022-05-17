@@ -74,6 +74,7 @@ pycparser==2.21
 pyOpenSSL==22.0.0
 pyparsing==3.0.8
 pysqlite3==0.4.7
+pycountry==22.3.5
 python-dateutil==2.8.2
 python-editor==1.0.4
 python-openid==2.2.5

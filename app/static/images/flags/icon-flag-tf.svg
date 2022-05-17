@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="600px" height="400px" viewBox="0 0 600 400" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 40.2 (33826) - http://www.bohemiancoding.com/sketch -->
+    <title>icon-flag-tf</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="Rectangle-path" fill="#002395" x="0" y="0" width="600" height="400"></rect>
+        <rect id="Rectangle-path" fill="#FFFFFF" x="0" y="0" width="244" height="164"></rect>
+        <rect id="Rectangle-path" fill="#002395" x="0" y="0" width="80" height="160"></rect>
+        <rect id="Rectangle-path" fill="#ED2939" x="160" y="0" width="80" height="160"></rect>
+        <polygon id="Shape" fill="#FFFFFF" points="355 183 367.875 203.5 404.5 203.5 404.5 275 377 232 340 291 358 291 377 257 416 327 455 257 474 291 492 291 455 232 427.5 275 427.5 235.5 444 235.5 456.25 216 427.5 216 427.5 203.5 464.125 203.5 477 183"></polygon>
+        <polygon id="Path" fill="#FFFFFF" points="474 270.5 434 270.5 434 284.5 474 284.5"></polygon>
+        <polygon id="s" fill="#FFFFFF" points="416 341 428.34359 378.98942 396.02774 355.51058 435.97226 355.51058 403.65641 378.98942"></polygon>
+        <polygon id="s" fill="#FFFFFF" points="371 307 383.34359 344.98942 351.02774 321.51058 390.97226 321.51058 358.65641 344.98942"></polygon>
+        <polygon id="s" fill="#FFFFFF" points="461 307 473.34359 344.98942 441.02774 321.51058 480.97226 321.51058 448.65641 344.98942"></polygon>
+        <polygon id="s" fill="#FFFFFF" points="333 206 345.34359 243.98942 313.02774 220.51058 352.97226 220.51058 320.65641 243.98942"></polygon>
+        <polygon id="s" fill="#FFFFFF" points="499 206 511.34359 243.98942 479.02774 220.51058 518.97226 220.51058 486.65641 243.98942"></polygon>
+        <polygon id="Path" fill="#FFFFFF" points="398 270.5 358 270.5 358 284.5 398 284.5"></polygon>
+    </g>
+</svg>
