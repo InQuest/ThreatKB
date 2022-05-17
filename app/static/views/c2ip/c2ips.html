@@ -50,11 +50,11 @@
                     <label>Country</label>
                     <ui-select ng-model="batch.country">
                         <ui-select-match placeholder="Select a Country or press delete to clear..">
-                            <img ng-src="../../images/flags/icon-flag-{{ $select.selected.countryCode2 }}.svg" style="max-width: 20px;"/>
+                            <img ng-src="../../images/flags/icon-flag-{{ $select.selected.countryCode2 | lowercase }}.svg" style="max-width: 20px;"/>
                             <small><div ng-bind-html="(($select.selected.countryCode2) + ($select.selected.countryCode2 ? ' / ' : 'Select a Country or press delete to clear..') + ($select.selected.countryName)) || ((batch.country.countryCode2) + (batch.country.countryCode2 ? ' / ' : 'Select a Country or press delete to clear..') + (batch.country.countryName))" style="display: inline"></div></small>
                         </ui-select-match>
                         <ui-select-choices repeat="country in (countries | filter: $select.search) track by country.countryCode2">
-                            <img ng-src="../../images/flags/icon-flag-{{ country.countryCode2 }}.svg" style="max-width: 20px;"/>
+                            <img ng-src="../../images/flags/icon-flag-{{ country.countryCode2 | lowercase }}.svg" style="max-width: 20px;"/>
                             <small><div ng-bind-html="((country.countryCode2) + ' / ' + (country.countryName)) | highlight: $select.search" style="display: inline"></div></small>
                         </ui-select-choices>
                     </ui-select>
@@ -390,11 +390,11 @@
                     <label>Country</label>
                     <ui-select ng-model="c2ip.country">
                         <ui-select-match placeholder="Select a Country or press delete to clear..">
-                            <img ng-src="../../images/flags/icon-flag-{{ $select.selected.countryCode2 }}.svg" style="max-width: 20px;"/>
+                            <img ng-src="../../images/flags/icon-flag-{{ $select.selected.countryCode2 | lowercase }}.svg" style="max-width: 20px;"/>
                             <small><div ng-bind-html="(($select.selected.countryCode2) + ($select.selected.countryCode2 ? ' / ' : 'Select a Country or press delete to clear..') + ($select.selected.countryName)) || ((c2ip.country.countryCode2) + (c2ip.country.countryCode2 ? ' / ' : 'Select a Country or press delete to clear..') + (c2ip.country.countryName))" style="display: inline"></div></small>
                         </ui-select-match>
                         <ui-select-choices repeat="country in (countries | filter: $select.search) track by country.countryCode2">
-                            <img ng-src="../../images/flags/icon-flag-{{ country.countryCode2 }}.svg" style="max-width: 20px;"/>
+                            <img ng-src="../../images/flags/icon-flag-{{ country.countryCode2 | lowercase }}.svg" style="max-width: 20px;"/>
                             <small><div ng-bind-html="((country.countryCode2) + ' / ' + (country.countryName)) | highlight: $select.search" style="display: inline"></div></small>
                         </ui-select-choices>
                     </ui-select>
