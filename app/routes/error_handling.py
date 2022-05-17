@@ -26,7 +26,7 @@ def handle_exception(exception):
     if hasattr(exception, "code") and exception.code == 412:
         return exception.description, exception.code
 
-    if hasattr(exception, "code") and exception.code == 404:
+    if hasattr(exception, "code") and str(exception.code).startswith("4"):
         return exception.description, exception.code
 
     db.session.rollback()

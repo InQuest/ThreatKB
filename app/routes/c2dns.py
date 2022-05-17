@@ -183,7 +183,7 @@ def update_c2dns(id_or_name):
         references=request.json.get("references", None),
         expiration_timestamp=parser.parse(request.json['expiration_timestamp']) if request.json.get(
             "expiration_timestamp", None) else None,
-        id=id,
+        id=entity.id,
         owner_user_id=request.json['owner_user']['id'] if request.json.get("owner_user", None) and request.json[
             "owner_user"].get("id", None) else None,
         modified_user_id=current_user.id,

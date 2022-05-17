@@ -193,7 +193,7 @@ def update_c2ip(id_or_ip):
             "expiration_timestamp", None) else None,
         owner_user_id=request.json['owner_user']['id'] if request.json.get("owner_user", None) and request.json[
             "owner_user"].get("id", None) else None,
-        id=id,
+        id=entity.id,
         modified_user_id=current_user.id,
         active=request.json.get("active", entity.active)
     )
