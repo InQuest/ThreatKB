@@ -24,8 +24,8 @@ def get_country(country):
             full_country = pycountry.countries.get(alpha_3=country)
         else:
             full_country = pycountry.countries.get(name=country)
-        return {"countryCode2": full_country.alpha_2,
-                "countryCode3": full_country.alpha_3,
-                "countryName": str(full_country.name).strip()}
+        return {"countryCode2": full_country.alpha_2 if full_country else None,
+                "countryCode3": full_country.alpha_3 if full_country else None,
+                "countryName": str(full_country.name).strip() if full_country else None}
     else:
         return None
