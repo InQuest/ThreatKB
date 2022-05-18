@@ -5,7 +5,7 @@ class Tags(db.Model):
     __tablename__ = "tags"
 
     id = db.Column(db.Integer, primary_key = True)
-    text = db.Column(db.String(256))
+    text = db.Column(db.String(256), unique=True)
 
     def to_dict(self):
         return dict(
