@@ -173,15 +173,22 @@ angular.module('ThreatKB')
                             enableSorting: true
                         },
                         {
+                            field: 'date_created',
+                            displayName: "Created Date",
+                            enableSorting: true,
+                            width: '150',
+                            cellFilter: 'date:\'yyyy-MM-dd HH:mm:ss\''
+                        },
+                        {
                             field: 'state',
                             displayName: 'State',
                             width: '180',
                             enableSorting: true,
                             cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.state"'
-                            + ' on-select="grid.appScope.save(row.entity)">'
-                            + '<ui-select-match placeholder="Select a state ...">'
-                            + '<small><span ng-bind="$select.selected.state || row.entity.state"></span></small>'
-                            + '</ui-select-match>'
+                                + ' on-select="grid.appScope.save(row.entity)">'
+                                + '<ui-select-match placeholder="Select a state ...">'
+                                + '<small><span ng-bind="$select.selected.state || row.entity.state"></span></small>'
+                                + '</ui-select-match>'
                             + '<ui-select-choices'
                             + ' repeat="state in (grid.appScope.cfg_states | filter: $select.search) track by state.id">'
                             + '<small><span ng-bind="state.state"></span></small>'
