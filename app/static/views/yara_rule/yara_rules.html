@@ -534,25 +534,32 @@
                             <div uib-accordion-group class="panel-default"
                                  heading="See files">
                                 <ul class="list-group">
-                                    <li class="list-group-item yara-files-list-item justify-content-between"
+                                    <li class="list-group-item yara-files-list-item justify-content-between" style=""
                                         ng-repeat="f in yara_rule.files | orderBy:'-last_revision_date'">
-                                        <a title="{{ file_store_path.value }}/{{ entity_mapping.SIGNATURE }}/{{ f.entity_id }}/{{ f.filename }}"
-                                           href="ThreatKB/files/{{ f.entity_type }}/{{ f.entity_id }}/{{ f.id }}">{{ f.filename }}</a>&nbsp;<span
-                                            ng-if="f.date_modified"
-                                            style="font-size: 0.8em;">({{ pretty_date(f.date_modified) }} by {{ f.user.email }})</span>
-                                        <div class="pull-right">
-                                            <div><a title="Search VirusTotal"
-                                                    href="https://www.virustotal.com/#/file/{{ f.sha256 }}/detection"
-                                                    target="_blank"><span
-                                                    class="glyphicon glyphicon-certificate"></span></a>
+                                        <a title="{{ f.full_path }}"
+                                           href="ThreatKB/files/{{ f.entity_type }}/{{ f.entity_id }}/{{ f.id }}">{{ f.filename }}</a>
+                                        <br>
+                                        <span class="pull-left" style="font-size: 0.8em;">{{ f.full_path }}</span>
+                                        <br>
+                                        <span
+                                                ng-if="f.date_modified"
+                                                style="font-size: 0.8em;">({{ pretty_date(f.date_modified) }} by {{ f.user.email }})</span>
+                                        <span class="pull-right">
+                                            <a title="Search VirusTotal"
+                                               href="https://www.virustotal.com/#/file/{{ f.sha256 }}/detection"
+                                               target="_blank"><span
+                                                    class="glyphicon glyphicon-certificate"
+                                                    style="vertical-align: middle;"></span></a>
                                                 &nbsp;
                                                 <a title="Search Google"
                                                    href="https://google.com/search?q={{ f.sha256 }}"
                                                    target="_blank"><span
-                                                        class="glyphicon glyphicon-globe"></span></a>
+                                                        class="glyphicon glyphicon-globe"
+                                                        style="vertical-align: middle;"></span></a>
                                                 &nbsp;
                                                 <a>
-                                                <span class="glyphicon glyphicon-link" style="font-size: 1.2em;"
+                                                <span class="glyphicon glyphicon-link"
+                                                      style="font-size: 1.2em; vertical-align: middle;"
                                                       title="Copy FilePath to clipboard" tooltip-placement="bottom"
                                                       uib-tooltip="Copied Filepath!"
                                                       tooltip-trigger="'outsideClick'"
@@ -560,15 +567,21 @@
                                                       data-clipboard-text="{{ file_store_path.value }}/{{ entity_mapping.SIGNATURE }}/{{ f.entity_id }}/{{ f.filename }}">
                                             </span>
                                                 </a>
-						&nbsp;
-                                                <span>:<button type="button" class="btn btn-xs pull-right"
-                                                            confirmed-click="delete_file({{ f.id }})"
-							    ng-confirm-click="Are you sure you want to delete {{ f.filename }}?" style="background: white;"><span
-                                                            style="color: red; vertical-align: middle;"
-                                                            class="glyphicon glyphicon-remove-circle"></span></button></span>
+                                                <span><button type="button" class="btn btn-xs" title="Delete file"
+                                                              confirmed-click="delete_file({{ f.id }})"
+                                                              ng-confirm-click="Are you sure you want to delete {{ f.filename }}?"
+                                                              style="background: white;"><span
+                                                        style="color: red; vertical-align: middle;"
+                                                        class="glyphicon glyphicon-remove-circle"></span></button></span>
+                                                <span><button type="button" class="btn btn-xs" title="Delete file path"
+                                                              confirmed-click="delete_file_path({{ f.id }})"
+                                                              ng-confirm-click="Are you sure you want to delete the full path {{ f.full_path }}?"
+                                                              style="background: white;"><span
+                                                        style="color: red; vertical-align: middle;"
+                                                        class="glyphicon glyphicon-exclamation-sign"></span></button></span>
 
-                                            </div>
-                                        </div>
+
+                                        </span>
                                     </li>
                                 </ul>
                             </div>

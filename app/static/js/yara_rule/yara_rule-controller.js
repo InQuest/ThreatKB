@@ -873,15 +873,29 @@ angular.module('ThreatKB')
 
             $scope.delete_file = function (file_id) {
                 Yara_rule.deleteFile({id: file_id}).then(function (resp) {
-		        growl.info("Successfully deleted file", {ttl: 3000});
-                        $scope.yara_rule.files = $scope.Files.resource.query({
+                    growl.info("Successfully deleted file", {ttl: 3000});
+                    $scope.yara_rule.files = $scope.Files.resource.query({
                         entity_type: Files.ENTITY_MAPPING.SIGNATURE,
                         entity_id: $scope.yara_rule.id
                     });
                 }, function (error) {
                     console.log('Error status: ' + error.status);
                     growl.error(error);
-                })};
+                })
+            };
+
+            $scope.delete_file_path = function (file_id) {
+                Yara_rule.deleteFilePath({id: file_id}).then(function (resp) {
+                    growl.info("Successfully deleted file path", {ttl: 3000});
+                    $scope.yara_rule.files = $scope.Files.resource.query({
+                        entity_type: Files.ENTITY_MAPPING.SIGNATURE,
+                        entity_id: $scope.yara_rule.id
+                    });
+                }, function (error) {
+                    console.log('Error status: ' + error.status);
+                    growl.error(error);
+                })
+            };
 
             $scope.upload = function (id, files) {
                 if (files && files.length) {

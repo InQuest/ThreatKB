@@ -103,6 +103,17 @@ angular.module('ThreatKB')
             );
         }
 
+        function deleteFilePath(file) {
+            return $http.delete('/ThreatKB/files/' + file.id + "?path=1").then(function (success) {
+                    if (success.status === 200) {
+                        return success.data;
+                    }
+                }, function (error) {
+                    return $q.reject(error.data);
+                }
+            );
+        }
+
         return {
             resource: $resource('ThreatKB/yara_rules/:id', {}, {
                 'query': {method: 'GET', isArray: true},
@@ -116,7 +127,8 @@ angular.module('ThreatKB')
             getSignatureFromRevision: getSignatureFromRevision,
             activateRule: activateRule,
             delete_all_inactive: delete_all_inactive,
-            deleteFile: deleteFile
+            deleteFile: deleteFile,
+            deleteFilePath: deleteFilePath
         };
     }]);
 

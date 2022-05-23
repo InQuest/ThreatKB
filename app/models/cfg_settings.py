@@ -1,4 +1,4 @@
-from app import db
+from app import db, cache
 
 
 class Cfg_settings(db.Model):
@@ -25,6 +25,7 @@ class Cfg_settings(db.Model):
         return '<Cfg_settings %s>' % (self.key)
 
     @staticmethod
+    @cache.memoize(timeout=60)
     def get_private_setting(key):
         try:
             setting = db.session.query(Cfg_settings).filter(Cfg_settings.public == False).filter(
@@ -34,6 +35,7 @@ class Cfg_settings(db.Model):
             return None
 
     @staticmethod
+    @cache.memoize(timeout=60)
     def get_setting(key):
         try:
             setting = db.session.query(Cfg_settings).filter(Cfg_settings.key == key).first()
@@ -42,8 +44,9 @@ class Cfg_settings(db.Model):
             return None
 
     @staticmethod
+    @cache.memoize(timeout=60)
     def get_settings(key_like):
         try:
             return db.session.query(Cfg_settings).filter(Cfg_settings.key.like(key_like)).all()
-        except:
+        except Exception as e:
             return None
