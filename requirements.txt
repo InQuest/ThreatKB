@@ -1,3 +1,4 @@
+python-magic==0.4.26
 mysqlclient
 setuptools_rust
 aiohttp==3.8.1
