@@ -2,11 +2,12 @@ from sqlalchemy.orm import Session
 
 from app import db, current_user, ENTITY_MAPPING, ACTIVITY_TYPE
 from app.models.files import Files
+from app.models.releases import get_release_yara_rule_history_mapping, get_release_metadata
 from app.routes import tags_mapping
 from app.models.comments import Comments
 from app.models.metadata import MetadataMapping, Metadata
 from app.models.cfg_category_range_mapping import CfgCategoryRangeMapping
-from app.models import cfg_settings, cfg_states, activity_log, macros
+from app.models import cfg_settings, cfg_states, activity_log, macros, releases
 from sqlalchemy.event import listens_for
 from dateutil import parser
 import datetime
@@ -65,6 +66,9 @@ class Yara_rule(db.Model):
     history = db.relationship("Yara_rule_history", foreign_keys=[id],
                               primaryjoin="Yara_rule_history.yara_rule_id==Yara_rule.id",
                               cascade="all,delete", uselist=True)
+
+    current_history = db.relationship("Yara_rule_history", foreign_keys=id,
+                                      primaryjoin="and_(Yara_rule_history.yara_rule_id==Yara_rule.id, Yara_rule_history.revision==Yara_rule.revision)")
 
     test_history = db.relationship("Yara_testing_history", foreign_keys=[id],
                                    primaryjoin="Yara_testing_history.yara_rule_id==Yara_rule.id",
@@ -190,10 +194,12 @@ class Yara_rule(db.Model):
                                   files=[file.to_dict() for file in files],
                                   ))
 
+
         if include_yara_rule_string:
             yara_dict["yara_rule_string"] = Yara_rule.to_yara_rule_string(yara_dict)
 
         return yara_dict
+
 
     def to_revision_dict(self):
         dict = self.to_dict()
@@ -361,6 +367,9 @@ class Yara_rule(db.Model):
         yara_rule = Yara_rule()
         yara_rule.name = yara_dict["rule_name"]
 
+        if type(yara_dict["metadata"]) is list:
+            yara_dict["metadata"] = {list(m.keys())[0]: list(m.values())[0] for m in yara_dict["metadata"]}
+
         yara_metadata = {key.lower(): val.strip().strip("\"") for key, val in
                          yara_dict["metadata"].items()} if "metadata" in yara_dict else {}
         for possible_field, mapped_to in metadata_field_mapping.items():
@@ -405,7 +414,7 @@ class Yara_rule(db.Model):
 
         for key, val in list(yara_rule.__dict__.items()):
             if not key.startswith('_') and type(val) in [str, str]:
-                val.decode("ascii")
+                str(val)
 
         if not yara_rule.category:
             yara_rule.category = CfgCategoryRangeMapping.DEFAULT_CATEGORY
@@ -505,12 +514,17 @@ class Yara_rule_history(db.Model):
         return json.loads(self.release_data) if self.release_data else {}
 
     def to_dict(self, include_json=True):
+        release_mapping = get_release_yara_rule_history_mapping()
+        release_metadata = get_release_metadata()
+        releases = ",".join([release_metadata[release]["name"] for release in
+                             release_mapping[self.id]]) if self.id in release_mapping else None
         yara_history_dict = dict(
             date_created=self.date_created.isoformat(),
             revision=self.revision,
             yara_rule_id=self.yara_rule_id,
             user=self.user.to_dict(),
-            state=self.state
+            state=self.state,
+            releases=releases
         )
 
         if include_json:

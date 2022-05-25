@@ -1,11 +1,15 @@
 from flask import abort, jsonify, request, send_file, json, Response
 from flask_login import login_required, current_user
-from app import app, db, admin_only, auto, nocache
+from app import app, db, admin_only, auto, nocache, cache
 from app.models import releases, cfg_settings
 import tempfile
 import uuid
 import time
 import distutils
+from app.models import yara_rule, releases
+import datetime
+from sqlalchemy import bindparam
+
 
 @app.route('/ThreatKB/releases', methods=['GET'])
 @auto.doc()
@@ -144,6 +148,54 @@ def create_release():
     db.session.add(release)
     db.session.commit()
 
+    if not release.is_test_release:
+        history = db.session.query(yara_rule.Yara_rule_history.id, yara_rule.Yara_rule_history.yara_rule_id,
+                                   yara_rule.Yara_rule_history.revision).all()
+        history_mapping = {}
+        for h in history:
+            id_, rule_id, revision = h
+            if not rule_id in history_mapping:
+                history_mapping[rule_id] = {}
+            if not revision in history_mapping[rule_id]:
+                history_mapping[rule_id][revision] = id_
+
+        release_data = release.release_data_dict
+        release_yara_rule_history_list = []
+        for sig_id in release_data["Signatures"]["Signatures"].keys():
+            revision = release_data["Signatures"]["Signatures"][sig_id]["revision"]
+            sig_id = int(sig_id)
+            revision = int(revision)
+            if not sig_id in history_mapping:
+                history_mapping[sig_id] = {}
+
+            if not revision in history_mapping[sig_id]:
+                yr = db.session.query(yara_rule.Yara_rule).get(sig_id)
+                latest = yara_rule.Yara_rule_history(
+                    date_created=datetime.datetime.now(),
+                    revision=revision,
+                    user_id=current_user.id,
+                    yara_rule_id=sig_id,
+                    state=yr.state,
+                    rule_json=json.dumps(yr.to_revision_dict())
+                )
+                db.session.add(latest)
+                db.session.flush()
+                history_mapping[sig_id][revision] = latest.id
+
+            release_yara_rule_history_list.append(
+                {"yara_rules_history_id": history_mapping[sig_id][revision], "release_id": release.id})
+
+        if release_yara_rule_history_list:
+            app.logger.debug(
+                f"Inserting {len(release_yara_rule_history_list)} entries into release yara rule history table")
+            app.logger.debug(f"first ten are {release_yara_rule_history_list[0:9]}")
+            db.session.execute(releases.ReleaseYaraRuleHistory.__table__.insert().values(
+                yara_rules_history_id=bindparam("yara_rules_history_id"),
+                release_id=bindparam("release_id")
+            ), release_yara_rule_history_list)
+            db.session.commit()
+
+    cache.delete_memoized(releases.get_release_yara_rule_history_mapping)
     r = release.to_dict(short=short)
     r["build_time_seconds"] = "{0:.2f}".format(time.time() - start_time)
     return jsonify(r)

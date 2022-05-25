@@ -642,6 +642,7 @@
                                             ng-value="rev">
                                         Rev. {{ rev.revision }} @{{ rev.date_created | date:'yyyy-MM-dd' }}
                                         by {{ rev.user.email }}
+                                        {{ rev.releases ? ' - Releases: ' + rev.releases   : '' }}
                                     </option>
                                 </select>
                             </div>

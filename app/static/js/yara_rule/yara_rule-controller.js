@@ -1101,13 +1101,13 @@ angular.module('ThreatKB')
         }])
     .controller('Yara_revisionController', ['$scope', 'Yara_rule',
         function ($scope, Yara_rule) {
-            $scope.revision_diff = null
+            $scope.revision_diff = null;
             $scope.calculateRevisionDiff = function () {
                 if (!$scope.selectedRevisions.compared) {
                     $scope.revision_diff = null;
                 } else {
                     var dmp = new diff_match_patch(),
-                    diffs = dmp.diff_main(($scope.selectedRevisions.main ? $scope.selectedRevisions.main.yara_rule_string : $scope.yara_rule.yara_rule_string), $scope.selectedRevisions.compared.yara_rule_string);
+                        diffs = dmp.diff_main(($scope.selectedRevisions.main ? $scope.selectedRevisions.main.yara_rule_string : $scope.yara_rule.yara_rule_string), $scope.selectedRevisions.compared.yara_rule_string);
                     $scope.revision_diff = dmp.diff_prettyHtml(diffs).replace(/&para;/g, '');
                 }
             };

@@ -1,4 +1,4 @@
-from app import db, ENTITY_MAPPING, ACTIVITY_TYPE
+from app import db, ENTITY_MAPPING, ACTIVITY_TYPE, cache, app
 from app.models import c2dns, c2ip, yara_rule, cfg_settings, cfg_states, metadata, users, activity_log, \
     cfg_category_range_mapping
 from sqlalchemy import and_
@@ -9,6 +9,61 @@ import io
 import zipfile
 import zlib
 import re
+import datetime
+from flask_login import current_user
+
+
+@cache.memoize(timeout=300)
+def get_release_metadata():
+    r = {}
+    for release in db.session.query(Release.id, Release.is_test_release, Release.name, Release.num_dns, Release.num_ips,
+                                    Release.num_signatures, Release.date_created, Release.created_user_id).filter(
+        Release.is_test_release == 0).all():
+        r[int(release[0])] = dict(
+            id=int(release[0]),
+            is_test_release=release[1],
+            name=release[2],
+            num_dns=release[3],
+            num_ips=release[4],
+            num_signatures=release[5],
+            date_created=release[6],
+            created_user_id=release[7]
+        )
+    return r
+
+
+@cache.memoize(timeout=1200)
+def get_release_yara_rule_history_mapping():
+    mapping = {}
+    release_data = db.session.query(ReleaseYaraRuleHistory).all()
+    for data in release_data:
+        if not data.yara_rules_history_id in mapping:
+            mapping[data.yara_rules_history_id] = []
+        mapping[data.yara_rules_history_id].append(data.release_id)
+    return mapping
+
+
+class ReleaseYaraRuleHistory(db.Model):
+    __tablename__ = "release_yara_rule_history"
+
+    id = db.Column(db.Integer, primary_key=True)
+    yara_rules_history_id = db.Column(db.Integer, db.ForeignKey('yara_rules_history.id'), nullable=False, index=True)
+    release_id = db.Column(db.Integer, db.ForeignKey('releases.id'), nullable=False, index=True)
+
+    yara_rule_history = db.relationship("Yara_rule_history", foreign_keys=yara_rules_history_id,
+                                        primaryjoin="Yara_rule_history.id==ReleaseYaraRuleHistory.yara_rules_history_id")
+
+    # release = db.relationship("Release", foreign_keys=release_id, primaryjoin="Release.id==ReleaseHistory.release_id")
+
+    def to_dict(self):
+        release_metadata = get_release_metadata()
+        return dict(
+            id=self.id,
+            revision=self.yara_rule_history.revision,
+            release_id=release_metadata[self.release_id]["id"],
+            release_name=release_metadata[self.release_id]["name"],
+            release_date=release_metadata[self.release_id]["date_created"],
+        )
 
 
 class Release(db.Model):

@@ -7,6 +7,7 @@ from flask_login import current_user, login_required
 import distutils
 
 from app.models.metadata import Metadata, MetadataMapping
+from app.models.releases import get_release_yara_rule_history_mapping, get_release_metadata
 from app.routes.batch import batch_update, batch_delete
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
 from app.routes.cfg_category_range_mapping import update_cfg_category_range_mapping_current
@@ -158,6 +159,39 @@ def get_yara_rule(id):
     return jsonify(return_dict)
 
 
+@app.route('/ThreatKB/yara_rules/<int:id>/release_mapping', methods=['GET'])
+@auto.doc()
+@login_required
+def get_yara_rule_release_mapping(id):
+    """Return yara_rule artifact associated with the given id
+    Return: yara_rule artifact dictionary"""
+
+    entity = yara_rule.Yara_rule.query.get(id)
+    if not entity:
+        abort(404)
+    if not current_user.admin and entity.owner_user_id != current_user.id:
+        abort(403)
+
+    rule_history = db.session.query(Yara_rule_history.id).filter(Yara_rule_history.yara_rule_id == entity.id).all()
+    if not rule_history:
+        return jsonify([])
+
+    release_mapping = get_release_yara_rule_history_mapping()
+    release_metadata = get_release_metadata()
+    mapping = {}
+    for rh in rule_history:
+        if not rh.id in mapping:
+            mapping[rh.id] = []
+        if rh.id in release_mapping:
+            for release_id in release_mapping[rh.id]:
+                mapping[rh.id].append(release_metadata[release_id])
+
+    return_mapping = {}
+    for key, val in mapping.items():
+        return_mapping[int(key)] = ",".join([release["name"] for release in val])
+    return jsonify(return_mapping)
+
+
 @app.route('/ThreatKB/yara_rules/<int:yara_rule_id>/revision/<int:revision>', methods=['GET'])
 @auto.doc()
 @login_required
@@ -289,6 +323,13 @@ def create_yara_rule():
     if dirty:
         db.session.commit()
 
+    db.session.add(yara_rule.Yara_rule_history(date_created=datetime.datetime.now(),
+                                               revision=entity.revision,
+                                               rule_json=json.dumps(entity.to_revision_dict()),
+                                               user_id=current_user.id,
+                                               yara_rule_id=entity.id,
+                                               state=entity.state))
+    db.session.commit()
     return jsonify(entity.to_dict()), 201
 
 
@@ -347,12 +388,6 @@ def update_yara_rule(id):
     if not release_state or not draft_state:
         raise Exception("You must set a release, draft, and retirement state before modifying signatures")
 
-    if not do_not_bump_revision:
-        db.session.add(yara_rule.Yara_rule_history(date_created=datetime.datetime.now(), revision=entity.revision,
-                                                   rule_json=json.dumps(entity.to_revision_dict()),
-                                                   user_id=current_user.id,
-                                                   yara_rule_id=entity.id,
-                                                   state=entity.state))
 
     if not entity.revision:
         entity.revision = 1
@@ -441,6 +476,13 @@ def update_yara_rule(id):
 
     # THIS IS UGLY. FIGURE OUT WHY MERGE ISN'T WORKING
     entity = yara_rule.Yara_rule.query.get(entity.id)
+
+    if not do_not_bump_revision:
+        db.session.add(yara_rule.Yara_rule_history(date_created=datetime.datetime.now(), revision=entity.revision,
+                                                   rule_json=json.dumps(entity.to_revision_dict()),
+                                                   user_id=current_user.id,
+                                                   yara_rule_id=entity.id,
+                                                   state=entity.state))
 
     if get_new_sig_id:
         update_cfg_category_range_mapping_current(request.json['category']['id'], temp_sig_id)

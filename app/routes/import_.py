@@ -6,6 +6,9 @@ from app.models.metadata import Metadata
 from app.utilities import extract_artifacts
 import distutils
 from app.models.whitelist import Whitelist
+import datetime
+import json
+
 
 #####################################################################
 
@@ -110,6 +113,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                 yr, fta = yara_rule.Yara_rule.get_yara_rule_from_yara_dict(artifact, metadata_field_mapping)
                 yr.created_user_id, yr.modified_user_id = current_user.id, current_user.id
                 yr.state = default_state if not shared_state else shared_state
+                yr.revision = 1
                 if shared_reference:
                     yr.references = shared_reference
                 if shared_description:
@@ -119,6 +123,13 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
 
                 db.session.add(yr)
                 db.session.commit()
+                db.session.add(yara_rule.Yara_rule_history(date_created=datetime.datetime.now(),
+                                                           revision=yr.revision,
+                                                           rule_json=json.dumps(yr.to_revision_dict()),
+                                                           user_id=current_user.id,
+                                                           yara_rule_id=yr.id,
+                                                           state=yr.state))
+
                 return_artifacts.append(yr)
                 fields_to_add[yr] = fta
         except Exception as e:
@@ -126,7 +137,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
             if type(e) == UnicodeEncodeError:
                 error_artifacts.append((artifact, "Unicode error: %s" % e.reason))
             else:
-                error_artifacts.append((artifact, e.message))
+                error_artifacts.append((artifact, str(e)))
             app.logger.error("Failed to commit artifacts '%s'" % artifact)
 
     db.session.commit()
