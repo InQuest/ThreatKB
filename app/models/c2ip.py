@@ -146,8 +146,8 @@ class C2ip(db.Model):
     def save_metadata(self, metadata):
         for name, val in metadata.items():
             val = val if not type(val) == dict else val.get("value", None)
-            if not val:
-                continue
+            #if not val:
+            #    continue
 
             m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
                 Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["DNS"]).filter(
@@ -161,6 +161,7 @@ class C2ip(db.Model):
                     Metadata.artifact_type == ENTITY_MAPPING["IP"]).first()
                 db.session.add(MetadataMapping(value=val, metadata_id=m.id, artifact_id=self.id,
                                                created_user_id=current_user.id))
+                dirty = True
 
         try:
             db.session.commit()
