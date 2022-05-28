@@ -115,10 +115,12 @@ def test_yara_rule_rest(rule_id):
                 file_store_path = Cfg_settings.get_setting("FILE_STORE_PATH")
                 if not file_store_path:
                     raise Exception('FILE_STORE_PATH configuration setting not set.')
-                files_to_test.append(os.path.join(file_store_path,
-                                                  str(f.entity_type) if f.entity_type is not None else "",
-                                                  str(f.entity_id) if f.entity_id is not None else "",
-                                                  str(f.filename)))
+                print(f"path is {f.id} {f.filename} {f.full_path}")
+                files_to_test.append(f.full_path)
+                #files_to_test.append(os.path.join(file_store_path,
+                #                                  str(f.entity_type) if f.entity_type is not None else "",
+                #                                  str(f.entity_id) if f.entity_id is not None else "",
+                #                                  str(f.filename)))
         if not is_neg_test:
             return jsonify(test_yara_rule(yara_rule_entity, files_to_test, current_user.id, False, is_neg_test)), 200
         else:

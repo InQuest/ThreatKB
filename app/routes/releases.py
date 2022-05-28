@@ -212,6 +212,7 @@ def delete_release(release_id):
     if not entity:
         abort(404)
 
+    db.session.query(releases.ReleaseYaraRuleHistory).filter(releases.ReleaseYaraRuleHistory.release_id==entity.id).delete()
     db.session.delete(entity)
     db.session.commit()
     return jsonify(''), 204
