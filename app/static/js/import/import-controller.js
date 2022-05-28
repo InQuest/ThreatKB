@@ -34,6 +34,7 @@ angular.module('ThreatKB').controller('ImportController',
                                 data: {
                                     file: file,
                                     autocommit: $scope.autocommit,
+                                    resurrect_retired_artifacts: $scope.resurrect_retired_artifacts,
                                     shared_reference: $scope.shared_reference,
                                     shared_description: $scope.shared_description,
                                     shared_state: $scope.shared_state,
@@ -130,17 +131,17 @@ angular.module('ThreatKB').controller('ImportController',
                 }
 
                 var field_mapping = JSON.parse($scope.default_mapping.value);
-                Import.import_artifacts($scope.import_text, $scope.autocommit, $scope.shared_reference, $scope.shared_description, $scope.shared_state.state.state, $scope.shared_owner, $scope.extract_ip, $scope.extract_dns, $scope.extract_signature, field_mapping).then(function (data) {
-                        if ($scope.autocommit) {
-                            blockUI.stop();
-                            var message = "";
-                            if (data.committed) {
-                                message = "Successfully committed " + data.committed.length + " artifacts.<BR><BR>";
-                            }
-                            if (data.duplicates) {
-                                message += "There were " + data.duplicates.length + " duplicates that were not committed.<BR><BR>";
-                                for (var key in data.duplicates) {
-                                    message += data.duplicates[key].artifact + "<BR>";
+                Import.import_artifacts($scope.import_text, $scope.autocommit, $scope.resurrect_retired_artifacts, $scope.shared_reference, $scope.shared_description, $scope.shared_state.state.state, $scope.shared_owner, $scope.extract_ip, $scope.extract_dns, $scope.extract_signature, field_mapping).then(function (data) {
+                    if ($scope.autocommit) {
+                        blockUI.stop();
+                        var message = "";
+                        if (data.committed) {
+                            message = "Successfully committed " + data.committed.length + " artifacts.<BR><BR>";
+                        }
+                        if (data.duplicates) {
+                            message += "There were " + data.duplicates.length + " duplicates that were not committed.<BR><BR>";
+                            for (var key in data.duplicates) {
+                                message += data.duplicates[key].artifact + "<BR>";
                                 }
                             }
 
@@ -175,6 +176,7 @@ angular.module('ThreatKB').controller('ImportController',
             $scope.clear = function () {
                 $scope.import_text = "";
                 $scope.autocommit = false;
+                $scope.resurrect_retired_artifacts = false;
                 $scope.artifacts = null;
                 $scope.checked_indexes = [];
                 $scope.shared_reference = "";

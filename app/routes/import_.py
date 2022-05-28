@@ -13,7 +13,8 @@ import json
 #####################################################################
 
 def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared_reference=None,
-                   shared_description=None, shared_state=None, shared_owner=None, metadata_field_mapping={}):
+                   shared_description=None, shared_state=None, shared_owner=None, metadata_field_mapping={},
+                   resurrect_retired_artifacts=resurrect_retired_artifacts):
     default_state = "Imported"
     return_artifacts = []
     duplicate_artifacts = []
@@ -37,17 +38,20 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
 
                 # old_ip = c2ip.C2ip.query.filter(c2ip.C2ip.ip == artifact["artifact"]).first()
                 old_ip = ip_addresses.get(artifact["artifact"], None)
-                if old_ip:
+                if old_ip and not resurrect_retired_artifacts:
                     message = "System comment: duplicate IP '%s' found at '%s' by '%s'" % (
-                    artifact["artifact"], shared_reference if shared_reference else "no reference provided",
-                    current_user.email)
+                        artifact["artifact"], shared_reference if shared_reference else "no reference provided",
+                        current_user.email)
                     db.session.add(
                         comments.Comments(comment=message, entity_type=ENTITY_MAPPING["IP"],
                                           entity_id=old_ip.id, user_id=current_user.id))
                     duplicate_artifacts.append(artifact)
                     continue
                 else:
-                    ip = c2ip.C2ip.get_c2ip_from_ip(artifact, metadata_field_mapping)
+                    if not resurrect_retired_artifacts or not old_ip:
+                        ip = c2ip.C2ip.get_c2ip_from_ip(artifact, metadata_field_mapping)
+                    else:
+                        ip = old_ip
                     ip.created_user_id, ip.modified_user_id = current_user.id, current_user.id
                     ip.state = default_state if not shared_state else shared_state
                     if Whitelist.hits_whitelist(ip.ip, ip.state):
@@ -72,17 +76,20 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
             elif artifact["type"].lower() in ["dns", "domain_name"] and extract_dns:
                 # old_dns = c2dns.C2dns.query.filter(c2dns.C2dns.domain_name == artifact["artifact"]).first()
                 old_dns = domain_names.get(artifact["artifact"].lower(), None)
-                if old_dns:
+                if old_dns and not resurrect_retired_artifacts:
                     message = "System comment: duplicate DNS '%s' found at '%s' by '%s'" % (
-                    artifact["artifact"], shared_reference if shared_reference else "no reference provided",
-                    current_user.email)
+                        artifact["artifact"], shared_reference if shared_reference else "no reference provided",
+                        current_user.email)
                     db.session.add(
                         comments.Comments(comment=message, entity_type=ENTITY_MAPPING["DNS"],
                                           entity_id=old_dns.id, user_id=current_user.id))
                     duplicate_artifacts.append(artifact)
                     continue
                 else:
-                    dns = c2dns.C2dns.get_c2dns_from_hostname(artifact, metadata_field_mapping)
+                    if not resurrect_retired_artifacts or not old_dns:
+                        dns = c2dns.C2dns.get_c2dns_from_hostname(artifact, metadata_field_mapping)
+                    else:
+                        dns = old_dns
                     dns.created_user_id, dns.modified_user_id = current_user.id, current_user.id
                     dns.state = default_state if not shared_state else shared_state
                     if Whitelist.hits_whitelist(dns.domain_name, dns.state):
@@ -182,6 +189,7 @@ def import_artifacts():
     Optional Arguments: autocommit (int), shared_state (str), shared_reference (str), shared_description(str), shared_owner (int)
     Return: list of artifact dictionaries [{"type":"IP": "artifact": {}}, {"type":"DNS": "artifact": {}}, ...]"""
     autocommit = request.json.get("autocommit", 0)
+    resurrect_retired_artifacts = request.json.get("resurrect_retired_artifacts", False)
     import_text = request.json.get('import_text', None)
     shared_state = request.json.get('shared_state', None)
     shared_reference = request.json.get("shared_reference", None)
@@ -205,7 +213,8 @@ def import_artifacts():
         artifacts = save_artifacts(extract_ip=extract_ip, extract_dns=extract_dns, extract_signature=extract_signature,
                                    artifacts=artifacts, shared_reference=shared_reference,
                                    shared_description=shared_description, shared_state=shared_state,
-                                   shared_owner=shared_owner, metadata_field_mapping=metadata_field_mapping)
+                                   shared_owner=shared_owner, metadata_field_mapping=metadata_field_mapping,
+                                   resurrect_retired_artifacts=resurrect_retired_artifacts)
 
     return jsonify({"artifacts": artifacts})
 
