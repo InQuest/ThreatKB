@@ -28,6 +28,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
     ip_addresses = {ipaddress.ip: ipaddress for ipaddress in c2ip.C2ip.query.all()}
     yara_rules = {yr.name: yr for yr in db.session.query(yara_rule.Yara_rule).all()}
     unique_rule_name_enforcement = cfg_settings.Cfg_settings.get_setting("ENFORCE_UNIQUE_YARA_RULE_NAMES")
+    retired_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_retired_state > 0).first()
 
     if not cfg_states.Cfg_states.query.filter_by(state=default_state).first():
         db.session.add(cfg_states.Cfg_states(state=default_state))
@@ -53,6 +54,16 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                         ip = c2ip.C2ip.get_c2ip_from_ip(artifact, metadata_field_mapping)
                     else:
                         ip = old_ip
+                        if not retired_state.state == ip.state:
+                            message = "System comment: duplicate IP '%s' found at '%s' by '%s' because it was not resurrected because it was in the state '%s' not the retired state of '%s'" % (
+                                artifact["artifact"], shared_reference if shared_reference else "no reference provided",
+                                current_user.email, ip.state, retired_state.state)
+                            db.session.add(
+                                comments.Comments(comment=message, entity_type=ENTITY_MAPPING["IP"],
+                                                  entity_id=old_ip.id, user_id=current_user.id))
+                            duplicate_artifacts.append(artifact)
+                            continue
+
                         message = "System comment: resurrected IP '%s' because of reference '%s' by '%s'" % (
                             artifact["artifact"], shared_reference if shared_reference else "no reference provided",
                             current_user.email)
@@ -100,6 +111,15 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                         dns = c2dns.C2dns.get_c2dns_from_hostname(artifact, metadata_field_mapping)
                     else:
                         dns = old_dns
+                        if not retired_state.state == dns.state:
+                            message = "System comment: duplicate DNS '%s' found at '%s' by '%s'  because it was not resurrected because it was in the state '%s' not the retired state of '%s'" % (
+                                artifact["artifact"], shared_reference if shared_reference else "no reference provided",
+                                current_user.email, dns.state, retired_state.state)
+                            db.session.add(
+                                comments.Comments(comment=message, entity_type=ENTITY_MAPPING["DNS"],
+                                                  entity_id=old_dns.id, user_id=current_user.id))
+                            duplicate_artifacts.append(artifact)
+                            continue
                         message = "System comment: resurrected DNS '%s' because of reference '%s' by '%s'" % (
                             artifact["artifact"], shared_reference if shared_reference else "no reference provided",
                             current_user.email)
