@@ -16,8 +16,8 @@ angular.module('ThreatKB')
             );
         }
 
-        function merge_signature(merge_from_id, merge_to_id) {
-            return $http.post('/ThreatKB/yara_rules/merge_signatures', {
+        function merge_signature_by_id(merge_from_id, merge_to_id) {
+            return $http.post('/ThreatKB/yara_rules/merge_signatures_by_id', {
                 merge_from_id: merge_from_id,
                 merge_to_id: merge_to_id
             }).then(function (success) {
@@ -25,6 +25,20 @@ angular.module('ThreatKB')
                         return success.data;
                     } else {
                         //TODO
+                    }
+                }, function (error) {
+                    return $q.reject(error.data);
+                }
+            );
+        }
+
+        function merge_signatures(ids) {
+            return $http.post('/ThreatKB/yara_rules/merge_signatures', {
+                signature_ids: ids,
+                save_output: 1
+            }).then(function (success) {
+                    if (success.status === 201 && success.data) {
+                        return success.data;
                     }
                 }, function (error) {
                     return $q.reject(error.data);
@@ -121,14 +135,16 @@ angular.module('ThreatKB')
                 'update': {method: 'PUT'}
             }),
             copySignatures: copySignatures,
-            merge_signature: merge_signature,
+            merge_signature_by_id: merge_signature_by_id,
             updateBatch: updateBatch,
             deleteBatch: deleteBatch,
             getSignatureFromRevision: getSignatureFromRevision,
             activateRule: activateRule,
             delete_all_inactive: delete_all_inactive,
             deleteFile: deleteFile,
-            deleteFilePath: deleteFilePath
+            deleteFilePath: deleteFilePath,
+            merge_signatures: merge_signatures
+
         };
     }]);
 

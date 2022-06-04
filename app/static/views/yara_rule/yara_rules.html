@@ -670,7 +670,7 @@
 
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger pull-left"
-                        ng-if="yara_rule.id" ng-click="merge_signature()">Merge This Into
+                        ng-if="yara_rule.id" ng-click="merge_signature_by_id()">Merge This Into
                 </button>
 
                 <div class="pull-left" style="width:350px; padding-right:4px; padding-left:4px;" ng-if="yara_rule.id">
@@ -729,6 +729,11 @@
                 confirmed-click="batch_delete()"
                 ng-confirm-click="Are you sure you want to batch inactive selected signature records?">
             Batch Delete ({{ checked_counter }})
+        </button>
+        <button type="button" class="btn btn-secondary" ng-disabled="!checked_counter || checked_counter<2"
+                confirmed-click="merge_signatures()"
+                ng-confirm-click="Are you sure you want merge these signatures?">
+            Merge Signatures ({{ checked_counter }})
         </button>
         <button type="button" class="btn btn-secondary" ng-if="view_selected == 'Inactive Only'"
                 confirmed-click="delete_all_inactive()"

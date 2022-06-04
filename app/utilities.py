@@ -49,6 +49,7 @@ def extract_dns_text(text):
 #####################################################################
 
 def extract_yara_rules_text(text):
+    text = text.strip()
     imports = Yara_rule.get_imports_from_string(text)
     split_regex = cfg_settings.Cfg_settings.get_setting(key="IMPORT_SIG_SPLIT_REGEX")
     split_regex = split_regex if split_regex else "\n[\t\s]*\}[\s\t]*(rule[\t\s][^\r\n]+(?:\{|[\r\n][\r\n\s\t]*\{))"
@@ -262,9 +263,10 @@ def get_strings_and_conditions(rule):
             segments["strings"][-1]
 
     if segments.get("condition", None):
-        segments["condition"][-1] = segments["condition"][-1].rstrip(" }")
+        segments["condition"][-1] = segments["condition"][-1].rstrip().rstrip(" }\n\t")
 
-    return "\n".join(segments["strings"]) if segments.get("strings", None) else "", "\n".join(segments["condition"])
+    return "\n".join(segments["strings"]) if segments.get("strings", None) else "", "\n".join(
+        [segment for segment in segments["condition"] if segment.strip(" }")])
 
 
 #####################################################################

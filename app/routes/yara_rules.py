@@ -1,11 +1,12 @@
 from app import app, db, auto, ENTITY_MAPPING
 from app.models.yara_rule import Yara_rule_history, Yara_rule
+from app.models.cfg_states import Cfg_states
 from app.routes import test_yara_rule
 from app.models import yara_rule, cfg_states, comments
 from flask import abort, jsonify, request, Response, json
 from flask_login import current_user, login_required
 import distutils
-
+from app.utilities import extract_yara_rules_text, extract_artifacts_text
 from app.models.metadata import Metadata, MetadataMapping
 from app.models.releases import get_release_yara_rule_history_mapping, get_release_metadata
 from app.routes.batch import batch_update, batch_delete
@@ -15,14 +16,113 @@ from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
 from app.routes.comments import create_comment
 from app.models.cfg_settings import Cfg_settings
 from app.utilities import filter_entities
-
 import datetime
+import uuid
+import random
+import string
+import base64
 
 
 @app.route('/ThreatKB/yara_rules/merge_signatures', methods=['POST'])
+def merge_signatures():
+    signatures = request.json.get('signatures', [])
+    save_output = request.json.get('save_output', 0)
+    signature_ids = request.json.get('signature_ids', [])
+
+    for i in range(len(signatures)):
+        try:
+            signatures[i] = base64.b64decode(signatures[i]).decode()
+        except:
+            pass
+
+    if signature_ids and (not current_user.is_authenticated or not current_user.active or not current_user.admin):
+        abort(403)
+
+    for id_ in signature_ids:
+        signature = db.session.query(yara_rule.Yara_rule).filter(yara_rule.Yara_rule.id == id_).first()
+        if signature:
+            signatures.append(signature.to_dict(include_yara_rule_string=True)['yara_rule_string'])
+
+    if not signatures or not type(signatures) == list or len(signatures) < 2:
+        abort(412, description="You must provide at least 2 signatures as a list")
+
+    rules = extract_yara_rules_text("\n\n".join(signatures))
+    rule_name = f"Merged_Rule_{str(uuid.uuid4())[:8]}"
+    description = f"\"Merger of {', '.join([rule['parsed_rule']['rule_name'] for rule in rules])}\""
+    strings = ""
+    condition = ""
+    imports = ""
+    r = 1
+    for rule in rules:
+        old_new = {}
+        current_strings = []
+        postfix = f"r{r}"
+        for s in rule['parsed_rule']['strings']:
+            old_name = s['name'].strip()
+            if old_name.startswith('$'):
+                name = f"${s['name'].strip()[1:]}_{postfix}"
+            else:
+                name = f"{s['name'].strip()}_{postfix}"
+
+            if s['value'].startswith("{") or s['value'].startswith("/"):
+                value = s['value'].strip()
+            else:
+                value = f"\"{s['value'].strip()}\""
+
+            old_new[old_name] = name
+            modifier = ' '.join(s.get('modifiers', []))
+            current_strings.append(
+                f"{name} = {value} {modifier}"
+            )
+        strings += '\n\t\t' + '\n\t\t'.join(current_strings)
+        app.logger.info(f"condition is\n{rule['condition']}")
+        this_condition = rule['condition'].strip()
+        for old, new in old_new.items():
+            this_condition = this_condition.replace(old, new)
+        condition += f"(\n\t{this_condition}\n\t)\n\tor\n\t"
+        imports += rule['imports'] + "\n" if not rule['imports'] in imports else ""
+        r += 1
+
+    condition = condition.rstrip("\n\tor\n\t")
+    full_rule = f"""
+    {imports}
+
+    rule {rule_name}
+    {{
+        meta:
+            description = {description}
+        strings:{strings}
+        condition:
+            {condition}
+    }}
+    """
+
+    app.logger.info(f"rule is\n{full_rule}")
+    if not save_output:
+        return jsonify({"merged_signature": full_rule.strip(" ").strip()})
+    else:
+        if not current_user.is_authenticated or not current_user.active or not current_user.admin:
+            abort(403)
+        output = extract_artifacts_text(do_extract_ip=False,
+                                        do_extract_dns=False,
+                                        do_extract_signature=True,
+                                        text=full_rule)
+        rule_dict = output[0]
+        yr, fta = yara_rule.Yara_rule.get_yara_rule_from_yara_dict(rule_dict, {})
+        yr.created_user_id, yr.modified_user_id = current_user.id, current_user.id
+        staging_state = db.session.query(Cfg_states).filter(Cfg_states.is_staging_state > 0).first()
+        yr.state = staging_state.state
+        yr.description = description.strip('"')
+        yr.revision = 1
+        db.session.add(yr)
+        db.session.commit()
+        return jsonify(yr.to_dict()), 201
+
+
+@app.route('/ThreatKB/yara_rules/merge_signatures_by_id', methods=['POST'])
 @auto.doc()
 @login_required
-def merge_signatures():
+def merge_signatures_by_id():
     """Merge a signature into another
     From Data: merge_from_id (int), merge_to_id (int)
     Return: merged yara_rule artifact dictionary"""
@@ -383,7 +483,7 @@ def update_yara_rule(id):
             raise Exception(
                 "State submitted is " + str(
                     rule_state) + " and the rule could not be saved because it does not compile.\n\nerror_code=" + str(
-                    return_code) + "\n\n" + stderr)
+                    return_code) + "\n\n" + str(stderr))
 
     if not release_state or not draft_state:
         raise Exception("You must set a release, draft, and retirement state before modifying signatures")

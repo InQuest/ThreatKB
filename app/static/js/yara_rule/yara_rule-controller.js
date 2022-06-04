@@ -454,7 +454,7 @@ angular.module('ThreatKB')
                 var id = id_or_rule;
                 if (typeof (id_or_rule) === "object") {
                     if (id_or_rule.merge) {
-                        Yara_rule.merge_signature($scope.yara_rule.id, id_or_rule.id).then(function (data) {
+                        Yara_rule.merge_signature_by_id($scope.yara_rule.id, id_or_rule.id).then(function (data) {
                             growl.info("Successfully merged '" + $scope.yara_rule.name + "' into '" + id_or_rule.name + "'", {ttl: 3000});
                         }, function (error) {
                             growl.error(error, {ttl: -1})
@@ -606,6 +606,7 @@ angular.module('ThreatKB')
                     growl.error(error.data, {ttl: -1});
                 });
             };
+
             $scope.batch_edit = function () {
                 var be = $uibModal.open({
                     templateUrl: 'yara_rule-batch_edit.html',
@@ -628,6 +629,21 @@ angular.module('ThreatKB')
             };
             $scope.edit = function (id) {
                 $scope.openYaraModal(id);
+            };
+
+
+            $scope.merge_signatures = function () {
+                var sigsToMerge = [];
+                for (var i = 0; i < $scope.checked_indexes.length; i++) {
+                    if ($scope.checked_indexes[i]) {
+                        sigsToMerge.push($scope.yara_rules[i].id);
+                    }
+                }
+                Yara_rule.merge_signatures(sigsToMerge).then(function (response) {
+                    $scope.update(response.id)
+                }, function (error) {
+                    growl.error(error, {ttl: -1});
+                });
             };
 
             $scope.view = function (id) {
@@ -1007,7 +1023,7 @@ angular.module('ThreatKB')
                 }
             };
 
-            $scope.merge_signature = function () {
+            $scope.merge_signature_by_id = function () {
                 if (!$scope.selected_signature) {
                     return;
                 }
