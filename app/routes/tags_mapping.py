@@ -135,6 +135,7 @@ def create_tags_mapping(table, s_id, list_of_tags):
 
 
 def delete_tags_mapping(table, s_id):
+    app.logger.debug(f"delete_tags_mapping {request.url} {table} {s_id}")
     tags_mapping.Tags_mapping.query.filter_by(
         source_table=table,
         source_id=s_id
@@ -144,6 +145,7 @@ def delete_tags_mapping(table, s_id):
 
 
 def batch_delete_tags_mapping(table, list_of_source_ids):
+    app.logger.debug(f"batchdelete_tags_mapping {request.url} {table} {list_of_source_ids}")
     db.session.execute(tags_mapping.Tags_mapping.__table__
                        .delete()
                        .where(tags_mapping.Tags_mapping.source_table == table
@@ -155,6 +157,7 @@ def batch_delete_tags_mapping(table, list_of_source_ids):
 @login_required
 @admin_only()
 def delete_tags_mapping_by_id(id):
+    app.logger.debug(f"delete_tags_mapping_by_id {request.url} {id}")
     entity = tags_mapping.Tags_mapping.query.get(id)
     if not entity:
         abort(404)
