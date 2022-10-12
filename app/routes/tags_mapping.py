@@ -148,8 +148,18 @@ def batch_delete_tags_mapping(table, list_of_source_ids):
     app.logger.debug(f"batchdelete_tags_mapping {request.url} {table} {list_of_source_ids}")
     db.session.execute(tags_mapping.Tags_mapping.__table__
                        .delete()
-                       .where(tags_mapping.Tags_mapping.source_table == table
-                              and tags_mapping.Tags_mapping.source_id.in_(list_of_source_ids)))
+                       .where((tags_mapping.Tags_mapping.source_table == table)
+                              & (tags_mapping.Tags_mapping.source_id.in_(list_of_source_ids))))
+    db.session.commit()
+
+
+def batch_delete_tags_mapping_for_source_id(table, source_id, list_of_tag_ids):
+    app.logger.debug(f"batch_delete_tags_mapping_for_source_id {request.url} {table} {source_id} {list_of_tag_ids}")
+    db.session.execute(tags_mapping.Tags_mapping.__table__
+                       .delete()
+                       .where((tags_mapping.Tags_mapping.source_table == table)
+                              & (tags_mapping.Tags_mapping.source_id == source_id)
+                              & (tags_mapping.Tags_mapping.tag_id.in_(list_of_tag_ids))))
     db.session.commit()
 
 

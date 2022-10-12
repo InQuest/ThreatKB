@@ -3,6 +3,7 @@ parsetab.py
 .editorconfig
 .jshintrc
 flask/
+env/
 .DS_Store
 *.db
 *.pyc

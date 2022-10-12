@@ -102,9 +102,9 @@ def delete_bookmarks(entity_type, entity_id, user_id):
 def batch_delete_bookmarks(entity_type, list_of_entity_ids, user_id):
     db.session.execute(Bookmarks.__table__
                        .delete()
-                       .where(Bookmarks.entity_type == entity_type
-                              and Bookmarks.user_id == user_id
-                              and Bookmarks.entity_id.in_(list_of_entity_ids)))
+                       .where((Bookmarks.entity_type == entity_type)
+                              & (Bookmarks.user_id == user_id)
+                              & (Bookmarks.entity_id.in_(list_of_entity_ids))))
     db.session.commit()
 
 
