@@ -9,7 +9,8 @@ from app.models.cfg_states import verify_state
 from app.models.whitelist import WhitelistException
 from app.routes.batch import batch_update, batch_delete
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
-from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping
+from app.routes.tags_mapping import create_tags_mapping, delete_tags_mapping, get_tags_for_source, \
+    batch_delete_tags_mapping_for_source_id
 from app.routes.comments import create_comment
 import distutils
 
@@ -56,7 +57,6 @@ def get_all_c2ips():
     include_metadata = bool(distutils.util.strtobool(request.args.get('include_metadata', "true")))
     include_tags = bool(distutils.util.strtobool(request.args.get('include_tags', "true")))
     include_comments = bool(distutils.util.strtobool(request.args.get('include_comments', "true")))
-
 
     response_dict = filter_entities(entity=c2ip.C2ip,
                                     artifact_type=ENTITY_MAPPING["IP"],
@@ -210,8 +210,15 @@ def update_c2ip(id_or_ip):
         app.logger.error("Whitelist validation failed.")
         abort(412, description="Whitelist validation failed.")
 
-    delete_tags_mapping(entity.__tablename__, entity.id)
-    create_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
+    current_tags = get_tags_for_source(entity.__tablename__, entity.id)
+    new_tags = request.json['tags']
+    tags_to_delete, tags_to_create = [c_tag for c_tag in current_tags if c_tag not in new_tags], [n_tag for n_tag in
+                                                                                                  new_tags if
+                                                                                                  n_tag not in current_tags]
+    if tags_to_delete:
+        batch_delete_tags_mapping_for_source_id(entity.__tablename__, entity.id, [tag['id'] for tag in tags_to_delete])
+    if tags_to_create:
+        create_tags_mapping(entity.__tablename__, entity.id, tags_to_create)
 
     entity.save_metadata(request.json.get("metadata_values", {}))
 
