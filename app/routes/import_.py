@@ -30,6 +30,12 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
     unique_rule_name_enforcement = cfg_settings.Cfg_settings.get_setting("ENFORCE_UNIQUE_YARA_RULE_NAMES")
     retired_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_retired_state > 0).first()
 
+    if not retired_state:
+        retired_state = cfg_states.Cfg_states(state="Retired", is_retired_state=1)
+        db.session.add(retired_state)
+        db.session.commit()
+        db.session.refresh(retired_state)
+
     if not cfg_states.Cfg_states.query.filter_by(state=default_state).first():
         db.session.add(cfg_states.Cfg_states(state=default_state))
         db.session.commit()
