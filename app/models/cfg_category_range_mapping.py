@@ -1,5 +1,6 @@
 from app import db
 from . import yara_rule
+from sqlalchemy import bindparam
 
 
 class CfgCategoryRangeMapping(db.Model):
@@ -36,7 +37,7 @@ class CfgCategoryRangeMapping(db.Model):
         )
 
     @staticmethod
-    def get_next_category_eventid(category=None):
+    def get_next_category_eventid(category=None, connection=None):
         default_category_min = 10000
         default_category_max = 20000
 
@@ -49,6 +50,22 @@ class CfgCategoryRangeMapping(db.Model):
                     category = CfgCategoryRangeMapping(category=CfgCategoryRangeMapping.DEFAULT_CATEGORY,
                                                        range_max=default_category_max,
                                                        range_min=default_category_min, current=default_category_min)
+                    if connection:
+                        transaction = connection.begin()
+                        connection.execute(CfgCategoryRangeMapping.__table__.insert().values(
+                            category=bindparam("category"),
+                            range_max=bindparam("range_max"),
+                            range_min=bindparam("range_min"),
+                            current=bindparam("current")
+                        ), {
+                            "category": category.category,
+                            "range_max": category.range_max,
+                            "range_min": category.range_min,
+                            "current": category.current
+                        })
+                        transaction.commit()
+                        category = CfgCategoryRangeMapping.query.filter(
+                            CfgCategoryRangeMapping.category == CfgCategoryRangeMapping.DEFAULT_CATEGORY).first()
                     CfgCategoryRangeMapping.COMMITTED_DEFAULT = category
                 else:
                     category = CfgCategoryRangeMapping.COMMITTED_DEFAULT
@@ -66,7 +83,6 @@ class CfgCategoryRangeMapping(db.Model):
         db.session.execute(
             "update `cfg_category_range_mapping` set current=%s where id=%s" % (category.current, category.id))
         return eventid
-
 
     def __repr__(self):
         return '<CfgCategoryRangeMapping %r>' % self.id

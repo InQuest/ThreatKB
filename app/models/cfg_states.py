@@ -53,7 +53,7 @@ def verify_state(state_to_verify):
 
 @listens_for(Cfg_states, "before_insert")
 def generate_eventid(mapper, connect, target):
-    if target.is_release_state > 0:
+    if not target.is_release_state or target.is_release_state > 0:
         Cfg_states.query.update(dict(is_release_state=0))
 
 

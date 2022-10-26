@@ -370,7 +370,7 @@ class Yara_rule(db.Model):
         if type(yara_dict["metadata"]) is list:
             yara_dict["metadata"] = {list(m.keys())[0]: list(m.values())[0] for m in yara_dict["metadata"]}
 
-        yara_metadata = {key.lower(): val.strip().strip("\"") for key, val in
+        yara_metadata = {key.lower(): str(val).strip().strip("\"") for key, val in
                          yara_dict["metadata"].items()} if "metadata" in yara_dict else {}
         for possible_field, mapped_to in metadata_field_mapping.items():
             mapped_to = mapped_to.lower()
@@ -431,7 +431,7 @@ def generate_eventid(mapper, connect, target):
     target.name = re.sub("[^A-Za-z0-9_]", "", target.name)
 
     if not target.eventid:
-        target.eventid = CfgCategoryRangeMapping.get_next_category_eventid(target.category)
+        target.eventid = CfgCategoryRangeMapping.get_next_category_eventid(target.category, connect)
 
 
 @listens_for(Yara_rule, "before_update")
