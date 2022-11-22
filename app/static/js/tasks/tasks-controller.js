@@ -400,6 +400,21 @@ angular.module('ThreatKB')
                 $scope.clear_batch();
                 $scope.batch_edit();
             };
+            $scope.batch_delete = function () {
+                let tasksToDelete = {
+                    ids: []
+                };
+                for (let i = 0; i < $scope.checked_indexes.length; i++) {
+                    if ($scope.checked_indexes[i]) {
+                        tasksToDelete.ids.push($scope.tasks[i].id);
+                    }
+                }
+                Task.deleteBatch(tasksToDelete).then(function (response) {
+                    getPage();
+                }, function (error) {
+                    growl.error(error.data, {ttl: -1});
+                });
+            };
             $scope.batch_edit = function () {
                 var be = $uibModal.open({
                     templateUrl: 'task-batch_edit.html',
