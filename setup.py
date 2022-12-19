@@ -35,7 +35,7 @@ setup(
         'billiard==3.5.0.3',
         'blinker==1.4',
         'celery==4.1.0',
-        'certifi==2017.11.5',
+        'certifi==2022.12.7',
         'cffi==1.10.0',
         'chardet==3.0.4',
         'click==6.7',
