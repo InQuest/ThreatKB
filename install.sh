@@ -7,9 +7,15 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+env/bin/python3 setup.py sdist
+if [ $? -ne 0 ]; then
+    echo "error: failed to install python3 setup.py sdist"
+    exit 1
+fi
+
 env/bin/pip3 install -r requirements.txt
 if [ $? -ne 0 ]; then
-    echo "error: failed to install python requirements.txt"
+    echo "error: failed to install pip3 requirements.txt"
     exit 1
 fi
 
