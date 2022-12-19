@@ -64,7 +64,7 @@ setup(
         'Jinja2==2.11.3',
         'jsonpickle==0.9.5',
         'kombu==4.1.0',
-        'Mako==1.0.7',
+        'Mako==1.2.2',
         'MarkupSafe==1.0',
         'maxminddb==1.3.0',
         'migrate==0.3.8',
