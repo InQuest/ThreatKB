@@ -221,6 +221,13 @@ angular.module('ThreatKB')
                             cellFilter: 'date:\'yyyy-MM-dd HH:mm:ss\''
                         },
                         {
+                            field: 'last_revision_date',
+                            displayName: "Revision Date",
+                            enableSorting: true,
+                            width: '150',
+                            cellFilter: 'date:\'yyyy-MM-dd HH:mm:ss\''
+                        },
+                        {
                             field: 'category',
                             width: '110',
                             enableSorting: true
