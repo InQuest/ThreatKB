@@ -185,7 +185,8 @@ class Yara_rule(db.Model):
                 yara_dict["owner_user"] = self.owner_user.to_dict() if self.owner_user else None
 
         if not short:
-            revisions = Yara_rule_history.query.filter_by(yara_rule_id=self.id).all()
+            revision_limit = int(cfg_settings.Cfg_settings.get_setting("FETCH_REVISION_COUNT_LIMIT") or 25)
+            revisions = Yara_rule_history.query.filter_by(yara_rule_id=self.id).order_by(Yara_rule_history.date_created.desc()).limit(revision_limit).all()
             comments = Comments.query.filter_by(entity_id=self.id).filter_by(
                 entity_type=ENTITY_MAPPING["SIGNATURE"]).all()
             files = Files.query.filter_by(entity_id=self.id).filter_by(entity_type=ENTITY_MAPPING["SIGNATURE"]).all()

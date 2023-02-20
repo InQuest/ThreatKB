@@ -149,26 +149,19 @@ def create_release():
     db.session.commit()
 
     if not release.is_test_release:
-        history = db.session.query(yara_rule.Yara_rule_history.id, yara_rule.Yara_rule_history.yara_rule_id,
-                                   yara_rule.Yara_rule_history.revision).all()
-        history_mapping = {}
-        for h in history:
-            id_, rule_id, revision = h
-            if not rule_id in history_mapping:
-                history_mapping[rule_id] = {}
-            if not revision in history_mapping[rule_id]:
-                history_mapping[rule_id][revision] = id_
-
         release_data = release.release_data_dict
         release_yara_rule_history_list = []
         for sig_id in release_data["Signatures"]["Signatures"].keys():
             revision = release_data["Signatures"]["Signatures"][sig_id]["revision"]
             sig_id = int(sig_id)
             revision = int(revision)
-            if not sig_id in history_mapping:
-                history_mapping[sig_id] = {}
 
-            if not revision in history_mapping[sig_id]:
+            revision_entity = db.session.query(yara_rule.Yara_rule_history) \
+                .filter_by(yara_rule_id=sig_id) \
+                .filter_by(revision=revision) \
+                .first()
+
+            if not revision_entity:
                 yr = db.session.query(yara_rule.Yara_rule).get(sig_id)
                 latest = yara_rule.Yara_rule_history(
                     date_created=datetime.datetime.now(),
@@ -180,10 +173,10 @@ def create_release():
                 )
                 db.session.add(latest)
                 db.session.flush()
-                history_mapping[sig_id][revision] = latest.id
+                revision_entity = latest
 
             release_yara_rule_history_list.append(
-                {"yara_rules_history_id": history_mapping[sig_id][revision], "release_id": release.id})
+                {"yara_rules_history_id": revision_entity.id, "release_id": release.id})
 
         if release_yara_rule_history_list:
             app.logger.debug(

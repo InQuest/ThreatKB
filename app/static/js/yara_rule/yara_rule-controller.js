@@ -273,7 +273,7 @@ angular.module('ThreatKB')
                         },
                         {
                             name: 'Actions',
-                            width: '160',
+                            width: '180',
                             enableFiltering: false,
                             enableColumnMenu: false,
                             enableSorting: false,
@@ -287,6 +287,12 @@ angular.module('ThreatKB')
                                 + '<button type="button" ng-click="grid.appScope.viewRule(row.entity.id)"'
                                 + ' class="btn btn-sm">'
                                 + '<small><span class="glyphicon glyphicon-eye-open"></span>'
+                                + '</small>'
+                                + '</button>'
+                                + '&nbsp;'
+                                + '<button type="button" ng-click="grid.appScope.viewRevision(row.entity.id)"'
+                                + ' class="btn btn-sm">'
+                                + '<small><span class="glyphicon glyphicon-list-alt"></span>'
                                 + '</small>'
                                 + '</button>'
                                 + '&nbsp;'
@@ -414,6 +420,11 @@ angular.module('ThreatKB')
             $scope.viewRule = function (id) {
                 $scope.yara_rule = Yara_rule.resource.get({id: id, include_yara_string: 1});
                 $scope.view(id);
+            };
+
+            $scope.viewRevision = function (id) {
+                $scope.yara_rule = Yara_rule.resource.get({id: id, include_yara_string: 1});
+                $scope.revision_view(id);
             };
 
             $scope.activateRule = function (id, name) {
@@ -650,6 +661,20 @@ angular.module('ThreatKB')
                 var yara_view = $uibModal.open({
                     templateUrl: 'yara_rule-view.html',
                     controller: 'Yara_ruleViewController',
+                    size: 'lg',
+                    backdrop: 'static',
+                    resolve: {
+                        yara_rule: function () {
+                            return $scope.yara_rule;
+                        }
+                    }
+                });
+            };
+
+            $scope.revision_view = function (id) {
+                const revision_view = $uibModal.open({
+                    templateUrl: 'yara_rule-revision.html',
+                    controller: 'Yara_ruleRevisionViewController',
                     size: 'lg',
                     backdrop: 'static',
                     resolve: {
@@ -1113,6 +1138,43 @@ angular.module('ThreatKB')
 
             $scope.loadTags = function (query) {
                 return Tags.loadTags(query);
+            };
+        }])
+    .controller('Yara_ruleRevisionViewController', ['$scope', '$uibModalInstance', 'yara_rule', '$location', '$window', '$cookies',
+        function ($scope, $uibModalInstance, yara_rule, $location, $window, $cookies) {
+            yara_rule.$promise.then(
+                function (yr) {
+                    $window.document.title = "ThreatKB: " + yr.name;
+                }
+            );
+
+            $scope.selectedRevisions = {
+                main: null,
+                compared: null
+            };
+
+            $scope.edit = function (id) {
+                var location = $location.absUrl();
+                var last_spot = location.split("/")[location.split("/").length - 1];
+                $uibModalInstance.close($scope.yara_rule);
+                if (isNaN(parseInt(last_spot, 10))) {
+                    $window.location.href = $location.absUrl() + "/" + id;
+                    return;
+                } else if (!isNaN(parseInt(last_spot, 10)) && last_spot !== id) {
+                    $window.location.href = $location.absUrl().replace(/\/[0-9]+$/, "/" + id);
+                    return;
+                }
+                $window.location.href = $location.absUrl();
+            };
+
+            $scope.yara_rule = yara_rule;
+
+            $scope.ok = function () {
+                $uibModalInstance.close($scope.yara_rule);
+            };
+
+            $scope.cancel = function () {
+                $uibModalInstance.dismiss('cancel');
             };
         }])
     .controller('Yara_revisionController', ['$scope', 'Yara_rule',
