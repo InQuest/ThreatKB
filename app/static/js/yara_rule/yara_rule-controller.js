@@ -410,7 +410,7 @@ angular.module('ThreatKB')
             };
 
             $scope.update = function (id) {
-                $scope.yara_rule = Yara_rule.resource.get({id: id, include_yara_string: 1});
+                $scope.yara_rule = Yara_rule.resource.get({id: id, include_yara_string: 1, include_revisions: 0});
                 $scope.cfg_states = Cfg_states.query();
                 $scope.users = Users.query();
                 $scope.cfg_category_range_mapping = CfgCategoryRangeMapping.query();
@@ -418,12 +418,12 @@ angular.module('ThreatKB')
             };
 
             $scope.viewRule = function (id) {
-                $scope.yara_rule = Yara_rule.resource.get({id: id, include_yara_string: 1});
+                $scope.yara_rule = Yara_rule.resource.get({id: id, include_yara_string: 1, include_revisions: 0});
                 $scope.view(id);
             };
 
             $scope.viewRevision = function (id) {
-                $scope.yara_rule = Yara_rule.resource.get({id: id, include_yara_string: 1});
+                $scope.yara_rule = Yara_rule.resource.get({id: id, include_yara_string: 1, include_revisions: 1});
                 $scope.revision_view(id);
             };
 
