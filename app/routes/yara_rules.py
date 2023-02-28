@@ -242,6 +242,7 @@ def get_yara_rule(id):
     """Return yara_rule artifact associated with the given id
     Return: yara_rule artifact dictionary"""
     include_yara_string = request.args.get("include_yara_string", False)
+    include_revisions = request.args.get("include_revisions", True)
     short = distutils.util.strtobool(request.args.get("short", "false"))
 
     if include_yara_string:
@@ -253,7 +254,7 @@ def get_yara_rule(id):
     if not current_user.admin and entity.owner_user_id != current_user.id:
         abort(403)
 
-    return_dict = entity.to_dict(include_yara_string, short)
+    return_dict = entity.to_dict(include_yara_string, short, include_revisions)
     return_dict["bookmarked"] = True if is_bookmarked(ENTITY_MAPPING["SIGNATURE"], id, current_user.id) \
         else False
 
