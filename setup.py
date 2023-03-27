@@ -78,7 +78,7 @@ setup(
         'python-openid==2.2.5',
         'pytz==2017.2',
         'pyzipcode==1.0',
-        'redis==2.10.6',
+        'redis==4.5.3',
         'requests==2.20.0',
         'six==1.10.0',
         'speaklater==1.3',
