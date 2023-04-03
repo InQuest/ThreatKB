@@ -76,7 +76,7 @@ setup(
         'Tempita==0.5.2',
         'urllib3==1.26.9',
         'vine==5.0.0',
-        'Werkzeug==0.15.5',
+        'Werkzeug==2.2.3',
         'Whoosh==2.7.4',
         'WTForms==3.0.1',
         'yara-python==4.2.0'

@@ -99,7 +99,7 @@ urllib3==1.26.9
 uWSGI==2.0.20
 vine==5.0.0
 wcwidth==0.2.5
-Werkzeug==0.15.5
+Werkzeug==2.2.3
 Whoosh==2.7.4
 wrapt==1.14.0
 WTForms==3.0.1
