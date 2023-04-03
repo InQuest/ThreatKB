@@ -29,7 +29,7 @@ def get_whitelist(id):
     return jsonify(entity.to_dict())
 
 
-@app.route('/ThreatKB/whitelist', methods=['POST'])
+@app.route('/ThreatKB/whitelist', methods=['POST', 'PUT'])
 @auto.doc()
 @login_required
 def create_whitelist():

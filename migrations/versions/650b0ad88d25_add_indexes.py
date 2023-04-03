@@ -17,14 +17,7 @@ depends_on = None
 
 
 def upgrade():
-    op.execute("""CREATE INDEX ifx_yara_rules_description ON yara_rules (`description`(1000));""")
-    op.execute("""CREATE INDEX ifx_yara_rules_references ON yara_rules (`references`(1000));""")
-    op.execute("""CREATE INDEX ifx_yara_rules_condition ON yara_rules (`condition`(1000));""")
-    op.execute("""CREATE INDEX ifx_yara_rules_strings ON yara_rules (`strings`(1000));""")
-
+    pass
 
 def downgrade():
-    op.execute("""DROP INDEX ifx_yara_rules_description ON yara_rules;""")
-    op.execute("""DROP INDEX ifx_yara_rules_references ON yara_rules;""")
-    op.execute("""DROP INDEX ifx_yara_rules_condition ON yara_rules;""")
-    op.execute("""DROP INDEX ifx_yara_rules_strings ON yara_rules;""")
+    pass

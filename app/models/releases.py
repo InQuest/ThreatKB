@@ -1,4 +1,4 @@
-from app import db, ENTITY_MAPPING, ACTIVITY_TYPE
+from app import db, ENTITY_MAPPING, ACTIVITY_TYPE, cache, app
 from app.models import c2dns, c2ip, yara_rule, cfg_settings, cfg_states, metadata, users, activity_log, \
     cfg_category_range_mapping
 from sqlalchemy import and_
@@ -9,6 +9,61 @@ import io
 import zipfile
 import zlib
 import re
+import datetime
+from flask_login import current_user
+
+
+@cache.memoize(timeout=300)
+def get_release_metadata():
+    r = {}
+    for release in db.session.query(Release.id, Release.is_test_release, Release.name, Release.num_dns, Release.num_ips,
+                                    Release.num_signatures, Release.date_created, Release.created_user_id).filter(
+        Release.is_test_release == 0).all():
+        r[int(release[0])] = dict(
+            id=int(release[0]),
+            is_test_release=release[1],
+            name=release[2],
+            num_dns=release[3],
+            num_ips=release[4],
+            num_signatures=release[5],
+            date_created=release[6],
+            created_user_id=release[7]
+        )
+    return r
+
+
+@cache.memoize(timeout=1200)
+def get_release_yara_rule_history_mapping():
+    mapping = {}
+    release_data = db.session.query(ReleaseYaraRuleHistory).all()
+    for data in release_data:
+        if not data.yara_rules_history_id in mapping:
+            mapping[data.yara_rules_history_id] = []
+        mapping[data.yara_rules_history_id].append(data.release_id)
+    return mapping
+
+
+class ReleaseYaraRuleHistory(db.Model):
+    __tablename__ = "release_yara_rule_history"
+
+    id = db.Column(db.Integer, primary_key=True)
+    yara_rules_history_id = db.Column(db.Integer, db.ForeignKey('yara_rules_history.id'), nullable=False, index=True)
+    release_id = db.Column(db.Integer, db.ForeignKey('releases.id'), nullable=False, index=True)
+
+    yara_rule_history = db.relationship("Yara_rule_history", foreign_keys=yara_rules_history_id,
+                                        primaryjoin="Yara_rule_history.id==ReleaseYaraRuleHistory.yara_rules_history_id")
+
+    # release = db.relationship("Release", foreign_keys=release_id, primaryjoin="Release.id==ReleaseHistory.release_id")
+
+    def to_dict(self):
+        release_metadata = get_release_metadata()
+        return dict(
+            id=self.id,
+            revision=self.yara_rule_history.revision,
+            release_id=release_metadata[self.release_id]["id"],
+            release_name=release_metadata[self.release_id]["name"],
+            release_date=release_metadata[self.release_id]["date_created"],
+        )
 
 
 class Release(db.Model):
@@ -30,13 +85,13 @@ class Release(db.Model):
     @property
     def release_data(self):
         try:
-            return zlib.decompress(self._release_data)
+            return zlib.decompress(self._release_data).decode()
         except:
-            return self._release_data
+            return self._release_data.decode() if not self._release_data == None else None
 
     @release_data.setter
     def release_data(self, value):
-        self._release_data = zlib.compress(value, 8)
+        self._release_data = zlib.compress(value.encode() if type(value) == str else value, 8)
 
     @property
     def release_data_dict(self):
@@ -228,16 +283,16 @@ class Release(db.Model):
 
         message += "New Signatures\n%s\n" % ("-" * 10)
         message += "\n\n".join([
-            "EventID: %s\nName: %s\nCategory: %s\nConfidence: %s\nSeverity: %s\nCVE: %s\nDescription: %s\nMitre Tactics: %s\nMitre Techniques: %s" % (
+            "EventID: %s\nName: %s\nCategory: %s\nConfidence: %s\nSeverity: %s\nDescription: %s\nMitre Tactics: %s\nMitre Techniques: %s\nMitre Sub-techniques: %s" % (
                 entity.get("eventid", "eventid"),
                 entity.get("name", "name"),
                 entity.get("category", "category"),
                 entity["metadata_values"].get("Confidence", {"value": "Confidence"})["value"],
                 entity["metadata_values"].get("Severity", {"value": "Severity"})["value"],
-                entity["metadata_values"].get("CVE", {"value": "NA"}).get("value", None) or "NA",
                 "\n    %s" % (entity.get("description", "description")),
-                                       "\n    " + "\n    ".join(entity.get("mitre_tactics", "")),
-                                       "\n    " + "\n    ".join(entity.get("mitre_techniques", "")),
+                "\n    " + "\n    ".join(entity.get("mitre_tactics", "")),
+                "\n    " + "\n    ".join(entity.get("mitre_techniques", "")),
+                "\n    " + "\n    ".join(entity.get("mitre_sub_techniques", "")),
             ) for entity in added]) if \
             len(added) > 0 else "NA"
 
@@ -256,17 +311,17 @@ class Release(db.Model):
 
         message += "\n\nModified Signatures\n%s\n" % ("-" * 10)
         message += "\n\n".join([
-            "EventID: %s\nName: %s\nCategory: %s\nConfidence: %s\nSeverity: %s\nCVE: %s\nDescription: %s\nMitre Tactics: %s\nMitre Techniques: %s" % (
+            "EventID: %s\nName: %s\nCategory: %s\nConfidence: %s\nSeverity: %s\nDescription: %s\nMitre Tactics: %s\nMitre Techniques: %s\nMitre Sub-techniques: %s" % (
                 entity.get("eventid", "eventid"),
                 entity.get("name", "name"),
                 entity.get("category", "category"),
                 entity["metadata_values"].get("Confidence", {"value": "Confidence"})["value"],
                 entity["metadata_values"].get("Severity", {"value": "Severity"})["value"],
-                entity["metadata_values"].get("CVE", {"value": "NA"})["value"] or "NA",
                 "\n    %s" % (entity.get("description", "description")),
-                                       "\n    " + "\n    ".join(entity.get("mitre_tactics", "")),
-                                       "\n    " + "\n    ".join(entity.get("mitre_techniques", "")),
-        ) for entity in
+                "\n    " + "\n    ".join(entity.get("mitre_tactics", "")),
+                "\n    " + "\n    ".join(entity.get("mitre_techniques", "")),
+                "\n    " + "\n    ".join(entity.get("mitre_sub_techniques", "")),
+            ) for entity in
             modified]) if \
             len(modified) > 0 else "NA"
 
@@ -332,7 +387,7 @@ class Release(db.Model):
 
         dns.sort()
 
-        memzip = io.StringIO()
+        memzip = io.BytesIO()
         z = zipfile.ZipFile(memzip, mode="w", compression=zipfile.ZIP_DEFLATED)
         for category, rules in combined_rules.items():
             imports = []
@@ -349,13 +404,14 @@ class Release(db.Model):
                     raise Exception(e.message + "\nYaraRule: id=%s,name=%s" % (signature["id"], signature["name"]))
 
             rules = "%s\n\n%s" % (imports, rules_string)
-            z.writestr("%s/%s.yar" % (signature_directory, category), rules)
+            filename = "%s/%s.yar" % (signature_directory.decode() if type(signature_directory) == bytes else signature_directory, category.decode() if type(category) == bytes else category)
+            z.writestr(filename, rules)
 
         if ips:
-            z.writestr(ip_text_filename, "\n".join([ip.encode("utf-8") for ip in ips]))
+            z.writestr(ip_text_filename, "\n".join([ip for ip in ips]))
 
         if dns:
-            z.writestr(dns_text_filename, "\n".join([d.encode("utf-8") for d in dns]))
+            z.writestr(dns_text_filename, "\n".join([d for d in dns]))
 
         return memzip
 

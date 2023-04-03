@@ -3,7 +3,7 @@ from sqlalchemy.orm import class_mapper
 from app import db, ENTITY_MAPPING, ACTIVITY_TYPE, ENTITY_MAPPING_URI, app
 from sqlalchemy import bindparam, inspect
 
-from app.models import users, cfg_settings, users
+from app.models import users, cfg_settings
 from app.models.cfg_states import Cfg_states
 import re
 from flask import request
@@ -16,7 +16,6 @@ class ActivityLog(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     activity_type = db.Column(db.String(256))
     activity_text = db.Column(db.TEXT())
-    activity_text_short = db.Column(db.String(1000))
     activity_date = db.Column(db.DateTime(timezone=True))
 
     entity_type = db.Column(db.Integer(), index=True, nullable=False)
@@ -46,7 +45,7 @@ def get_modified_changes(target):
     inspection = inspect(target)
     attrs = class_mapper(target.__class__).column_attrs
 
-    changes = {"short": [], "long": []}
+    changes = []
     for attr in attrs:
         attr_hist = getattr(inspection.attrs, attr.key).history
         if attr_hist.has_changes():
@@ -61,11 +60,9 @@ def get_modified_changes(target):
                 after = attr_hist.added[0]
 
             if before != after:
-                changes["long"].append("'%s' changed from '%s' to '%s'" % (attr.key, before, after))
-                changes["short"].append("'%s'" % (attr.key))
+                changes.append("'%s' changed from '%s' to '%s'" % (attr.key, before, after))
 
-    changes["long"] = [re.sub("[^\x00-\x7F]", "", change) for change in changes["long"]]
-    changes["short"] = [re.sub("[^\x00-\x7F]", "", change) for change in changes["short"]]
+    changes = [re.sub("[^\x00-\x7F]", "", change) for change in changes]
     return changes
 
 

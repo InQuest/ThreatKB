@@ -23,11 +23,16 @@ def handle_500(error):
 @app.errorhandler(Exception)
 def handle_exception(exception):
     app.logger.exception(exception)
+    if hasattr(exception, "code") and exception.code == 412:
+        return exception.description, exception.code
+
+    if hasattr(exception, "code") and str(exception.code).startswith("4"):
+        return exception.description, exception.code
+
     db.session.rollback()
 
     stacktrace = "%s" % (
         re.sub(r'\"[^\"]+\/([^\"]+)', r"\1", traceback.format_exc().replace("\n", "<BR>").replace(" ", "&nbsp;")))
-
     err = Error(
         stacktrace=traceback.format_exc(),
         user_id=current_user.id,
@@ -39,9 +44,9 @@ def handle_exception(exception):
     db.session.add(err)
     db.session.commit()
 
-    stacktrace += str(exception.message)
+    stacktrace += str(exception)
 
-    return stacktrace, exception.code if hasattr(exception, "code") else 500
+    return stacktrace, 500
 
 
 @app.route('/ThreatKB/error', methods=["GET"])

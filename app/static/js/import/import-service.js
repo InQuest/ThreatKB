@@ -9,11 +9,12 @@ angular.module('ThreatKB').factory('Import',
                 commit_artifacts: commit_artifacts
             });
 
-            function import_artifacts(import_text, autocommit, shared_reference, shared_description, shared_state, shared_owner, extract_ip, extract_dns, extract_signature, metadata_field_mapping) {
+            function import_artifacts(import_text, autocommit, resurrect_retired_artifacts, shared_reference, shared_description, shared_state, shared_owner, extract_ip, extract_dns, extract_signature, metadata_field_mapping) {
                 // send a post request to the server
                 return $http.post('/ThreatKB/import', {
                     import_text: import_text,
                     autocommit: autocommit,
+                    resurrect_retired_artifacts: resurrect_retired_artifacts,
                     shared_reference: shared_reference,
                     shared_description: shared_description,
                     shared_state: shared_state,
@@ -36,10 +37,11 @@ angular.module('ThreatKB').factory('Import',
 
             }
 
-            function commit_artifacts(artifacts, shared_reference, shared_description, shared_state, shared_owner, extract_ip, extract_dns, extract_signature, metadata_field_mapping) {
+            function commit_artifacts(artifacts, resurrect_retired_artifacts, shared_reference, shared_description, shared_state, shared_owner, extract_ip, extract_dns, extract_signature, metadata_field_mapping) {
                 // send a post request to the server
                 return $http.post('/ThreatKB/import/commit', {
                     artifacts: artifacts,
+                    resurrect_retired_artifacts: resurrect_retired_artifacts,
                     shared_reference: shared_reference,
                     shared_description: shared_description,
                     shared_state: shared_state,

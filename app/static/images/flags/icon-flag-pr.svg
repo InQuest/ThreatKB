@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="181px" height="120px" viewBox="0 0 181 120" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 3.6.1 (26313) - http://www.bohemiancoding.com/sketch -->
+    <title>PR</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="PR">
+            <rect id="Rectangle-path" fill="#ED0000" x="0" y="0" width="180" height="120"></rect>
+            <path d="M0,48 L180,48 L180,24 L0,24 L0,48 L0,48 Z" id="Shape" fill="#FFFFFF"></path>
+            <path d="M0,96 L180,96 L180,72 L0,72 L0,96 L0,96 Z" id="Path" fill="#FFFFFF"></path>
+            <path d="M0,0 L103.92304,60 L0,120 L0,0 Z" id="Shape" fill="#0050F0"></path>
+            <path d="M31.3061288,41.0556501 L31.3061288,61.0556501 L41.3061288,61.0556501 L31.3061288,41.0556501 Z" id="triangle" fill="#FFFFFF" transform="translate(36.306129, 51.055650) rotate(18.000000) translate(-36.306129, -51.055650) "></path>
+            <path d="M27.9759035,41.0556501 L27.9759035,61.0556501 L37.9759035,61.0556501 L27.9759035,41.0556501 Z" id="triangle" fill="#FFFFFF" transform="translate(32.975904, 51.055650) scale(-1, 1) rotate(18.000000) translate(-32.975904, -51.055650) "></path>
+            <path d="M38.6621465,48.8196601 L38.6621465,68.8196601 L48.6621465,68.8196601 L38.6621465,48.8196601 Z" id="triangle" fill="#FFFFFF" transform="translate(43.662146, 58.819660) rotate(90.000000) translate(-43.662146, -58.819660) "></path>
+            <path d="M20.6198858,48.8196601 L20.6198858,68.8196601 L30.6198858,68.8196601 L20.6198858,48.8196601 Z" id="triangle" fill="#FFFFFF" transform="translate(25.619886, 58.819660) scale(-1, 1) rotate(90.000000) translate(-25.619886, -58.819660) "></path>
+            <path d="M21.648982,45.6524277 L21.648982,65.6524277 L31.648982,65.6524277 L21.648982,45.6524277 Z" id="triangle" fill="#FFFFFF" transform="translate(26.648982, 55.652428) rotate(-54.000000) translate(-26.648982, -55.652428) "></path>
+            <path d="M37.6330503,45.6524277 L37.6330503,65.6524277 L47.6330503,65.6524277 L37.6330503,45.6524277 Z" id="triangle" fill="#FFFFFF" transform="translate(42.633050, 55.652428) scale(-1, 1) rotate(-54.000000) translate(-42.633050, -55.652428) "></path>
+            <path d="M33.5512687,58.2148597 L33.5512687,78.2148597 L43.5512687,78.2148597 L33.5512687,58.2148597 Z" id="triangle" fill="#FFFFFF" transform="translate(38.551269, 68.214860) rotate(162.000000) translate(-38.551269, -68.214860) "></path>
+            <path d="M25.7307636,58.2148597 L25.7307636,78.2148597 L35.7307636,78.2148597 L25.7307636,58.2148597 Z" id="triangle" fill="#FFFFFF" transform="translate(30.730764, 68.214860) scale(-1, 1) rotate(162.000000) translate(-30.730764, -68.214860) "></path>
+            <path d="M23.0365548,56.2574024 L23.0365548,76.2574024 L33.0365548,76.2574024 L23.0365548,56.2574024 Z" id="triangle" fill="#FFFFFF" transform="translate(28.036555, 66.257402) rotate(234.000000) translate(-28.036555, -66.257402) "></path>
+            <path d="M36.2454775,56.2574024 L36.2454775,76.2574024 L46.2454775,76.2574024 L36.2454775,56.2574024 Z" id="triangle" fill="#FFFFFF" transform="translate(41.245478, 66.257402) scale(-1, 1) rotate(234.000000) translate(-41.245478, -66.257402) "></path>
+        </g>
+    </g>
+</svg>

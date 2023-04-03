@@ -1,5 +1,3 @@
-from sqlalchemy import bindparam
-
 from app import app, db, admin_only, auto
 from app.models import comments
 from flask import abort, jsonify, request, Response
@@ -39,7 +37,7 @@ def get_comments(id):
     return jsonify(entity.to_dict())
 
 
-@app.route('/ThreatKB/comments', methods=['POST'])
+@app.route('/ThreatKB/comments', methods=['POST', 'PUT'])
 @auto.doc()
 @login_required
 def create_comments():
@@ -47,16 +45,9 @@ def create_comments():
     From Data: comment (str), entity_type (int) {"SIGNATURE": 1, "DNS": 2, "IP": 3, "TASK": 4}, entity_id
     Return: comment dictionary"""
 
-    try:
-        data = json.loads(request.json)
-        app.logger.debug("assigned")
-    except:
-        data = request.json
-        app.logger.debug("except")
-
-    return create_comment(data['comment'],
-                          data['entity_type'],
-                          data['entity_id'],
+    return create_comment(request.json['comment'],
+                          request.json['entity_type'],
+                          request.json['entity_id'],
                           current_user.id), 201
 
 
@@ -85,23 +76,3 @@ def delete_comments(id):
     db.session.delete(entity)
     db.session.commit()
     return jsonify(''), 204
-
-
-def create_batch_comments(comment, entity_type, list_of_ids, user_id):
-    comments_to_create = []
-    for entity_id in list_of_ids:
-        comments_to_create.append({
-            "comment": comment,
-            "entity_type": entity_type,
-            "entity_id": entity_id,
-            "user_id": user_id
-        })
-
-    if comments_to_create:
-        db.session.execute(comments.Comments.__table__.insert().values(
-            comment=bindparam("comment"),
-            entity_type=bindparam("entity_type"),
-            entity_id=bindparam("entity_id"),
-            user_id=bindparam("user_id")
-        ), comments_to_create)
-        db.session.commit()

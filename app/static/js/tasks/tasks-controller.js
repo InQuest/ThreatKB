@@ -12,15 +12,6 @@ angular.module('ThreatKB')
 
             $scope.start_filter_requests_length = Cfg_settings.get({key: "START_FILTER_REQUESTS_LENGTH"});
 
-            $scope.batchEditableColumns = [];
-            Cfg_settings.get({key: "BATCH_EDIT_CONFIGURATION"}).$promise.then(function (batchEditConfig) {
-                    let batchEditableJson = JSON.parse(batchEditConfig.value);
-                    if (batchEditableJson !== undefined && batchEditableJson.hasOwnProperty('tasks')) {
-                        $scope.batchEditableColumns = batchEditableJson.tasks;
-                    }
-                }
-            );
-
             $('input[type=number]').on('mousewheel', function () {
                 var el = $(this);
                 el.blur();
@@ -182,6 +173,13 @@ angular.module('ThreatKB')
                             enableSorting: true
                         },
                         {
+                            field: 'date_created',
+                            displayName: "Created Date",
+                            enableSorting: true,
+                            width: '150',
+                            cellFilter: 'date:\'yyyy-MM-dd HH:mm:ss\''
+                        },
+                        {
                             field: 'state',
                             displayName: 'State',
                             width: '180',
@@ -191,12 +189,12 @@ angular.module('ThreatKB')
                                 + '<ui-select-match placeholder="Select a state ...">'
                                 + '<small><span ng-bind="$select.selected.state || row.entity.state"></span></small>'
                                 + '</ui-select-match>'
-                                + '<ui-select-choices'
-                                + ' repeat="state in (grid.appScope.cfg_states | filter: $select.search) track by state.id">'
-                                + '<small><span ng-bind="state.state"></span></small>'
-                                + '</ui-select-choices>'
-                                + '</ui-select>'
-                                + '</div>'
+                            + '<ui-select-choices'
+                            + ' repeat="state in (grid.appScope.cfg_states | filter: $select.search) track by state.id">'
+                            + '<small><span ng-bind="state.state"></span></small>'
+                            + '</ui-select-choices>'
+                            + '</ui-select>'
+                            + '</div>'
                         },
                         {
                             field: 'owner_user.email',
@@ -204,16 +202,16 @@ angular.module('ThreatKB')
                             width: '180',
                             enableSorting: false,
                             cellTemplate: '<ui-select append-to-body="true" ng-model="row.entity.owner_user"'
-                                + ' on-select="grid.appScope.save(row.entity)">'
-                                + '<ui-select-match placeholder="Select an owner ...">'
-                                + '<small><span ng-bind="$select.selected.email || row.entity.owner_user.email"></span></small>'
-                                + '</ui-select-match>'
-                                + '<ui-select-choices'
-                                + ' repeat="person in (grid.appScope.users | filter: $select.search) track by person.id">'
-                                + '<small><span ng-bind="person.email"></span></small>'
-                                + '</ui-select-choices>'
-                                + '</ui-select>'
-                                + '</div>'
+                            + ' on-select="grid.appScope.save(row.entity)">'
+                            + '<ui-select-match placeholder="Select an owner ...">'
+                            + '<small><span ng-bind="$select.selected.email || row.entity.owner_user.email"></span></small>'
+                            + '</ui-select-match>'
+                            + '<ui-select-choices'
+                            + ' repeat="person in (grid.appScope.users | filter: $select.search) track by person.id">'
+                            + '<small><span ng-bind="person.email"></span></small>'
+                            + '</ui-select-choices>'
+                            + '</ui-select>'
+                            + '</div>'
                         },
                         {
                             name: 'Actions',
@@ -222,19 +220,19 @@ angular.module('ThreatKB')
                             enableColumnMenu: false,
                             enableSorting: false,
                             cellTemplate: '<div style="text-align: center;">'
-                                + '<button type="button" ng-click="grid.appScope.update(row.entity.id)"'
-                                + ' class="btn btn-sm">'
-                                + '<small><span class="glyphicon glyphicon-pencil"></span>'
-                                + '</small>'
-                                + '</button>'
-                                + '&nbsp;'
-                                + '<button confirmed-click="grid.appScope.delete(row.entity.id)"'
-                                + ' ng-confirm-click="Are you sure you want to '
-                                + 'delete this task?" class="btn btn-sm btn-danger">'
-                                + '<small>'
-                                + '<span class="glyphicon glyphicon-remove-circle"></span>'
-                                + '</small>'
-                                + '</button></div>'
+                            + '<button type="button" ng-click="grid.appScope.update(row.entity.id)"'
+                            + ' class="btn btn-sm">'
+                            + '<small><span class="glyphicon glyphicon-pencil"></span>'
+                            + '</small>'
+                            + '</button>'
+                            + '&nbsp;'
+                            + '<button confirmed-click="grid.appScope.delete(row.entity.id)"'
+                            + ' ng-confirm-click="Are you sure you want to '
+                            + 'delete this task?" class="btn btn-sm btn-danger">'
+                            + '<small>'
+                            + '<span class="glyphicon glyphicon-remove-circle"></span>'
+                            + '</small>'
+                            + '</button></div>'
                         }
                     ]
             };
@@ -271,7 +269,7 @@ angular.module('ThreatKB')
                     // Set new request cancelation trigger
                     cancelGetPage = $q.defer();
                     // ... and fire off a cancelable request
-                    $http.get(url, {timeout: cancelGetPage.promise})
+                    $http.get(url, { timeout: cancelGetPage.promise })
                         .then(function (response) {
                             $scope.gridOptions.totalItems = response.data.total_count;
                             $scope.gridOptions.data = response.data.data;
@@ -315,17 +313,13 @@ angular.module('ThreatKB')
             };
 
             $scope.save_batch = function () {
-                let tasksToUpdate = {
+                var tasksToUpdate = {
+                    owner_user: $scope.batch.owner,
+                    state: $scope.batch.state,
+                    description: $scope.batch.description,
                     ids: []
                 };
-                for (const property in $scope.batch) {
-                    if (property === "owner") {
-                        tasksToUpdate.owner_user = $scope.batch[property];
-                    } else {
-                        tasksToUpdate[property] = $scope.batch[property];
-                    }
-                }
-                for (let i = 0; i < $scope.checked_indexes.length; i++) {
+                for (var i = 0; i < $scope.checked_indexes.length; i++) {
                     if ($scope.checked_indexes[i]) {
                         tasksToUpdate.ids.push($scope.tasks[i].id);
                     }
@@ -339,7 +333,7 @@ angular.module('ThreatKB')
 
             $scope.save = function (id_or_ip) {
                 var id = id_or_ip;
-                if (typeof (id_or_ip) === "object") {
+                if (typeof(id_or_ip) === "object") {
                     id = id_or_ip.id;
                     $scope.task = id_or_ip;
                 }
@@ -406,6 +400,21 @@ angular.module('ThreatKB')
                 $scope.clear_batch();
                 $scope.batch_edit();
             };
+            $scope.batch_delete = function () {
+                let tasksToDelete = {
+                    ids: []
+                };
+                for (let i = 0; i < $scope.checked_indexes.length; i++) {
+                    if ($scope.checked_indexes[i]) {
+                        tasksToDelete.ids.push($scope.tasks[i].id);
+                    }
+                }
+                Task.deleteBatch(tasksToDelete).then(function (response) {
+                    getPage();
+                }, function (error) {
+                    growl.error(error.data, {ttl: -1});
+                });
+            };
             $scope.batch_edit = function () {
                 var be = $uibModal.open({
                     templateUrl: 'task-batch_edit.html',
@@ -415,9 +424,6 @@ angular.module('ThreatKB')
                     resolve: {
                         batch: function () {
                             return $scope.batch;
-                        },
-                        batchFields: function () {
-                            return $scope.batchEditableColumns;
                         }
                     }
                 });
@@ -522,7 +528,7 @@ angular.module('ThreatKB')
                             disableCountDown: true
                         });
                     }, function (error) {
-                        blockUI.stop();
+                    blockUI.stop();
                         growl.error(error.data, {ttl: -1});
                     }
                 );
@@ -580,11 +586,9 @@ angular.module('ThreatKB')
                 $uibModalInstance.dismiss('cancel');
             };
         }])
-    .controller('TaskBatchEditController', ['$scope', '$uibModalInstance', 'batch', 'Users', 'Cfg_states', 'batchFields',
-        function ($scope, $uibModalInstance, batch, Users, Cfg_states, batchFields) {
+    .controller('TaskBatchEditController', ['$scope', '$uibModalInstance', 'batch', 'Users', 'Cfg_states',
+        function ($scope, $uibModalInstance, batch, Users, Cfg_states) {
             $scope.batch = batch;
-
-            $scope.batchFields = batchFields;
 
             $scope.users = Users.query();
 

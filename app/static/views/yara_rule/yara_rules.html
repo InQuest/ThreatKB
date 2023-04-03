@@ -14,7 +14,7 @@
                 </h4>
             </div>
             <div class="modal-body">
-                <div class="form-group" ng-if="batchFields.includes('owner_user')">
+                <div class="form-group">
                     <label>Owner</label>
                     <ui-select ng-model="batch.owner" name="owner">
                         <ui-select-match placeholder="Select an owner ...">
@@ -26,21 +26,7 @@
                         </ui-select-choices>
                     </ui-select>
                 </div>
-                <div class="form-group" ng-if="batchFields.includes('description')">
-                    <label>Description</label>
-                    <textarea class="form-control" placeholder="Enter description..." rows="6"
-                              ng-model="batch.description"></textarea>
-                </div>
-                <div class="form-group" ng-if="batchFields.includes('references')">
-                    <label>References</label>
-                    <textarea class="form-control" placeholder="Enter references..." rows="6"
-                              ng-model="batch.references"></textarea>
-                </div>
-                <div class="form-group" ng-if="batchFields.includes('imports')">
-                    <label>Imports</label>
-                    <textarea class="form-control" ng-model="batch.imports" rows="2"></textarea>
-                </div>
-                <div class="form-group" ng-if="batchFields.includes('state')">
+                <div class="form-group">
                     <label>State</label>
                     <ui-select ng-model="batch.state" name="state">
                         <ui-select-match placeholder="Select a state or press delete to clear..">
@@ -51,29 +37,7 @@
                         </ui-select-choices>
                     </ui-select>
                 </div>
-                <div class="form-group" ng-if="batchFields.includes('mitre_tactics')">
-                    <label>Mitre ATT&CK Tactics</label>
-                    <ui-select multiple ng-model="batch.mitre_tactics" theme="bootstrap"
-                               close-on-select="false"
-                               title="Choose tactics">
-                        <ui-select-match placeholder="Choose tactics...">{{$item}}</ui-select-match>
-                        <ui-select-choices repeat="tactic in mitre_tactics | filter:$select.search">
-                            {{ tactic }}
-                        </ui-select-choices>
-                    </ui-select>
-                </div>
-                <div class="form-group" ng-if="batchFields.includes('mitre_techniques')">
-                    <label>Mitre ATT&CK Techniques</label>
-                    <ui-select multiple ng-model="batch.mitre_techniques" theme="bootstrap"
-                               close-on-select="false"
-                               title="Choose techniques">
-                        <ui-select-match placeholder="Choose techniques...">{{$item}}</ui-select-match>
-                        <ui-select-choices repeat="tactic in mitre_techniques | filter:$select.search">
-                            {{ tactic }}
-                        </ui-select-choices>
-                    </ui-select>
-                </div>
-                <div class="form-group" ng-if="batchFields.includes('category')">
+                <div class="form-group">
                     <label>Category</label>
                     <ui-select ng-model="batch.category" name="category">
                         <ui-select-match placeholder="Select a category or press delete to clear...">
@@ -85,53 +49,11 @@
                         </ui-select-choices>
                     </ui-select>
                 </div>
-                <!-- START DYNAMICALLY GENERATED CONTENT -->
-                <div class="form-group" ng-repeat="m in metadata[0].string"
-                     ng-if="batchMetadata.length > 0 && batchMetadata.includes(m.key)">
-                    <label>{{ m.key }}</label>
-                    <input class="form-control" ng-model="batch.metadata_values[m.key].value">
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea class="form-control" placeholder="Enter description..." rows="6"
+                              ng-model="batch.description"></textarea>
                 </div>
-                <div class="form-group" ng-repeat="m in metadata[0].integer"
-                     ng-if="batchMetadata.length > 0 && batchMetadata.includes(m.key)">
-                    <label>{{ m.key }}</label>
-                    <input class="form-control" ng-model="batch.metadata_values[m.key].value" type="number">
-                </div>
-                <div class="form-group" ng-repeat="m in metadata[0].date"
-                     ng-if="batchMetadata.length > 0 && batchMetadata.includes(m.key)">
-                    <label>{{ m.key }}</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control"
-                               date-formatter uib-datepicker-popup="yyyy-MM-dd"
-                               alt-input-formats="['yyyy-MM-ddTHH:mm:ss']"
-                               datepicker-options="dateOptions" close-text="Close"
-                               is-open="datepickers[m.key]"
-                               ng-model="batch.metadata_values[m.key].value"/>
-                        <span class="input-group-btn">
-                            <button type="button" class="btn btn-default" ng-click="openDatepicker(m.key)"><i
-                                    class="glyphicon glyphicon-calendar"></i></button>
-                        </span>
-                    </div>
-                </div>
-                <div class="form-group" ng-repeat="m in metadata[0].multiline_comment" rows="2"
-                     ng-if="batchMetadata.length > 0 && batchMetadata.includes(m.key)">
-                    <label>{{ m.key }}</label>
-                    <textarea class="form-control" ng-model="batch.metadata_values[m.key].value"></textarea>
-                </div>
-                <div class="form-group" ng-repeat="m in metadata[0].select"
-                     ng-if="batchMetadata.length > 0 && batchMetadata.includes(m.key)">
-                    <label>{{ m.key }}</label>
-                    <ui-select ng-model="batch.metadata_values[m.key].value"
-                               on-select="update_selected_metadata(m, $select.selected)" ng-required="m.required">
-                        <ui-select-match placeholder="Select an option or press delete to clear...">
-                            <small><span ng-bind="$select.selected.choice || option.choice"></span></small>
-                        </ui-select-match>
-                        <ui-select-choices
-                                repeat="option in (m.choices | filter: $select.search) track by option.id">
-                            <small><span>{{ option.choice }}</span></small>
-                        </ui-select-choices>
-                    </ui-select>
-                </div>
-                <!-- /START DYNAMICALLY GENERATED CONTENT -->
                 <div class="form-group">
                     <label>Tags</label>
                     <tags-input ng-model="batch.tags" add-on-paste="true">
@@ -141,12 +63,6 @@
                                        load-on-empty="true">
                         </auto-complete>
                     </tags-input>
-                </div>
-                <div class="form-group" ng-if="batchFields.includes('comments')">
-                    <label>Comment</label>
-
-                    <textarea class="form-control" placeholder="Add a comment..."
-                              rows="4" ng-model="batch.comments"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
@@ -210,6 +126,102 @@
                     </uib-accordion>
                 </div>
             </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" ng-click="cancel()">Close
+            </button>
+        </div>
+    </script>
+    <script type="text/ng-template" id="yara_rule-revision.html">
+        <a class="btn btn-sm btn-primary modal-fullscreen-button modal-fullscreen-button-abs-pos"
+           ng-click="toggleFullscreen()">Toggle full screen</a>
+        <div class="modal-header">
+            <button type="button" class="close"
+                    ng-click="cancel()">&times;
+            </button>
+            <a class="btn btn-sm  btn-primary" ng-if="yara_rule.id"
+               ng-click="edit(yara_rule.id)">Edit
+            </a>
+            <h4 class="modal-title" id="viewSigLabel" style="float: left; margin-right: 10px;">
+                View Signature Revision(s)
+            </h4>
+        </div>
+        <div class="modal-body">
+            <div ng-if="yara_rule.id && yara_rule.revisions && yara_rule.revisions.length">
+                <style type="text/css">
+                    .yara-revisions {
+                    }
+
+                    .yara-revisions > div.yara-revisions-select {
+                        display: flex;
+                    }
+
+                    .yara-revisions > div.yara-revisions-select > div {
+                        flex: 1;
+                        padding: 4px 8px;
+                    }
+
+                    .yara-revisions > div.yara-revisions-select > div > label {
+                        display: block;
+                    }
+
+                    .yara-revisions > div.yara-revisions-select > div > select {
+                        display: block;
+                        width: 100%;
+                    }
+
+                    .yara-revisions > div.yara-revisions-view {
+                        overflow-y: auto;
+                    }
+
+                    .yara-revisions > div.yara-revisions-view > pre {
+                        height: 320px;
+                    }
+
+                    .yara-revisions > div.yara-revisions-view > pre del {
+                        background: #fdaeb7;
+                    }
+
+                    .yara-revisions > div.yara-revisions-view > pre ins {
+                        background: #cdffd8;
+                    }
+                </style>
+                <label>Revisions ({{ yara_rule.revisions.length + 1 }})</label>
+                <div class="yara-revisions">
+                    <div class="yara-revisions-select">
+                        <div>
+                            <label>View</label>
+                            <select ng-model="selectedRevisions.main">
+                                <option ng-value="null" selected>
+                                    CURRENT @{{ yara_rule.last_revision_date | date:'yyyy-MM-dd' }}
+                                    by {{ yara_rule.modified_user.email }}
+                                </option>
+                                <option ng-repeat="rev in yara_rule.revisions | orderBy:'-date_created'"
+                                        ng-value="rev">
+                                    Rev. {{ rev.revision }} @{{ rev.date_created | date:'yyyy-MM-dd' }}
+                                    by {{ rev.user.email }}
+                                    {{ rev.releases ? ' - Releases: ' + rev.releases   : '' }}
+                                </option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Diff</label>
+                            <select ng-model="selectedRevisions.compared">
+                                <option ng-value="null"> None</option>
+                                <option ng-repeat="rev in yara_rule.revisions | orderBy:'-date_created'"
+                                        ng-value="rev"
+                                        ng-show="rev.revision < (selectedRevisions.main ? selectedRevisions.main.revision : yara_rule.revision)">
+                                    Rev. {{ rev.revision }} @{{ rev.date_created | date:'yyyy-MM-dd' }}
+                                    by {{ rev.user.email }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="yara-revisions-view" ng-controller="Yara_revisionController">
+                        <pre ng-if="revision_diff"><code ng-bind-html="revision_diff"></code></pre>
+                        <pre ng-if="!revision_diff"><code> {{ selectedRevisions.main ? selectedRevisions.main.yara_rule_string : yara_rule.yara_rule_string }} </code></pre>
+                    </div>
+                </div>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-default" ng-click="cancel()">Close
@@ -410,6 +422,18 @@
                 </div>
 
                 <div class="form-group">
+                    <label>Mitre ATT&CK Sub-Techniques</label>
+                    <ui-select multiple ng-model="yara_rule.mitre_sub_techniques" theme="bootstrap"
+                               close-on-select="false"
+                               title="Choose sub-techniques">
+                        <ui-select-match placeholder="Choose sub-techniques...">{{$item}}</ui-select-match>
+                        <ui-select-choices repeat="tactic in mitre_sub_techniques | filter:$select.search">
+                            {{ tactic }}
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+
+                <div class="form-group">
                     <label>Category</label>
                     <span class="error text-danger">*</span>
                     <ui-select ng-model="yara_rule.category" ng-required="true">
@@ -452,6 +476,8 @@
 
                 <div class="form-group" ng-repeat="m in metadata[0].date" ng-if="yara_rule.id">
                     <label>{{ m.key }}</label>
+                    <!-- <input class="form-control" ng-model="yara_rule.metadata_values[m.key].value" type="date"
+                           ng-required="m.required" format-date/> -->
                     <div class="input-group">
                         <input type="text" class="form-control" ng-required="m.required"
                                date-formatter uib-datepicker-popup="yyyy-MM-dd"
@@ -469,6 +495,7 @@
                 <div class="form-group" ng-repeat="m in metadata[0].date" ng-if="!yara_rule.id">
                     <label>{{ m.key }}</label>
                     <span class="error text-danger" ng-if="m.required">*</span>
+                    <!-- <input class="form-control" ng-model="m.default" type="date" ng-required="m.required" format-date> -->
                     <div class="input-group">
                         <input type="text" class="form-control" ng-required="m.required"
                                date-formatter uib-datepicker-popup="yyyy-MM-dd"
@@ -602,145 +629,66 @@
                         <uib-accordion>
                             <div uib-accordion-group class="panel-default"
                                  heading="See files">
-                                <div>
-                                    <input id="selectAllFiles" type="checkbox" style="margin: 0 10px 0 17px;"
-                                           ng-model="all_files_checked"
-                                           ng-change="toggle_checked_files()"/><label for="selectAllFiles">Select
-                                    All</label>
-                                    <button type="button" class="btn btn-secondary pull-right"
-                                            ng-disabled="!checked_file_counter || checked_file_counter<1"
-                                            confirmed-click="delete_selected_files()"
-                                            ng-confirm-click="Are you sure you want to delete selected files?"
-                                            style="padding: 0;">
-                                        Delete ({{ checked_file_counter }})
-                                    </button>
-                                    {{ initialize_checked_files(yara_rule.files) }}
-                                </div>
                                 <ul class="list-group">
-                                    <li class="list-group-item yara-files-list-item justify-content-between"
+                                    <li class="list-group-item yara-files-list-item justify-content-between" style=""
                                         ng-repeat="f in yara_rule.files | orderBy:'-last_revision_date'">
-                                        <a title="{{ file_store_path.value }}/{{ entity_mapping.SIGNATURE }}/{{ f.entity_id }}/{{ f.filename }}"
-                                           href="ThreatKB/files/{{ f.entity_type }}/{{ f.entity_id }}/{{ f.id }}">{{ f.filename }}</a>&nbsp;<span
-                                            ng-if="f.date_modified"
-                                            style="font-size: 0.8em;">({{ pretty_date(f.date_modified) }} by {{ f.user.email }})</span>
-                                        <div class="pull-right">
-                                            <div><a title="Search VirusTotal"
-                                                    href="https://www.virustotal.com/#/file/{{ f.sha256 }}/detection"
-                                                    target="_blank"><span
-                                                    class="glyphicon glyphicon-certificate"></span></a>
+                                        <a title="{{ f.full_path }}"
+                                           href="ThreatKB/files/{{ f.entity_type }}/{{ f.entity_id }}/{{ f.id }}">{{ f.filename }}</a>
+                                        <br>
+                                        <span class="pull-left" style="font-size: 0.8em;">{{ f.full_path }}</span>
+                                        <br>
+                                        <span
+                                                ng-if="f.date_modified"
+                                                style="font-size: 0.8em;">({{ pretty_date(f.date_modified) }} by {{ f.user.email }})</span>
+                                        <span class="pull-right">
+                                            <a title="Search VirusTotal"
+                                               href="https://www.virustotal.com/#/file/{{ f.sha256 }}/detection"
+                                               target="_blank"><span
+                                                    class="glyphicon glyphicon-certificate"
+                                                    style="vertical-align: middle;"></span></a>
                                                 &nbsp;
                                                 <a title="Search Google"
                                                    href="https://google.com/search?q={{ f.sha256 }}"
                                                    target="_blank"><span
-                                                        class="glyphicon glyphicon-globe"></span></a>
+                                                        class="glyphicon glyphicon-globe"
+                                                        style="vertical-align: middle;"></span></a>
                                                 &nbsp;
                                                 <a>
-                                            <span class="glyphicon glyphicon-link" style="font-size: 1.2em;"
-                                                  title="Copy FilePath to clipboard" tooltip-placement="bottom"
-                                                  uib-tooltip="Copied Filepath!"
-                                                  tooltip-trigger="'outsideClick'"
-                                                  ngclipboard
-                                                  data-clipboard-text="{{ file_store_path.value }}/{{ entity_mapping.SIGNATURE }}/{{ f.entity_id }}/{{ f.directory }}/{{ f.filename }}">
+                                                <span class="glyphicon glyphicon-link"
+                                                      style="font-size: 1.2em; vertical-align: middle;"
+                                                      title="Copy FilePath to clipboard" tooltip-placement="bottom"
+                                                      uib-tooltip="Copied Filepath!"
+                                                      tooltip-trigger="'outsideClick'"
+                                                      ngclipboard
+                                                      data-clipboard-text="{{ file_store_path.value }}/{{ entity_mapping.SIGNATURE }}/{{ f.entity_id }}/{{ f.filename }}">
                                             </span>
                                                 </a>
-                                            </div>
-                                        </div>
+                                                <span><button type="button" class="btn btn-xs" title="Delete file"
+                                                              confirmed-click="delete_file({{ f.id }})"
+                                                              ng-confirm-click="Are you sure you want to delete {{ f.filename }}?"
+                                                              style="background: white;"><span
+                                                        style="color: red; vertical-align: middle;"
+                                                        class="glyphicon glyphicon-remove-circle"></span></button></span>
+                                                <span><button type="button" class="btn btn-xs" title="Delete file path"
+                                                              confirmed-click="delete_file_path({{ f.id }})"
+                                                              ng-confirm-click="Are you sure you want to delete the full path {{ f.full_path }}?"
+                                                              style="background: white;"><span
+                                                        style="color: red; vertical-align: middle;"
+                                                        class="glyphicon glyphicon-exclamation-sign"></span></button></span>
+
+
+                                        </span>
                                     </li>
                                 </ul>
                             </div>
                         </uib-accordion>
                     </div>
                 </div>
-
-                <div ng-if="yara_rule.id && yara_rule.revisions && yara_rule.revisions.length">
-                    <style type="text/css">
-                        .yara-revisions {
-                        }
-
-                        .yara-revisions > div.yara-revisions-select {
-                            display: flex;
-                        }
-
-                        .yara-revisions > div.yara-revisions-select > div {
-                            flex: 1;
-                            padding: 4px 8px;
-                        }
-
-                        .yara-revisions > div.yara-revisions-select > div > label {
-                            display: block;
-                        }
-
-                        .yara-revisions > div.yara-revisions-select > div > select {
-                            display: block;
-                            width: 100%;
-                        }
-
-                        .yara-revisions > div.yara-revisions-view {
-                            overflow-y: auto;
-                        }
-
-                        .yara-revisions > div.yara-revisions-view > pre {
-                            height: 320px;
-                        }
-
-                        .yara-revisions > div.yara-revisions-view > pre del {
-                            background: #fdaeb7;
-                        }
-
-                        .yara-revisions > div.yara-revisions-view > pre ins {
-                            background: #cdffd8;
-                        }
-                    </style>
-                    <label>Revisions ({{ yara_rule.revisions.length + 1 }})</label>
-                    <div class="yara-revisions">
-                        <div class="yara-revisions-select">
-                            <div>
-                                <label>View</label>
-                                <select ng-model="selectedRevisions.main">
-                                    <option ng-value="null">
-                                        CURRENT @{{ yara_rule.last_revision_date | date:'yyyy-MM-dd' }}
-                                        by {{ yara_rule.modified_user.email }}
-                                    </option>
-                                    <option ng-repeat="rev in yara_rule.revisions | orderBy:'-date_created'"
-                                            ng-value="rev">
-                                        Rev. {{ rev.revision }} @{{ rev.date_created | date:'yyyy-MM-dd' }}
-                                        by {{ rev.user.email }}
-                                    </option>
-                                </select>
-                            </div>
-                            <div>
-                                <label>Diff</label>
-                                <select ng-model="selectedRevisions.compared">
-                                    <option ng-value="null"> None</option>
-                                    <option ng-repeat="rev in yara_rule.revisions | orderBy:'-date_created'"
-                                            ng-value="rev"
-                                            ng-show="rev.revision < (selectedRevisions.main ? selectedRevisions.main.revision : yara_rule.revision)">
-                                        Rev. {{ rev.revision }} @{{ rev.date_created | date:'yyyy-MM-dd' }}
-                                        by {{ rev.user.email }}
-                                    </option>
-                                </select>
-                            </div>
-                            <div style="max-width: min-content">
-                                <label>&nbsp;</label>
-                                <button type="button" class="btn btn-danger"
-                                        ng-disabled="!selectedRevisions.compared"
-                                        confirmed-click="revertRevision(yara_rule.id, selectedRevisions.compared.revision)"
-                                        ng-confirm-click="Are you sure you want to revert to revision?">Revert
-                                </button>
-                            </div>
-                        </div>
-                        <div class="yara-revisions-view" ng-controller="Yara_revisionController">
-                            <pre ng-if="revision_diff"><code ng-bind-html="revision_diff"></code></pre>
-                            <pre ng-if="!revision_diff"><code> {{ selectedRevisions.main ? selectedRevisions.main.yara_rule_string : yara_rule.yara_rule_string }} </code></pre>
-                        </div>
-                    </div>
-
-                </div>
             </div>
 
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger pull-left"
-                        ng-if="yara_rule.id" ng-click="merge_signature()">Merge This Into
+                        ng-if="yara_rule.id" ng-click="merge_signature_by_id()">Merge This Into
                 </button>
 
                 <div class="pull-left" style="width:350px; padding-right:4px; padding-left:4px;" ng-if="yara_rule.id">
@@ -764,8 +712,7 @@
                     </button>
                 </div>
                 <div class="pull-right" style="padding: 5px 10px 0 5px;" ng-if="yara_rule.id">
-                    <input type="checkbox" class="pull-left" ng-model="do_not_bump_revision"
-                           ng-change="toggle_bump_release()">
+                    <input type="checkbox" class="pull-left" ng-model="do_not_bump_revision">
                     &nbsp;Do not bump revision
                 </div>
             </div>
@@ -792,13 +739,7 @@
         <button type="button" class="btn btn-secondary" ng-disabled="!checked_counter" ng-click="download_rules()">
             Download ({{ checked_counter }})
         </button>
-        <button type="button" class="btn btn-secondary" ng-disabled="!checked_counter || checked_counter > 1"
-                confirmed-click="duplicate_rule()"
-                ng-confirm-click="Are you sure you want to duplicate selected signature?">
-            Duplicate
-        </button>
-        <button type="button" class="btn btn-secondary" ng-if="batchEditableColumns.length > 0"
-                ng-disabled="!checked_counter || checked_counter<2"
+        <button type="button" class="btn btn-secondary" ng-disabled="!checked_counter || checked_counter<2"
                 ng-click="open_batch()">
             Batch Edit ({{ checked_counter }})
         </button>
@@ -806,6 +747,11 @@
                 confirmed-click="batch_delete()"
                 ng-confirm-click="Are you sure you want to batch inactive selected signature records?">
             Batch Delete ({{ checked_counter }})
+        </button>
+        <button type="button" class="btn btn-secondary" ng-disabled="!checked_counter || checked_counter<2"
+                confirmed-click="merge_signatures()"
+                ng-confirm-click="Are you sure you want merge these signatures?">
+            Merge Signatures ({{ checked_counter }})
         </button>
         <button type="button" class="btn btn-secondary" ng-if="view_selected == 'Inactive Only'"
                 confirmed-click="delete_all_inactive()"
@@ -844,3 +790,4 @@
          ui-grid-pagination ui-grid-auto-resize>
     </div>
 </div>
+

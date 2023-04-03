@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="180px" height="120px" viewBox="0 0 180 120" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 40.2 (33826) - http://www.bohemiancoding.com/sketch -->
+    <title>icon-flag-br</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="Rectangle-90" fill="#479951" x="0" y="0" width="180" height="120"></rect>
+        <polygon id="Rectangle-87" fill="#E5B731" points="89.5 6 13 60 89.5 114 166 60"></polygon>
+        <circle id="Oval-15-copy-2" fill="#FFFFFF" cx="88.5" cy="59.5" r="31.5"></circle>
+        <path d="M118.763772,68.8995242 C114.753117,81.7054706 102.763946,91 88.5972222,91 C71.1465582,91 57,76.8969696 57,59.5 C57,56.7647455 57.3497028,54.1109172 58.0069677,51.5805259 C62.0780857,50.8703168 66.2664967,50.5 70.5416667,50.5 C89.0748034,50.5 105.977496,57.4592822 118.763782,68.8995332 Z M119.886925,63.9122403 C120.089633,62.4704937 120.194444,60.9974492 120.194444,59.5 C120.194444,42.1030304 106.047886,28 88.5972222,28 C75.6952251,28 64.5993367,35.7090775 59.6914574,46.758815 C63.2360668,46.2586825 66.8585644,46.0000011 70.5416667,46.0000011 C89.3327434,46.0000011 106.546273,52.7335029 119.886925,63.9122403 Z" id="Combined-Shape" fill="#346DA6"></path>
+    </g>
+</svg>

@@ -16,12 +16,26 @@ angular.module('ThreatKB')
             );
         }
 
+        function deleteBatch(batch) {
+            return $http.put('/ThreatKB/tasks/batch/delete', {
+                batch: batch
+            }).then(function (success) {
+                    if (success.status === 200) {
+                        return success.data;
+                    }
+                }, function (error) {
+                    return $q.reject(error.data);
+                }
+            );
+        }
+
         return {
             resource: $resource('ThreatKB/tasks/:id', {}, {
                 'query': {method: 'GET', isArray: true},
                 'get': {method: 'GET'},
                 'update': {method: 'PUT'}
             }),
-            updateBatch: updateBatch
+            updateBatch: updateBatch,
+            deleteBatch: deleteBatch
         };
     }]);

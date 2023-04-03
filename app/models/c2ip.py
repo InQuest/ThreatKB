@@ -1,7 +1,3 @@
-import distutils
-import re
-
-from ipaddr import IPAddress, IPNetwork
 from sqlalchemy.event import listens_for
 from sqlalchemy.orm import Session
 
@@ -9,14 +5,14 @@ import app
 from app import db, current_user, ENTITY_MAPPING, ACTIVITY_TYPE
 from app.geo_ip_helper import get_geo_for_ip
 from app.models.comments import Comments
-from app.models.whitelist import Whitelist
+from app.models.whitelist import Whitelist, WhitelistException
 from app.routes import tags_mapping
 from app.models.metadata import Metadata, MetadataMapping
+from app.models import cfg_states, activity_log
+from ipaddr import IPAddress, IPNetwork
 from app.models import cfg_states, cfg_settings, activity_log
-
+from app.routes.countries import get_country
 from flask import abort
-
-import time
 
 
 class C2ip(db.Model):
@@ -53,9 +49,6 @@ class C2ip(db.Model):
 
     tags = []
 
-    WHITELIST_CACHE = None
-    WHITELIST_CACHE_LAST_UPDATE = None
-
     @property
     def metadata_fields(self):
         return db.session.query(Metadata).filter(Metadata.artifact_type == ENTITY_MAPPING["IP"]).all()
@@ -69,39 +62,58 @@ class C2ip(db.Model):
             .filter(MetadataMapping.artifact_id == self.id)\
             .all()
 
-    def to_dict(self, include_metadata=True, include_tags=True, include_comments=True):
+    def to_dict(self, include_metadata=True, include_tags=True, include_comments=True,
+                metadata_cache=None, users_cache=None, tags_mapping_cache=None,
+                comments_cache=None
+                ):
         d = dict(
             active=self.active,
             date_created=self.date_created.isoformat() if self.date_created else None,
             date_modified=self.date_modified.isoformat() if self.date_modified else None,
             ip=self.ip,
             asn=self.asn,
-            country=self.country,
+            country=get_country(self.country),
             state=self.state,
             description=self.description,
             references=self.references,
             expiration_timestamp=self.expiration_timestamp.isoformat() if self.expiration_timestamp else None,
-            id=self.id,
-            created_user=self.created_user.to_dict(),
-            modified_user=self.modified_user.to_dict(),
-            owner_user=self.owner_user.to_dict() if self.owner_user else None,
+            id=self.id
         )
 
         if include_tags:
-            d["tags"] = tags_mapping.get_tags_for_source(self.__tablename__, self.id)
+            if tags_mapping_cache and tags_mapping_cache['c2ip'].get(self.id, None):
+                d["tags"] = tags_mapping_cache['c2ip'][self.id]
+            else:
+                d["tags"] = tags_mapping.get_tags_for_source(self.__tablename__, self.id)
 
         if include_comments:
-            d["comments"] = [comment.to_dict() for comment in Comments.query.filter_by(entity_id=self.id).filter_by(
-                entity_type=ENTITY_MAPPING["IP"]).all()]
+            if comments_cache:
+                d["comments"] = comments_cache['c2ip'][self.id] if self.id in comments_cache['c2ip'] else []
+            else:
+                d["comments"] = [comment.to_dict() for comment in Comments.query.filter_by(entity_id=self.id).filter_by(
+                    entity_type=ENTITY_MAPPING["IP"]).all()]
 
         if include_metadata:
-            metadata_values_dict = {}
-            metadata_keys = Metadata.get_metadata_keys("IP")
-            metadata_values_dict = {m["metadata"]["key"]: m for m in
-                                    [entity.to_dict() for entity in self.metadata_values]}
-            for key in list(set(metadata_keys) - set(metadata_values_dict.keys())):
-                metadata_values_dict[key] = {}
-            d.update(dict(metadata=Metadata.get_metadata_dict("IP"), metadata_values=metadata_values_dict))
+            if metadata_cache:
+                d["metadata"] = metadata_cache["IP"][self.id]["metadata"] if metadata_cache["IP"].get(self.id, None) and metadata_cache["IP"][self.id].get("metadata",None) else {}
+                d["metadata_values"] = metadata_cache["IP"][self.id]["metadata_values"] if metadata_cache["IP"].get(self.id,None) and metadata_cache["IP"][self.id].get("metadata_values", None) else {}
+            else:
+                metadata_values_dict = {}
+                metadata_keys = Metadata.get_metadata_keys("IP")
+                metadata_values_dict = {m["metadata"]["key"]: m for m in
+                                        [entity.to_dict() for entity in self.metadata_values]}
+                for key in list(set(metadata_keys) - set(metadata_values_dict.keys())):
+                    metadata_values_dict[key] = {}
+                d.update(dict(metadata=Metadata.get_metadata_dict("IP"), metadata_values=metadata_values_dict))
+
+        if users_cache:
+            d["created_user"] = users_cache.get(self.created_user_id, None)
+            d["modified_user"] = users_cache.get(self.modified_user_id, None)
+            d["owner_user"] = users_cache.get(self.owner_user_id, None)
+        else:
+            d["created_user"] = self.created_user.to_dict()
+            d["modified_user"] = self.modified_user.to_dict()
+            d["owner_user"] = self.owner_user.to_dict() if self.owner_user else None
 
         return d
 
@@ -112,7 +124,7 @@ class C2ip(db.Model):
             date_modified=self.date_modified.isoformat() if self.date_modified else None,
             ip=self.ip,
             asn=self.asn,
-            country=self.country,
+            country=get_country(self.country),
             state=self.state,
             description=self.description,
             references=self.references,
@@ -134,8 +146,8 @@ class C2ip(db.Model):
     def save_metadata(self, metadata):
         for name, val in metadata.items():
             val = val if not type(val) == dict else val.get("value", None)
-            if not val:
-                continue
+            #if not val:
+            #    continue
 
             m = db.session.query(MetadataMapping).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
                 Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["DNS"]).filter(
@@ -149,6 +161,7 @@ class C2ip(db.Model):
                     Metadata.artifact_type == ENTITY_MAPPING["IP"]).first()
                 db.session.add(MetadataMapping(value=val, metadata_id=m.id, artifact_id=self.id,
                                                created_user_id=current_user.id))
+                dirty = True
 
         try:
             db.session.commit()
@@ -219,129 +232,25 @@ class C2ip(db.Model):
 
 @listens_for(C2ip, "before_insert")
 def run_against_whitelist(mapper, connect, target):
-    whitelist_enabled = cfg_settings.Cfg_settings.get_setting("ENABLE_IP_WHITELIST_CHECK_ON_SAVE")
-    whitelist_states = cfg_settings.Cfg_settings.get_setting("WHITELIST_STATES")
+    if Whitelist.hits_whitelist(target.ip, target.state):
+        abort(412, f"Failed whitelist validation {target.ip}")
 
-    if whitelist_enabled and distutils.util.strtobool(whitelist_enabled) and whitelist_states:
+    if not current_user.admin:
+        release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
+        if release_state and target.state == release_state.state:
+            abort(403)
 
-        if target.state in whitelist_states.split(","):
-            new_ip = target.ip
-
-            abort_import = False
-
-            if not C2ip.WHITELIST_CACHE_LAST_UPDATE or not C2ip.WHITELIST_CACHE or (
-                time.time() - C2ip.WHITELIST_CACHE_LAST_UPDATE) > 60:
-                C2ip.WHITELIST_CACHE = Whitelist.query.all()
-                C2ip.WHITELIST_CACHE_LAST_UPDATE = time.time()
-
-            whitelists = C2ip.WHITELIST_CACHE
-
-            hit = None
-
-            for whitelist in whitelists:
-                wa = str(whitelist.whitelist_artifact)
-
-                try:
-                    if str(IPAddress(new_ip)) == str(IPAddress(wa)):
-                        abort_import = True
-                        hit = wa
-                        break
-                except ValueError:
-                    pass
-
-                try:
-                    if IPAddress(new_ip) in IPNetwork(wa):
-                        abort_import = True
-                        hit = wa
-                        break
-                except ValueError:
-                    pass
-
-                try:
-                    regex = re.compile(wa)
-                    result = regex.search(new_ip)
-                except:
-                    result = False
-
-                if result:
-                    abort_import = True
-                    break
-
-            if abort_import:
-                raise Exception('Failed Whitelist Validation on whitelist entry \'%s\'' % (hit))
-
-            # Verify the ip is well formed
-            IPAddress(new_ip)
-
-            if not current_user.admin:
-                release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
-                if release_state and target.state == release_state.state:
-                    abort(403)
-
-
-@listens_for(C2ip, "before_update")
-def run_against_whitelist(mapper, connect, target):
-    whitelist_enabled = cfg_settings.Cfg_settings.get_setting("ENABLE_IP_WHITELIST_CHECK_ON_SAVE")
-    whitelist_states = cfg_settings.Cfg_settings.get_setting("WHITELIST_STATES")
-
-    if whitelist_enabled and distutils.util.strtobool(whitelist_enabled) and whitelist_states:
-
-        if target.state in whitelist_states.split(","):
-            new_ip = target.ip
-
-            abort_import = False
-
-            if not C2ip.WHITELIST_CACHE_LAST_UPDATE or not C2ip.WHITELIST_CACHE or (
-                time.time() - C2ip.WHITELIST_CACHE_LAST_UPDATE) > 60:
-                C2ip.WHITELIST_CACHE = Whitelist.query.all()
-                C2ip.WHITELIST_CACHE_LAST_UPDATE = time.time()
-
-            whitelists = C2ip.WHITELIST_CACHE
-
-            hit = None
-
-            for whitelist in whitelists:
-                wa = str(whitelist.whitelist_artifact)
-
-                try:
-                    if str(IPAddress(new_ip)) == str(IPAddress(wa)):
-                        abort_import = True
-                        hit = wa
-                        break
-                except ValueError:
-                    pass
-
-                try:
-                    if IPAddress(new_ip) in IPNetwork(wa):
-                        abort_import = True
-                        hit = wa
-                        break
-                except ValueError:
-                    pass
-
-                try:
-                    regex = re.compile(wa)
-                    result = regex.search(new_ip)
-                except:
-                    result = False
-
-                if result:
-                    abort_import = True
-                    break
-
-            if abort_import:
-                raise Exception('Failed Whitelist Validation on whitelist entry \'%s\'' % (hit))
-
-            # Verify the ip is well formed
-            IPAddress(new_ip)
-
-            if not current_user.admin:
-                release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
-                if release_state and target.state == release_state.state:
-                    abort(403)
 
 @listens_for(C2ip, "before_update")
 def c2ip_before_update(mapper, connect, target):
+    try:
+        IPAddress(target.ip)
+    except:
+        abort(412, f"Not a welformed IP address {target.ip}")
+
+    if Whitelist.hits_whitelist(target.ip, target.state):
+        abort(412, f"Failed whitelist validation {target.ip}")
+
     if current_user and not current_user.admin:
         release_state = cfg_states.Cfg_states.query.filter(cfg_states.Cfg_states.is_release_state > 0).first()
         if release_state and target.state == release_state.state:
@@ -375,13 +284,11 @@ def ip_modified(mapper, connection, target):
                                       user_id=target.modified_user_id)
 
         changes = activity_log.get_modified_changes(target)
-        if changes["long"].__len__() > 0:
+        if changes.__len__() > 0:
             activity_log.log_activity(connection=connection,
                                       activity_type=list(ACTIVITY_TYPE.keys())[list(ACTIVITY_TYPE.keys()).index("ARTIFACT_MODIFIED")],
                                       activity_text="'%s' modified with changes: %s"
-                                                    % (target.ip, ', '.join(map(str, changes["long"]))),
-                                      activity_text_short="'%s' modified fields are: %s"
-                                                    % (target.ip, ', '.join(map(str, changes["short"]))),
+                                                    % (target.ip, ', '.join(map(str, changes))),
                                       activity_date=target.date_modified,
                                       entity_type=ENTITY_MAPPING["IP"],
                                       entity_id=target.id,

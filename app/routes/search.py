@@ -2,8 +2,20 @@ from flask import request, Response, json, abort
 from flask_login import login_required
 from sqlalchemy import or_, and_
 from app import app, db, auto, ENTITY_MAPPING
-from app.models import yara_rule, c2dns, c2ip, tasks, tags, tags_mapping, metadata
+from app.models import comments, yara_rule, c2dns, c2ip, tasks, tags, tags_mapping, metadata
 import json
+from app.models import users
+from app.models import tags_mapping
+from app import cache
+
+
+@cache.cached(timeout=60*5)
+def get_caches():
+    metadata_cache = metadata.Metadata.get_metadata_cache()
+    tags_mapping_cache = tags_mapping.Tags_mapping.get_tags_mapping_cache()
+    user_cache = users.KBUser.get_user_cache()
+    comments_cache = comments.Comments.get_comment_cache()
+    return metadata_cache, tags_mapping_cache, user_cache, comments_cache
 
 
 @app.route('/ThreatKB/search', methods=['GET'])
@@ -17,8 +29,6 @@ def do_search():
     all = request.args.get("all", None)
     artifact_type = request.args.get('artifact_type', None)
     category = request.args.get('category', None)
-    references = request.args.get('references', None)
-    description = request.args.get('description', None)
 
     if not tag and not state and not category and not artifact_type and not all:
         abort(400)
@@ -60,17 +70,6 @@ def do_search():
     if category:
         signatures = signatures.filter(yara_rule.Yara_rule.category == category)
 
-    if references:
-        signatures = signatures.filter(yara_rule.Yara_rule.references.like("%" + references + "%"))
-        ips = ips.filter(c2ip.C2ip.references.like("%" + references + "%"))
-        dns = dns.filter(c2dns.C2dns.references.like("%" + references + "%"))
-
-    if description:
-        signatures = signatures.filter(yara_rule.Yara_rule.description.like("%" + description + "%"))
-        ips = ips.filter(c2ip.C2ip.description.like("%" + description + "%"))
-        dns = dns.filter(c2dns.C2dns.description.like("%" + description + "%"))
-        task = task.filter(tasks.Tasks.description.like("%" + description + "%"))
-
     if all:
         signatures = signatures.filter(
             or_(yara_rule.Yara_rule.name.like("%" + all + "%"), yara_rule.Yara_rule.category.like("%" + all + "%"),
@@ -95,14 +94,16 @@ def do_search():
         task = task.filter(or_(tasks.Tasks.state.like("%" + all + "%"), tasks.Tasks.title.like("%" + all + "%"),
                                tasks.Tasks.final_artifact.like("%" + all + "%")))
 
+    metadata_cache, tags_mapping_cache, user_cache, comments_cache = get_caches()
+
     if not artifact_type or "signature" in artifact_type:
-        results["signatures"] = [signature.to_dict() for signature in signatures.all()]
+        results["signatures"] = [signature.to_dict(comments_cache=comments_cache, metadata_cache=metadata_cache, users_cache=user_cache, tags_mapping_cache=tags_mapping_cache) for signature in signatures.all()]
 
     if not artifact_type or "ip" in artifact_type:
-        results["ips"] = [ip.to_dict() for ip in ips.all()]
+        results["ips"] = [ip.to_dict(comments_cache=comments_cache, metadata_cache=metadata_cache, users_cache=user_cache, tags_mapping_cache=tags_mapping_cache) for ip in ips.all()]
 
     if not artifact_type or "dns" in artifact_type:
-        results["dns"] = [d.to_dict() for d in dns.all()]
+        results["dns"] = [d.to_dict(comments_cache=comments_cache, metadata_cache=metadata_cache, users_cache=user_cache, tags_mapping_cache=tags_mapping_cache) for d in dns.all()]
 
     if not artifact_type or "task" in artifact_type:
         results["tasks"] = [t.to_dict() for t in task.all()]

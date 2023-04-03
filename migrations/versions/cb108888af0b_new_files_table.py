@@ -22,7 +22,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('date_created', sa.DateTime(timezone=True), nullable=True),
     sa.Column('date_modified', sa.DateTime(timezone=True), nullable=True),
-    sa.Column('filename', sa.String(length=65000), nullable=True),
+    sa.Column('filename', sa.TEXT(), nullable=True),
     sa.Column('content_type', sa.String(length=100), nullable=True),
     sa.Column('entity_type', sa.Integer(), nullable=False),
     sa.Column('entity_id', sa.Integer(), nullable=False),

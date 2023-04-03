@@ -4,7 +4,6 @@ parsetab.py
 .jshintrc
 flask/
 env/
-db_data/
 .DS_Store
 *.db
 *.pyc

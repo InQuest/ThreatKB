@@ -22,7 +22,7 @@ def upgrade():
                     sa.Column('name', sa.String(length=128), nullable=False),
                     sa.Column('description', sa.String(length=128), nullable=True),
                     sa.Column('interpreter', sa.String(length=64), nullable=True),
-                    sa.Column('code', sa.String(length=60000), nullable=True),
+                    sa.Column('code', sa.TEXT(), nullable=True),
                     sa.Column('match_regex', sa.String(length=4096), nullable=True),
                     sa.Column('date_created', sa.DateTime(timezone=True), nullable=True),
                     sa.Column('date_modified', sa.DateTime(timezone=True), nullable=True),

@@ -187,7 +187,6 @@ body.modals-full-screen .modal-dialog {
 
 /* Yara sign, files list */
 .yara-files-list-item {
-    display: flex;
     align-items: end;
     /* align-items: center; */
 }

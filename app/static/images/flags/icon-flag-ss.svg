@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="181px" height="120px" viewBox="0 0 181 120" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 40.2 (33826) - http://www.bohemiancoding.com/sketch -->
+    <title>icon-flag-ss</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="Rectangle" fill="#FFFFFF" x="0" y="0" width="180" height="120"></rect>
+        <polygon id="Rectangle-3-copy-2" fill="#479951" points="0.00552366097 99.997054 0.00552366097 120 180 120 180 80 37.5 80 0.00552366097 99.997054"></polygon>
+        <polygon id="Rectangle-3-copy-3" fill="#CA4638" points="43.75 76.6666667 180.005524 76.6666667 180.005524 43.3333333 43.75 43.3333333 75 60 43.75 76.6666667"></polygon>
+        <polygon id="Rectangle-3" fill="#262626" points="0.00276191524 20.001473 0.00276191524 0 179.997238 0 179.997238 40 37.5 40 0.00276191524 20.001473"></polygon>
+        <polygon id="Triangle-18-copy-2" fill="#346DA6" points="0 0 75 60 0 120"></polygon>
+        <polygon id="Shape" fill="#E5B731" transform="translate(26.500000, 60.000000) rotate(-45.000000) translate(-26.500000, -60.000000) " points="37.745897 76.5409806 26.7580363 68.730379 16.1147074 77 20.0412397 63.9845208 9 56.2705327 22.4145915 56.037127 26.2340597 43 30.5981998 55.871226 44 55.527825 33.2825973 63.7160879 37.745897 76.5409806"></polygon>
+    </g>
+</svg>

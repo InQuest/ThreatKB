@@ -13,27 +13,31 @@ from flask_selfdoc import Autodoc
 import datetime
 import logging
 import os
-from distutils import util
-from slack_helper import SlackHelper
+import distutils
 
 
 app = Flask(__name__, static_url_path='')
-cache = Cache(app, config={'CACHE_TYPE': 'simple'})
+app.config.from_object("config")
+
+if app.config.get('REDIS_CACHE_URL', None):
+    cache = Cache(app, config={'CACHE_TYPE': 'redis', 'CACHE_REDIS_URL': app.config.get('REDIS_CACHE_URL')})
+else:
+    cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 cache.init_app(app)
 app.secret_key = "a" * 24  # os.urandom(24)
-app.config.from_object("config")
 
 auto = Autodoc(app)
 
-db = SQLAlchemy(app)
+#db = SQLAlchemy(app)
+db = SQLAlchemy(app, engine_options={"pool_recycle": 600})
 login_manager = LoginManager()
 login_manager.init_app(app)
 bcrypt = Bcrypt(app)
 celery = None
+migrate = Migrate(app, db)
 
 ENTITY_MAPPING = {"SIGNATURE": 1, "DNS": 2, "IP": 3, "TASK": 4, "RELEASE": 5}
 ENTITY_MAPPING_URI = {1: "yara_rules", 2: "c2dns", 3: "c2ips", 4: "tasks", 5: "releases"}
-
 ACTIVITY_TYPE = {"ARTIFACT_CREATED": "Artifact Created",
                  "ARTIFACT_MODIFIED": "Artifact Modified",
                  "COMMENTS": 'Comment',
@@ -88,13 +92,9 @@ def set_celery_stuff(flask_app):
     if flask_app.config["MAX_MILLIS_PER_FILE_THRESHOLD"]:
         flask_app.config["MAX_MILLIS_PER_FILE_THRESHOLD"] = float(flask_app.config["MAX_MILLIS_PER_FILE_THRESHOLD"])
 
-
-print("app config: %s" % (str(app.config)))
-print("print env")
-for key, val in os.environ.iteritems():
-    print "%s=%s" % (key, val)
-
 set_celery_stuff(app)
+
+print(("app config: %s" % (str(app.config))))
 
 from app.celeryapp import make_celery
 
@@ -129,6 +129,7 @@ from app.routes.metadata import *
 from app.routes.errors import *
 from app.routes.activity_log import *
 from app.routes.macros import *
+from app.routes.countries import *
 
 from app.models import users
 from app.models import c2ip
@@ -293,6 +294,7 @@ def generate_app():
     from app.routes import errors
     from app.routes import activity_log
     from app.routes import macros
+    from app.routes import countries
 
     app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
 

@@ -4,7 +4,7 @@ from flask import abort, jsonify, request, Response
 from flask_login import login_required, current_user
 from dateutil import parser
 import json
-import re
+
 
 @app.route('/ThreatKB/metadata', methods=['GET'])
 @auto.doc()
@@ -45,7 +45,7 @@ def get_metadata(id):
     return jsonify(entity.to_dict())
 
 
-@app.route('/ThreatKB/metadata', methods=['POST'])
+@app.route('/ThreatKB/metadata', methods=['POST', 'PUT'])
 @auto.doc()
 @login_required
 @admin_only()
@@ -58,11 +58,6 @@ def create_metadata():
     default = request.json.get('default', None)
     choices = request.json.get("choices", "")
     choices = [choice.strip() for choice in choices.split(",") if len(choice) > 0]
-
-    if request.json.get("export_with_release", 1) and \
-        ENTITY_MAPPING["SIGNATURE"] == request.json['artifact_type'] and \
-        re.search("[^A-Za-z0-9_]", request.json['key']):
-        abort(400, description="You cannot save signature meta data that matches this regex [^A-Za-z0-9_]")
 
     if type_.lower() == "integer" and default:
         default = int(default)

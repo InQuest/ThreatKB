@@ -1,7 +1,7 @@
 from app import app, db, admin_only, auto
 from app.models import tags
 from flask import abort, jsonify, request, Response
-from flask_login import login_required, current_user
+from flask_login import login_required
 import json
 
 from app.models.tags_mapping import Tags_mapping
@@ -29,7 +29,7 @@ def get_tags(id):
     return jsonify(entity.to_dict())
 
 
-@app.route('/ThreatKB/tags', methods=['POST'])
+@app.route('/ThreatKB/tags', methods=['POST', 'PUT'])
 @auto.doc()
 @login_required
 def create_tags():
@@ -39,16 +39,14 @@ def create_tags():
     return jsonify(created_tag.to_dict()), 201
 
 
-def create_tag(tag_text, commit=True):
+def create_tag(tag_text):
     entity = tags.Tags.query.filter(tags.Tags.text == tag_text).first()
     if not entity:
         entity = tags.Tags(
-            text=tag_text,
-            created_user_id=current_user.id
+            text=tag_text
         )
         db.session.add(entity)
-        if commit:
-            db.session.commit()
+        db.session.commit()
     return entity
 
 
@@ -57,7 +55,7 @@ def create_tag(tag_text, commit=True):
 @login_required
 @admin_only()
 def update_tags(id):
-    """Update tag associated with given id
+    """Update tag associatd with given id
     From Data: text
     Return: tag dictionary"""
     entity = tags.Tags.query.get(id)
@@ -68,8 +66,7 @@ def update_tags(id):
     if not entity1:
         entity = tags.Tags(
             text=request.json['text'],
-            id=id,
-            created_user_id=current_user.id
+            id=id
         )
         db.session.merge(entity)
         db.session.commit()

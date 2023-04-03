@@ -2,17 +2,18 @@ from sqlalchemy.orm import Session
 
 from app import db, current_user, ENTITY_MAPPING, ACTIVITY_TYPE
 from app.models.files import Files
+from app.models.releases import get_release_yara_rule_history_mapping, get_release_metadata
 from app.routes import tags_mapping
 from app.models.comments import Comments
 from app.models.metadata import MetadataMapping, Metadata
 from app.models.cfg_category_range_mapping import CfgCategoryRangeMapping
-from app.models import cfg_settings, cfg_states, activity_log, macros
+from app.models import cfg_settings, cfg_states, activity_log, macros, releases
 from sqlalchemy.event import listens_for
 from dateutil import parser
 import datetime
 import json
 import re
-from distutils import util
+import distutils
 import zlib
 
 from flask import abort
@@ -29,15 +30,16 @@ class Yara_rule(db.Model):
     revision = db.Column(db.Integer(), default=1)
     name = db.Column(db.String(128), index=True)
     category = db.Column(db.String(32), index=True)
-    condition = db.Column(db.String(2048), index=True)
-    strings = db.Column(db.String(30000), index=True)
-    imports = db.Column(db.String(512))
+    condition = db.Column(db.TEXT(), index=True)
+    strings = db.Column(db.TEXT(), index=True)
+    imports = db.Column(db.String(2048))
     description = db.Column(db.TEXT(), index=True)
     references = db.Column(db.TEXT(), index=True)
     active = db.Column(db.Boolean, nullable=False, default=True, index=True)
     eventid = db.Column(db.Integer(), index=True, nullable=False)
     _mitre_techniques = db.Column(db.String(256), index=True)
     _mitre_tactics = db.Column(db.String(256), index=True)
+    _mitre_sub_techniques = db.Column(db.String(256), index=True)
 
     tags = []
 
@@ -65,6 +67,9 @@ class Yara_rule(db.Model):
                               primaryjoin="Yara_rule_history.yara_rule_id==Yara_rule.id",
                               cascade="all,delete", uselist=True)
 
+    current_history = db.relationship("Yara_rule_history", foreign_keys=id,
+                                      primaryjoin="and_(Yara_rule_history.yara_rule_id==Yara_rule.id, Yara_rule_history.revision==Yara_rule.revision)")
+
     test_history = db.relationship("Yara_testing_history", foreign_keys=[id],
                                    primaryjoin="Yara_testing_history.yara_rule_id==Yara_rule.id",
                                    cascade="all,delete", uselist=True)
@@ -72,7 +77,19 @@ class Yara_rule(db.Model):
     @property
     def mitre_techniques(self):
         if self._mitre_techniques:
-            return self._mitre_techniques.split(",") or []
+            return list(set(self._mitre_techniques.split(",")))
+        return []
+
+    @property
+    def mitre_tactics(self):
+        if self._mitre_tactics:
+            return list(set(self._mitre_tactics.split(",")))
+        return []
+
+    @property
+    def mitre_sub_techniques(self):
+        if self._mitre_sub_techniques:
+            return list(set(self._mitre_sub_techniques.split(",")))
         return []
 
     @property
@@ -80,6 +97,10 @@ class Yara_rule(db.Model):
         if self._mitre_tactics:
             return self._mitre_tactics.split(",")
         return []
+
+    @mitre_sub_techniques.setter
+    def mitre_sub_techniques(self, value):
+        self._mitre_sub_techniques = ",".join(value)
 
     @mitre_techniques.setter
     def mitre_techniques(self, value):
@@ -103,7 +124,8 @@ class Yara_rule(db.Model):
             .all()
 
     def to_dict(self, include_yara_rule_string=None, short=False, include_relationships=True, include_metadata=True,
-                include_tags=True, include_comments=True):
+                include_tags=True, include_comments=True, metadata_cache=None, users_cache=None, tags_mapping_cache=None,
+                comments_cache=None, include_revisions=True):
         yara_dict = dict(
             creation_date=self.creation_date.isoformat() if self.creation_date else None,
             last_revision_date=self.last_revision_date.isoformat() if self.last_revision_date else None,
@@ -120,34 +142,52 @@ class Yara_rule(db.Model):
             imports=self.imports,
             mitre_tactics=self.mitre_tactics,
             mitre_techniques=self.mitre_techniques,
+            mitre_sub_techniques=self.mitre_sub_techniques,
             active=self.active
         )
 
         if include_tags:
-            yara_dict["tags"] = tags_mapping.get_tags_for_source(self.__tablename__, self.id)
+            if tags_mapping_cache and tags_mapping_cache['yara_rules'].get(self.id, None):
+                yara_dict["tags"] = tags_mapping_cache['yara_rules'][self.id]
+            else:
+                yara_dict["tags"] = tags_mapping.get_tags_for_source(self.__tablename__, self.id)
 
         if include_comments:
-            yara_dict["comments"] = [comment.to_dict() for comment in
+            if comments_cache:
+                yara_dict["comments"] = comments_cache['yara_rules'][self.id] if self.id in comments_cache['yara_rules'] else []
+            else:
+                yara_dict["comments"] = [comment.to_dict() for comment in
                                      Comments.query.filter_by(entity_id=self.id).filter_by(
                                          entity_type=ENTITY_MAPPING["SIGNATURE"]).all()]
 
         if include_metadata:
-            metadata_values_dict = {}
-            metadata_keys = Metadata.get_metadata_keys("SIGNATURE")
-            metadata_values_dict = {m["metadata"]["key"]: m for m in
-                                    [entity.to_dict() for entity in self.metadata_values]}
-            for key in list(set(metadata_keys) - set(metadata_values_dict.keys())):
-                metadata_values_dict[key] = {}
-            yara_dict.update(
-                dict(metadata=Metadata.get_metadata_dict("SIGNATURE"), metadata_values=metadata_values_dict))
+            if metadata_cache:
+                yara_dict["metadata"] = metadata_cache["SIGNATURE"][self.id]["metadata"] if metadata_cache["SIGNATURE"].get(self.id,None) and  metadata_cache["SIGNATURE"][self.id].get("metadata", None) else {}
+                yara_dict["metadata_values"] = metadata_cache["SIGNATURE"][self.id]["metadata_values"] if metadata_cache["SIGNATURE"].get(self.id, None) and metadata_cache["SIGNATURE"][self.id].get("metadata_values", None) else {}
+            else:
+                metadata_values_dict = {}
+                metadata_keys = Metadata.get_metadata_keys("SIGNATURE")
+                metadata_values_dict = {m["metadata"]["key"]: m for m in
+                                        [entity.to_dict() for entity in self.metadata_values]}
+                for key in list(set(metadata_keys) - set(metadata_values_dict.keys())):
+                    metadata_values_dict[key] = {}
+                yara_dict.update(
+                    dict(metadata=Metadata.get_metadata_dict("SIGNATURE"), metadata_values=metadata_values_dict))
 
         if include_relationships:
-            yara_dict["created_user"] = self.created_user.to_dict()
-            yara_dict["modified_user"] = self.modified_user.to_dict()
-            yara_dict["owner_user"] = self.owner_user.to_dict() if self.owner_user else None
+            if users_cache:
+                yara_dict["created_user"] = users_cache.get(self.created_user_id, None)
+                yara_dict["modified_user"] = users_cache.get(self.modified_user_id, None)
+                yara_dict["owner_user"] = users_cache.get(self.owner_user_id, None)
+            else:
+                yara_dict["created_user"] = self.created_user.to_dict()
+                yara_dict["modified_user"] = self.modified_user.to_dict()
+                yara_dict["owner_user"] = self.owner_user.to_dict() if self.owner_user else None
 
         if not short:
-            revisions = Yara_rule_history.query.filter_by(yara_rule_id=self.id).all()
+            if include_revisions:
+                revision_limit = int(cfg_settings.Cfg_settings.get_setting("FETCH_REVISION_COUNT_LIMIT") or 25)
+                revisions = Yara_rule_history.query.filter_by(yara_rule_id=self.id).order_by(Yara_rule_history.date_created.desc()).limit(revision_limit).all()
             comments = Comments.query.filter_by(entity_id=self.id).filter_by(
                 entity_type=ENTITY_MAPPING["SIGNATURE"]).all()
             files = Files.query.filter_by(entity_id=self.id).filter_by(entity_type=ENTITY_MAPPING["SIGNATURE"]).all()
@@ -156,10 +196,12 @@ class Yara_rule(db.Model):
                                   files=[file.to_dict() for file in files],
                                   ))
 
+
         if include_yara_rule_string:
             yara_dict["yara_rule_string"] = Yara_rule.to_yara_rule_string(yara_dict)
 
         return yara_dict
+
 
     def to_revision_dict(self):
         dict = self.to_dict()
@@ -193,7 +235,8 @@ class Yara_rule(db.Model):
             strings="strings:\n\t%s" % self.strings if self.strings and self.strings.strip() else "",
             imports=self.imports,
             mitre_tactics=self.mitre_tactics,
-            mitre_techniques=self.mitre_techniques
+            mitre_techniques=self.mitre_techniques,
+            mitre_sub_techniques=self.mitre_sub_techniques
         )
 
     def __repr__(self):
@@ -286,26 +329,14 @@ class Yara_rule(db.Model):
 
         yara_rule_text = Yara_rule.expand_macros(yara_rule_text)
 
-        return yara_rule_text.encode("utf-8")
+        return yara_rule_text
 
     @staticmethod
-    def expand_macros(yara_rule_text, all_macros=None):
-
-        try:
-            if len(all_macros) == 0:
-                return yara_rule_text
-        except:
-            all_macros = all_macros = macros.Macros.get_macros()
-
+    def expand_macros(yara_rule_text):
+        all_macros = macros.Macros.get_macros()
         tag_template = cfg_settings.Cfg_settings.get_setting("MACRO_TAG_TEMPLATE")
-
         for m in all_macros:
-            if m["tag"] in yara_rule_text:
-                yara_rule_text = yara_rule_text.replace(tag_template % m['tag'], m['value'])
-
-        if any([tag_template % m['tag'] in yara_rule_text for m in all_macros]):
-            return Yara_rule.expand_macros(yara_rule_text, [{"tag": m["tag"], "value": m["value"]} for m in all_macros])
-
+            yara_rule_text = yara_rule_text.replace(tag_template % m['tag'], m['value'])
         return yara_rule_text
 
     @staticmethod
@@ -331,14 +362,17 @@ class Yara_rule(db.Model):
 
         clobber_on_import = cfg_settings.Cfg_settings.get_setting("IMPORT_CLOBBER")
         try:
-            clobber_on_import = util.strtobool(clobber_on_import)
+            clobber_on_import = distutils.util.strtobool(clobber_on_import)
         except:
             clobber_on_import = clobber_on_import
 
         yara_rule = Yara_rule()
         yara_rule.name = yara_dict["rule_name"]
 
-        yara_metadata = {key.lower(): val.strip().strip("\"") for key, val in
+        if type(yara_dict["metadata"]) is list:
+            yara_dict["metadata"] = {list(m.keys())[0]: list(m.values())[0] for m in yara_dict["metadata"]}
+
+        yara_metadata = {key.lower(): str(val).strip().strip("\"") for key, val in
                          yara_dict["metadata"].items()} if "metadata" in yara_dict else {}
         for possible_field, mapped_to in metadata_field_mapping.items():
             mapped_to = mapped_to.lower()
@@ -382,7 +416,7 @@ class Yara_rule(db.Model):
 
         for key, val in list(yara_rule.__dict__.items()):
             if not key.startswith('_') and type(val) in [str, str]:
-                val.decode("ascii")
+                str(val)
 
         if not yara_rule.category:
             yara_rule.category = CfgCategoryRangeMapping.DEFAULT_CATEGORY
@@ -399,7 +433,7 @@ def generate_eventid(mapper, connect, target):
     target.name = re.sub("[^A-Za-z0-9_]", "", target.name)
 
     if not target.eventid:
-        target.eventid = CfgCategoryRangeMapping.get_next_category_eventid(target.category)
+        target.eventid = CfgCategoryRangeMapping.get_next_category_eventid(target.category, connect)
 
 
 @listens_for(Yara_rule, "before_update")
@@ -418,7 +452,7 @@ def yara_created(mapper, connection, target):
                               activity_type=list(ACTIVITY_TYPE.keys())[list(ACTIVITY_TYPE.keys()).index("ARTIFACT_CREATED")],
                               activity_text=target.name,
                               activity_date=target.creation_date,
-                              entity_type=ENTITY_MAPPING["SIGNATURE"],
+                              entity_type=ENTITY_MAPPING["TASK"],
                               entity_id=target.id,
                               user_id=target.created_user_id)
 
@@ -439,13 +473,11 @@ def yara_modified(mapper, connection, target):
                                       user_id=target.modified_user_id)
 
         changes = activity_log.get_modified_changes(target)
-        if changes["long"].__len__() > 0:
+        if changes.__len__() > 0:
             activity_log.log_activity(connection=connection,
                                       activity_type=list(ACTIVITY_TYPE.keys())[list(ACTIVITY_TYPE.keys()).index("ARTIFACT_MODIFIED")],
                                       activity_text="'%s' modified with changes: %s"
-                                                    % (target.name, ', '.join(map(str, changes["long"]))),
-                                      activity_text_short="'%s' modified fields are: %s"
-                                                    % (target.name, ', '.join(map(str, changes["short"]))),
+                                                    % (target.name, ', '.join(map(str, changes))),
                                       activity_date=target.last_revision_date,
                                       entity_type=ENTITY_MAPPING["SIGNATURE"],
                                       entity_id=target.id,
@@ -477,19 +509,24 @@ class Yara_rule_history(db.Model):
 
     @rule_json.setter
     def rule_json(self, value):
-        self._rule_json = zlib.compress(value, 8)
+        self._rule_json = zlib.compress(value.encode(), 8)
 
     @property
     def release_data_dict(self):
         return json.loads(self.release_data) if self.release_data else {}
 
     def to_dict(self, include_json=True):
+        release_mapping = get_release_yara_rule_history_mapping()
+        release_metadata = get_release_metadata()
+        releases = ",".join([release_metadata[release]["name"] for release in
+                             release_mapping[self.id]]) if self.id in release_mapping else None
         yara_history_dict = dict(
             date_created=self.date_created.isoformat(),
             revision=self.revision,
             yara_rule_id=self.yara_rule_id,
             user=self.user.to_dict(),
-            state=self.state
+            state=self.state,
+            releases=releases
         )
 
         if include_json:

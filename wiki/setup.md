@@ -1,17 +1,3 @@
-### Docker
-
-
-1. Checkout staging branch:
-    - `git checkout -b staging origin/staging`
-2. Make data diretories:
-    - `mkdir db_data`
-    - `mkdir files`
-3. Start:
-    - `docker-compose up -d`
-4. Navigate to the app:
-    - `http://localhost:5000`
-
-
 ### Pre-requisites
 
 Tested on Ubuntu Linux 14.04 -> 18.10

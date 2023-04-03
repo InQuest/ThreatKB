@@ -9,6 +9,7 @@ angular.module('ThreatKB').controller('ImportController',
             $scope.shared_owner = null;
             $scope.users = Users.query();
             $scope.default_mapping = Cfg_settings.get({key: "DEFAULT_METADATA_MAPPING"});
+            $scope.resurrect_retired_artifacts = true;
 
             $scope.block_message = "Committing Artifacts. This might take awhile, we're doing lots of advanced processing...";
             $scope.block_extract_message = "Extracting Artifacts. This might take awhile, we're doing lots of advanced processing...";
@@ -34,6 +35,7 @@ angular.module('ThreatKB').controller('ImportController',
                                 data: {
                                     file: file,
                                     autocommit: $scope.autocommit,
+                                    resurrect_retired_artifacts: $scope.resurrect_retired_artifacts,
                                     shared_reference: $scope.shared_reference,
                                     shared_description: $scope.shared_description,
                                     shared_state: $scope.shared_state,
@@ -97,19 +99,29 @@ angular.module('ThreatKB').controller('ImportController',
                 blockUI.start($scope.block_message);
 
                 var field_mapping = JSON.parse($scope.default_mapping.value);
-                Import.commit_artifacts(artifacts_to_commit, $scope.shared_reference, $scope.shared_description, $scope.shared_state.state.state, $scope.shared_owner, $scope.extract_ip, $scope.extract_dns, $scope.extract_signature, field_mapping).then(function (data) {
+                Import.commit_artifacts(artifacts_to_commit, $scope.resurrect_retired_artifacts, $scope.shared_reference, $scope.shared_description, $scope.shared_state.state.state, $scope.shared_owner, $scope.extract_ip, $scope.extract_dns, $scope.extract_signature, field_mapping).then(function (data) {
                     blockUI.stop();
                     var ttl = 3000;
                     var message = "";
                     if (data.committed) {
                         message = "Successfully committed " + data.committed.length + " artifacts.<BR><BR>";
                     }
+
+                    if (data.resurrected) {
+                        message += "There were " + data.resurrected.length + " resurrected artifacts.<BR><BR>";
+                        for (var resurrected in data.resurrected) {
+                            message += data.resurrected[resurrected] + "<BR>";
+                        }
+                        message += "<BR>";
+                    }
+
                     if (data.duplicates) {
                         ttl = -1;
                         message += "There were " + data.duplicates.length + " duplicates that were not committed.<BR><BR>";
                         for (var duplicate in data.duplicates) {
                             message += data.duplicates[duplicate].artifact + "<BR>";
                         }
+                        message += "<BR>";
                     }
 
                     growl.info(message, {
@@ -117,11 +129,7 @@ angular.module('ThreatKB').controller('ImportController',
                         disableCountDown: true
                     });
                     $scope.clear();
-                    },
-                    function (error) {
-                        blockUI.stop();
-                        growl.error(error, {ttl: -1});
-                    });
+                });
             };
 
             $scope.import_artifacts = function () {
@@ -134,28 +142,38 @@ angular.module('ThreatKB').controller('ImportController',
                 }
 
                 var field_mapping = JSON.parse($scope.default_mapping.value);
-                Import.import_artifacts($scope.import_text, $scope.autocommit, $scope.shared_reference, $scope.shared_description, $scope.shared_state.state.state, $scope.shared_owner, $scope.extract_ip, $scope.extract_dns, $scope.extract_signature, field_mapping).then(function (data) {
-                        if ($scope.autocommit) {
-                            blockUI.stop();
-                            var message = "";
-                            if (data.committed) {
-                                message = "Successfully committed " + data.committed.length + " artifacts.<BR><BR>";
-                            }
-                            if (data.duplicates) {
-                                message += "There were " + data.duplicates.length + " duplicates that were not committed.<BR><BR>";
-                                for (var key in data.duplicates) {
-                                    message += data.duplicates[key].artifact + "<BR>";
-                                }
-                            }
+                Import.import_artifacts($scope.import_text, $scope.autocommit, $scope.resurrect_retired_artifacts, $scope.shared_reference, $scope.shared_description, $scope.shared_state.state.state, $scope.shared_owner, $scope.extract_ip, $scope.extract_dns, $scope.extract_signature, field_mapping).then(function (data) {
+                    if ($scope.autocommit) {
+                        blockUI.stop();
+                        var message = "";
+                        if (data.committed) {
+                            message = "Successfully committed " + data.committed.length + " artifacts.<BR><BR>";
+                        }
 
-                            if (data.errors) {
-                                message += "There were " + data.errors.length + " errors that were not committed.<BR><BR>";
+                        if (data.resurrected) {
+                            message += "There were " + data.resurrected.length + " resurrected artifacts.<BR><BR>";
+                            for (var resurrected in data.resurrected) {
+                                message += data.resurrected[resurrected] + "<BR>";
                             }
+                            message += "<BR>";
+                        }
 
-                            growl.info(message, {
-                                ttl: 3000,
-                                disableCountDown: true
-                            });
+                        if (data.duplicates) {
+                            message += "There were " + data.duplicates.length + " duplicates that were not committed.<BR><BR>";
+                            for (var key in data.duplicates) {
+                                message += data.duplicates[key].artifact + "<BR>";
+                            }
+                            message += "<BR>";
+                        }
+
+                        if (data.errors) {
+                            message += "There were " + data.errors.length + " errors that were not committed.<BR><BR>";
+                        }
+
+                        growl.info(message, {
+                            ttl: 3000,
+                            disableCountDown: true
+                        });
                             $scope.clear();
                         } else {
                             if (data.length > 0) {
@@ -171,8 +189,7 @@ angular.module('ThreatKB').controller('ImportController',
                             }
                         }
                     }, function (error) {
-                    blockUI.stop();
-                    growl.error(error, {ttl: -1});
+                    growl.error(error.data, {ttl: -1});
                     }
                 );
             };
@@ -180,6 +197,7 @@ angular.module('ThreatKB').controller('ImportController',
             $scope.clear = function () {
                 $scope.import_text = "";
                 $scope.autocommit = false;
+                $scope.resurrect_retired_artifacts = true;
                 $scope.artifacts = null;
                 $scope.checked_indexes = [];
                 $scope.shared_reference = "";

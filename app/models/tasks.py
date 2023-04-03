@@ -16,7 +16,7 @@ class Tasks(db.Model):
     state = db.Column(db.String(32), index=True)
     active = db.Column(db.Boolean, nullable=False, default=True)
     title = db.Column(db.String(256), index=True)
-    description = db.Column(db.String(2048), index=True)
+    description = db.Column(db.TEXT(), index=True)
     final_artifact = db.Column(db.String(4096))
 
     created_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
@@ -86,13 +86,11 @@ def task_modified(mapper, connection, target):
                                       user_id=target.modified_user_id)
 
         changes = activity_log.get_modified_changes(target)
-        if changes["long"].__len__() > 0:
+        if changes.__len__() > 0:
             activity_log.log_activity(connection=connection,
                                       activity_type=list(ACTIVITY_TYPE.keys())[list(ACTIVITY_TYPE.keys()).index("ARTIFACT_MODIFIED")],
                                       activity_text="'%s' modified with changes: %s"
-                                                    % (target.title, ', '.join(map(str, changes["long"]))),
-                                      activity_text_short="'%s' modified fields are: %s"
-                                                    % (target.title, ', '.join(map(str, changes["short"]))),
+                                                    % (target.title, ', '.join(map(str, changes))),
                                       activity_date=target.date_modified,
                                       entity_type=ENTITY_MAPPING["TASK"],
                                       entity_id=target.id,

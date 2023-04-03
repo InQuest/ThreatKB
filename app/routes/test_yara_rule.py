@@ -10,7 +10,6 @@ import yara
 import re
 import uuid
 import subprocess
-import tempfile
 
 from sqlalchemy import func, not_, text
 from sqlalchemy.ext.serializer import loads, dumps
@@ -116,7 +115,12 @@ def test_yara_rule_rest(rule_id):
                 file_store_path = Cfg_settings.get_setting("FILE_STORE_PATH")
                 if not file_store_path:
                     raise Exception('FILE_STORE_PATH configuration setting not set.')
-                files_to_test.append(f.get_file_path())
+                print(f"path is {f.id} {f.filename} {f.full_path}")
+                files_to_test.append(f.full_path)
+                #files_to_test.append(os.path.join(file_store_path,
+                #                                  str(f.entity_type) if f.entity_type is not None else "",
+                #                                  str(f.entity_id) if f.entity_id is not None else "",
+                #                                  str(f.filename)))
         if not is_neg_test:
             return jsonify(test_yara_rule(yara_rule_entity, files_to_test, current_user.id, False, is_neg_test)), 200
         else:
@@ -301,8 +305,7 @@ def get_yara_rule(yara_rule_entity):
 
 def perform_rule_match(rule, file_path, manager_dict, yara_command, yara_test_regex):
     start = time.time()
-    temp_dir = tempfile.gettempdir()
-    rule_temp_path = "%s%s%s.yar" % (temp_dir, os.sep, str(uuid.uuid4()).replace("-", ""))
+    rule_temp_path = "/tmp/%s.yar" % (str(uuid.uuid4()).replace("-", ""))
     with open(rule_temp_path, "w") as f:
         f.write(rule)
 
@@ -312,13 +315,13 @@ def perform_rule_match(rule, file_path, manager_dict, yara_command, yara_test_re
     stdout, stderr = proc.communicate()
     end = time.time()
     manager_dict['duration'] = end - start
-    manager_dict['stdout'] = stdout
-    manager_dict['stderr'] = stderr
+    manager_dict['stdout'] = stdout.decode()
+    manager_dict['stderr'] = stderr.decode()
     manager_dict['file_path'] = file_path
     manager_dict['command'] = yara_command
     manager_dict['command_match_test_regex'] = yara_test_regex
 
-    if re.search(yara_test_regex, stdout):
+    if re.search(yara_test_regex, manager_dict['stdout']):
         manager_dict['match'] = True
     else:
         manager_dict['match'] = False

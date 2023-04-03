@@ -1,11 +1,15 @@
 from flask import abort, jsonify, request, send_file, json, Response
 from flask_login import login_required, current_user
-from app import app, db, admin_only, auto, nocache
+from app import app, db, admin_only, auto, nocache, cache
 from app.models import releases, cfg_settings
 import tempfile
 import uuid
 import time
-from distutils import util
+import distutils
+from app.models import yara_rule, releases
+import datetime
+from sqlalchemy import bindparam
+
 
 @app.route('/ThreatKB/releases', methods=['GET'])
 @auto.doc()
@@ -42,7 +46,7 @@ def get_releases_latest():
     Return: list of release dictionaries"""
 
     count = request.args.get("count", None)
-    short = util.strtobool(request.args.get("short", "True"))
+    short = distutils.util.strtobool(request.args.get("short", "True"))
 
     try:
         count = int(count)
@@ -106,7 +110,7 @@ def generate_artifact_export(release_id):
     content.seek(0)
 
     tfile = "%s/%s" % (tempfile.gettempdir(), str(uuid.uuid4()).replace("-", ""))
-    with open(tfile, "w") as t:
+    with open(tfile, "wb") as t:
         t.write(content.read())
     return send_file(tfile, attachment_filename=filename, as_attachment=True)
 
@@ -119,7 +123,7 @@ def create_release():
     """Create new release
     From Data: name (str), is_test_release (bool)
     Return: release dictionary"""
-    short = util.strtobool(request.args.get('short', "true"))
+    short = distutils.util.strtobool(request.args.get('short', "true"))
 
     start_time = time.time()
 
@@ -144,6 +148,47 @@ def create_release():
     db.session.add(release)
     db.session.commit()
 
+    if not release.is_test_release:
+        release_data = release.release_data_dict
+        release_yara_rule_history_list = []
+        for sig_id in release_data["Signatures"]["Signatures"].keys():
+            revision = release_data["Signatures"]["Signatures"][sig_id]["revision"]
+            sig_id = int(sig_id)
+            revision = int(revision)
+
+            revision_entity = db.session.query(yara_rule.Yara_rule_history) \
+                .filter_by(yara_rule_id=sig_id) \
+                .filter_by(revision=revision) \
+                .first()
+
+            if not revision_entity:
+                yr = db.session.query(yara_rule.Yara_rule).get(sig_id)
+                latest = yara_rule.Yara_rule_history(
+                    date_created=datetime.datetime.now(),
+                    revision=revision,
+                    user_id=current_user.id,
+                    yara_rule_id=sig_id,
+                    state=yr.state,
+                    rule_json=json.dumps(yr.to_revision_dict())
+                )
+                db.session.add(latest)
+                db.session.flush()
+                revision_entity = latest
+
+            release_yara_rule_history_list.append(
+                {"yara_rules_history_id": revision_entity.id, "release_id": release.id})
+
+        if release_yara_rule_history_list:
+            app.logger.debug(
+                f"Inserting {len(release_yara_rule_history_list)} entries into release yara rule history table")
+            app.logger.debug(f"first ten are {release_yara_rule_history_list[0:9]}")
+            db.session.execute(releases.ReleaseYaraRuleHistory.__table__.insert().values(
+                yara_rules_history_id=bindparam("yara_rules_history_id"),
+                release_id=bindparam("release_id")
+            ), release_yara_rule_history_list)
+            db.session.commit()
+
+    cache.delete_memoized(releases.get_release_yara_rule_history_mapping)
     r = release.to_dict(short=short)
     r["build_time_seconds"] = "{0:.2f}".format(time.time() - start_time)
     return jsonify(r)
@@ -160,6 +205,7 @@ def delete_release(release_id):
     if not entity:
         abort(404)
 
+    db.session.query(releases.ReleaseYaraRuleHistory).filter(releases.ReleaseYaraRuleHistory.release_id==entity.id).delete()
     db.session.delete(entity)
     db.session.commit()
     return jsonify(''), 204

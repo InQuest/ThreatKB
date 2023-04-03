@@ -31,7 +31,7 @@ def get_cfg_category_range_mapping(id):
     return jsonify(entity.to_dict())
 
 
-@app.route('/ThreatKB/cfg_category_range_mapping', methods=['POST'])
+@app.route('/ThreatKB/cfg_category_range_mapping', methods=['POST', 'PUT'])
 @auto.doc()
 @login_required
 @admin_only()

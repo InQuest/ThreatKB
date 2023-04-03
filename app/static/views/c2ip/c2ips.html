@@ -14,24 +14,19 @@
                 </h4>
             </div>
             <div class="modal-body">
-                <div class="form-group" ng-if="batchFields.includes('owner_user')">
+                <div class="form-group">
                     <label>Owner</label>
                     <ui-select ng-model="batch.owner" name="owner">
                         <ui-select-match placeholder="Select an owner ...">
                             <small><span ng-bind="$select.selected.email"></span></small>
                         </ui-select-match>
                         <ui-select-choices
-                                repeat="person in (users | filter: $select.search) track by person.id">
+                            repeat="person in (users | filter: $select.search) track by person.id">
                             <small><span ng-bind="person.email"></span></small>
                         </ui-select-choices>
                     </ui-select>
                 </div>
-                <div class="form-group" ng-if="batchFields.includes('description')">
-                    <label>Description</label>
-                    <textarea class="form-control" placeholder="Enter description..." rows="6"
-                              ng-model="batch.description"></textarea>
-                </div>
-                <div class="form-group" ng-if="batchFields.includes('state')">
+                <div class="form-group">
                     <label>State</label>
                     <ui-select ng-model="batch.state" name="state">
                         <ui-select-match placeholder="Select a state or press delete to clear..">
@@ -42,78 +37,42 @@
                         </ui-select-choices>
                     </ui-select>
                 </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea class="form-control" placeholder="Enter description..." rows="6"
+                              ng-model="batch.description"></textarea>
+                </div>
                 <div class="form-group" ng-if="batchFields.includes('asn')">
                     <label>ASN</label>
                     <input class="form-control" ng-model="batch.asn" ng-maxlength="128"/>
                 </div>
                 <div class="form-group" ng-if="batchFields.includes('country')">
                     <label>Country</label>
-                    <input class="form-control" ng-model="batch.country" ng-maxlength="64"/>
-                </div>
-                <div class="form-group" ng-if="batchFields.includes('expiration_timestamp')">
-                    <label>Expiration Timestamp</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control"
-                               date-formatter uib-datepicker-popup="yyyy-MM-dd"
-                               alt-input-formats="['yyyy-MM-ddTHH:mm:ss']"
-                               datepicker-options="dateOptions" close-text="Close"
-                               is-open="datepickers['expiration_timestamp']"
-                               ng-model="batch.expiration_timestamp"/>
-                        <span class="input-group-btn">
-                            <button type="button" class="btn btn-default"
-                                    ng-click="openDatepicker('expiration_timestamp')"><i
-                                    class="glyphicon glyphicon-calendar"></i></button>
-                        </span>
-                    </div>
-                </div>
-                <!-- START DYNAMICALLY GENERATED CONTENT -->
-                <div class="form-group" ng-repeat="m in metadata[0].string"
-                     ng-if="batchMetadata.length > 0 && batchMetadata.includes(m.key)">
-                    <label>{{ m.key }}</label>
-                    <input class="form-control" ng-model="batch.metadata_values[m.key].value">
-                </div>
-                <div class="form-group" ng-repeat="m in metadata[0].integer"
-                     ng-if="batchMetadata.length > 0 && batchMetadata.includes(m.key)">
-                    <label>{{ m.key }}</label>
-                    <input class="form-control" ng-model="batch.metadata_values[m.key].value" type="number">
-                </div>
-                <div class="form-group" ng-repeat="m in metadata[0].date"
-                     ng-if="batchMetadata.length > 0 && batchMetadata.includes(m.key)">
-                    <label>{{ m.key }}</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control"
-                               date-formatter uib-datepicker-popup="yyyy-MM-dd"
-                               alt-input-formats="['yyyy-MM-ddTHH:mm:ss']"
-                               datepicker-options="dateOptions" close-text="Close"
-                               is-open="datepickers[m.key]"
-                               ng-model="batch.metadata_values[m.key].value"/>
-                        <span class="input-group-btn">
-                            <button type="button" class="btn btn-default" ng-click="openDatepicker(m.key)"><i
-                                    class="glyphicon glyphicon-calendar"></i></button>
-                        </span>
-                    </div>
-                </div>
-                <div class="form-group" ng-repeat="m in metadata[0].multiline_comment" rows="2"
-                     ng-if="batchMetadata.length > 0 && batchMetadata.includes(m.key)">
-                    <label>{{ m.key }}</label>
-                    <textarea class="form-control" ng-model="batch.metadata_values[m.key].value"></textarea>
-                </div>
-                <div class="form-group" ng-repeat="m in metadata[0].select"
-                     ng-if="batchMetadata.length > 0 && batchMetadata.includes(m.key)">
-                    <label>{{ m.key }}</label>
-                    <ui-select ng-model="batch.metadata_values[m.key].value"
-                               on-select="update_selected_metadata(m, $select.selected)" ng-required="m.required">
-                        <ui-select-match placeholder="Select an option or press delete to clear...">
-                            <small><span ng-bind="$select.selected.choice || option.choice"></span></small>
+                    <ui-select ng-model="batch.country">
+                        <ui-select-match placeholder="Select a Country or press delete to clear..">
+                            <img ng-src="../../images/flags/icon-flag-{{ $select.selected.countryCode2 | lowercase }}.svg" style="max-width: 20px;"/>
+                            <small><div ng-bind-html="(($select.selected.countryCode2) + ($select.selected.countryCode2 ? ' / ' : 'Select a Country or press delete to clear..') + ($select.selected.countryName)) || ((batch.country.countryCode2) + (batch.country.countryCode2 ? ' / ' : 'Select a Country or press delete to clear..') + (batch.country.countryName))" style="display: inline"></div></small>
                         </ui-select-match>
-                        <ui-select-choices
-                                repeat="option in (m.choices | filter: $select.search) track by option.id">
-                            <small><span>{{ option.choice }}</span></small>
+                        <ui-select-choices repeat="country in (countries | filter: $select.search) track by country.countryCode2">
+                            <img ng-src="../../images/flags/icon-flag-{{ country.countryCode2 | lowercase }}.svg" style="max-width: 20px;"/>
+                            <small><div ng-bind-html="((country.countryCode2) + ' / ' + (country.countryName)) | highlight: $select.search" style="display: inline"></div></small>
                         </ui-select-choices>
                     </ui-select>
                 </div>
-                <!-- /START DYNAMICALLY GENERATED CONTENT -->
-                <div class="form-group" ng-if="batchFields.includes('tags')">
+                <div class="form-group">
+                    <label>Expiration Timestamp</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="expiration_timestamp" ng-required="false"
+                               date-formatter uib-datepicker-popup="yyyy-MM-dd" alt-input-formats="['yyyy-MM-ddTHH:mm:ss']"
+                               datepicker-options="dateOptions" close-text="Close"
+                               is-open="datepickers['expiration_timestamp']"
+                               ng-model="batch.expiration_timestamp" />
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-default" ng-click="openDatepicker('expiration_timestamp')"><i class="glyphicon glyphicon-calendar"></i></button>
+                        </span>
+                    </div>
+                </div>
+                <div class="form-group">
                     <label>Tags</label>
                     <tags-input ng-model="batch.tags">
                         <auto-complete source="loadTags($query)"
@@ -122,12 +81,6 @@
                                        load-on-empty="true">
                         </auto-complete>
                     </tags-input>
-                </div>
-                <div class="form-group" ng-if="batchFields.includes('comments')">
-                    <label>Comment</label>
-
-                    <textarea class="form-control" placeholder="Add a comment..."
-                              rows="4" ng-model="batch.comments"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
@@ -177,14 +130,12 @@
 
             <div class="form-group" ng-if="c2ip.date_created">
                 <label>Date Created</label>
-                <input readonly type="text" class="form-control"
-                       ng-value="c2ip.date_created | date:'yyyy-MM-dd hh:mm:ss'"/>
+                <input readonly type="text" class="form-control" ng-value="c2ip.date_created | date:'yyyy-MM-dd hh:mm:ss'"/>
             </div>
 
             <div class="form-group" ng-if="c2ip.date_modified">
                 <label>Date Modified</label>
-                <input readonly type="text" class="form-control"
-                       ng-value="c2ip.date_modified | date:'yyyy-MM-dd hh:mm:ss'"/>
+                <input readonly type="text" class="form-control" ng-value="c2ip.date_modified | date:'yyyy-MM-dd hh:mm:ss'"/>
             </div>
 
             <div class="form-group" ng-if="c2ip.description">
@@ -204,13 +155,18 @@
 
             <div class="form-group" ng-if="c2ip.country">
                 <label>Country</label>
-                <input readonly type="text" class="form-control" ng-model="c2ip.country"/>
+                <br />
+                <img ng-if="c2ip.country" ng-src="../../images/flags/icon-flag-{{ c2ip.country.countryCode2 | lowercase }}.svg" style="max-width: 20px;"/>
+                <small><div ng-bind-html="((c2ip.country.countryCode2) + ' / ' + (c2ip.country.countryName))" style="display: inline"></div></small>
             </div>
 
             <div class="form-group" ng-if="c2ip.expiration_timestamp">
                 <label>Expiration Timestamp</label>
-                <input readonly type="text" class="form-control" name="expiration_timestamp"
-                       ng-model="c2ip.expiration_timestamp"/>
+                <input readonly type="text" class="form-control" name="expiration_timestamp" ng-required="false"
+                       date-formatter uib-datepicker-popup="yyyy-MM-dd" alt-input-formats="['yyyy-MM-ddTHH:mm:ss']"
+                       datepicker-options="dateOptions" close-text="Close"
+                       is-open="datepickers['expiration_timestamp']"
+                       ng-model="c2ip.expiration_timestamp" />
             </div>
 
             <!-- START DYNAMICALLY GENERATED CONTENT -->
@@ -236,30 +192,31 @@
 
             <div class="form-group" ng-repeat="m in metadata[0].date" ng-if="c2ip.id">
                 <label>{{ m.key }}</label>
+                <!-- <input readonly class="form-control" ng-model="c2ip.metadata_values[m.key].value" type="date"
+                       format-date/> -->
                 <div class="input-group">
                     <input type="text" class="form-control" ng-required="m.required"
-                           date-formatter uib-datepicker-popup="yyyy-MM-dd" alt-input-formats="['yyyy-MM-ddTHH:mm:ss']"
-                           datepicker-options="dateOptions" close-text="Close"
-                           is-open="datepickers[m.key]"
-                           ng-model="c2ip.metadata_values[m.key].value"/>
+                        date-formatter uib-datepicker-popup="yyyy-MM-dd" alt-input-formats="['yyyy-MM-ddTHH:mm:ss']"
+                        datepicker-options="dateOptions" close-text="Close"
+                        is-open="datepickers[m.key]"
+                        ng-model="c2ip.metadata_values[m.key].value" />
                     <span class="input-group-btn">
-                        <button type="button" class="btn btn-default" ng-click="openDatepicker(m.key)"><i
-                                class="glyphicon glyphicon-calendar"></i></button>
+                        <button type="button" class="btn btn-default" ng-click="openDatepicker(m.key)"><i class="glyphicon glyphicon-calendar"></i></button>
                     </span>
                 </div>
             </div>
 
             <div class="form-group" ng-repeat="m in metadata[0].date" ng-if="!c2ip.id">
                 <label>{{ m.key }}</label>
+                <!-- <input readonly class="form-control" ng-model="m.default" type="date" format-date> -->
                 <div class="input-group">
                     <input type="text" class="form-control" ng-required="m.required"
-                           date-formatter uib-datepicker-popup="yyyy-MM-dd" alt-input-formats="['yyyy-MM-ddTHH:mm:ss']"
-                           datepicker-options="dateOptions" close-text="Close"
-                           is-open="datepickers[m.key]"
-                           ng-model="m.default"/>
+                        date-formatter uib-datepicker-popup="yyyy-MM-dd" alt-input-formats="['yyyy-MM-ddTHH:mm:ss']"
+                        datepicker-options="dateOptions" close-text="Close"
+                        is-open="datepickers[m.key]"
+                        ng-model="m.default" />
                     <span class="input-group-btn">
-                        <button type="button" class="btn btn-default" ng-click="openDatepicker(m.key)"><i
-                                class="glyphicon glyphicon-calendar"></i></button>
+                        <button type="button" class="btn btn-default" ng-click="openDatepicker(m.key)"><i class="glyphicon glyphicon-calendar"></i></button>
                     </span>
                 </div>
             </div>
@@ -301,7 +258,7 @@
                                     ng-repeat="comment in c2ip.comments | orderBy:'-date_created'">
                                     <div>
                                         <pre
-                                                style="word-break: normal; white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word;">{{ comment.comment }}</pre>
+                                            style="word-break: normal; white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word;">{{ comment.comment }}</pre>
                                         <span>{{ comment.user.email }}&nbsp;<small>{{ comment.date_created | date:'medium'  }}</small></span>
                                     </div>
                                 </li>
@@ -381,7 +338,7 @@
                             <small><span ng-bind="$select.selected.email || c2ip.owner_user.email"></span></small>
                         </ui-select-match>
                         <ui-select-choices
-                                repeat="person in (users | filter: $select.search) track by person.id">
+                            repeat="person in (users | filter: $select.search) track by person.id">
                             <small><span ng-bind="person.email"></span></small>
                         </ui-select-choices>
                     </ui-select>
@@ -433,28 +390,30 @@
 
                 <div class="form-group">
                     <label>Country</label>
-                    <span class="error" ng-show="form.country.$error.minlength">Must be at least  characters.</span>
-                    <span class="error" ng-show="form.country.$error.maxlength">Must be at most 64 characters.</span>
-
-                    <input class="form-control" name="country"
-                           ng-model="c2ip.country" ng-required="false"
-                           ng-maxlength="64"/>
+                    <ui-select ng-model="c2ip.country">
+                        <ui-select-match placeholder="Select a Country or press delete to clear..">
+                            <img ng-src="../../images/flags/icon-flag-{{ $select.selected.countryCode2 | lowercase }}.svg" style="max-width: 20px;"/>
+                            <small><div ng-bind-html="(($select.selected.countryCode2) + ($select.selected.countryCode2 ? ' / ' : 'Select a Country or press delete to clear..') + ($select.selected.countryName)) || ((c2ip.country.countryCode2) + (c2ip.country.countryCode2 ? ' / ' : 'Select a Country or press delete to clear..') + (c2ip.country.countryName))" style="display: inline"></div></small>
+                        </ui-select-match>
+                        <ui-select-choices repeat="country in (countries | filter: $select.search) track by country.countryCode2">
+                            <img ng-src="../../images/flags/icon-flag-{{ country.countryCode2 | lowercase }}.svg" style="max-width: 20px;"/>
+                            <small><div ng-bind-html="((country.countryCode2) + ' / ' + (country.countryName)) | highlight: $select.search" style="display: inline"></div></small>
+                        </ui-select-choices>
+                    </ui-select>
                 </div>
-
                 <div class="form-group">
                     <label>Expiration Timestamp</label>
 
                     <div class="input-group">
                         <input type="text" class="form-control" name="expiration_timestamp" ng-required="false"
-                               date-formatter uib-datepicker-popup="yyyy-MM-dd"
-                               alt-input-formats="['yyyy-MM-ddTHH:mm:ss']"
+                               date-formatter uib-datepicker-popup="yyyy-MM-dd" alt-input-formats="['yyyy-MM-ddTHH:mm:ss']"
                                datepicker-options="dateOptions" close-text="Close"
                                is-open="datepickers['expiration_timestamp']"
-                               ng-model="c2ip.expiration_timestamp"/>
+                               ng-model="c2ip.expiration_timestamp" />
                         <span class="input-group-btn">
-                            <button type="button" class="btn btn-default"
-                                    ng-click="openDatepicker('expiration_timestamp')"><i
-                                    class="glyphicon glyphicon-calendar"></i></button>
+                            <button type="button" class="btn btn-default" ng-click="openDatepicker('expiration_timestamp')">
+                                <i class="glyphicon glyphicon-calendar"></i>
+                            </button>
                         </span>
                     </div>
                 </div>
@@ -493,14 +452,12 @@
                            ng-required="m.required" format-date/> -->
                     <div class="input-group">
                         <input type="text" class="form-control" ng-required="m.required"
-                               date-formatter uib-datepicker-popup="yyyy-MM-dd"
-                               alt-input-formats="['yyyy-MM-ddTHH:mm:ss']"
-                               datepicker-options="dateOptions" close-text="Close"
-                               is-open="datepickers[m.key]"
-                               ng-model="c2ip.metadata_values[m.key].value"/>
+                            date-formatter uib-datepicker-popup="yyyy-MM-dd" alt-input-formats="['yyyy-MM-ddTHH:mm:ss']"
+                            datepicker-options="dateOptions" close-text="Close"
+                            is-open="datepickers[m.key]"
+                            ng-model="c2ip.metadata_values[m.key].value" />
                         <span class="input-group-btn">
-                            <button type="button" class="btn btn-default" ng-click="openDatepicker(m.key)"><i
-                                    class="glyphicon glyphicon-calendar"></i></button>
+                            <button type="button" class="btn btn-default" ng-click="openDatepicker(m.key)"><i class="glyphicon glyphicon-calendar"></i></button>
                         </span>
                     </div>
                 </div>
@@ -511,14 +468,12 @@
                     <!-- <input class="form-control" ng-model="m.default" type="date" ng-required="m.required" format-date> -->
                     <div class="input-group">
                         <input type="text" class="form-control" ng-required="m.required"
-                               date-formatter uib-datepicker-popup="yyyy-MM-dd"
-                               alt-input-formats="['yyyy-MM-ddTHH:mm:ss']"
-                               datepicker-options="dateOptions" close-text="Close"
-                               is-open="datepickers[m.key]"
-                               ng-model="m.default"/>
+                            date-formatter uib-datepicker-popup="yyyy-MM-dd" alt-input-formats="['yyyy-MM-ddTHH:mm:ss']"
+                            datepicker-options="dateOptions" close-text="Close"
+                            is-open="datepickers[m.key]"
+                            ng-model="m.default" />
                         <span class="input-group-btn">
-                            <button type="button" class="btn btn-default" ng-click="openDatepicker(m.key)"><i
-                                    class="glyphicon glyphicon-calendar"></i></button>
+                            <button type="button" class="btn btn-default" ng-click="openDatepicker(m.key)"><i class="glyphicon glyphicon-calendar"></i></button>
                         </span>
                     </div>
                 </div>
@@ -546,7 +501,7 @@
                             </small>
                         </ui-select-match>
                         <ui-select-choices
-                                repeat="option in (m.choices | filter: $select.search) track by option.id">
+                            repeat="option in (m.choices | filter: $select.search) track by option.id">
                             <small><span>{{ option.choice }}</span></small>
                         </ui-select-choices>
                     </ui-select>
@@ -561,7 +516,7 @@
                             <small><span ng-bind="$select.selected.choice || option.choice"></span></small>
                         </ui-select-match>
                         <ui-select-choices
-                                repeat="option in (m.choices | filter: $select.search) track by option.id">
+                            repeat="option in (m.choices | filter: $select.search) track by option.id">
                             <small><span>{{ option.choice }}</span></small>
                         </ui-select-choices>
                     </ui-select>
@@ -596,7 +551,7 @@
                         <span class="input-group-btn" style="height:10px;">
                             <button class="btn btn-secondary" type="button"
                                     ng-click="add_comment(c2ip.id)" style="height:100%;"><span
-                                    class="glyphicon glyphicon-plus"></span></button>
+                                class="glyphicon glyphicon-plus"></span></button>
                         </span>
                     </div>
                     <div ng-if="c2ip.comments && c2ip.comments.length" style="padding-top:3px;">
@@ -608,13 +563,12 @@
                                         ng-repeat="comment in c2ip.comments | orderBy:'-date_created'">
                                         <div>
                                             <pre
-                                                    style="word-break: normal; white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word;">{{ comment.comment }}</pre>
+                                                style="word-break: normal; white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word;">{{ comment.comment }}</pre>
                                             <span>{{ comment.user.email }}&nbsp;<small>{{ comment.date_created | date:'medium'  }}</small></span>
                                             <button type="button" class="btn btn-xs pull-right"
                                                     confirmed-click="delete_comment({{ c2ip.id }},{{ comment.id }})"
                                                     ng-confirm-click="Are you sure you want to delete comment?"><span
-                                                    style="color: red;"
-                                                    class="glyphicon glyphicon-remove-circle"></span>
+                                                style="color: red;" class="glyphicon glyphicon-remove-circle"></span>
                                             </button>
                                         </div>
                                     </li>
@@ -652,8 +606,7 @@
         <button type="button" class="btn btn-secondary" ng-disabled="!checked_counter" ng-click="download_ips()">
             Download ({{ checked_counter }})
         </button>
-        <button type="button" class="btn btn-secondary" ng-if="batchEditableColumns.length > 0"
-                ng-disabled="!checked_counter || checked_counter<2"
+        <button type="button" class="btn btn-secondary" ng-disabled="!checked_counter || checked_counter<2"
                 ng-click="open_batch()">
             Batch Edit ({{ checked_counter }})
         </button>

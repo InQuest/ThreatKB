@@ -1,4 +1,19 @@
-from app import db
+from app import db, cache
+from app.models.cfg_settings import Cfg_settings
+from app.models.cfg_states import Cfg_states, get_cfg_states
+import distutils
+import re
+import time
+from ipaddr import IPAddress, IPNetwork
+
+
+class WhitelistException(Exception):
+    pass
+
+
+@cache.memoize(timeout=300)
+def get_whitelist_cache():
+    return Whitelist.query.all()
 
 
 class Whitelist(db.Model):
@@ -26,3 +41,56 @@ class Whitelist(db.Model):
             created_time=self.created_time.isoformat(),
             modified_time=self.modified_time.isoformat()
         )
+
+    @staticmethod
+    def hits_whitelist(indicator, state):
+        whitelist_enabled = Cfg_settings.get_setting("ENABLE_IP_WHITELIST_CHECK_ON_SAVE")
+        whitelist_states = Cfg_settings.get_setting("WHITELIST_STATES")
+
+        if not whitelist_enabled or not distutils.util.strtobool(whitelist_enabled) or not whitelist_states:
+            return True
+
+        states = []
+
+        for s in whitelist_states.split(","):
+            if s in get_cfg_states():
+                states.append(s)
+
+        if state in states:
+            new_ip = indicator
+
+            abort_import = False
+
+            whitelists = get_whitelist_cache()
+
+            for whitelist in whitelists:
+                wa = str(whitelist.whitelist_artifact)
+
+                try:
+                    if str(IPAddress(new_ip)) == str(IPAddress(wa)):
+                        abort_import = True
+                        break
+                except ValueError:
+                    pass
+
+                try:
+                    if IPAddress(new_ip) in IPNetwork(wa):
+                        abort_import = True
+                        break
+                except ValueError:
+                    pass
+
+                try:
+                    regex = re.compile(wa)
+                    result = regex.search(new_ip)
+                except:
+                    result = False
+
+                if result:
+                    abort_import = True
+                    break
+
+            if abort_import:
+                return True
+
+        return False

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="180px" height="120px" viewBox="0 0 180 120" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 39.1 (31720) - http://www.bohemiancoding.com/sketch -->
+    <title>icon-flag-tg</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="Oval-1-copy" fill="#CA4638" x="0" y="0" width="70" height="72"></rect>
+        <polygon id="Star-1" fill="#FFFFFF" points="34.9999998 41.2000001 27.3587923 46.5172214 30.0545061 37.6068886 22.6362652 31.9827794 31.9435176 31.7931109 35.0000002 23 38.0564845 31.7931124 47.3637368 31.9827855 39.9454935 37.6068899 42.6412074 46.5172216"></polygon>
+        <polygon id="path-1" fill="#479951" points="70 48 70 72 180 72 180 48"></polygon>
+        <polygon id="path-1-path" fill="#479951" points="70 0 70 24 180 24 180 0"></polygon>
+        <polygon id="path-1-path" fill="#479951" points="0 96 0 120 180 120 180 96"></polygon>
+        <polygon id="path-2-path" fill="#E5B731" points="0 72 0 96 180 96 180 72"></polygon>
+        <polygon id="path-2" fill="#E5B731" points="70 24 70 48 180 48 180 24"></polygon>
+    </g>
+</svg>

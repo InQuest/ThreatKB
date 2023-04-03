@@ -1,10 +1,10 @@
-from distutils import util
+import distutils
 
 from app import app, db, auto, ENTITY_MAPPING
 from app.models import tasks, cfg_settings
 from flask import abort, jsonify, request, Response
 from flask_login import login_required, current_user
-from app.routes.batch import batch_update
+from app.routes.batch import batch_update, batch_delete
 from app.routes.bookmarks import is_bookmarked, delete_bookmarks
 
 from app.utilities import filter_entities
@@ -30,9 +30,9 @@ def get_all_tasks():
     sort_by = request.args.get('sort_by', False)
     sort_direction = request.args.get('sort_dir', 'ASC')
     exclude_totals = request.args.get('exclude_totals', False)
-    include_metadata = bool(util.strtobool(request.args.get('include_metadata', "false")))
-    include_tags = bool(util.strtobool(request.args.get('include_tags', "true")))
-    include_comments = bool(util.strtobool(request.args.get('include_comments', "true")))
+    include_metadata = bool(distutils.util.strtobool(request.args.get('include_metadata', "false")))
+    include_tags = bool(distutils.util.strtobool(request.args.get('include_tags', "true")))
+    include_comments = bool(distutils.util.strtobool(request.args.get('include_comments', "true")))
 
     response_dict = filter_entities(entity=tasks.Tasks,
                                     artifact_type=ENTITY_MAPPING["TASK"],
@@ -59,10 +59,10 @@ def get_tasks(id):
     Return: task dictionary"""
     entity = tasks.Tasks.query.get(id)
     if not entity:
-        abort(404, description="You have requested a resource that is not in the database")
+        abort(404)
 
     show_for_non_admin = cfg_settings.Cfg_settings.get_setting("ENABLE_NON_ADMIN_TASK_VISIBILITY")
-    show_for_non_admin = bool(util.strtobool(show_for_non_admin)) if show_for_non_admin else False
+    show_for_non_admin = bool(distutils.util.strtobool(show_for_non_admin)) if show_for_non_admin else False
 
     if not show_for_non_admin and \
             not (current_user.admin or entity.owner_user_id == current_user.id or entity.owner_user_id is None):
@@ -84,7 +84,7 @@ def create_tasks():
     entity = tasks.Tasks(
         title=request.json['title'],
         description=request.json['description'],
-        final_artifact=request.json['final_artifact'] if "final_artifact" in request.json else None,
+        final_artifact=request.json['final_artifact'],
         state=request.json['state']['state'] if 'state' in request.json['state'] else None,
         created_user_id=current_user.id,
         modified_user_id=current_user.id,
@@ -109,7 +109,7 @@ def update_tasks(id):
 
     entity.title = request.json['title']
     entity.description = request.json['description']
-    final_artifact = request.json['final_artifact'] if "final_artifact" in request.json else None,
+    entity.final_artifact = request.json['final_artifact']
     entity.state = request.json['state']['state'] if request.json['state'] and 'state' in request.json['state'] else \
         request.json['state']
     entity.created_user_id = current_user.id
@@ -139,7 +139,6 @@ def batch_update_tasks():
         return batch_update(batch=request.json['batch'],
                             artifact=tasks.Tasks,
                             session=db.session,
-                            entity_mapping=ENTITY_MAPPING["TASK"],
                             include_tags=False)
 
 
@@ -162,3 +161,21 @@ def delete_tasks(id):
     delete_bookmarks(ENTITY_MAPPING["TASK"], id, current_user.id)
 
     return jsonify(''), 204
+
+
+@app.route('/ThreatKB/tasks/batch/delete', methods=['PUT'])
+@auto.doc()
+@login_required
+def batch_delete_tasks():
+    """Batch delete task artifacts
+    From Data: batch {
+                 ids (array)
+               }
+    Return: Success Code"""
+
+    if 'batch' in request.json and request.json['batch']:
+        return batch_delete(batch=request.json['batch'],
+                            artifact=tasks.Tasks,
+                            session=db.session,
+                            entity_mapping=ENTITY_MAPPING["TASK"])
+
