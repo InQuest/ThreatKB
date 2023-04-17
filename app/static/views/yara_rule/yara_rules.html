@@ -79,13 +79,13 @@
             <button type="button" class="close"
                     ng-click="cancel()">&times;
             </button>
-            <button class="btn btn-sm  btn-primary" ng-if="yara_rule.id"
+            <span class="btn btn-sm  btn-primary" ng-if="yara_rule.id"
                     title="Copy Yara Rule to clipboard" tooltip-placement="bottom"
                     uib-tooltip="Copied Yara Rule!"
                     tooltip-trigger="'outsideClick'"
                     ngclipboard data-clipboard-text="{{ yara_rule.yara_rule_string }}">
                 Copy To Clipboard
-            </button>
+            </span>
             <a class="btn btn-sm  btn-primary" ng-if="yara_rule.id"
                ng-click="edit(yara_rule.id)">Edit
             </a>
@@ -285,13 +285,13 @@
 
                 <div class="pull-right" ng-if="yara_rule.id"
                      style="margin: 0 35px 0 0;">
-                    <button class="btn btn-sm  btn-primary" ng-if="yara_rule.id"
+                    <span class="btn btn-sm  btn-primary" ng-if="yara_rule.id"
                             title="Copy Yara Rule to clipboard" tooltip-placement="bottom"
                             uib-tooltip="Copied Yara Rule!"
                             tooltip-trigger="'outsideClick'"
                             ngclipboard data-clipboard-text="{{ yara_rule.yara_rule_string }}">
                         Copy To Clipboard
-                    </button>
+                    </span>
                     <button ng-if="negTestDir.value" type="button" class="btn btn-sm btn-primary"
                             ng-click="negTestSignature(yara_rule.id)">{{ testButtonTextNeg }}
                     </button>
