@@ -80,13 +80,13 @@
             <button type="button" class="close"
                     ng-click="cancel()">&times;
             </button>
-            <button class="btn btn-sm  btn-primary" ng-if="c2dns.id"
+            <span class="btn btn-sm  btn-primary" ng-if="c2dns.id"
                     title="Copy DNS to clipboard" tooltip-placement="bottom"
                     uib-tooltip="Copied DNS!"
                     tooltip-trigger="'outsideClick'"
                     ngclipboard data-clipboard-text="{{ c2dns.domain_name }}">
                 Copy To Clipboard
-            </button>
+            </span>
             <a class="btn btn-sm  btn-primary" ng-if="c2dns.id"
                ng-click="edit(c2dns.id)">Edit
             </a>
@@ -280,13 +280,13 @@
                 </h4>
 
                 <div class="pull-right" ng-if="c2dns.id" style="margin: 0 35px 0 0;">
-                    <button class="btn btn-sm  btn-primary" ng-if="c2dns.id"
+                    <span class="btn btn-sm  btn-primary" ng-if="c2dns.id"
                             title="Copy DNS to clipboard" tooltip-placement="bottom"
                             uib-tooltip="Copied DNS!"
                             tooltip-trigger="'outsideClick'"
                             ngclipboard data-clipboard-text="{{ c2dns.domain_name }}">
                         Copy To Clipboard
-                    </button>
+                    </span>
 
                     <a class="btn btn-sm btn-primary modal-fullscreen-button"
                        ng-click="toggleFullscreen()">Toggle full screen</a>

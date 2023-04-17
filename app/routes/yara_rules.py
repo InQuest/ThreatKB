@@ -599,7 +599,7 @@ def update_yara_rule(id):
     if tags_to_create:
         create_tags_mapping(entity.__tablename__, entity.id, tags_to_create)
 
-    return jsonify(entity.to_dict()), 200
+    return jsonify(entity.to_dict(include_yara_rule_string=True)), 200
 
 
 @app.route('/ThreatKB/yara_rules/batch/edit', methods=['PUT'])
