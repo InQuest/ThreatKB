@@ -11,7 +11,10 @@ def get_version():
     Return: version number"""
     try:
         version = [v.strip() for v in open("version", "r").readlines()]
+        return Response(
+            json.dumps({"version": version[0], "version_email": version[1], "version_date": version[2][:-6]}),
+            mimetype='application/json')
     except:
-        version = ["unavailable", "unavailable", "unavailable"]
-    return Response(json.dumps({"version": version[0], "version_email": version[1], "version_date": version[2][:-6]}),
-                    mimetype='application/json')
+        return Response(
+            json.dumps({"version": "unavailable", "version_email": "unavailable", "version_date": "unavailable"}),
+            mimetype='application/json')
