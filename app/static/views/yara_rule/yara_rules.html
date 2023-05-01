@@ -684,6 +684,10 @@
                         </uib-accordion>
                     </div>
                 </div>
+                <div ng-if="yara_rule.id">
+                    <button type="button" class="btn btn-primary" ng-click="closeAndViewRevision(yara_rule.id)">View Revisions
+                    </button>
+                </div>
             </div>
 
             <div class="modal-footer">
@@ -703,7 +707,6 @@
                         </ui-select-choices>
                     </ui-select>
                 </div>
-
 
                 <div class="pull-right">
                     <button type="button" class="btn btn-default" ng-click="cancel()">Cancel
