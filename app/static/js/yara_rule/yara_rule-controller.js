@@ -703,8 +703,8 @@ angular.module('ThreatKB')
             $scope.revisionIsOpen = false;
 
         }])
-    .controller('Yara_ruleSaveController', ['$scope', '$http', '$cookies', '$uibModalInstance', '$location', '$window', 'yara_rule', 'yara_rules', 'metadata', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags', 'Yara_rule', 'Cfg_settings', 'Bookmarks', 'hotkeys',
-        function ($scope, $http, $cookies, $uibModalInstance, $location, $window, yara_rule, yara_rules, metadata, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags, Yara_rule, Cfg_settings, Bookmarks, hotkeys) {
+    .controller('Yara_ruleSaveController', ['$scope', '$http', '$cookies', '$uibModal', '$uibModalInstance', '$location', '$window', 'yara_rule', 'yara_rules', 'metadata', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags', 'Yara_rule', 'Cfg_settings', 'Bookmarks', 'hotkeys',
+        function ($scope, $http, $cookies, $uibModal, $uibModalInstance, $location, $window, yara_rule, yara_rules, metadata, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags, Yara_rule, Cfg_settings, Bookmarks, hotkeys) {
 
             if (yara_rule.$promise !== null && yara_rule.$promise !== undefined) {
                 yara_rule.$promise.then(
@@ -913,7 +913,22 @@ angular.module('ThreatKB')
                 });
             };
 
-
+            $scope.closeAndViewRevision = function(id) {
+                $window.document.title = "ThreatKB";
+                $uibModalInstance.close($scope.yara_rule);
+                $window.location.href = $location.absUrl().replace(/\/[0-9]+$/, "");
+                $uibModal.open({
+                    templateUrl: 'yara_rule-revision.html',
+                    controller: 'Yara_ruleRevisionViewController',
+                    size: 'lg',
+                    backdrop: 'static',
+                    resolve: {
+                        yara_rule: function () {
+                            return $scope.yara_rule;
+                        }
+                    }
+                });
+            }
 
             $scope.$watch('files', function () {
                 $scope.upload($scope.files);
@@ -1168,7 +1183,7 @@ angular.module('ThreatKB')
                 if (isNaN(parseInt(last_spot, 10))) {
                     $window.location.href = $location.absUrl() + "/" + id;
                     return;
-                } else if (!isNaN(parseInt(last_spot, 10)) && last_spot !== id) {
+                } else if (!isNaN(parseInt(last_spot, 10)) && parseInt(last_spot) !== id) {
                     $window.location.href = $location.absUrl().replace(/\/[0-9]+$/, "/" + id);
                     return;
                 }
