@@ -713,7 +713,16 @@ angular.module('ThreatKB')
                     }
                 );
             }
-
+            let category_prefixes = Cfg_settings.get({key: "CATEGORY_PREFIX_MAPPING"});
+            if (category_prefixes.$promise !== null && category_prefixes.$promise !== undefined) {
+                category_prefixes.$promise.then(
+                    function (category_prefixes) {
+                        if (category_prefixes !== null && category_prefixes.value !== null) {
+                            $scope.category_prefixes = JSON.parse(category_prefixes.value);
+                        }
+                    }
+                );
+            }
 
             var mitre_techniques = Cfg_settings.get({key: "MITRE_TECHNIQUES"});
             if (mitre_techniques.$promise !== null && mitre_techniques.$promise !== undefined) {
@@ -994,13 +1003,30 @@ angular.module('ThreatKB')
             };
 
             $scope.ok = function () {
-                // Check if outstanding comment
-                if ($scope.yara_rule.new_comment && $scope.yara_rule.new_comment.trim() && confirm('There is a unsaved comment, do you wish to save it as well?')) {
-                    $scope.add_comment($scope.yara_rule.id);
+                // Ensure that Rule name starts with Category Prefix
+                let category;
+                let validationPassed = true;
+                if ($scope.yara_rule.category && (typeof $scope.yara_rule.category === 'object')) {
+                    category = $scope.yara_rule.category.category;
+                } else {
+                    category = $scope.yara_rule.category;
                 }
-                // Close modal
-                $window.document.title = "ThreatKB";
-                $uibModalInstance.close($scope.yara_rule);
+                if ($scope.category_prefixes.hasOwnProperty(category)) {
+                    let expectedPrefix = $scope.category_prefixes[category] + "_";
+                    if (!$scope.yara_rule.name.startsWith(expectedPrefix)) {
+                        alert("Rule Name " + $scope.yara_rule.name + " must start with " + expectedPrefix + " based on selected Category.");
+                        validationPassed = false;
+                    }
+                }
+                if (validationPassed) {
+                    // Check if outstanding comment
+                    if ($scope.yara_rule.new_comment && $scope.yara_rule.new_comment.trim() && confirm('There is a unsaved comment, do you wish to save it as well?')) {
+                        $scope.add_comment($scope.yara_rule.id);
+                    }
+                    // Close modal
+                    $window.document.title = "ThreatKB";
+                    $uibModalInstance.close($scope.yara_rule);
+                }
             };
 
             $scope.cancel = function () {
