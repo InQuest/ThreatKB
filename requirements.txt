@@ -27,7 +27,7 @@ Deprecated==1.2.13
 dnspython==2.0.0
 docopt==0.6.2
 envoy==0.0.3
-Flask==1.1.2
+Flask==2.3.2
 Flask-Babel==2.0.0
 Flask-Bcrypt==1.0.1
 Flask-Caching==1.10.1
