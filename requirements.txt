@@ -1,4 +1,4 @@
-aiohttp==3.8.1
+aiohttp==3.8.5
 aiosignal==1.2.0
 alembic==1.7.7
 amqp==5.1.1
