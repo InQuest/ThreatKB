@@ -37,6 +37,8 @@ def batch_update(batch, artifact, session, include_tags=True):
     fields_to_update = dict()
     if 'description' in batch and batch['description']:
         fields_to_update['description'] = batch['description']
+    if 'match_type' in batch and batch['match_type']:
+        fields_to_update['match_type'] = batch['match_type']
     if 'expiration_timestamp' in batch and batch['expiration_timestamp'] and hasattr(artifact, 'expiration_timestamp'):
         fields_to_update['expiration_timestamp'] = batch['expiration_timestamp']
     if 'category' in batch and batch['category'] and hasattr(artifact, 'category'):

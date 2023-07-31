@@ -234,6 +234,7 @@ def batch_update_c2dns():
     """Batch update c2dns artifacts
     From Data: batch {
                  state (str),
+                 match_type (str),
                  owner_user (str),
                  tags (array),
                  ids (array)
