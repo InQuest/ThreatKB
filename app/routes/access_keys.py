@@ -1,3 +1,4 @@
+import codecs
 import time
 import datetime
 import os
@@ -76,7 +77,7 @@ def create_access_key():
     active_inactive_count = json.loads(get_active_inactive_key_count().data)
 
     if active_inactive_count and active_inactive_count['activeInactiveCount'] < 2:
-        s_key = os.urandom(24).encode('hex')
+        s_key = codecs.encode(os.urandom(24), 'hex').decode()
         token = user.generate_auth_token(s_key)
 
         key = AccessKeys(
