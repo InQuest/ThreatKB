@@ -15,13 +15,13 @@ Installing by Docker is the currently recommended way of setting up ThreatKB, di
 ## Table of Contents
 
 * [Home](https://github.com/InQuest/ThreatKB/wiki)
-* [Setup ThreatKB](https://github.com/InQuest/ThreatKB/wiki/Setup#pre-requisites)
+* [Setup ThreatKB](https://github.com/InQuest/ThreatKB/wiki/Setup)
   + [Pre-requisites](https://github.com/InQuest/ThreatKB/wiki/Setup#pre-requisites)
   + [System Prep](https://github.com/InQuest/ThreatKB/wiki/Setup#system-prep)
   + [Application Install](https://github.com/InQuest/ThreatKB/wiki/Setup#application-install)
 * [Getting Started](https://github.com/InQuest/ThreatKB/wiki/Getting-Started)
   + [Running ThreatKB](https://github.com/InQuest/ThreatKB/wiki/Getting-Started#running-threatkb)
-  + [Admin User Creation](https://github.com/InQuest/ThreatKB/wiki/Getting-Started#running-threatkb)
+  + [Admin User Creation](https://github.com/InQuest/ThreatKB/wiki/Getting-Started#admin-user-creation)
 * [Docker Installation](https://github.com/InQuest/ThreatKB/wiki/Docker)
 * [Database Structure](https://github.com/InQuest/ThreatKB/wiki/Database-Structure)
 * [Documentation](https://github.com/InQuest/ThreatKB/wiki/Documentation)
