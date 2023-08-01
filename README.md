@@ -1,7 +1,6 @@
 <p align="center">
-  <img src=".github/wiki/inquest_logo.svg" />
+  <img src="https://raw.githubusercontent.com/InQuest/ThreatKB/wiki-cleanup/.github/wiki/inquest_logo.svg" />
 </p>
-
 
 ### NOTE: THIS REPO IS IN AN ALPHA STATE
 
@@ -15,21 +14,22 @@ Installing by Docker is the currently recommended way of setting up ThreatKB, di
 
 ## Table of Contents
 
-* [Docker Installation](wiki/docker.md)
-* [Setup ThreatKB](wiki/setup.md)
-  + [Pre-requisites](wiki/setup.md#pre-requisites)
-  + [System Prep](wiki/setup.md#system-prep)
-* [Getting Started](wiki/getting-started.md)
-  + [Application Install](wiki/getting-started.md#application-install)
-  + [Running ThreatKB](wiki/getting-started.md#running-threatkb)
-  + [Admin User Creation](wiki/getting-started.md#admin-user-creation)
-* [Databases](wiki/db-struct.md)
-* [Documentation](wiki/documentation.md)
-* [FAQ](wiki/faq.md)
+* [Home](https://github.com/InQuest/ThreatKB/wiki)
+* [Setup ThreatKB](https://github.com/InQuest/ThreatKB/wiki/Setup#pre-requisites)
+  + [Pre-requisites](https://github.com/InQuest/ThreatKB/wiki/Setup#pre-requisites)
+  + [System Prep](https://github.com/InQuest/ThreatKB/wiki/Setup#system-prep)
+  + [Application Install](https://github.com/InQuest/ThreatKB/wiki/Setup#application-install)
+* [Getting Started](https://github.com/InQuest/ThreatKB/wiki/Getting-Started)
+  + [Running ThreatKB](https://github.com/InQuest/ThreatKB/wiki/Getting-Started#running-threatkb)
+  + [Admin User Creation](https://github.com/InQuest/ThreatKB/wiki/Getting-Started#running-threatkb)
+* [Docker Installation](https://github.com/InQuest/ThreatKB/wiki/Docker)
+* [Database Structure](https://github.com/InQuest/ThreatKB/wiki/Database-Structure)
+* [Documentation](https://github.com/InQuest/ThreatKB/wiki/Documentation)
+* [FAQ](https://github.com/InQuest/ThreatKB/wiki/Frequently-Asked-Questions)
 
 ## Thank You
 ThreatKB utilizes Plyara to parse YARA rules into Python dictionaries. A huge thank you to the Plyara team! Links to the project are below:
 
-- [Plyara](https://github.com/8u1a/plyara) ([LICENSE](https://github.com/8u1a/plyara/blob/master/LICENSE))
+- [Plyara](https://github.com/plyara/plyara) ([LICENSE](https://github.com/plyara/plyara/blob/master/LICENSE))
 
 When a release is created, the system first pulls all signatures that are in the release state. Then, it gathers all signatures that are in the staging state and checks their revision history for the most recently released revision that is in the release state. If it finds it, it will include it in the release. If it does not find any previously released revisions, it will skip the signature.
