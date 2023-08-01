@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/InQuest/ThreatKB/wiki-cleanup/.github/wiki/inquest_logo.svg" />
+  <img src="https://raw.githubusercontent.com/InQuest/ThreatKB/rc/.github/wiki/inquest_logo.svg" />
 </p>
 
 ### NOTE: THIS REPO IS IN AN ALPHA STATE
