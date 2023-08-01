@@ -93,7 +93,7 @@ sqlparse==0.4.2
 Tempita==0.5.2
 termcolor==1.1.0
 tabulate==0.8.9
-threatkb==0.1.1
+threatkb==1.0.0a2
 typing_extensions==4.4.0
 urllib3==1.26.9
 uWSGI==2.0.20
