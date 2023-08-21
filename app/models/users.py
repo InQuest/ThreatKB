@@ -1,4 +1,4 @@
-from itsdangerous import (JSONWebSignatureSerializer
+from itsdangerous import (URLSafeTimedSerializer
                           as Serializer, BadSignature)
 
 from app import db

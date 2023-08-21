@@ -213,7 +213,6 @@ def teardown_request(exception):
     db.session.remove()
 
 
-@app.before_first_request
 def setup_logging():
     app.logger.addHandler(logging.StreamHandler())
     app.logger.setLevel(app.config["LOGGING_LEVEL"])
@@ -314,7 +313,6 @@ def generate_app():
             db.session.rollback()
         db.session.remove()
 
-    @app.before_first_request
     def setup_logging():
         app.logger.addHandler(logging.StreamHandler())
         app.logger.setLevel(app.config["LOGGING_LEVEL"])
@@ -343,6 +341,9 @@ def generate_app():
 
         return None
 
+    with app.app_context():
+        setup_logging()
+
 
 def run(debug=False, port=0, host=''):
     import os
@@ -352,3 +353,7 @@ def run(debug=False, port=0, host=''):
 
     generate_app()
     app.run(debug=debug, port=port, host=host)
+
+
+with app.app_context():
+    setup_logging()
