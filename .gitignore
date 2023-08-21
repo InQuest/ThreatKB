@@ -70,3 +70,5 @@ dump.rdb
 # STS (Spring Tool Suite)
 .springBeans
 .vagrant
+
+version

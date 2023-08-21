@@ -703,8 +703,8 @@ angular.module('ThreatKB')
             $scope.revisionIsOpen = false;
 
         }])
-    .controller('Yara_ruleSaveController', ['$scope', '$http', '$cookies', '$uibModalInstance', '$location', '$window', 'yara_rule', 'yara_rules', 'metadata', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags', 'Yara_rule', 'Cfg_settings', 'Bookmarks', 'hotkeys',
-        function ($scope, $http, $cookies, $uibModalInstance, $location, $window, yara_rule, yara_rules, metadata, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags, Yara_rule, Cfg_settings, Bookmarks, hotkeys) {
+    .controller('Yara_ruleSaveController', ['$scope', '$http', '$cookies', '$uibModal', '$uibModalInstance', '$location', '$window', 'yara_rule', 'yara_rules', 'metadata', 'Cfg_states', 'Comments', 'Upload', 'Files', 'CfgCategoryRangeMapping', 'growl', 'Users', 'Tags', 'Yara_rule', 'Cfg_settings', 'Bookmarks', 'hotkeys',
+        function ($scope, $http, $cookies, $uibModal, $uibModalInstance, $location, $window, yara_rule, yara_rules, metadata, Cfg_states, Comments, Upload, Files, CfgCategoryRangeMapping, growl, Users, Tags, Yara_rule, Cfg_settings, Bookmarks, hotkeys) {
 
             if (yara_rule.$promise !== null && yara_rule.$promise !== undefined) {
                 yara_rule.$promise.then(
@@ -713,7 +713,16 @@ angular.module('ThreatKB')
                     }
                 );
             }
-
+            let category_prefixes = Cfg_settings.get({key: "CATEGORY_PREFIX_MAPPING"});
+            if (category_prefixes.$promise !== null && category_prefixes.$promise !== undefined) {
+                category_prefixes.$promise.then(
+                    function (category_prefixes) {
+                        if (category_prefixes !== null && category_prefixes.value !== null) {
+                            $scope.category_prefixes = JSON.parse(category_prefixes.value);
+                        }
+                    }
+                );
+            }
 
             var mitre_techniques = Cfg_settings.get({key: "MITRE_TECHNIQUES"});
             if (mitre_techniques.$promise !== null && mitre_techniques.$promise !== undefined) {
@@ -784,6 +793,7 @@ angular.module('ThreatKB')
                             growl.error(error.data, {ttl: -1});
                         } else {
                             $scope.yara_rule.state = data.state;
+                            $scope.yara_rule.yara_rule_string = data.yara_rule_string;
                             growl.info("Successfully saved signature '" + $scope.yara_rule.name + "'.", {ttl: 2000});
                         }
                     },
@@ -912,7 +922,22 @@ angular.module('ThreatKB')
                 });
             };
 
-
+            $scope.closeAndViewRevision = function(id) {
+                $window.document.title = "ThreatKB";
+                $uibModalInstance.close($scope.yara_rule);
+                $window.location.href = $location.absUrl().replace(/\/[0-9]+$/, "");
+                $uibModal.open({
+                    templateUrl: 'yara_rule-revision.html',
+                    controller: 'Yara_ruleRevisionViewController',
+                    size: 'lg',
+                    backdrop: 'static',
+                    resolve: {
+                        yara_rule: function () {
+                            return $scope.yara_rule;
+                        }
+                    }
+                });
+            }
 
             $scope.$watch('files', function () {
                 $scope.upload($scope.files);
@@ -978,13 +1003,30 @@ angular.module('ThreatKB')
             };
 
             $scope.ok = function () {
-                // Check if outstanding comment
-                if ($scope.yara_rule.new_comment && $scope.yara_rule.new_comment.trim() && confirm('There is a unsaved comment, do you wish to save it as well?')) {
-                    $scope.add_comment($scope.yara_rule.id);
+                // Ensure that Rule name starts with Category Prefix
+                let category;
+                let validationPassed = true;
+                if ($scope.yara_rule.category && (typeof $scope.yara_rule.category === 'object')) {
+                    category = $scope.yara_rule.category.category;
+                } else {
+                    category = $scope.yara_rule.category;
                 }
-                // Close modal
-                $window.document.title = "ThreatKB";
-                $uibModalInstance.close($scope.yara_rule);
+                if ($scope.category_prefixes.hasOwnProperty(category)) {
+                    let expectedPrefix = $scope.category_prefixes[category] + "_";
+                    if (!$scope.yara_rule.name.startsWith(expectedPrefix)) {
+                        alert("Rule Name " + $scope.yara_rule.name + " must start with " + expectedPrefix + " based on selected Category.");
+                        validationPassed = false;
+                    }
+                }
+                if (validationPassed) {
+                    // Check if outstanding comment
+                    if ($scope.yara_rule.new_comment && $scope.yara_rule.new_comment.trim() && confirm('There is a unsaved comment, do you wish to save it as well?')) {
+                        $scope.add_comment($scope.yara_rule.id);
+                    }
+                    // Close modal
+                    $window.document.title = "ThreatKB";
+                    $uibModalInstance.close($scope.yara_rule);
+                }
             };
 
             $scope.cancel = function () {
@@ -1167,7 +1209,7 @@ angular.module('ThreatKB')
                 if (isNaN(parseInt(last_spot, 10))) {
                     $window.location.href = $location.absUrl() + "/" + id;
                     return;
-                } else if (!isNaN(parseInt(last_spot, 10)) && last_spot !== id) {
+                } else if (!isNaN(parseInt(last_spot, 10)) && parseInt(last_spot) !== id) {
                     $window.location.href = $location.absUrl().replace(/\/[0-9]+$/, "/" + id);
                     return;
                 }

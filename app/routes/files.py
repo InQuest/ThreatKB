@@ -254,9 +254,7 @@ def get_file_for_entity(entity_type, entity_id, file_id):
     if not file_entity:
         abort(404)
 
-    full_path = os.path.join(cfg_settings.Cfg_settings.get_setting("FILE_STORE_PATH"),
-                             str(ENTITY_MAPPING[entity_type]) if entity_type != "0" else "",
-                             str(entity_id) if entity_id != 0 else "",
+    full_path = os.path.join(file_entity.full_path,
                              secure_filename(file_entity.filename))
     if not os.path.exists(full_path):
         abort(404)
