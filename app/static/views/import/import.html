@@ -44,6 +44,16 @@
                 </ui-select>
             </div>
             <div class="form-group">
+                <ui-select ng-model="shared_match_type.match_type">
+                    <ui-select-match placeholder="Select a shared match type..">
+                        <span ng-bind="$select.selected.match_type || shared_match_type.match_type"></span>
+                    </ui-select-match>
+                    <ui-select-choices repeat="match_type in (match_types | filter: $select.search)">
+                        <span>{{ match_type }}</span>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+            <div class="form-group">
                 <textarea class="form-control" rows="10" placeholder="Metadata field mapping..."
                           ng-model="default_mapping.value" name="metadata_field_mapping"></textarea>
             </div>
