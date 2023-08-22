@@ -13,7 +13,7 @@ import json
 #####################################################################
 
 def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared_reference=None,
-                   shared_description=None, shared_state=None, shared_owner=None, metadata_field_mapping={},
+                   shared_description=None, shared_state=None, shared_match_type=None, shared_owner=None, metadata_field_mapping={},
                    resurrect_retired_artifacts=True):
     default_state = "Imported"
     return_artifacts = []
@@ -134,6 +134,7 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                                               entity_id=dns.id, user_id=current_user.id))
                     dns.created_user_id, dns.modified_user_id = current_user.id, current_user.id
                     dns.state = default_state if not shared_state else shared_state
+                    dns.match_type = None if not shared_match_type else shared_match_type
                     if Whitelist.hits_whitelist(dns.domain_name, dns.state):
                         error_artifacts.append((dns.domain_name, f"Whitelist validation failed {dns.domain_name}"))
                         continue
@@ -144,6 +145,8 @@ def save_artifacts(extract_ip, extract_dns, extract_signature, artifacts, shared
                         dns.description = shared_description
                     if shared_state:
                         dns.state = shared_state
+                    if shared_match_type:
+                        dns.match_type = shared_match_type
                     if shared_owner:
                         dns.owner_user_id = shared_owner
 
@@ -239,6 +242,7 @@ def import_artifacts():
     resurrect_retired_artifacts = request.json.get("resurrect_retired_artifacts", True)
     import_text = request.json.get('import_text', None)
     shared_state = request.json.get('shared_state', None)
+    shared_match_type = request.json.get('shared_match_type', None)
     shared_reference = request.json.get("shared_reference", None)
     shared_description = request.json.get("shared_description", None)
     shared_owner = request.json.get("shared_owner", None)
@@ -259,7 +263,7 @@ def import_artifacts():
     if autocommit:
         artifacts = save_artifacts(extract_ip=extract_ip, extract_dns=extract_dns, extract_signature=extract_signature,
                                    artifacts=artifacts, shared_reference=shared_reference,
-                                   shared_description=shared_description, shared_state=shared_state,
+                                   shared_description=shared_description, shared_state=shared_state, shared_match_type=shared_match_type,
                                    shared_owner=shared_owner, metadata_field_mapping=metadata_field_mapping,
                                    resurrect_retired_artifacts=resurrect_retired_artifacts)
 
@@ -280,6 +284,7 @@ def import_artifacts_by_filek():
     import_text = request.files['file'].stream.read()
     import_text = import_text.strip()
     shared_state = request.values.get('shared_state', None)
+    shared_match_type = request.values.get('shared_match_type', None)
     resurrect_retired_artifacts = request.json.get("resurrect_retired_artifacts", True)
     shared_reference = request.values.get("shared_reference", None) or None
     shared_description = request.values.get("shared_description", None) or None
@@ -301,7 +306,7 @@ def import_artifacts_by_filek():
     if autocommit:
         artifacts = save_artifacts(extract_ip=extract_ip, extract_dns=extract_dns, extract_signature=extract_signature,
                                    artifacts=artifacts, shared_reference=shared_reference,
-                                   shared_description=shared_description, shared_state=shared_state,
+                                   shared_description=shared_description, shared_state=shared_state, shared_match_type=shared_match_type,
                                    shared_owner=shared_owner, metadata_field_mapping=metadata_field_mapping,
                                    resurrect_retired_artifacts=resurrect_retired_artifacts)
 
@@ -322,6 +327,7 @@ def commit_artifacts():
     shared_description = request.json.get("shared_description", None)
     resurrect_retired_artifacts = request.json.get("resurrect_retired_artifacts", True)
     shared_state = request.json.get('shared_state', None)
+    shared_match_type = request.json.get('shared_match_type', None)
     extract_ip = request.json.get('extract_ip', True)
     extract_dns = request.json.get('extract_dns', True)
     shared_owner = request.json.get("shared_owner", None)
@@ -336,7 +342,7 @@ def commit_artifacts():
 
     artifacts = save_artifacts(extract_ip=extract_ip, extract_dns=extract_dns, extract_signature=extract_signature,
                                artifacts=artifacts, shared_reference=shared_reference,
-                               shared_description=shared_description, shared_state=shared_state,
+                               shared_description=shared_description, shared_state=shared_state, shared_match_type=shared_match_type,
                                metadata_field_mapping=metadata_field_mapping, shared_owner=shared_owner,
                                resurrect_retired_artifacts=resurrect_retired_artifacts)
     return jsonify({"artifacts": artifacts}), 201

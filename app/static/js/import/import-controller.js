@@ -6,6 +6,8 @@ angular.module('ThreatKB').controller('ImportController',
 
             $scope.cfg_states = Cfg_states.query();
             $scope.shared_state = {};
+            $scope.shared_match_type = {};
+            $scope.match_types = ['exact', 'wildcard'];
             $scope.shared_owner = null;
             $scope.users = Users.query();
             $scope.default_mapping = Cfg_settings.get({key: "DEFAULT_METADATA_MAPPING"});
@@ -39,6 +41,7 @@ angular.module('ThreatKB').controller('ImportController',
                                     shared_reference: $scope.shared_reference,
                                     shared_description: $scope.shared_description,
                                     shared_state: $scope.shared_state,
+                                    shared_match_type: $scope.shared_match_type,
                                     shared_owner: $scope.shared_owner,
                                     extract_ip: $scope.extract_ip,
                                     extract_dns: $scope.extract_dns,
@@ -89,6 +92,9 @@ angular.module('ThreatKB').controller('ImportController',
                     $scope.shared_state.state = {};
                 }
 
+                if ($scope.shared_match_type === undefined) {
+                    $scope.shared_match_type = {};
+                }
                 var artifacts_to_commit = [];
                 for (var i = 0; i < $scope.artifacts.length; i++) {
                     if ($scope.checked_indexes[i]) {
@@ -99,7 +105,7 @@ angular.module('ThreatKB').controller('ImportController',
                 blockUI.start($scope.block_message);
 
                 var field_mapping = JSON.parse($scope.default_mapping.value);
-                Import.commit_artifacts(artifacts_to_commit, $scope.resurrect_retired_artifacts, $scope.shared_reference, $scope.shared_description, $scope.shared_state.state.state, $scope.shared_owner, $scope.extract_ip, $scope.extract_dns, $scope.extract_signature, field_mapping).then(function (data) {
+                Import.commit_artifacts(artifacts_to_commit, $scope.resurrect_retired_artifacts, $scope.shared_reference, $scope.shared_description, $scope.shared_state.state.state, $scope.shared_match_type.match_type, $scope.shared_owner, $scope.extract_ip, $scope.extract_dns, $scope.extract_signature, field_mapping).then(function (data) {
                     blockUI.stop();
                     var ttl = 3000;
                     var message = "";
@@ -137,12 +143,15 @@ angular.module('ThreatKB').controller('ImportController',
                     $scope.shared_state.state = {};
                 }
 
+                if ($scope.shared_match_type === undefined) {
+                    $scope.shared_match_type = {};
+                }
                 if ($scope.autocommit) {
                     blockUI.start($scope.block_message);
                 }
 
                 var field_mapping = JSON.parse($scope.default_mapping.value);
-                Import.import_artifacts($scope.import_text, $scope.autocommit, $scope.resurrect_retired_artifacts, $scope.shared_reference, $scope.shared_description, $scope.shared_state.state.state, $scope.shared_owner, $scope.extract_ip, $scope.extract_dns, $scope.extract_signature, field_mapping).then(function (data) {
+                Import.import_artifacts($scope.import_text, $scope.autocommit, $scope.resurrect_retired_artifacts, $scope.shared_reference, $scope.shared_description, $scope.shared_state.state.state, $scope.shared_match_type.match_type, $scope.shared_owner, $scope.extract_ip, $scope.extract_dns, $scope.extract_signature, field_mapping).then(function (data) {
                     if ($scope.autocommit) {
                         blockUI.stop();
                         var message = "";
@@ -206,6 +215,7 @@ angular.module('ThreatKB').controller('ImportController',
                 $scope.users = Users.query();
                 $scope.cfg_states = Cfg_states.query();
                 $scope.shared_state = {};
+                $scope.shared_match_type = {};
                 $scope.extract_ip = true;
                 $scope.extract_dns = true;
                 $scope.extract_signature = true;

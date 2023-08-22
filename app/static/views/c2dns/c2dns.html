@@ -38,6 +38,17 @@
                     </ui-select>
                 </div>
                 <div class="form-group">
+                    <label>Match Type</label>
+                    <ui-select ng-model="batch.match_type">
+                        <ui-select-match placeholder="Select a match type or press delete to clear..">
+                            <span ng-bind="$select.selected.match_type || batch.match_type"></span>
+                        </ui-select-match>
+                        <ui-select-choices repeat="match_type in (match_types | filter: $select.search)">
+                            <span>{{ match_type }}</span>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+                <div class="form-group">
                     <label>Description</label>
                     <textarea class="form-control" placeholder="Enter description..." rows="6"
                               ng-model="batch.description"></textarea>
