@@ -1,5 +1,4 @@
-from itsdangerous import (URLSafeTimedSerializer
-                          as Serializer, BadSignature)
+from itsdangerous import (URLSafeTimedSerializer as Serializer, BadSignature)
 
 from app import db
 from app.models import metadata, scripts
