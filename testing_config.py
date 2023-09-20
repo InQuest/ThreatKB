@@ -1,8 +1,7 @@
-import os
-import sys
+import os, sys, logging
 
-from flask_bcrypt import Bcrypt
 from flask import Flask
+from flask_bcrypt import Bcrypt
 
 SQL_PROTOCOL = os.getenv('SQL_PROTOCOL', 'mysql')
 SQL_HOST = os.getenv('SQL_HOST', '127.0.0.1')
@@ -19,16 +18,14 @@ SQLALCHEMY_DATABASE_URI = '{protocol}://{username}:{password}@{hostname}:{port}/
     database = SQL_DATABASE
 )
 
+LOGGING_LEVEL = getattr(logging, os.getenv('LOGGING_LEVEL', 'DEBUG'))
+
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 # Dummy user for tests.
 TEST_USER = 'admin'
 TEST_PASSWORD = 'password'
-
-app = Flask(__name__, static_url_path="")
-b = Bcrypt(app)
-TEST_PASSWORD_HASHED = b.generate_password_hash(TEST_PASSWORD)
-
+TEST_PASSWORD_HASHED = Bcrypt(Flask(__name__, static_url_path="")).generate_password_hash(TEST_PASSWORD)
 
 try:
     SQLALCHEMY_DATABASE_URI

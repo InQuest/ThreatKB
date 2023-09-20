@@ -420,6 +420,7 @@ angular.module('ThreatKB')
                 var c2dnsToUpdate = {
                     owner_user: $scope.batch.owner,
                     state: $scope.batch.state,
+                    match_type: $scope.batch.match_type,
                     description: $scope.batch.description,
                     expiration_timestamp: $scope.batch.expiration_timestamp,
                     tags: $scope.batch.tags,
@@ -505,6 +506,7 @@ angular.module('ThreatKB')
                 $scope.batch = {
                     owner: null,
                     state: null,
+                    match_type: null,
                     description: null,
                     expiration_timestamp: null,
                     tags: null
@@ -828,6 +830,8 @@ angular.module('ThreatKB')
             $scope.users = Users.query();
 
             $scope.cfg_states = Cfg_states.query();
+
+            $scope.match_types = ['exact', 'wildcard'];
 
             $scope.ok = function () {
                 $uibModalInstance.close($scope.batch);

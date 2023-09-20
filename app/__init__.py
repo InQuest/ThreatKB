@@ -1,3 +1,8 @@
+import os
+import sys
+import logging
+import datetime
+import distutils
 import functools
 
 from flask import Flask, abort, jsonify, request
@@ -10,14 +15,19 @@ from flask import make_response
 from functools import wraps, update_wrapper
 from flask_caching import Cache
 from flask_selfdoc import Autodoc
-import datetime
-import logging
-import os
-import distutils
 
 
 app = Flask(__name__, static_url_path='')
-app.config.from_object("config")
+
+if os.path.exists("testing_config.py") and not os.path.exists("config.py"):
+    app.config.from_object("testing_config")
+
+if os.path.exists("config.py"):
+    app.config.from_object("config")
+
+if not os.path.exists("config.py") and not os.path.exists("testing_config.py"):
+    print("Missing configuration settings")
+    sys.exit(1)
 
 if app.config.get('REDIS_CACHE_URL', None):
     cache = Cache(app, config={'CACHE_TYPE': 'redis', 'CACHE_REDIS_URL': app.config.get('REDIS_CACHE_URL')})
@@ -203,7 +213,6 @@ def teardown_request(exception):
     db.session.remove()
 
 
-@app.before_first_request
 def setup_logging():
     app.logger.addHandler(logging.StreamHandler())
     app.logger.setLevel(app.config["LOGGING_LEVEL"])
@@ -304,7 +313,6 @@ def generate_app():
             db.session.rollback()
         db.session.remove()
 
-    @app.before_first_request
     def setup_logging():
         app.logger.addHandler(logging.StreamHandler())
         app.logger.setLevel(app.config["LOGGING_LEVEL"])
@@ -333,6 +341,9 @@ def generate_app():
 
         return None
 
+    with app.app_context():
+        setup_logging()
+
 
 def run(debug=False, port=0, host=''):
     import os
@@ -342,3 +353,7 @@ def run(debug=False, port=0, host=''):
 
     generate_app()
     app.run(debug=debug, port=port, host=host)
+
+
+with app.app_context():
+    setup_logging()

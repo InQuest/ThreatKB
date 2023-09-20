@@ -1,3 +1,0 @@
-# Licensing
-
-**TODO**
