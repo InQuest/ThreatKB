@@ -1,19 +1,23 @@
 import os
 import sys
 import logging
+import datetime
+import distutils
 import functools
 import bugsnag
 
-from flask import Flask
+from flask import Flask, abort, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
+from flask_login import current_user
 from flask_migrate import Migrate
 from flask import make_response
 from functools import wraps, update_wrapper
 from flask_caching import Cache
 from flask_selfdoc import Autodoc
 from bugsnag.flask import handle_exceptions
+from bugsnag.handlers import BugsnagHandler
 
 bugsnag.configure(
     api_key="1583fc59cfe874823505f26cb11b991d",
@@ -222,6 +226,10 @@ def teardown_request(exception):
 def setup_logging():
     app.logger.addHandler(logging.StreamHandler())
     app.logger.setLevel(app.config["LOGGING_LEVEL"])
+    handler = BugsnagHandler()
+    # send only ERROR-level logs and above
+    handler.setLevel(logging.ERROR)
+    app.logger.addHandler(handler)
 
 
 @login_manager.user_loader
@@ -321,6 +329,10 @@ def generate_app():
     def setup_logging():
         app.logger.addHandler(logging.StreamHandler())
         app.logger.setLevel(app.config["LOGGING_LEVEL"])
+        handler = BugsnagHandler()
+        # send only ERROR-level logs and above
+        handler.setLevel(logging.ERROR)
+        app.logger.addHandler(handler)
 
     @login_manager.user_loader
     @cache.memoize(timeout=60)
