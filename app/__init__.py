@@ -1,23 +1,27 @@
 import os
 import sys
 import logging
-import datetime
-import distutils
 import functools
+import bugsnag
 
-from flask import Flask, abort, jsonify, request
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
-from flask_login import current_user
 from flask_migrate import Migrate
 from flask import make_response
 from functools import wraps, update_wrapper
 from flask_caching import Cache
 from flask_selfdoc import Autodoc
+from bugsnag.flask import handle_exceptions
 
+bugsnag.configure(
+    api_key="1583fc59cfe874823505f26cb11b991d",
+    project_root="/opt/threatkb",
+)
 
 app = Flask(__name__, static_url_path='')
+handle_exceptions(app)
 
 if os.path.exists("testing_config.py") and not os.path.exists("config.py"):
     app.config.from_object("testing_config")
@@ -38,7 +42,6 @@ app.secret_key = "a" * 24  # os.urandom(24)
 
 auto = Autodoc(app)
 
-#db = SQLAlchemy(app)
 db = SQLAlchemy(app, engine_options={"pool_recycle": 600})
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -55,6 +58,7 @@ ACTIVITY_TYPE = {"ARTIFACT_CREATED": "Artifact Created",
                  "RELEASES_MADE": 'Release Made',
                  "TAG_CREATED": 'Tag Created',
                  "TAG_REMOVED": 'Tag Removed'}
+
 
 def nocache(view):
     @wraps(view)
@@ -77,7 +81,9 @@ def admin_only():
             if not current_user.admin:
                 return abort(403)
             return f(*args, **kwargs)
+
         return wrapped
+
     return wrapper
 
 
@@ -102,6 +108,7 @@ def set_celery_stuff(flask_app):
     if flask_app.config["MAX_MILLIS_PER_FILE_THRESHOLD"]:
         flask_app.config["MAX_MILLIS_PER_FILE_THRESHOLD"] = float(flask_app.config["MAX_MILLIS_PER_FILE_THRESHOLD"])
 
+
 set_celery_stuff(app)
 
 print(("app config: %s" % (str(app.config))))
@@ -109,7 +116,6 @@ print(("app config: %s" % (str(app.config))))
 from app.celeryapp import make_celery
 
 celery = make_celery(app)
-
 
 from app.routes.version import *
 from app.routes.index import *
@@ -243,7 +249,6 @@ def load_user_from_request(request):
 
 
 def generate_app():
-
     global celery
     from app.models import users
     from app.models import c2ip
