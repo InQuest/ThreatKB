@@ -562,7 +562,7 @@ def update_yara_rule(id):
         m = db.session.query(MetadataMapping, Metadata).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
             Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).filter(
             MetadataMapping.artifact_id == entity.id).first()
-        if m[0]:
+        if m and m[0]:
             m[0].value = value_dict.get("value", None) if not m[1].required else value_dict["value"]
             db.session.add(m[0])
             dirty = True
