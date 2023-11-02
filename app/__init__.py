@@ -19,8 +19,11 @@ from flask_selfdoc import Autodoc
 from bugsnag.flask import handle_exceptions
 from bugsnag.handlers import BugsnagHandler
 
+if os.getenv("BUGSNAG_API_KEY"):
+    bugsnag_api_key = os.getenv("BUGSNAG_API_KEY")
+
 bugsnag.configure(
-    api_key="1583fc59cfe874823505f26cb11b991d",
+    api_key=bugsnag_api_key,
     project_root="/opt/threatkb",
 )
 
