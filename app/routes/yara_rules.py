@@ -477,6 +477,9 @@ def update_yara_rule(id):
                 not rule.id == id]):
             raise Exception("You cannot save two rules with the same name.")
 
+    if not release_state or not draft_state:
+        raise Exception("You must set a release, draft, and retirement state before modifying signatures")
+
     compile_on_save = Cfg_settings.get_setting("COMPILE_YARA_RULE_ON_SAVE")
     if compile_on_save and distutils.util.strtobool(compile_on_save) and (
             rule_state == release_state.state or rule_state == draft_state.state):
@@ -486,10 +489,6 @@ def update_yara_rule(id):
                 "State submitted is " + str(
                     rule_state) + " and the rule could not be saved because it does not compile.\n\nerror_code=" + str(
                     return_code) + "\n\n" + str(stderr))
-
-    if not release_state or not draft_state:
-        raise Exception("You must set a release, draft, and retirement state before modifying signatures")
-
 
     if not entity.revision:
         entity.revision = 1
