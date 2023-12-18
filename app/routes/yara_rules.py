@@ -477,6 +477,9 @@ def update_yara_rule(id):
                 not rule.id == id]):
             raise Exception("You cannot save two rules with the same name.")
 
+    if not release_state or not draft_state:
+        raise Exception("You must set a release, draft, and retirement state before modifying signatures")
+
     compile_on_save = Cfg_settings.get_setting("COMPILE_YARA_RULE_ON_SAVE")
     if compile_on_save and distutils.util.strtobool(compile_on_save) and (
             rule_state == release_state.state or rule_state == draft_state.state):
@@ -486,10 +489,6 @@ def update_yara_rule(id):
                 "State submitted is " + str(
                     rule_state) + " and the rule could not be saved because it does not compile.\n\nerror_code=" + str(
                     return_code) + "\n\n" + str(stderr))
-
-    if not release_state or not draft_state:
-        raise Exception("You must set a release, draft, and retirement state before modifying signatures")
-
 
     if not entity.revision:
         entity.revision = 1
@@ -562,7 +561,7 @@ def update_yara_rule(id):
         m = db.session.query(MetadataMapping, Metadata).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
             Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).filter(
             MetadataMapping.artifact_id == entity.id).first()
-        if m[0]:
+        if m and m[0]:
             m[0].value = value_dict.get("value", None) if not m[1].required else value_dict["value"]
             db.session.add(m[0])
             dirty = True
