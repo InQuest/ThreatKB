@@ -825,6 +825,17 @@ angular.module('ThreatKB')
                     $scope.editor.wrap = !$scope.editor.wrap;
                     $scope.change_wrap_editor();
                 }
+            }).add({
+                combo: 'escape',
+                description: 'Escape',
+                allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
+                callback: function () {
+                    if ($scope.form.$dirty && !$scope.form.$invalid && confirm('Rule has been modified, do you wish to save it?')) {
+                        $scope.save_artifact();
+                    } else {
+                        $scope.cancel();
+                    }
+                }
             });
 
             if (!$scope.yara_rule.id) {
