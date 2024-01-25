@@ -924,7 +924,11 @@ angular.module('ThreatKB')
 
             $scope.closeAndViewRevision = function(id) {
                 $window.document.title = "ThreatKB";
-                $uibModalInstance.close($scope.yara_rule);
+                if ($scope.form.$dirty && confirm('Rule has been modified, do you wish to save it?')) {
+                    $uibModalInstance.close($scope.yara_rule);
+                } else {
+                    $uibModalInstance.dismiss('cancel');
+                }
                 $window.location.href = $location.absUrl().replace(/\/[0-9]+$/, "");
                 $uibModal.open({
                     templateUrl: 'yara_rule-revision.html',
