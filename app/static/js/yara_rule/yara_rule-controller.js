@@ -417,7 +417,7 @@ angular.module('ThreatKB')
             };
 
             $scope.update = function (id) {
-                $scope.yara_rule = Yara_rule.resource.get({id: id, include_yara_string: 1, include_revisions: 0});
+                $scope.yara_rule = Yara_rule.resource.get({id: id, include_yara_string: 1, include_revisions: 0, include_metadata: 1});
                 $scope.cfg_states = Cfg_states.query();
                 $scope.users = Users.query();
                 $scope.cfg_category_range_mapping = CfgCategoryRangeMapping.query();
@@ -425,7 +425,7 @@ angular.module('ThreatKB')
             };
 
             $scope.viewRule = function (id) {
-                $scope.yara_rule = Yara_rule.resource.get({id: id, include_yara_string: 1, include_revisions: 0});
+                $scope.yara_rule = Yara_rule.resource.get({id: id, include_yara_string: 1, include_revisions: 0, include_metadata: 1});
                 $scope.view(id);
             };
 
@@ -825,6 +825,17 @@ angular.module('ThreatKB')
                     $scope.editor.wrap = !$scope.editor.wrap;
                     $scope.change_wrap_editor();
                 }
+            }).add({
+                combo: 'escape',
+                description: 'Escape',
+                allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
+                callback: function () {
+                    if ($scope.form.$dirty && !$scope.form.$invalid && confirm('Rule has been modified, do you wish to save it?')) {
+                        $scope.save_artifact();
+                    } else {
+                        $scope.cancel();
+                    }
+                }
             });
 
             if (!$scope.yara_rule.id) {
@@ -924,7 +935,11 @@ angular.module('ThreatKB')
 
             $scope.closeAndViewRevision = function(id) {
                 $window.document.title = "ThreatKB";
-                $uibModalInstance.close($scope.yara_rule);
+                if ($scope.form.$dirty && confirm('Rule has been modified, do you wish to save it?')) {
+                    $uibModalInstance.close($scope.yara_rule);
+                } else {
+                    $uibModalInstance.dismiss('cancel');
+                }
                 $window.location.href = $location.absUrl().replace(/\/[0-9]+$/, "");
                 $uibModal.open({
                     templateUrl: 'yara_rule-revision.html',
