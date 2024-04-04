@@ -125,6 +125,10 @@ angular.module('ThreatKB')
                 sort_dir: null
             };
 
+            $scope.customTooltip = function (row,col,value) {
+                return value.map(u => u.text).join(', ');
+            }
+
             $scope.gridOptions = {
                 paginationPageSizes: [25, 50, 75, 100],
                 paginationPageSize: 25,
@@ -269,13 +273,32 @@ angular.module('ThreatKB')
                         {
                             field: 'tags',
                             displayName: 'Tags',
-                            width: '180',
+                            width: '160',
                             enableSorting: false,
-                            cellTemplate: '<ul class="gridTags" append-to-body="true" ng-model="row.entity.tags">'
+                            cellTemplate: '<div class="gridTags" title="{{grid.appScope.customTooltip(row,col,COL_FIELD)}}">'
+                                + '<ul class="gridTags" append-to-body="true" ng-model="row.entity.tags">'
                                 + '<li ng-repeat="tag in (row.entity.tags | filter: $select.search) track by tag.id">'
                                 + '<small>{{tag.text}}</small>'
                                 + '</li>'
                                 + '</ul>'
+                                + '</div>'
+                        },
+                        {
+                            field: 'metadata_values',
+                            displayName: 'Severity',
+                            width: '90',
+                            enableSorting: true,
+                            cellTemplate: '<div ng-model="row.entity.metadata_values" style="text-align: center;">'
+                                + '<span ng-bind="row.entity.metadata_values.severity.value"></span>'
+                                + '</div>'
+                        },
+                        {
+                            field: 'metadata_values',
+                            displayName: 'Confidence',
+                            width: '115',
+                            enableSorting: true,
+                            cellTemplate: '<div ng-model="row.entity.metadata_values" style="text-align: center;">'
+                                + '<span ng-bind="row.entity.metadata_values.confidence.value"></span>'
                                 + '</div>'
                         },
                         {
@@ -345,7 +368,7 @@ angular.module('ThreatKB')
                     url += '&page_size=' + paginationOptions.pageSize;
                     url += '&include_yara_string=0';
                     url += '&short=1';
-                    url += '&include_metadata=0';
+                    url += '&include_metadata=1';
                     url += '&view=' + $scope.view_selected;
 
                     switch (paginationOptions.sort_dir) {
@@ -566,7 +589,8 @@ angular.module('ThreatKB')
                     "tags": [],
                     "comments": [],
                     "files": [],
-                    "imports": ""
+                    "imports": "",
+                    "severity": ""
                 };
             };
 
