@@ -218,18 +218,22 @@ angular.module('ThreatKB')
                             enableSorting: true
                         },
                         {
-                            field: 'creation_date',
-                            displayName: "Created Date",
+                            field: 'metadata_values',
+                            displayName: 'Severity',
+                            width: '90',
                             enableSorting: true,
-                            width: '150',
-                            cellFilter: 'date:\'yyyy-MM-dd HH:mm:ss\''
+                            cellTemplate: '<div ng-model="row.entity.metadata_values" style="text-align: center;">'
+                                + '<span ng-bind="row.entity.metadata_values.Severity.value"></span>'
+                                + '</div>'
                         },
                         {
-                            field: 'last_revision_date',
-                            displayName: "Revision Date",
+                            field: 'metadata_values',
+                            displayName: 'Confidence',
+                            width: '115',
                             enableSorting: true,
-                            width: '150',
-                            cellFilter: 'date:\'yyyy-MM-dd HH:mm:ss\''
+                            cellTemplate: '<div ng-model="row.entity.metadata_values" style="text-align: center;">'
+                                + '<span ng-bind="row.entity.metadata_values.Confidence.value"></span>'
+                                + '</div>'
                         },
                         {
                             field: 'category',
@@ -284,22 +288,18 @@ angular.module('ThreatKB')
                                 + '</div>'
                         },
                         {
-                            field: 'metadata_values',
-                            displayName: 'Severity',
-                            width: '90',
+                            field: 'creation_date',
+                            displayName: "Created Date",
                             enableSorting: true,
-                            cellTemplate: '<div ng-model="row.entity.metadata_values" style="text-align: center;">'
-                                + '<span ng-bind="row.entity.metadata_values.severity.value"></span>'
-                                + '</div>'
+                            width: '150',
+                            cellFilter: 'date:\'yyyy-MM-dd HH:mm:ss\''
                         },
                         {
-                            field: 'metadata_values',
-                            displayName: 'Confidence',
-                            width: '115',
+                            field: 'last_revision_date',
+                            displayName: "Revision Date",
                             enableSorting: true,
-                            cellTemplate: '<div ng-model="row.entity.metadata_values" style="text-align: center;">'
-                                + '<span ng-bind="row.entity.metadata_values.confidence.value"></span>'
-                                + '</div>'
+                            width: '150',
+                            cellFilter: 'date:\'yyyy-MM-dd HH:mm:ss\''
                         },
                         {
                             name: 'Actions',
