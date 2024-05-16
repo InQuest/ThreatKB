@@ -121,6 +121,10 @@ angular.module('ThreatKB')
                 sort_dir: null
             };
 
+            $scope.customTooltip = function (row,col,value) {
+                return value.map(u => u.text).join(', ');
+            }
+
             $scope.gridOptions = {
                 paginationPageSizes: [25, 50, 75, 100],
                 paginationPageSize: 25,
@@ -255,7 +259,8 @@ angular.module('ThreatKB')
                             displayName: 'Tags',
                             width: '180',
                             enableSorting: false,
-                            cellTemplate: '<ul class="gridTags" append-to-body="true" ng-model="row.entity.tags">'
+                            cellTemplate: '<div class="gridTags" title="{{grid.appScope.customTooltip(row,col,COL_FIELD)}}">'
+                                + '<ul class="gridTags" append-to-body="true" ng-model="row.entity.tags">'
                                 + '<li ng-repeat="tag in (row.entity.tags | filter: $select.search) track by tag.id">'
                                 + '<small>{{tag.text}}</small>'
                                 + '</li>'

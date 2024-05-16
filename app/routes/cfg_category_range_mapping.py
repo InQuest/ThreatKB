@@ -74,6 +74,7 @@ def update_cfg_category_range_mapping(id):
 
 
 def update_cfg_category_range_mapping_current(id, current):
+    db.session.rollback()
     entity = cfg_category_range_mapping.CfgCategoryRangeMapping.query.get(id)
     if not entity:
         return
@@ -86,7 +87,11 @@ def update_cfg_category_range_mapping_current(id, current):
         id=id
     )
     db.session.merge(entity)
-    db.session.commit()
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
     return
 
 
