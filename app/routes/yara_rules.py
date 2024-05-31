@@ -386,17 +386,8 @@ def create_yara_rule():
         active=request.json.get("active", True)
     )
 
-    mitre_techniques = Cfg_settings.get_setting("MITRE_TECHNIQUES").split(",")
     entity.mitre_techniques = request.json.get("mitre_techniques", [])
-    matches = [technique for technique in entity.mitre_techniques if technique not in mitre_techniques]
-    if matches:
-        raise Exception
-
-    mitre_tactics = Cfg_settings.get_setting("MITRE_TACTICS").split(",")
     entity.mitre_tactics = request.json.get("mitre_tactics", [])
-    matches = [tactic for tactic in entity.mitre_tactics if tactic not in mitre_tactics]
-    if matches:
-        raise Exception
 
     if entity.state == release_state:
         entity.state = draft_state.state
@@ -557,23 +548,9 @@ def update_yara_rule(id):
         active=request.json.get("active", entity.active)
     )
 
-    mitre_techniques = Cfg_settings.get_setting("MITRE_TECHNIQUES").split(",")
     entity.mitre_techniques = request.json.get("mitre_techniques", [])
-    matches = [technique for technique in entity.mitre_techniques if technique not in mitre_techniques]
-    if matches:
-        raise Exception
-
-    mitre_sub_techniques = Cfg_settings.get_setting("MITRE_SUB_TECHNIQUES").split(",")
     entity.mitre_sub_techniques = request.json.get("mitre_sub_techniques", [])
-    matches = [technique for technique in entity.mitre_sub_techniques if technique not in mitre_sub_techniques]
-    if matches:
-        raise Exception
-
-    mitre_tactics = Cfg_settings.get_setting("MITRE_TACTICS").split(",")
     entity.mitre_tactics = request.json.get("mitre_tactics", [])
-    matches = [tactic for tactic in entity.mitre_tactics if tactic not in mitre_tactics]
-    if matches:
-        raise Exception
 
     if old_state == release_state.state and entity.state == release_state.state and not do_not_bump_revision:
         entity.state = draft_state.state
