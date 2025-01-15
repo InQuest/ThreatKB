@@ -196,7 +196,7 @@ def filter_entities(entity,
             pass
 
     if not include_merged:
-        entities = entities.filter(entity.state != 'Merged')
+        entities = entities.filter(or_(entity.state != 'Merged', entity.state == None))
 
     entities = entities.filter(operator(*clauses))
     filtered_entities = entities

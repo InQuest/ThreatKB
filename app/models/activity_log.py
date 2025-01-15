@@ -83,10 +83,10 @@ def get_state_change(target, artifact):
             o_state = Cfg_states.query.filter(Cfg_states.state == state_history.deleted[0]).first()
             n_state = Cfg_states.query.filter(Cfg_states.state == state_history.added[0]).first()
 
-            if o_state.is_release_state > 0 or o_state.is_retired_state > 0 or o_state.is_staging_state > 0\
+            if o_state is None or o_state.is_release_state > 0 or o_state.is_retired_state > 0 or o_state.is_staging_state > 0\
                     or n_state.is_release_state > 0 or n_state.is_retired_state > 0 or n_state.is_staging_state > 0:
                 activity_text = "State for '%s' was toggled from '%s' to '%s'" \
-                                % (artifact, o_state.state, n_state.state)
+                                % (artifact, o_state.state if o_state is not None else 'None', n_state.state)
 
     return activity_text
 
