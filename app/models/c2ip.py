@@ -75,7 +75,7 @@ class C2ip(db.Model):
             country=get_country(self.country),
             state=self.state,
             description=self.description,
-            # references=self.references,
+            references=self.references,
             expiration_timestamp=self.expiration_timestamp.isoformat() if self.expiration_timestamp else None,
             id=self.id
         )

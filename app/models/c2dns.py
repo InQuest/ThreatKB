@@ -137,7 +137,7 @@ class C2dns(db.Model):
             match_type=self.match_type,
             expiration_timestamp=self.expiration_timestamp.isoformat() if self.expiration_timestamp else None,
             id=self.id,
-            # description=self.description,
+            description=self.description,
             references=self.references,
         )
 

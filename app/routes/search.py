@@ -100,10 +100,10 @@ def do_search():
         results["signatures"] = [signature.to_dict(comments_cache=comments_cache, metadata_cache=metadata_cache, users_cache=user_cache, tags_mapping_cache=tags_mapping_cache) for signature in signatures.all()]
 
     if not artifact_type or "ip" in artifact_type:
-        results["ips"] = [ip.to_dict(include_tags=False, include_comments=False, include_metadata=False, comments_cache=comments_cache, metadata_cache=metadata_cache, users_cache=user_cache, tags_mapping_cache=tags_mapping_cache) for ip in ips.all()]
+        results["ips"] = [ip.to_dict(comments_cache=comments_cache, metadata_cache=metadata_cache, users_cache=user_cache, tags_mapping_cache=tags_mapping_cache) for ip in ips.all()]
 
     if not artifact_type or "dns" in artifact_type:
-        results["dns"] = [d.to_dict(include_tags=False, include_comments=False, include_metadata=False, comments_cache=comments_cache, metadata_cache=metadata_cache, users_cache=user_cache, tags_mapping_cache=tags_mapping_cache) for d in dns.all()]
+        results["dns"] = [d.to_dict(comments_cache=comments_cache, metadata_cache=metadata_cache, users_cache=user_cache, tags_mapping_cache=tags_mapping_cache) for d in dns.all()]
 
     if not artifact_type or "task" in artifact_type:
         results["tasks"] = [t.to_dict() for t in task.all()]
