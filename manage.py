@@ -1,14 +1,14 @@
-from flask_script import Manager
-from flask_migrate import Migrate, MigrateCommand
+from flask import Flask
+from flask.cli import FlaskGroup
+from flask_migrate import Migrate
 
 from app import app, db
 
 app.config.from_object('config')
 
 migrate = Migrate(app, db)
-manager = Manager(app)
 
-manager.add_command('db', MigrateCommand)
+cli = FlaskGroup(app)
 
 if __name__ == '__main__':
     """
@@ -37,4 +37,4 @@ if __name__ == '__main__':
     from app.models import whitelist
     from app.models import yara_rule
 
-    manager.run()
+    cli()

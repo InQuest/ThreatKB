@@ -7,7 +7,7 @@ from flask_login import current_user
 from plyara import Plyara
 
 from more_itertools import unique_everseen
-from sqlalchemy import and_, not_, or_, text
+from sqlalchemy import and_, not_, or_, text, select, exists
 
 from app import ENTITY_MAPPING
 from app.models import cfg_settings
@@ -157,16 +157,24 @@ def filter_entities(entity,
 
         if column == "tags":
             if is_null:
-                entities = entities \
-                    .outerjoin(Tags_mapping,
-                               and_(entity.id == Tags_mapping.source_id,
-                                    entity.__tablename__ == Tags_mapping.source_table)) \
-                    .filter(Tags_mapping.tag_id.is_(None))
+                # Use EXISTS subquery instead of outer join
+                entities = entities.filter(~exists().where(and_(
+                    Tags_mapping.source_id == entity.id,
+                    Tags_mapping.source_table == entity.__tablename__
+                )))
             else:
-                entities = entities.outerjoin(Tags_mapping, entity.id == Tags_mapping.source_id) \
-                    .filter(Tags_mapping.source_table == entity.__tablename__) \
-                    .join(Tags, Tags_mapping.tag_id == Tags.id) \
-                    .filter(not_(Tags.text.like(l_value)) if s_value.startswith("!") else Tags.text.like(l_value))
+                # Use subquery for better performance
+                tag_subquery = select([Tags.id]).where(
+                    Tags.text.like(l_value) if not s_value.startswith("!") else ~Tags.text.like(l_value)
+                ).correlate(None)
+
+                entities = entities.filter(
+                    exists().where(and_(
+                        Tags_mapping.source_id == entity.id,
+                        Tags_mapping.source_table == entity.__tablename__,
+                        Tags_mapping.tag_id.in_(tag_subquery)
+                    ))
+                )
             continue
 
         try:
