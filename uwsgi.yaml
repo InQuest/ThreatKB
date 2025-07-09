@@ -14,3 +14,22 @@ uwsgi:
     ignore-write-errors:  true
     http-timeout:         600
     harakiri:             600
+    # Logging configuration
+    logto:                /var/log/uwsgi/uwsgi.log
+    log-maxsize:          50000000
+    log-backupname:       /var/log/uwsgi/uwsgi.log.old
+    logformat:            '[pid: %(pid)|app: -|req: -/-] %(addr) (%(user)) {%(vars) vars in %(pktsize) bytes} [%(ctime)] %(method) %(uri) => generated %(rsize) bytes in %(msecs) msecs (%(proto) %(status)) %(headers) headers in %(hsize) bytes (%(switches) switches on core %(core))'
+    # Request logging
+    req-logger:           file:/var/log/uwsgi/requests.log
+    # Memory and performance logging
+    memory-report:        true
+    # Enable stats server for monitoring
+    stats:                127.0.0.1:9191
+    stats-http:           true
+    # Debugging options
+    py-tracebacker:       /tmp/uwsgi-tb
+    enable-threads:       true
+    single-interpreter:   true
+    # Process management
+    die-on-term:          true
+    need-app:             true

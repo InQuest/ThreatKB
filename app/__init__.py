@@ -214,8 +214,48 @@ def teardown_request(exception):
 
 
 def setup_logging():
-    app.logger.addHandler(logging.StreamHandler())
-    app.logger.setLevel(app.config["LOGGING_LEVEL"])
+    # Create logs directory if it doesn't exist
+    import os
+    os.makedirs('/var/log/threatkb', exist_ok=True)
+    
+    # Configure root logger
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
+        handlers=[
+            logging.FileHandler('/var/log/threatkb/app.log'),
+            logging.StreamHandler()
+        ]
+    )
+    
+    # Configure Flask app logger
+    app.logger.setLevel(app.config.get("LOGGING_LEVEL", logging.INFO))
+    
+    # Add file handler for Flask app
+    file_handler = logging.FileHandler('/var/log/threatkb/flask.log')
+    file_handler.setLevel(logging.INFO)
+    file_handler.setFormatter(logging.Formatter(
+        '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+    ))
+    app.logger.addHandler(file_handler)
+    
+    # Add console handler for Flask app
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    console_handler.setFormatter(logging.Formatter(
+        '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+    ))
+    app.logger.addHandler(console_handler)
+    
+    # Configure SQLAlchemy logging
+    sqlalchemy_logger = logging.getLogger('sqlalchemy.engine')
+    sqlalchemy_logger.setLevel(logging.WARNING)  # Only log warnings and errors
+    
+    # Configure werkzeug logging
+    werkzeug_logger = logging.getLogger('werkzeug')
+    werkzeug_logger.setLevel(logging.INFO)
+    
+    app.logger.info("Logging configuration completed")
 
 
 @login_manager.user_loader
@@ -314,8 +354,30 @@ def generate_app():
         db.session.remove()
 
     def setup_logging():
-        app.logger.addHandler(logging.StreamHandler())
-        app.logger.setLevel(app.config["LOGGING_LEVEL"])
+        # Create logs directory if it doesn't exist
+        import os
+        os.makedirs('/var/log/threatkb', exist_ok=True)
+        
+        # Configure Flask app logger
+        app.logger.setLevel(app.config.get("LOGGING_LEVEL", logging.INFO))
+        
+        # Add file handler for Flask app
+        file_handler = logging.FileHandler('/var/log/threatkb/flask.log')
+        file_handler.setLevel(logging.INFO)
+        file_handler.setFormatter(logging.Formatter(
+            '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+        ))
+        app.logger.addHandler(file_handler)
+        
+        # Add console handler for Flask app
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.INFO)
+        console_handler.setFormatter(logging.Formatter(
+            '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+        ))
+        app.logger.addHandler(console_handler)
+        
+        app.logger.info("Flask logging configuration completed")
 
     @login_manager.user_loader
     @cache.memoize(timeout=60)
