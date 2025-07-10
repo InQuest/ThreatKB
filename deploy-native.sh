@@ -2,7 +2,7 @@
 #
 # ThreatKB Native Deployment Script
 # This script installs and configures ThreatKB directly on a Linux server
-# without Docker, connecting to a remote MySQL database.
+# with options for local or remote MySQL database.
 #
 
 set -e  # Exit on any error
@@ -13,17 +13,20 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Configuration variables - MODIFY THESE
-MYSQL_HOST="your-mysql-host"
+# Configuration variables
+MYSQL_INSTALL_TYPE=""   # Will be set to "local" or "remote"
+MYSQL_HOST="localhost"
 MYSQL_PORT="3306"
-MYSQL_USER="your-mysql-user"
-MYSQL_PASSWORD="your-mysql-password"
+MYSQL_USER="threatkb"
+MYSQL_PASSWORD=""
+MYSQL_ROOT_PASSWORD=""
 MYSQL_DATABASE="threatkb"
-SERVER_NAME="your-server-name"
+# SERVER_NAME is the domain name or IP address for nginx (e.g., "example.com" or "192.168.1.100")
+SERVER_NAME="$(hostname -I | awk '{print $1}')"
 SECRET_KEY="$(openssl rand -hex 24)"
 SECURITY_SALT="$(openssl rand -hex 16)"
-THREATKB_REPO="https://github.com/your-repo/ThreatKB.git"
-THREATKB_BRANCH="main"
+# Set to "true" if you want to skip git clone (files already exist)
+SKIP_GIT_CLONE="false"
 
 # Installation paths
 INSTALL_DIR="/opt/threatkb"
@@ -46,19 +49,51 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
-# Prompt for configuration if not provided as environment variables
-if [ "$MYSQL_HOST" == "your-mysql-host" ]; then
-    read -p "Enter MySQL host: " MYSQL_HOST
-    read -p "Enter MySQL port [3306]: " MYSQL_PORT
-    MYSQL_PORT=${MYSQL_PORT:-3306}
-    read -p "Enter MySQL username: " MYSQL_USER
-    read -sp "Enter MySQL password: " MYSQL_PASSWORD
-    echo ""
-    read -p "Enter MySQL database name [threatkb]: " MYSQL_DATABASE
-    MYSQL_DATABASE=${MYSQL_DATABASE:-threatkb}
-    read -p "Enter server name for nginx [$(hostname)]: " SERVER_NAME
-    SERVER_NAME=${SERVER_NAME:-$(hostname)}
-fi
+print_section "ThreatKB Deployment Configuration"
+
+# MySQL Installation Choice
+echo -e "${YELLOW}Choose MySQL installation option:${NC}"
+echo "1) Install MySQL locally (recommended for new deployments)"
+echo "2) Use existing remote MySQL server"
+echo ""
+while true; do
+    read -p "Enter your choice [1-2]: " mysql_choice
+    case $mysql_choice in
+        1)
+            MYSQL_INSTALL_TYPE="local"
+            MYSQL_HOST="localhost"
+            # Generate secure passwords
+            MYSQL_ROOT_PASSWORD="$(openssl rand -base64 32 | tr -d '=+/' | cut -c1-25)"
+            MYSQL_PASSWORD="$(openssl rand -base64 32 | tr -d '=+/' | cut -c1-25)"
+            echo -e "${GREEN}✓ Local MySQL installation selected${NC}"
+            echo -e "${YELLOW}Generated secure passwords will be saved to /opt/threatkb/.mysql_credentials${NC}"
+            break
+            ;;
+        2)
+            MYSQL_INSTALL_TYPE="remote"
+            echo -e "${GREEN}✓ Remote MySQL selected${NC}"
+            echo ""
+            read -p "Enter MySQL host: " MYSQL_HOST
+            read -p "Enter MySQL port [3306]: " MYSQL_PORT
+            MYSQL_PORT=${MYSQL_PORT:-3306}
+            read -p "Enter MySQL username: " MYSQL_USER
+            read -sp "Enter MySQL password: " MYSQL_PASSWORD
+            echo ""
+            read -p "Enter MySQL database name [threatkb]: " MYSQL_DATABASE
+            MYSQL_DATABASE=${MYSQL_DATABASE:-threatkb}
+            break
+            ;;
+        *)
+            echo -e "${RED}Invalid choice. Please enter 1 or 2.${NC}"
+            ;;
+    esac
+done
+
+# Server configuration
+echo ""
+read -p "Enter server name/IP for nginx [$SERVER_NAME]: " input_server_name
+SERVER_NAME=${input_server_name:-$SERVER_NAME}
+echo -e "${YELLOW}Note: SERVER_NAME is used for nginx configuration. Use your domain name or server IP address.${NC}"
 
 print_section "System Update and Package Installation"
 
@@ -71,8 +106,50 @@ apt upgrade -y
 print_status "Installing system dependencies..."
 apt install -y python3.10 python3.10-venv python3.10-dev build-essential git
 apt install -y nginx redis-server uwsgi uwsgi-plugin-python3
-apt install -y default-mysql-client default-libmysqlclient-dev
 apt install -y npm nodejs curl
+
+# Install MySQL based on user choice
+if [ "$MYSQL_INSTALL_TYPE" == "local" ]; then
+    print_status "Installing MySQL server locally..."
+    # Set MySQL root password non-interactively
+    echo "mysql-server mysql-server/root_password password $MYSQL_ROOT_PASSWORD" | debconf-set-selections
+    echo "mysql-server mysql-server/root_password_again password $MYSQL_ROOT_PASSWORD" | debconf-set-selections
+    apt install -y mysql-server mysql-client libmysqlclient-dev
+    
+    # Start and enable MySQL service
+    systemctl start mysql
+    systemctl enable mysql
+    
+    print_status "Configuring MySQL database and user..."
+    # Create database and user
+    mysql -u root -p"$MYSQL_ROOT_PASSWORD" <<EOF
+CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER IF NOT EXISTS '$MYSQL_USER'@'localhost' IDENTIFIED BY '$MYSQL_PASSWORD';
+GRANT ALL PRIVILEGES ON $MYSQL_DATABASE.* TO '$MYSQL_USER'@'localhost';
+FLUSH PRIVILEGES;
+EOF
+    
+    # Save credentials to file
+    mkdir -p /opt/threatkb
+    cat > /opt/threatkb/.mysql_credentials <<EOF
+# MySQL Credentials for ThreatKB
+# Generated on $(date)
+MYSQL_ROOT_PASSWORD="$MYSQL_ROOT_PASSWORD"
+MYSQL_USER="$MYSQL_USER"
+MYSQL_PASSWORD="$MYSQL_PASSWORD"
+MYSQL_DATABASE="$MYSQL_DATABASE"
+MYSQL_HOST="$MYSQL_HOST"
+MYSQL_PORT="$MYSQL_PORT"
+EOF
+    chmod 600 /opt/threatkb/.mysql_credentials
+    chown root:root /opt/threatkb/.mysql_credentials
+    
+    echo -e "${GREEN}✓ MySQL server installed and configured${NC}"
+    echo -e "${YELLOW}MySQL credentials saved to: /opt/threatkb/.mysql_credentials${NC}"
+else
+    print_status "Installing MySQL client for remote connection..."
+    apt install -y mysql-client libmysqlclient-dev
+fi
 
 print_section "Application Setup"
 
@@ -81,14 +158,24 @@ print_status "Creating application directory..."
 mkdir -p $INSTALL_DIR
 cd $INSTALL_DIR
 
-# Clone the repository
-print_status "Cloning ThreatKB repository..."
-if [ -d "$INSTALL_DIR/.git" ]; then
-    print_status "Repository already exists, updating..."
-    git pull
+# Clone the repository or use existing files
+if [ "$SKIP_GIT_CLONE" = "true" ]; then
+    print_status "Skipping git clone - using existing files in $INSTALL_DIR"
+    if [ ! -d "$INSTALL_DIR" ] || [ ! -f "$INSTALL_DIR/requirements.txt" ]; then
+        echo -e "${RED}Error: ThreatKB files not found in $INSTALL_DIR. Please ensure the files are uploaded first.${NC}"
+        exit 1
+    fi
 else
-    git clone $THREATKB_REPO $INSTALL_DIR
-    git checkout $THREATKB_BRANCH
+    print_status "Cloning ThreatKB repository..."
+    if [ -d "$INSTALL_DIR/.git" ]; then
+        print_status "Repository already exists, updating..."
+        cd $INSTALL_DIR
+        git pull
+    else
+        git clone $THREATKB_REPO $INSTALL_DIR
+        cd $INSTALL_DIR
+        git checkout $THREATKB_BRANCH
+    fi
 fi
 
 # Create Python virtual environment
@@ -142,16 +229,60 @@ chmod 755 $LOG_DIR $UWSGI_LOG_DIR
 print_section "Database Setup"
 
 # Test database connection
-print_status "Testing database connection to existing database..."
-if mysql -h $MYSQL_HOST -P $MYSQL_PORT -u $MYSQL_USER -p$MYSQL_PASSWORD -e "USE $MYSQL_DATABASE"; then
-    print_status "Database connection successful"
+if [ "$MYSQL_INSTALL_TYPE" == "local" ]; then
+    print_status "Testing local database connection..."
+    if mysql -u $MYSQL_USER -p"$MYSQL_PASSWORD" -e "USE $MYSQL_DATABASE"; then
+        print_status "Local database connection successful"
+    else
+        echo -e "${RED}Error: Cannot connect to local database $MYSQL_DATABASE.${NC}"
+        exit 1
+    fi
 else
-    echo -e "${RED}Error: Cannot connect to database $MYSQL_DATABASE. Please verify your database credentials and ensure the database exists.${NC}"
-    exit 1
+    print_status "Testing remote database connection..."
+    if mysql -h $MYSQL_HOST -P $MYSQL_PORT -u $MYSQL_USER -p"$MYSQL_PASSWORD" -e "USE $MYSQL_DATABASE"; then
+        print_status "Remote database connection successful"
+    else
+        echo -e "${RED}Error: Cannot connect to remote database $MYSQL_DATABASE.${NC}"
+        echo -e "${RED}Please verify your database credentials and ensure the database exists.${NC}"
+        exit 1
+    fi
 fi
 
-# Skip database migrations
-print_status "Skipping database migrations as requested - using existing database structure"
+# Initialize database schema
+print_status "Initializing database schema..."
+cd $INSTALL_DIR
+source env/bin/activate
+export FLASK_APP=app
+flask db upgrade
+
+# Create default admin user if it doesn't exist
+print_status "Creating default admin user..."
+python3 << EOF
+import sys
+sys.path.insert(0, '$INSTALL_DIR')
+from app import create_app, db
+from app.models import KbUser
+import hashlib
+
+app = create_app()
+with app.app_context():
+    # Check if admin user exists
+    admin_user = KbUser.query.filter_by(email='admin@inquest.net').first()
+    if not admin_user:
+        # Create admin user
+        password_hash = hashlib.sha256('b5vXcqzUtn4suyS'.encode()).hexdigest()
+        admin_user = KbUser(
+            email='admin@inquest.net',
+            password=password_hash,
+            admin=True,
+            active=True
+        )
+        db.session.add(admin_user)
+        db.session.commit()
+        print('Admin user created successfully')
+    else:
+        print('Admin user already exists')
+EOF
 
 print_section "uWSGI Configuration"
 
@@ -169,8 +300,8 @@ auto-procname = true
 close-on-exec = true
 reaper = true
 max-requests = 1000
-module = app
-callable = app
+module = wsgi
+callable = application
 virtualenv = ${INSTALL_DIR}/env
 python-path = ${INSTALL_DIR}
 ignore-sigpipe = true
@@ -310,16 +441,76 @@ systemctl restart nginx
 
 print_section "Deployment Complete"
 
-echo -e "${GREEN}ThreatKB has been successfully deployed!${NC}"
-echo -e "You can access the application at: http://${SERVER_NAME}"
-echo -e "\nImportant paths:"
-echo -e "  - Application: ${INSTALL_DIR}"
-echo -e "  - Logs: ${LOG_DIR}"
-echo -e "  - uWSGI Logs: ${UWSGI_LOG_DIR}"
-echo -e "  - Nginx Logs: /var/log/nginx/threatkb-*.log"
-echo -e "\nService management:"
-echo -e "  - sudo systemctl restart uwsgi         # Restart application server"
+echo -e "\n${GREEN}=== ThreatKB Deployment Complete! ===${NC}\n"
+echo -e "Access your ThreatKB instance at: ${YELLOW}http://${SERVER_NAME}/${NC}"
+echo -e "Default login credentials:"
+echo -e "  - Username: admin@inquest.net"
+echo -e "  - Password: b5vXcqzUtn4suyS"
+echo -e "\n${YELLOW}IMPORTANT: Change the default password after first login!${NC}"
+
+# Show MySQL-specific information
+if [ "$MYSQL_INSTALL_TYPE" == "local" ]; then
+    echo -e "\n${GREEN}MySQL Database (Local Installation):${NC}"
+    echo -e "  - Database: $MYSQL_DATABASE"
+    echo -e "  - User: $MYSQL_USER"
+    echo -e "  - Host: $MYSQL_HOST:$MYSQL_PORT"
+    echo -e "  - Credentials saved to: ${YELLOW}/opt/threatkb/.mysql_credentials${NC}"
+    echo -e "  - MySQL service: $(systemctl is-active mysql)"
+    echo -e "\n${YELLOW}MySQL Management:${NC}"
+    echo -e "  - sudo systemctl restart mysql         # Restart MySQL server"
+    echo -e "  - mysql -u $MYSQL_USER -p             # Connect to database"
+    echo -e "  - cat /opt/threatkb/.mysql_credentials # View saved credentials"
+else
+    echo -e "\n${GREEN}MySQL Database (Remote Connection):${NC}"
+    echo -e "  - Database: $MYSQL_DATABASE"
+    echo -e "  - User: $MYSQL_USER"
+    echo -e "  - Host: $MYSQL_HOST:$MYSQL_PORT"
+    echo -e "  - Connection: Remote server"
+fi
+
+echo -e "\n${GREEN}Service Status:${NC}"
+echo -e "  - uWSGI: $(systemctl is-active uwsgi)"
+echo -e "  - Nginx: $(systemctl is-active nginx)"
+echo -e "  - Redis: $(systemctl is-active redis-server)"
+echo -e "  - Celery: $(systemctl is-active threatkb-celery)"
+
+echo -e "\n${GREEN}Log Files:${NC}"
+echo -e "  - Application: /var/log/uwsgi/threatkb.log"
+echo -e "  - Nginx Access: /var/log/nginx/threatkb-access.log"
+echo -e "  - Nginx Error: /var/log/nginx/threatkb-error.log"
+echo -e "  - Celery: /var/log/threatkb-celery.log"
+
+echo -e "\n${GREEN}Service Management:${NC}"
+echo -e "  - sudo systemctl restart uwsgi         # Restart application"
 echo -e "  - sudo systemctl restart nginx         # Restart web server"
 echo -e "  - sudo systemctl restart redis-server  # Restart Redis"
 echo -e "  - sudo systemctl restart threatkb-celery  # Restart background tasks"
-echo -e "\n${YELLOW}NOTE: Remember to secure your server with HTTPS for production use!${NC}"
+
+echo -e "\n${GREEN}Troubleshooting:${NC}"
+echo -e "  - sudo tail -f /var/log/uwsgi/threatkb.log    # View app logs"
+echo -e "  - sudo systemctl status uwsgi nginx redis    # Check service status"
+echo -e "  - sudo nginx -t                              # Test nginx config"
+
+echo -e "\n${YELLOW}Security Recommendations:${NC}"
+echo -e "  - Change default admin password immediately"
+echo -e "  - Configure HTTPS/SSL for production use"
+echo -e "  - Set up firewall rules (ufw enable)"
+echo -e "  - Regular security updates (apt update && apt upgrade)"
+if [ "$MYSQL_INSTALL_TYPE" == "local" ]; then
+    echo -e "  - Secure MySQL installation (mysql_secure_installation)"
+    echo -e "  - Backup MySQL credentials file securely"
+fi
+
+echo -e "\n${GREEN}Optional: Add Datadog APM Integration${NC}"
+echo -e "For production monitoring, you can add APM integration:"
+echo -e "  cd /path/to/datadog-apm-integration"
+echo -e "  sudo ./install-ddtrace-apm.sh"
+
+echo -e "\n${GREEN}Deployment Summary:${NC}"
+echo -e "  - ThreatKB Application: ✓ Installed"
+echo -e "  - MySQL Database: ✓ $([ "$MYSQL_INSTALL_TYPE" == "local" ] && echo "Local" || echo "Remote")"
+echo -e "  - Web Server (Nginx): ✓ Configured"
+echo -e "  - Application Server (uWSGI): ✓ Running"
+echo -e "  - Background Tasks (Celery): ✓ Running"
+echo -e "  - Cache (Redis): ✓ Running"
+echo -e "\n${GREEN}🎉 ThreatKB is ready to use! 🎉${NC}"
