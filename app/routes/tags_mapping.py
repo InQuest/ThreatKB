@@ -71,12 +71,13 @@ def create_tags_mapping_rest():
 def batch_create_tags_mapping(table, list_of_source_ids, list_of_tags):
     tags_mapping_to_create = []
     for tag in list_of_tags:
-        if 'id' in tag:
+        if isinstance(tag, dict) and 'id' in tag:
             t_id = tag['id']
         else:
-            created_tag = create_tag(tag['text'])
+            created_tag = create_tag(tag['text']) if type(tag) is dict else create_tag(tag)
             t_id = created_tag.id
-            tag['id'] = t_id
+            if isinstance(tag, dict):
+                tag['id'] = t_id
 
         for s_id in list_of_source_ids:
             entity = tags_mapping.Tags_mapping.query.filter_by(
@@ -105,7 +106,7 @@ def batch_create_tags_mapping(table, list_of_source_ids, list_of_tags):
 def create_tags_mapping(table, s_id, list_of_tags):
     tags_mapping_to_create = []
     for tag in list_of_tags:
-        if 'id' in tag:
+        if isinstance(tag, dict) and 'id' in tag:
             t_id = tag['id']
         else:
             created_tag = create_tag(tag['text']) if type(tag) is dict else create_tag(tag)
