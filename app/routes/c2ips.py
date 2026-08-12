@@ -197,7 +197,12 @@ def update_c2ip(id_or_ip):
             "owner_user"].get("id", None) else None,
         id=entity.id,
         modified_user_id=current_user.id,
-        active=request.json.get("active", entity.active)
+        active=request.json.get("active", entity.active),
+        # `ports` is maintained directly in the DB by the threat intel team and is not
+        # part of this form. Carry the existing value through: this route rebuilds the
+        # entity and merge()s it, so any mapped column left unset here would be
+        # overwritten with NULL.
+        ports=entity.ports
     )
     db.session.merge(entity)
 

@@ -30,6 +30,10 @@ class C2ip(db.Model):
     references = db.Column(db.TEXT())
     expiration_timestamp = db.Column(db.DateTime(timezone=True))
     active = db.Column(db.Boolean, nullable=False, default=True, index=True)
+    # Port spec ("80, 8080, 8888-9999") consumed by the NDRv5 C2 feed. Maintained
+    # directly in the DB by the threat intel team, not through this app. Declared
+    # here ONLY so `alembic --autogenerate` sees it and cannot emit a drop_column.
+    ports = db.Column(db.String(255))
 
     created_user_id = db.Column(db.Integer, db.ForeignKey('kb_users.id'), nullable=False)
     created_user = db.relationship('KBUser', foreign_keys=created_user_id,
