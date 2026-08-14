@@ -116,7 +116,11 @@ def merge_signatures():
         yr.description = description.strip('"')
         yr.revision = 1
         db.session.add(yr)
-        db.session.commit()
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
+            raise
         return jsonify(yr.to_dict()), 201
 
 
@@ -139,7 +143,11 @@ def merge_signatures_by_id():
     merged_state = "Merged"
     if not cfg_states.Cfg_states.query.filter_by(state=merged_state).first():
         db.session.add(cfg_states.Cfg_states(state=merged_state))
-        db.session.commit()
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
+            raise
 
     merge_from_yr.state = merged_state
     db.session.add(merge_from_yr)
@@ -154,7 +162,11 @@ def merge_signatures_by_id():
     db.session.add(
         comments.Comments(comment=merged_from_comment, entity_type=ENTITY_MAPPING["SIGNATURE"],
                           entity_id=merge_to_yr.id, user_id=current_user.id))
-    db.session.commit()
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
 
     delete_bookmarks(ENTITY_MAPPING["SIGNATURE"], merge_from_id, current_user.id)
 
@@ -199,7 +211,6 @@ def get_all_yara_rules():
     include_metadata = bool(distutils.util.strtobool(request.args.get('include_metadata', "true")))
     include_tags = bool(distutils.util.strtobool(request.args.get('include_tags', "true")))
     include_comments = bool(distutils.util.strtobool(request.args.get('include_comments', "true")))
-
 
     if include_yara_string:
         include_yara_string = True
@@ -340,6 +351,8 @@ def create_yara_rule():
         rule_state = request.json.get("state", None).get("state", None)
     except:
         rule_state = request.json.get("state", None)
+    if rule_state is None:
+        raise Exception("State is mandatory.")
 
     unique_rule_name_enforcement = Cfg_settings.get_setting("ENFORCE_UNIQUE_YARA_RULE_NAMES")
     if unique_rule_name_enforcement and distutils.util.strtobool(unique_rule_name_enforcement):
@@ -391,7 +404,11 @@ def create_yara_rule():
         entity.state = draft_state.state
 
     db.session.add(entity)
-    db.session.commit()
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
 
     entity.tags = create_tags_mapping(entity.__tablename__, entity.id, request.json['tags'])
 
@@ -424,7 +441,11 @@ def create_yara_rule():
             dirty = True
 
     if dirty:
-        db.session.commit()
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
+            raise
 
     db.session.add(yara_rule.Yara_rule_history(date_created=datetime.datetime.now(),
                                                revision=entity.revision,
@@ -432,7 +453,11 @@ def create_yara_rule():
                                                user_id=current_user.id,
                                                yara_rule_id=entity.id,
                                                state=entity.state))
-    db.session.commit()
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
     return jsonify(entity.to_dict()), 201
 
 
@@ -443,7 +468,11 @@ def activate_yara_rule(id):
     entity = yara_rule.Yara_rule.query.get(id)
     entity.active = 1
     db.session.merge(entity)
-    db.session.commit()
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
     return jsonify(entity.to_dict()), 201
 
 @app.route('/ThreatKB/yara_rules/<int:id>', methods=['PUT'])
@@ -470,6 +499,8 @@ def update_yara_rule(id):
         rule_state = request.json.get("state", None).get("state", None)
     except:
         rule_state = request.json.get("state", None)
+    if rule_state is None:
+        raise Exception("State is mandatory.")
 
     unique_rule_name_enforcement = Cfg_settings.get_setting("ENFORCE_UNIQUE_YARA_RULE_NAMES")
     if unique_rule_name_enforcement and distutils.util.strtobool(unique_rule_name_enforcement):
@@ -514,7 +545,7 @@ def update_yara_rule(id):
         description=request.json.get("description", None),
         references=request.json.get("references", None),
         category=request.json['category']['category'] if request.json['category'] and 'category' in request
-            .json['category'] else request.json['category'],
+        .json['category'] else request.json['category'],
         condition=yara_rule.Yara_rule.make_yara_sane(request.json["condition"], "condition:"),
         strings=yara_rule.Yara_rule.make_yara_sane(request.json["strings"], "strings:"),
         eventid=temp_sig_id,
@@ -524,7 +555,7 @@ def update_yara_rule(id):
         modified_user_id=current_user.id,
         last_revision_date=datetime.datetime.now(),
         owner_user_id=request.json['owner_user']['id'] if request.json.get("owner_user", None) and request
-            .json["owner_user"].get("id", None) else None,
+        .json["owner_user"].get("id", None) else None,
         revision=entity.revision if do_not_bump_revision else entity.revision + 1,
         imports=yara_rule.Yara_rule.get_imports_from_string(request.json.get("imports", None)),
         active=request.json.get("active", entity.active)
@@ -551,15 +582,23 @@ def update_yara_rule(id):
     if old_state == release_state.state and entity.state == release_state.state and not do_not_bump_revision:
         entity.state = draft_state.state
 
+    if get_new_sig_id:
+        update_cfg_category_range_mapping_current(request.json['category']['id'], temp_sig_id)
+
     db.session.merge(entity)
-    db.session.commit()
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
 
     dirty = False
     for name, value_dict in request.json.get("metadata_values", {}).items():
         if not name or not value_dict:
             continue
 
-        m = db.session.query(MetadataMapping, Metadata).join(Metadata, Metadata.id == MetadataMapping.metadata_id).filter(
+        m = db.session.query(MetadataMapping, Metadata).join(Metadata,
+                                                             Metadata.id == MetadataMapping.metadata_id).filter(
             Metadata.key == name).filter(Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).filter(
             MetadataMapping.artifact_id == entity.id).first()
         if m and m[0]:
@@ -569,12 +608,17 @@ def update_yara_rule(id):
         else:
             m = db.session.query(Metadata).filter(Metadata.key == name).filter(
                 Metadata.artifact_type == ENTITY_MAPPING["SIGNATURE"]).first()
-            db.session.add(MetadataMapping(value=value_dict["value"] if m.required else value_dict.get("value", None), metadata_id=m.id, artifact_id=entity.id,
+            db.session.add(MetadataMapping(value=value_dict["value"] if m.required else value_dict.get("value", None),
+                                           metadata_id=m.id, artifact_id=entity.id,
                                            created_user_id=current_user.id))
             dirty = True
 
     if dirty:
-        db.session.commit()
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
+            raise
 
     # THIS IS UGLY. FIGURE OUT WHY MERGE ISN'T WORKING
     entity = yara_rule.Yara_rule.query.get(entity.id)
@@ -585,9 +629,6 @@ def update_yara_rule(id):
                                                    user_id=current_user.id,
                                                    yara_rule_id=entity.id,
                                                    state=entity.state))
-
-    if get_new_sig_id:
-        update_cfg_category_range_mapping_current(request.json['category']['id'], temp_sig_id)
 
     current_tags = get_tags_for_source(entity.__tablename__, entity.id)
     new_tags = request.json['tags']
@@ -639,7 +680,11 @@ def delete_yara_rule(id):
             abort(403)
 
         db.session.merge(entity)
-        db.session.commit()
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
+            raise
 
         # delete_tags_mapping(entity.__tablename__, entity.id)
         delete_bookmarks(ENTITY_MAPPING["SIGNATURE"], id, current_user.id)
@@ -650,7 +695,11 @@ def delete_yara_rule(id):
         db.session.query(yara_rule.Yara_rule_history).filter(
             yara_rule.Yara_rule_history.yara_rule_id.in_([entity.id])).delete(synchronize_session='fetch')
         db.session.delete(entity)
-        db.session.commit()
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
+            raise
 
         delete_bookmarks(ENTITY_MAPPING["SIGNATURE"], id, current_user.id)
 
@@ -684,7 +733,7 @@ def copy_yara_rules():
     Return: yara strings for copy"""
 
     signatures = []
-    if 'copy' in request.json and request.json['copy']\
+    if 'copy' in request.json and request.json['copy'] \
             and 'ids' in request.json['copy'] and request.json['copy']['ids']:
         for sig_id in request.json['copy']['ids']:
             sig = yara_rule.Yara_rule.query.get(sig_id)
@@ -709,5 +758,9 @@ def delete_all_inactive_yara_rules():
     db.session.query(yara_rule.Yara_rule_history).filter(
         yara_rule.Yara_rule_history.yara_rule_id.in_(rules_to_delete_ids)).delete(synchronize_session='fetch')
     db.session.query(yara_rule.Yara_rule).filter(yara_rule.Yara_rule.active == 0).delete()
-    db.session.commit()
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
     return jsonify(''), 200
